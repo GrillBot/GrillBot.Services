@@ -66,6 +66,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build container
-        run: docker build -t ghcr.io/grillbot/grillbot.services:file_service --build-arg github_actions_token=${{ secrets.GITHUB_TOKEN }} src/FileService
+        run: docker build -t ghcr.io/grillbot/fileservice:master --build-arg github_actions_token=${{ secrets.GITHUB_TOKEN }} src/FileService
       - name: Push container
-        run: docker push ghcr.io/grillbot/grillbot.services:file_service
+        run: docker push ghcr.io/grillbot/fileservice:master
