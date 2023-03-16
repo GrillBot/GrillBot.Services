@@ -71,6 +71,7 @@ jobs:
         run: docker push ghcr.io/grillbot/grillbot.services:file_service
   FileService_Deploy_Production:
     runs-on: ubuntu-latest
+    environment: 'Production'
     needs: FileService_BuildContainer
     if: github.ref == 'refs/heads/master'
     steps:
