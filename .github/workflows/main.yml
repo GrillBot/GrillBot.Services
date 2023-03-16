@@ -30,7 +30,7 @@ jobs:
   FileService_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
-    if: needs.PathFilter.outputs.FileService == 'true'
+    if: needs.PathsFilter.outputs.FileService == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
