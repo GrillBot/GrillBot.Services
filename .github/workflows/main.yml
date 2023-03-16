@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       FileService: ${{ steps.filter.outputs.FileService }}
+      RubbergodService: ${{ steps.filter.outputs.RubbergodService }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -28,6 +29,9 @@ jobs:
             FileService:
               - .github/workflows/**
               - 'src/FileService/**'
+            RubbergodService:
+              - .github/workflows/**
+              - 'src/RubbergodService/**'
   FileService_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -83,3 +87,58 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-fileservice
+  RubbergodService_Build:
+    runs-on: ubuntu-latest
+    needs: PathsFilter
+    if: needs.PathsFilter.outputs.RubbergodService == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+          source-url: https://nuget.pkg.github.com/GrillBot/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Install dependencies
+        run: |
+          dotnet restore -r linux-x64 src/RubbergodService/RubbergodService/
+      - name: Build (DEBUG)
+        run: dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/RubbergodService/RubbergodService/
+      - name: Build (RELEASE)
+        run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/RubbergodService/RubbergodService/
+  RubbergodService_BuildContainer:
+    runs-on: ubuntu-latest
+    needs: RubbergodService_Build
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Login to the container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build container
+        run: docker build -t ghcr.io/grillbot/grillbot.services:rubbergod_service --build-arg github_actions_token=${{ secrets.GITHUB_TOKEN }} src/RubbergodService
+      - name: Push container
+        run: docker push ghcr.io/grillbot/grillbot.services:rubbergod_service
+  RubbergodService_Deploy_Production:
+    runs-on: ubuntu-latest
+    environment: 'Production'
+    needs: RubbergodService_BuildContainer
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Execute deployment on SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_Username }}
+          password: ${{ secrets.SSH_Password }}
+          port: 22
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-rubbergodservice
