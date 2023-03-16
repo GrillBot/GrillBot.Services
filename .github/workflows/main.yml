@@ -79,7 +79,7 @@ jobs:
         run: docker push ghcr.io/grillbot/grillbot.services:file_service
   FileService_Deploy_Production:
     runs-on: ubuntu-latest
-    environment: 'Production'
+    environment: 'Production_FileService'
     needs: FileService_BuildContainer
     if: github.ref == 'refs/heads/master'
     steps:
@@ -134,7 +134,7 @@ jobs:
         run: docker push ghcr.io/grillbot/grillbot.services:rubbergod_service
   RubbergodService_Deploy_Production:
     runs-on: ubuntu-latest
-    environment: 'Production'
+    environment: 'Production_RubbergodService'
     needs: RubbergodService_BuildContainer
     if: github.ref == 'refs/heads/master'
     steps:
@@ -186,7 +186,7 @@ jobs:
         run: docker push ghcr.io/grillbot/grillbot.services:graphics
   Graphics_Deploy_Production:
     runs-on: ubuntu-latest
-    environment: 'Production'
+    environment: 'Production_Graphics'
     needs: Graphics_BuildContainer
     if: github.ref == 'refs/heads/master'
     steps:
