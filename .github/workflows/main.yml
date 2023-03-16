@@ -1,0 +1,70 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    types: [ opened, reopened, synchronize ]
+    branches: [ master ]
+  workflow_dispatch:
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+
+jobs:
+  PathsFilter:
+    runs-on: ubuntu-latest
+    outputs:
+      FileService: ${{ steps.filter.outputs.FileService }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Paths filter
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            FileService:
+              - 'src/FileService/**'
+  FileService_Build:
+    runs-on: ubuntu-latest
+    needs: PathsFilter
+    if: needs.PathFilter.outputs.FileService == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+          source-url: https://nuget.pkg.github.com/GrillBot/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Install dependencies
+        run: |
+          dotnet restore -r linux-x64 src/FileService/FileService/
+      - name: Build (DEBUG)
+        run: dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/FileService/FileService/
+      - name: Build (RELEASE)
+        run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/FileService/FileService/
+  FileService_BuildContainer:
+    runs-on: ubuntu-latest
+    needs: FileService_Build
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Login to the container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build container
+        run: docker build -t ghcr.io/GrillBot/GrillBot.Services:FileService --build-arg github_actions_token=${{ secrets.GITHUB_TOKEN }} /src/FileService
+      - name: Push container
+        run: docker push ghcr.io/GrillBot/GrillBot.Services:FileService
