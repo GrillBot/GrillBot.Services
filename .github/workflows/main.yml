@@ -77,20 +77,6 @@ jobs:
         run: docker build -t ghcr.io/grillbot/grillbot.services:file_service --build-arg github_actions_token=${{ secrets.GITHUB_TOKEN }} src/FileService
       - name: Push container
         run: docker push ghcr.io/grillbot/grillbot.services:file_service
-  FileService_Deploy_Production:
-    runs-on: ubuntu-latest
-    environment: 'Production_FileService'
-    needs: FileService_BuildContainer
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-fileservice
   RubbergodService_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -132,20 +118,6 @@ jobs:
         run: docker build -t ghcr.io/grillbot/grillbot.services:rubbergod_service --build-arg github_actions_token=${{ secrets.GITHUB_TOKEN }} src/RubbergodService
       - name: Push container
         run: docker push ghcr.io/grillbot/grillbot.services:rubbergod_service
-  RubbergodService_Deploy_Production:
-    runs-on: ubuntu-latest
-    environment: 'Production_RubbergodService'
-    needs: RubbergodService_BuildContainer
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-rubbergodservice
   Graphics_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -184,13 +156,13 @@ jobs:
         run: docker build -t ghcr.io/grillbot/grillbot.services:graphics src/Graphics
       - name: Push container
         run: docker push ghcr.io/grillbot/grillbot.services:graphics
-  Graphics_Deploy_Production:
+  Production_Deployment:
     runs-on: ubuntu-latest
-    environment: 'Production_Graphics'
-    needs: Graphics_BuildContainer
+    environment: 'Production'
     if: github.ref == 'refs/heads/master'
     steps:
-      - name: Execute deployment on SSH
+      - name: Deploy Graphics
+        if: jobs.Graphics_BuildContainer.result == 'success'
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -198,3 +170,22 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-graphics
+      - name: Deploy Graphics
+        if: jobs.RubbergodService_BuildContainer.result == 'success'
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_Username }}
+          password: ${{ secrets.SSH_Password }}
+          port: 22
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-rubbergodservice
+      - name: Deploy FileService
+        if: jobs.FileService_BuildContainer.result == 'success'
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_Username }}
+          password: ${{ secrets.SSH_Password }}
+          port: 22
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-fileservice
+
