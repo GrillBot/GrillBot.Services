@@ -26,6 +26,7 @@ jobs:
         with:
           filters: |
             FileService:
+              - .github/workflows/**
               - 'src/FileService/**'
   FileService_Build:
     runs-on: ubuntu-latest
