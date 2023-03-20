@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PointsService.Core.Entity;
@@ -11,9 +12,11 @@ using PointsService.Core.Entity;
 namespace PointsService.Core.Migrations
 {
     [DbContext(typeof(PointsServiceContext))]
-    partial class PointsServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20230320212709_ReactionIdNonNull")]
+    partial class ReactionIdNonNull
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,10 +101,10 @@ namespace PointsService.Core.Migrations
                     b.Property<bool>("IsUser")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime?>("LastMessageIncrement")
+                    b.Property<DateTime>("LastMessageIncrement")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime?>("LastReactionIncrement")
+                    b.Property<DateTime>("LastReactionIncrement")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("PointsDisabled")

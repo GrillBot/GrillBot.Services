@@ -16,7 +16,9 @@ public class MessageInfo
     
     [Required]
     public MessageType MessageType { get; set; }
-
+    
     [Required]
-    public UserInfo Author { get; set; } = null!;
+    [StringLength(30)]
+    [DiscordId]
+    public string AuthorId { get; set; } = null!;
 }

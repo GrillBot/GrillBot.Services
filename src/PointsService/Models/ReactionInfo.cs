@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using GrillBot.Core.Validation;
 
 namespace PointsService.Models;
 
@@ -8,8 +9,13 @@ public class ReactionInfo
     /// The user who added the reaction.
     /// </summary>
     [Required]
-    public UserInfo User { get; set; } = null!;
+    [StringLength(30)]
+    [DiscordId]
+    public string UserId { get; set; } = null!;
 
     [Required]
     public string Emote { get; set; } = null!;
+
+    public string GetReactionId()
+        => $"{UserId}_{Emote}";
 }

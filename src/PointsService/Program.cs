@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+using GrillBot.Core;
 using PointsService.Core;
 using PointsService.Core.Entity;
 
@@ -6,9 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCoreServices(builder.Configuration);
 
 var app = builder.Build();
-
-using var scope = app.Services.CreateScope();
-await scope.ServiceProvider.GetRequiredService<PointsServiceContext>().Database.MigrateAsync();
+await app.InitDatabaseAsync<PointsServiceContext>();
 
 if (app.Environment.IsDevelopment())
 {

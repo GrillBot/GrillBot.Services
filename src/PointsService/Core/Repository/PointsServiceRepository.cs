@@ -1,24 +1,27 @@
-﻿using PointsService.Core.Entity;
+﻿using GrillBot.Core.Managers.Performance;
+using PointsService.Core.Entity;
 
 namespace PointsService.Core.Repository;
 
 public class PointsServiceRepository
 {
     private PointsServiceContext Context { get; }
+    private ICounterManager CounterManager { get; }
 
     public ChannelRepository Channel { get; }
     public UserRepository User { get; }
     public TransactionRepository Transaction { get; }
     public StatisticsRepository Statistics { get; }
 
-    public PointsServiceRepository(PointsServiceContext context)
+    public PointsServiceRepository(PointsServiceContext context, ICounterManager counterManager)
     {
         Context = context;
+        CounterManager = counterManager;
 
-        Channel = new ChannelRepository(context);
-        User = new UserRepository(context);
-        Transaction = new TransactionRepository(context);
-        Statistics = new StatisticsRepository(context);
+        Channel = new ChannelRepository(context, counterManager);
+        User = new UserRepository(context, counterManager);
+        Transaction = new TransactionRepository(context, counterManager);
+        Statistics = new StatisticsRepository(context, counterManager);
     }
 
     public Task AddAsync<TEntity>(TEntity entity) where TEntity : class
@@ -33,6 +36,11 @@ public class PointsServiceRepository
     public void Remove<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         => Context.Set<TEntity>().RemoveRange(entities);
 
-    public Task<int> CommitAsync()
-        => Context.SaveChangesAsync();
+    public async Task<int> CommitAsync()
+    {
+        using (CounterManager.Create("Repository.Commit"))
+        {
+            return await Context.SaveChangesAsync();
+        }
+    }
 }

@@ -14,6 +14,8 @@ public class User
     
     public bool PointsDisabled { get; set; }
     
-    public DateTime LastReactionIncrement { get; set; }
-    public DateTime LastMessageIncrement { get; set; }
+    public DateTime? LastReactionIncrement { get; set; }
+    public DateTime? LastMessageIncrement { get; set; }
+    
+    public bool IsUser { get; set; }
 }

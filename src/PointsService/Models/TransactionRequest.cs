@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GrillBot.Core.Validation;
+using PointsService.Validation;
 
 namespace PointsService.Models;
 
-public class TransactionRequest
+public class TransactionRequest : IValidatableObject
 {
     [Required]
     [StringLength(30)]
@@ -19,4 +20,7 @@ public class TransactionRequest
     public MessageInfo MessageInfo { get; set; } = null!;
 
     public ReactionInfo? ReactionInfo { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        => validationContext.GetRequiredService<TransactionRequestValidator>().Validate(this);
 }

@@ -1,11 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GrillBot.Core.Database.Repository;
+using GrillBot.Core.Managers.Performance;
+using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
 
 namespace PointsService.Core.Repository;
 
-public class StatisticsRepository : RepositoryBase
+public class StatisticsRepository : RepositoryBase<PointsServiceContext>
 {
-    public StatisticsRepository(PointsServiceContext context) : base(context)
+    public StatisticsRepository(PointsServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {
     }
 

@@ -21,14 +21,14 @@ public class Transaction
     public string MessageId { get; set; } = null!;
 
     [StringLength(100)]
-    public string? ReactionId { get; set; } = null!;
+    public string ReactionId { get; set; } = "";
 
     public int MergedCount { get; set; }
     public DateTime? MergeRangeFrom { get; set; }
     public DateTime? MergeRangeTo { get; set; }
 
     [Required]
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public int Value { get; set; }
 
