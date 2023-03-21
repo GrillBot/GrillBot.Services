@@ -20,12 +20,12 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
         return query;
     }
 
-    public async Task<bool> ExistsTransactionAsync(string guildId, string messageId, string reactionId = "")
+    public async Task<bool> ExistsTransactionAsync(string guildId, string messageId, string userId, string reactionId = "")
     {
         using (CreateCounter())
         {
             return await GetBaseQuery(guildId, true)
-                .AnyAsync(o => o.ReactionId == reactionId && o.MessageId == messageId);
+                .AnyAsync(o => o.ReactionId == reactionId && o.MessageId == messageId && o.UserId == userId);
         }
     }
 

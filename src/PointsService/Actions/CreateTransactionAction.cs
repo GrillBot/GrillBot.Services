@@ -83,7 +83,10 @@ public class CreateTransactionAction : IApiAction
 
     private async Task<bool> IsUniqueRequestAsync(TransactionRequest request)
     {
-        var exists = await Repository.Transaction.ExistsTransactionAsync(request.GuildId, request.MessageInfo.Id, request.ReactionInfo?.GetReactionId() ?? "");
+        var reactionId = request.ReactionInfo?.GetReactionId() ?? "";
+        var userId = request.ReactionInfo?.UserId ?? request.MessageInfo.AuthorId;
+        
+        var exists = await Repository.Transaction.ExistsTransactionAsync(request.GuildId, request.MessageInfo.Id, userId, reactionId);
         return !exists;
     }
 }
