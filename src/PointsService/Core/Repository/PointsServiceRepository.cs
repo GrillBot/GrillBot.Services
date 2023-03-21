@@ -27,13 +27,13 @@ public class PointsServiceRepository
     public Task AddAsync<TEntity>(TEntity entity) where TEntity : class
         => Context.Set<TEntity>().AddAsync(entity).AsTask();
 
-    public Task AddAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
+    public Task AddAsyncCollection<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         => Context.Set<TEntity>().AddRangeAsync(entities);
 
     public void Remove<TEntity>(TEntity entity) where TEntity : class
         => Context.Set<TEntity>().Remove(entity);
 
-    public void Remove<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
+    public void RemoveCollection<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         => Context.Set<TEntity>().RemoveRange(entities);
 
     public async Task<int> CommitAsync()
