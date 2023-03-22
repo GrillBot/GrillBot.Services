@@ -111,4 +111,18 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
             return await PaginatedResponse<Transaction>.CreateWithEntityAsync(query, request.Pagination);
         }
     }
+
+    public async Task<int> ComputePositionAsync(string guildId, int currentUserPoints, DateTime after)
+    {
+        using (CreateCounter())
+        {
+            var query = Context.Transactions.AsNoTracking()
+                .Where(o => o.MergedCount == 0 && o.GuildId == guildId && o.CreatedAt >= after)
+                .GroupBy(o => o.UserId)
+                .Where(o => o.Sum(x => x.Value) > currentUserPoints);
+
+            var count = await query.CountAsync();
+            return count + 1;
+        }
+    }
 }

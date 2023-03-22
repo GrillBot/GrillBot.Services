@@ -26,14 +26,18 @@ public class CurrentPointsStatusAction : IApiAction
     {
         var endOfDay = new TimeSpan(0, 23, 59, 59, 999);
         var now = DateTime.UtcNow;
+        var yearBack = now.AddYears(-1);
 
         var result = new PointsStatus
         {
             Total = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired, DateTime.MinValue, DateTime.MaxValue),
             Today = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired, now.Date, now.Date.Add(endOfDay)),
             MonthBack = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired, now.AddMonths(-1), DateTime.MaxValue),
-            YearBack = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired, now.AddYears(-1), DateTime.MaxValue)
+            YearBack = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired, yearBack, DateTime.MaxValue)
         };
+
+        if (!expired)
+            result.Position = await Repository.Transaction.ComputePositionAsync(guildId, result.YearBack, yearBack);
 
         return new ApiResult(StatusCodes.Status200OK, result);
     }
