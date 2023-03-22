@@ -6,6 +6,7 @@ public static class ActionExtensions
     {
         return services
             .AddScoped<CreateTransactionAction>()
-            .AddScoped<DeleteTransactionsAction>();
+            .AddScoped<DeleteTransactionsAction>()
+            .AddScoped<SynchronizationAction>();
     }
 }
