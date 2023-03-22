@@ -1,8 +1,8 @@
-﻿using System.Linq.Expressions;
-using GrillBot.Core.Database.Repository;
+﻿using GrillBot.Core.Database.Repository;
 using GrillBot.Core.Managers.Performance;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
+using PointsService.Models;
 
 namespace PointsService.Core.Repository;
 
@@ -54,6 +54,31 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
                 query = query.Where(o => o.CreatedAt < dateTo);
 
             return await query.SumAsync(o => o.Value);
+        }
+    }
+
+    public async Task<List<BoardItem>> ComputeLeaderboardAsync(string guildId, int skip, int count)
+    {
+        using (CreateCounter())
+        {
+            var endOfDay = new TimeSpan(0, 23, 59, 59, 999);
+            var now = DateTime.UtcNow;
+
+            var query = Context.Transactions.AsNoTracking().Where(o => o.MergedCount == 0 && o.GuildId == guildId);
+            var boardQuery = query.GroupBy(o => o.UserId)
+                .Select(o => new BoardItem
+                {
+                    UserId = o.Key,
+                    Today = o.Where(x => x.CreatedAt >= now.Date && x.CreatedAt <= now.Date.Add(endOfDay)).Sum(x => x.Value),
+                    Total = o.Sum(x => x.Value),
+                    MonthBack = o.Where(x => x.CreatedAt >= now.AddMonths(-1)).Sum(x => x.Value),
+                    YearBack = o.Where(x => x.CreatedAt >= now.AddYears(-1)).Sum(x => x.Value)
+                });
+
+            if (skip > 0) boardQuery = boardQuery.Skip(skip);
+            if (count > 0) boardQuery = boardQuery.Take(count);
+
+            return await boardQuery.ToListAsync();
         }
     }
 }
