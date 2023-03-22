@@ -73,12 +73,32 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
                     Total = o.Sum(x => x.Value),
                     MonthBack = o.Where(x => x.CreatedAt >= now.AddMonths(-1)).Sum(x => x.Value),
                     YearBack = o.Where(x => x.CreatedAt >= now.AddYears(-1)).Sum(x => x.Value)
-                });
+                })
+                .OrderByDescending(o => o.YearBack)
+                .AsQueryable();
 
             if (skip > 0) boardQuery = boardQuery.Skip(skip);
             if (count > 0) boardQuery = boardQuery.Take(count);
 
             return await boardQuery.ToListAsync();
+        }
+    }
+
+    public async Task<List<PointsChartItem>> ComputeChartDataAsync(AdminListRequest request)
+    {
+        using (CreateCounter())
+        {
+            var query = CreateQuery(request, true)
+                .GroupBy(o => o.CreatedAt.Date);
+
+            var groupedQuery = query.Select(o => new PointsChartItem
+            {
+                Day = new DateOnly(o.Key.Year, o.Key.Month, o.Key.Day),
+                MessagePoints = o.Where(x => x.ReactionId == "").Sum(x => x.Value),
+                ReactionPoints = o.Where(x => x.ReactionId != "").Sum(x => x.Value)
+            });
+
+            return await groupedQuery.ToListAsync();
         }
     }
 }

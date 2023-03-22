@@ -9,6 +9,7 @@ public static class ActionExtensions
             .AddScoped<DeleteTransactionsAction>()
             .AddScoped<SynchronizationAction>()
             .AddScoped<CurrentPointsStatusAction>()
-            .AddScoped<LeaderboardAction>();
+            .AddScoped<LeaderboardAction>()
+            .AddScoped<ChartAction>();
     }
 }
