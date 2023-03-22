@@ -11,6 +11,7 @@ public static class ActionExtensions
             .AddScoped<CurrentPointsStatusAction>()
             .AddScoped<LeaderboardAction>()
             .AddScoped<ChartAction>()
-            .AddScoped<AdminListAction>();
+            .AddScoped<AdminListAction>()
+            .AddScoped<MergeTransactionsAction>();
     }
 }

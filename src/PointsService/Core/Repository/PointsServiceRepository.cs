@@ -27,7 +27,7 @@ public class PointsServiceRepository
     public Task AddAsync<TEntity>(TEntity entity) where TEntity : class
         => Context.Set<TEntity>().AddAsync(entity).AsTask();
 
-    public Task AddAsyncCollection<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
+    public Task AddCollectionAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         => Context.Set<TEntity>().AddRangeAsync(entities);
 
     public void Remove<TEntity>(TEntity entity) where TEntity : class

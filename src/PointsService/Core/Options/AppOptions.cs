@@ -9,4 +9,6 @@ public class AppOptions
     public int ReactionPointsMax { get; set; }
     public int MessagePointsMin { get; set; }
     public int MessagePointsMax { get; set; }
+    public int MinimalTransactionsForMerge { get; set; }
+    public int ExpirationMonths { get; set; }
 }

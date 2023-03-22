@@ -125,4 +125,26 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
             return count + 1;
         }
     }
+
+    private IQueryable<Transaction> GetTransactionsForMergeQuery(DateTime expirationDate)
+    {
+        return Context.Transactions
+            .Where(o => o.CreatedAt < expirationDate && o.MergedCount == 0);
+    }
+
+    public async Task<int> GetCountOfTransactionsForMergeAsync(DateTime expirationDate)
+    {
+        using (CreateCounter())
+        {
+            return await GetTransactionsForMergeQuery(expirationDate).CountAsync();
+        }
+    }
+
+    public async Task<List<Transaction>> GetTransactionsForMergeAsync(DateTime expirationDate)
+    {
+        using (CreateCounter())
+        {
+            return await GetTransactionsForMergeQuery(expirationDate).ToListAsync();
+        }
+    }
 }
