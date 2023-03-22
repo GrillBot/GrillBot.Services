@@ -1,5 +1,6 @@
 ﻿using GrillBot.Core.Database.Repository;
 using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.Models.Pagination;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
 using PointsService.Models;
@@ -99,6 +100,15 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
             });
 
             return await groupedQuery.ToListAsync();
+        }
+    }
+
+    public async Task<PaginatedResponse<Transaction>> GetAdminListAsync(AdminListRequest request)
+    {
+        using (CreateCounter())
+        {
+            var query = CreateQuery(request, true);
+            return await PaginatedResponse<Transaction>.CreateWithEntityAsync(query, request.Pagination);
         }
     }
 }

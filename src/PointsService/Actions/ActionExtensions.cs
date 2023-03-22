@@ -10,6 +10,7 @@ public static class ActionExtensions
             .AddScoped<SynchronizationAction>()
             .AddScoped<CurrentPointsStatusAction>()
             .AddScoped<LeaderboardAction>()
-            .AddScoped<ChartAction>();
+            .AddScoped<ChartAction>()
+            .AddScoped<AdminListAction>();
     }
 }
