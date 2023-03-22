@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileService", "src\FileServ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RubbergodService", "src\RubbergodService\RubbergodService\RubbergodService.csproj", "{AE130712-829F-4E38-8178-EBD978B58A7A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PointsService", "src\PointsService\PointsService.csproj", "{7AECD35F-D27B-4153-ADE3-E6813F368468}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{AE130712-829F-4E38-8178-EBD978B58A7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE130712-829F-4E38-8178-EBD978B58A7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE130712-829F-4E38-8178-EBD978B58A7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AECD35F-D27B-4153-ADE3-E6813F368468}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AECD35F-D27B-4153-ADE3-E6813F368468}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AECD35F-D27B-4153-ADE3-E6813F368468}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AECD35F-D27B-4153-ADE3-E6813F368468}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
