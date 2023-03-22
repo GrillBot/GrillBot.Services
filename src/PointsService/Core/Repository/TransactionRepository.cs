@@ -1,4 +1,5 @@
-﻿using GrillBot.Core.Database.Repository;
+﻿using System.Linq.Expressions;
+using GrillBot.Core.Database.Repository;
 using GrillBot.Core.Managers.Performance;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
@@ -37,6 +38,22 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
             if (!string.IsNullOrEmpty(reactionId))
                 query = query.Where(o => o.ReactionId == reactionId);
             return await query.ToListAsync();
+        }
+    }
+
+    public async Task<int> ComputePointsStatusAsync(string guildId, string userId, bool expired, DateTime dateFrom, DateTime dateTo)
+    {
+        using (CreateCounter())
+        {
+            var query = Context.Transactions.AsNoTracking().Where(o => o.GuildId == guildId && o.UserId == userId);
+            query = expired ? query.Where(o => o.MergedCount > 0) : query.Where(o => o.MergedCount == 0);
+
+            if (dateFrom != DateTime.MinValue)
+                query = query.Where(o => o.CreatedAt >= dateFrom);
+            if (dateTo != DateTime.MaxValue)
+                query = query.Where(o => o.CreatedAt < dateTo);
+
+            return await query.SumAsync(o => o.Value);
         }
     }
 }
