@@ -1,4 +1,6 @@
-﻿namespace PointsService.Actions;
+﻿using PointsService.Models;
+
+namespace PointsService.Actions;
 
 public static class ActionExtensions
 {
@@ -12,6 +14,7 @@ public static class ActionExtensions
             .AddScoped<LeaderboardAction>()
             .AddScoped<ChartAction>()
             .AddScoped<AdminListAction>()
-            .AddScoped<MergeTransactionsAction>();
+            .AddScoped<MergeTransactionsAction>()
+            .AddScoped<TransferPointsAction>();
     }
 }

@@ -24,4 +24,10 @@ public class TransactionController : ControllerBase
     [HttpDelete("{guildId}/{messageId}/{reactionId}")]
     public Task<IActionResult> DeleteTransactionAsync([DiscordId, StringLength(30)] string guildId, [DiscordId, StringLength(30)] string messageId, [StringLength(100)] string reactionId)
         => ProcessAsync<DeleteTransactionsAction>(guildId, messageId, reactionId);
+
+    [HttpPost("transfer")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public Task<IActionResult> TransferPointsAsync([FromBody] TransferPointsRequest request)
+        => ProcessAsync<TransferPointsAction>(request);
 }
