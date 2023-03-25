@@ -9,7 +9,7 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class CreateTransactionAction : IApiAction
+public class CreateTransactionAction : ApiActionBase
 {
     private PointsServiceRepository Repository { get; }
     private AppOptions Options { get; }
@@ -22,9 +22,9 @@ public class CreateTransactionAction : IApiAction
         RandomManager = randomManager;
     }
 
-    public async Task<ApiResult> ProcessAsync(object?[] parameters)
+    public override async Task<ApiResult> ProcessAsync()
     {
-        var request = (TransactionRequest)parameters.First()!;
+        var request = (TransactionRequest)Parameters.First()!;
         var author = (await Repository.User.FindUserAsync(request.GuildId, request.MessageInfo.AuthorId))!;
         var reactionUser = request.ReactionInfo is null ? null : await Repository.User.FindUserAsync(request.GuildId, request.ReactionInfo.UserId);
         var channel = (await Repository.Channel.FindChannelAsync(request.GuildId, request.ChannelId))!;
@@ -85,7 +85,7 @@ public class CreateTransactionAction : IApiAction
     {
         var reactionId = request.ReactionInfo?.GetReactionId() ?? "";
         var userId = request.ReactionInfo?.UserId ?? request.MessageInfo.AuthorId;
-        
+
         var exists = await Repository.Transaction.ExistsTransactionAsync(request.GuildId, request.MessageInfo.Id, userId, reactionId);
         return !exists;
     }

@@ -4,7 +4,7 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class CurrentPointsStatusAction : IApiAction
+public class CurrentPointsStatusAction : ApiActionBase
 {
     private PointsServiceRepository Repository { get; }
 
@@ -13,11 +13,11 @@ public class CurrentPointsStatusAction : IApiAction
         Repository = repository;
     }
 
-    public async Task<ApiResult> ProcessAsync(object?[] parameters)
+    public override async Task<ApiResult> ProcessAsync()
     {
-        var guildId = (string)parameters[0]!;
-        var userId = (string)parameters[1]!;
-        var expired = (bool)parameters[2]!;
+        var guildId = (string)Parameters[0]!;
+        var userId = (string)Parameters[1]!;
+        var expired = (bool)Parameters[2]!;
 
         return await ProcessAsync(guildId, userId, expired);
     }

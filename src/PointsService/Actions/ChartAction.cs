@@ -4,7 +4,7 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class ChartAction : IApiAction
+public class ChartAction : ApiActionBase
 {
     private PointsServiceRepository Repository { get; }
 
@@ -13,9 +13,9 @@ public class ChartAction : IApiAction
         Repository = repository;
     }
 
-    public async Task<ApiResult> ProcessAsync(object?[] parameters)
+    public override async Task<ApiResult> ProcessAsync()
     {
-        var request = (AdminListRequest)parameters[0]!;
+        var request = (AdminListRequest)Parameters[0]!;
 
         request.Sort.OrderBy = "Day";
         request.Sort.Descending = false;

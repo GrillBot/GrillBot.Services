@@ -5,7 +5,7 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class SynchronizationAction : IApiAction
+public class SynchronizationAction : ApiActionBase
 {
     private PointsServiceRepository Repository { get; }
 
@@ -14,9 +14,9 @@ public class SynchronizationAction : IApiAction
         Repository = repository;
     }
 
-    public async Task<ApiResult> ProcessAsync(object?[] parameters)
+    public override async Task<ApiResult> ProcessAsync()
     {
-        var request = (SynchronizationRequest)parameters.First()!;
+        var request = (SynchronizationRequest)Parameters.First()!;
 
         await ProcessUsersAsync(request);
         await ProcessChannelsAsync(request);

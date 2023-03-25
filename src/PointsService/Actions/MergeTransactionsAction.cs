@@ -8,7 +8,7 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class MergeTransactionsAction : IApiAction
+public class MergeTransactionsAction : ApiActionBase
 {
     private PointsServiceRepository Repository { get; }
     private AppOptions Options { get; }
@@ -19,7 +19,7 @@ public class MergeTransactionsAction : IApiAction
         Options = options.Value;
     }
 
-    public async Task<ApiResult> ProcessAsync(object?[] parameters)
+    public override async Task<ApiResult> ProcessAsync()
     {
         var startAt = DateTime.Now;
         var expirationDate = DateTime.UtcNow.AddMonths(-Options.ExpirationMonths);

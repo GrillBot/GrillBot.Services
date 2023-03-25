@@ -8,7 +8,7 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class TransferPointsAction : IApiAction
+public class TransferPointsAction : ApiActionBase
 {
     private PointsServiceRepository Repository { get; }
 
@@ -17,9 +17,9 @@ public class TransferPointsAction : IApiAction
         Repository = repository;
     }
 
-    public async Task<ApiResult> ProcessAsync(object?[] parameters)
+    public override async Task<ApiResult> ProcessAsync()
     {
-        var request = (TransferPointsRequest)parameters.First()!;
+        var request = (TransferPointsRequest)Parameters.First()!;
 
         var validationErrors = await ValidateRequestAsync(request);
         if (validationErrors != null)

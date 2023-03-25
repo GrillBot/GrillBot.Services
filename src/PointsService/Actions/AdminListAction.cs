@@ -5,7 +5,7 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class AdminListAction : IApiAction
+public class AdminListAction : ApiActionBase
 {
     private PointsServiceRepository Repository { get; }
 
@@ -14,9 +14,9 @@ public class AdminListAction : IApiAction
         Repository = repository;
     }
 
-    public async Task<ApiResult> ProcessAsync(object?[] parameters)
+    public override async Task<ApiResult> ProcessAsync()
     {
-        var request = (AdminListRequest)parameters[0]!;
+        var request = (AdminListRequest)Parameters[0]!;
         var list = await Repository.Transaction.GetAdminListAsync(request);
         var result = await PaginatedResponse<TransactionItem>.CopyAndMapAsync(list, entity => Task.FromResult(new TransactionItem
         {
