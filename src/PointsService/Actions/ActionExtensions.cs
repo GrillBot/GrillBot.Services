@@ -15,6 +15,7 @@ public static class ActionExtensions
             .AddScoped<ChartAction>()
             .AddScoped<AdminListAction>()
             .AddScoped<MergeTransactionsAction>()
-            .AddScoped<TransferPointsAction>();
+            .AddScoped<TransferPointsAction>()
+            .AddScoped<AdminCreateTransactionAction>();
     }
 }

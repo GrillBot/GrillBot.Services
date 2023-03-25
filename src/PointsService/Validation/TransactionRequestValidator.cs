@@ -24,4 +24,10 @@ public class TransactionRequestValidator
         if (!Repository.Channel.ExistsChannel(request.GuildId, request.ChannelId))
             yield return new ValidationResult("UnknownChannel");
     }
+
+    public IEnumerable<ValidationResult> Validate(AdminTransactionRequest request)
+    {
+        if (!Repository.User.ExistsUser(request.GuildId, request.UserId))
+            yield return new ValidationResult("UnknownUser");
+    }
 }
