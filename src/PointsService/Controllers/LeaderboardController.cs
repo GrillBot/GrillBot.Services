@@ -12,7 +12,7 @@ public class LeaderboardController : ControllerBase
     }
 
     [HttpGet("{guildId}")]
-    [ProducesResponseType(typeof(List<BoardItem>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Leaderboard), StatusCodes.Status200OK)]
     public Task<IActionResult> GetLeaderboardAsync([FromRoute]LeaderboardRequest request)
         => ProcessAsync<LeaderboardAction>(request);
 }

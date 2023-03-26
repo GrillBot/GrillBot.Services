@@ -17,7 +17,12 @@ public class LeaderboardAction : ApiActionBase
     {
         var request = (LeaderboardRequest)Parameters[0]!;
 
-        var result = await Repository.Transaction.ComputeLeaderboardAsync(request.GuildId, request.Skip, request.Count);
+        var result = new Leaderboard
+        {
+            Items = await Repository.Transaction.ComputeLeaderboardAsync(request.GuildId, request.Skip, request.Count),
+            TotalItemsCount = await Repository.Transaction.ComputeLeaderboardTotalItemsCount(request.GuildId)
+        };
+
         return new ApiResult(StatusCodes.Status200OK, result);
     }
 }

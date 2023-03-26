@@ -85,6 +85,30 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
         }
     }
 
+    public async Task<int> ComputeLeaderboardTotalItemsCount(string guildId)
+    {
+        using (CreateCounter())
+        {
+            var endOfDay = new TimeSpan(0, 23, 59, 59, 999);
+            var now = DateTime.UtcNow;
+
+            var query = Context.Transactions.AsNoTracking().Where(o => o.MergedCount == 0 && o.GuildId == guildId);
+            var boardQuery = query.GroupBy(o => o.UserId)
+                .Select(o => new BoardItem
+                {
+                    UserId = o.Key,
+                    Today = o.Where(x => x.CreatedAt >= now.Date && x.CreatedAt <= now.Date.Add(endOfDay)).Sum(x => x.Value),
+                    Total = o.Sum(x => x.Value),
+                    MonthBack = o.Where(x => x.CreatedAt >= now.AddMonths(-1)).Sum(x => x.Value),
+                    YearBack = o.Where(x => x.CreatedAt >= now.AddYears(-1)).Sum(x => x.Value)
+                })
+                .OrderByDescending(o => o.YearBack)
+                .AsQueryable();
+
+            return await boardQuery.CountAsync();
+        }
+    }
+
     public async Task<List<PointsChartItem>> ComputeChartDataAsync(AdminListRequest request)
     {
         using (CreateCounter())
