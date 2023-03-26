@@ -30,4 +30,9 @@ public class TransactionController : ControllerBase
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> TransferPointsAsync([FromBody] TransferPointsRequest request)
         => ProcessAsync<TransferPointsAction>(request);
+
+    [HttpGet("{guildId}/{userId}")]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    public Task<IActionResult> ExistsAnyAsync([DiscordId, StringLength(30)] string guildId, [DiscordId, StringLength(30)] string userId)
+        => ProcessAsync<TransactionExistsAction>(guildId, userId);
 }

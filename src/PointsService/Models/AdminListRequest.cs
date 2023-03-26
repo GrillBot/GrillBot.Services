@@ -48,9 +48,9 @@ public class AdminListRequest : IValidatableObject, IQueryableModel<Transaction>
         if (!string.IsNullOrEmpty(UserId))
             query = query.Where(o => o.UserId == UserId);
         if (CreatedFrom.HasValue)
-            query = query.Where(o => o.CreatedAt >= CreatedFrom.Value);
+            query = query.Where(o => o.CreatedAt >= CreatedFrom.Value.ToUniversalTime());
         if (CreatedTo.HasValue)
-            query = query.Where(o => o.CreatedAt < CreatedTo.Value);
+            query = query.Where(o => o.CreatedAt < CreatedTo.Value.ToUniversalTime());
 
         if (OnlyMessages)
             query = query.Where(o => o.ReactionId == "");

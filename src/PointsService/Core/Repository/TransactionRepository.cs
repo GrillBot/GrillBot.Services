@@ -31,6 +31,15 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
         }
     }
 
+    public async Task<bool> ExistsAnyTransactionAsync(string guildId, string userId)
+    {
+        using (CreateCounter())
+        {
+            return await GetBaseQuery(guildId, true)
+                .AnyAsync(o => o.UserId == userId);
+        }
+    }
+
     public async Task<List<Transaction>> FindTransactionsAsync(string guildId, string messageId, string? reactionId = null)
     {
         using (CreateCounter())
