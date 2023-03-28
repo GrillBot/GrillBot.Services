@@ -27,4 +27,7 @@ public class Karma
         Positive = karma.Positive;
         Negative = karma.Negative;
     }
+
+    public bool IsEqual(Karma karma)
+        => MemberId == karma.MemberId && KarmaValue == karma.KarmaValue && Positive == karma.Positive && Negative == karma.Negative;
 }

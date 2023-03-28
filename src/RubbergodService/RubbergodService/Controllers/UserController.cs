@@ -1,24 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RubbergodService.MemberSynchronization;
+using RubbergodService.Actions;
+using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace RubbergodService.Controllers;
 
-[ApiController]
-[Route("api/user")]
-public class UserController : Controller
+public class UserController : ControllerBase
 {
-    private MemberSyncQueue MemberSyncQueue { get; }
-
-    public UserController(MemberSyncQueue memberSyncQueue)
+    public UserController(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        MemberSyncQueue = memberSyncQueue;
     }
 
     [HttpPatch("{memberId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult> RefreshUserAsync(string memberId)
-    {
-        await MemberSyncQueue.AddToQueueAsync(memberId);
-        return Ok();
-    }
+    public Task<IActionResult> RefreshUserAsync(string memberId)
+        => ProcessAsync<RefreshUserAction>(memberId);
 }

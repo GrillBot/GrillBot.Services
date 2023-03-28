@@ -1,29 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RubbergodService.Core.Helpers;
+using RubbergodService.Actions;
 using RubbergodService.Core.Models;
-using RubbergodService.DirectApi;
+using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace RubbergodService.Controllers;
 
-[ApiController]
-[Route("api/directApi")]
-public class DirectApiController : Controller
+public class DirectApiController : ControllerBase
 {
-    private DirectApiManager DirectApiManager { get; }
-
-    public DirectApiController(DirectApiManager directApiManager)
+    public DirectApiController(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        DirectApiManager = directApiManager;
     }
 
     [HttpPost("{service}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> SendAsync(string service, DirectApiCommand command)
-    {
-        using var response = await DirectApiManager.SendAsync(service, command);
-        var json = await JsonHelper.SerializeJsonDocumentAsync(response);
-
-        return Ok(json);
-    }
+    public Task<IActionResult> SendAsync(string service, DirectApiCommand command)
+        => ProcessAsync<SendDirectApiAction>(service, command);
 }

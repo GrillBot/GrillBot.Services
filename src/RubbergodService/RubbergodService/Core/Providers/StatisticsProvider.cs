@@ -1,7 +1,7 @@
 ﻿using GrillBot.Core.Database;
 using RubbergodService.Core.Repository;
 
-namespace RubbergodService.Core;
+namespace RubbergodService.Core.Providers;
 
 public class StatisticsProvider : IStatisticsProvider
 {

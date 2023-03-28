@@ -1,34 +1,27 @@
 ﻿using GrillBot.Core.Models.Pagination;
 using Microsoft.AspNetCore.Mvc;
+using RubbergodService.Actions;
 using RubbergodService.Core.Entity;
 using RubbergodService.Core.Models;
-using RubbergodService.Managers;
+using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace RubbergodService.Controllers;
 
-[ApiController]
-[Route("api/karma")]
-public class KarmaController : Controller
+public class KarmaController : ControllerBase
 {
-    private KarmaManager KarmaManager { get; }
-
-    public KarmaController(KarmaManager manager)
+    public KarmaController(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        KarmaManager = manager;
     }
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> StoreKarmaAsync(List<Karma> items)
-    {
-        await KarmaManager.StoreKarmaAsync(items);
-        return Ok();
-    }
+    public Task<IActionResult> StoreKarmaAsync(List<Karma> items)
+        => ProcessAsync<StoreKarmaAction>(items);
 
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PaginatedResponse<UserKarma>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PaginatedResponse<UserKarma>>> GetPageAsync([FromQuery] PaginatedParams parameters)
-        => Ok(await KarmaManager.GetPageAsync(parameters));
+    public Task<IActionResult> GetPageAsync([FromQuery] PaginatedParams parameters)
+        => ProcessAsync<GetKarmaPageAction>(parameters);
 }

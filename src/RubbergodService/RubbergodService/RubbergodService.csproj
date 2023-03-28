@@ -9,7 +9,7 @@
     <ItemGroup>
         <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="6.0.2" />
         <PackageReference Include="Discord.Net.Rest" Version="3.9.0" />
-        <PackageReference Include="GrillBot.Core" Version="1.0.5" />
+        <PackageReference Include="GrillBot.Core" Version="1.0.12" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.3">
           <PrivateAssets>all</PrivateAssets>

@@ -1,30 +1,10 @@
 using GrillBot.Core;
-using Microsoft.AspNetCore.HttpOverrides;
 using RubbergodService.Core;
 using RubbergodService.Core.Entity;
 using RubbergodService.Discord;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Configure services
-builder.Services
-    .AddDatabase(builder.Configuration, out var connectionString)
-    .AddManagers()
-    .AddDiscord()
-    .AddEndpointsApiExplorer()
-    .AddSwaggerGen()
-    .AddDirectApi()
-    .AddMemberSync()
-    .AddMemoryCache()
-    .AddDiagnostic()
-    .AddCoreManagers()
-    .AddStatisticsProvider<StatisticsProvider>();
-builder.Services.AddControllers(c => c.RegisterCoreFilter());
-
-builder.Services
-    .AddHealthChecks()
-    .AddNpgSql(connectionString);
-builder.Services.Configure<ForwardedHeadersOptions>(opt => opt.ForwardedHeaders = ForwardedHeaders.All);
+builder.Services.AddCoreServices(builder.Configuration);
 
 var app = builder.Build();
 
