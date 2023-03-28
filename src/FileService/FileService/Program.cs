@@ -1,6 +1,7 @@
-using Discord;
+using Azure.Storage.Blobs;
+using FileService.Actions;
 using FileService.Cache;
-using FileService.Managers;
+using FileService.Factory;
 using GrillBot.Core;
 using Microsoft.AspNetCore.HttpOverrides;
 
@@ -11,7 +12,6 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.MaxRequestBodySize = 1073741824; // 1GB 
 });
 
-builder.Services.AddScoped<StorageManager>();
 builder.Services.AddScoped<StorageCacheManager>();
 builder.Services.AddMemoryCache();
 builder.Services.AddEndpointsApiExplorer();
@@ -19,8 +19,13 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
 builder.Services.AddControllers(c => c.RegisterCoreFilter());
 builder.Services.AddDiagnostic();
-builder.Services.AddSingleton<IDiscordClient>(_ => null!);
+builder.Services.AddFakeDiscordClient(ServiceLifetime.Singleton);
 builder.Services.AddCoreManagers();
+builder.Services.AddActions();
+builder.Services.AddScoped<BlobContainerFactory>();
+builder.Services.AddScoped<BlobContainerClient>(provider => provider.GetRequiredService<BlobContainerFactory>().CreateClient());
+
+builder.Services.Configure<RouteOptions>(opt => opt.LowercaseUrls = true);
 builder.Services.Configure<ForwardedHeadersOptions>(opt => opt.ForwardedHeaders = ForwardedHeaders.All);
 
 var app = builder.Build();
