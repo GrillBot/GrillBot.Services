@@ -2,11 +2,11 @@ import express from 'express';
 
 interface RequestStatistics {
     endpoint: string;
-    count: number;
     lastRequestAt: string;
     totalTime: number;
-    avgTime: number;
     lastTime: number;
+    successCount: number;
+    failedCount: number;
 }
 
 interface Stats {
@@ -14,15 +14,13 @@ interface Stats {
     measuredFrom: string | null;
     endpoints: RequestStatistics[];
     cpuTime: number;
-    database: null
 }
 
 const stats: Stats = {
     requestsCount: 0,
     measuredFrom: null,
     endpoints: [],
-    cpuTime: 0,
-    database: null
+    cpuTime: 0
 };
 
 export const requestsCounter = (request: express.Request, response: express.Response, next: express.NextFunction): void => {
@@ -33,19 +31,17 @@ export const requestsCounter = (request: express.Request, response: express.Resp
     }
 
     const url = `${request.method} ${request.url}`;
-    const endpoint = stats.endpoints.find(o => o.endpoint === url);
-    if (!endpoint) {
+    if (!stats.endpoints.some(o => o.endpoint === url)) {
+        const isSuccess = response.statusCode < 400;
+
         stats.endpoints.push({
-            count: 1,
             lastRequestAt: new Date().toISOString(),
             endpoint: url,
             totalTime: 0,
-            avgTime: 0,
-            lastTime: 0
+            lastTime: 0,
+            failedCount: isSuccess ? 0 : 1,
+            successCount: isSuccess ? 1 : 0
         });
-    } else {
-        endpoint.count++;
-        endpoint.lastRequestAt = new Date().toISOString();
     }
 
     const cpuUsage = process.cpuUsage();
@@ -67,9 +63,16 @@ export const durationCounter = (req: express.Request, res: express.Response, nex
 
         const endpoint = stats.endpoints.find(o => o.endpoint === `${req.method} ${req.url}`);
         if (!endpoint) { return; }
+
         endpoint.totalTime += duration;
         endpoint.lastTime = duration;
-        endpoint.avgTime = Math.round(endpoint.totalTime / endpoint.count);
+        endpoint.lastRequestAt = new Date().toISOString();
+
+        if (res.statusCode < 400) {
+            endpoint.successCount++;
+        } else {
+            endpoint.failedCount++;
+        }
     });
 
     next();
