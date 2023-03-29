@@ -5,6 +5,7 @@ Repository for all services that GrillBot depends.
 - [FileService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/FileService)
 - [Graphics](https://github.com/GrillBot/GrillBot.Services/tree/master/src/Graphics)
 - [RubbergodService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/RubbergodService)
+- [PointsService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/PointsService)
 
 ## Docker
 
@@ -13,3 +14,4 @@ Exists only one name of image `ghcr.io/grillbot/grillbot.services` and service a
 - FileService - `ghcr.io/grillbot/grillbot.services:file_service`
 - Graphics - `ghcr.io/grillbot/grillbot.services:graphics`
 - RubbergodService - `ghcr.io/grillbot/grillbot.services:rubbergod`
+- PointsService - `ghcr.io/grillbot/grillbot.services:points_service`

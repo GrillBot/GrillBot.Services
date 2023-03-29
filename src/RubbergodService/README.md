@@ -1,13 +1,13 @@
 # GrillBot - RubbergodService
 
-Microservice for connectivity between [GrillBot](https://github.com/GrillBot) and [Rubbergod](https://github.com/Toaster192/rubbergod).
+Service for connectivity between [GrillBot](https://github.com/GrillBot) and [Rubbergod](https://github.com/Toaster192/rubbergod).
 
 ## Requirements
 
 - PostgreSQL server (minimal recomended version is 13).
 - .NET 7.0 (with ASP.NET Core 7)
 
-If you're running bot on Linux distributions, you have to install these packages: `tzdata`, `libc6-dev`.
+If you're running service on Linux distributions, you have to install these packages: `tzdata`, `libc6-dev`.
 
 Only debian based distros are tested. Funcionality cannot be guaranteed for other distributions.
 
