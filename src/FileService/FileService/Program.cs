@@ -9,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Limits.MaxRequestBodySize = 1073741824; // 1GB 
+    options.Limits.MaxRequestBodySize = 1073741824; // 1GB
+    options.AddServerHeader = false;
 });
 
 builder.Services.AddScoped<StorageCacheManager>();
@@ -29,6 +30,15 @@ builder.Services.Configure<RouteOptions>(opt => opt.LowercaseUrls = true);
 builder.Services.Configure<ForwardedHeadersOptions>(opt => opt.ForwardedHeaders = ForwardedHeaders.All);
 
 var app = builder.Build();
+
+app.Use((context, next) =>
+{
+    context.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
+    context.Response.Headers.Add("X-Xss-Protection", "1; mode=block");
+    context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+
+    return next();
+});
 
 if (app.Environment.IsDevelopment())
 {

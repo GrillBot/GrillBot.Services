@@ -7,6 +7,15 @@ import * as common from './src/common';
 import * as image from './src/images';
 
 const app = express();
+app.use((req, res, next) => {
+    res.removeHeader('server');
+    res.removeHeader('X-Powered-By')
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-Xss-Protection', '1; mode=block');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+
+    next();
+});
 app.use(express.json({ limit: '100mb' }))
 app.use(loggerMiddleware);
 app.use(actuator({}));
