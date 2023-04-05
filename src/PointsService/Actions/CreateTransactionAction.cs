@@ -70,7 +70,7 @@ public class CreateTransactionAction : ApiActionBase
         var cooldown = isReaction ? Options.ReactionCooldown : Options.MessageCooldown;
         var lastIncrement = isReaction ? user.LastReactionIncrement : user.LastMessageIncrement;
 
-        return lastIncrement == null || lastIncrement.Value.AddSeconds(cooldown) <= DateTime.Now;
+        return lastIncrement == null || lastIncrement.Value.AddSeconds(cooldown) <= DateTime.UtcNow;
     }
 
     private int ComputeValue(bool isReaction)
