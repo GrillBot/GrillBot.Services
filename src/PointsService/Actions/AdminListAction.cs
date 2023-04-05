@@ -24,7 +24,7 @@ public class AdminListAction : ApiActionBase
             MergedCount = entity.MergedCount,
             Value = entity.Value,
             GuildId = entity.GuildId,
-            IsReaction = !string.IsNullOrEmpty(entity.ReactionId),
+            ReactionId = entity.ReactionId,
             MergedFrom = entity.MergeRangeFrom,
             MergedTo = entity.MergeRangeTo,
             MessageId = entity.MessageId,
