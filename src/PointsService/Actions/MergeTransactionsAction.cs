@@ -38,7 +38,10 @@ public class MergeTransactionsAction : ApiActionBase
         {
             MergedCount = mergedTransactions.Count,
             Duration = (DateTime.Now - startAt).ToString("c"),
-            ExpiredCount = transactions.Count
+            ExpiredCount = transactions.Count,
+            GuildCount = mergedTransactions.DistinctBy(o => o.GuildId).Count(),
+            TotalPoints = mergedTransactions.Sum(o => o.Value),
+            UserCount = mergedTransactions.DistinctBy(o => o.UserId).Count()
         };
 
         return new ApiResult(StatusCodes.Status200OK, result);
