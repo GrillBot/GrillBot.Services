@@ -1,6 +1,4 @@
-﻿using PointsService.Models;
-
-namespace PointsService.Actions;
+﻿namespace PointsService.Actions;
 
 public static class ActionExtensions
 {
@@ -17,6 +15,7 @@ public static class ActionExtensions
             .AddScoped<MergeTransactionsAction>()
             .AddScoped<TransferPointsAction>()
             .AddScoped<AdminCreateTransactionAction>()
-            .AddScoped<TransactionExistsAction>();
+            .AddScoped<TransactionExistsAction>()
+            .AddScoped<ImagePointsStatusAction>();
     }
 }

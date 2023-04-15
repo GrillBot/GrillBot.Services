@@ -22,4 +22,8 @@ public class StatusController : ControllerBase
     [ProducesResponseType(typeof(PointsStatus), StatusCodes.Status200OK)]
     public Task<IActionResult> GetStatusOfExpiredPointsAsync([Required, StringLength(30), DiscordId] string guildId, [Required, StringLength(30), DiscordId] string userId)
         => ProcessAsync<CurrentPointsStatusAction>(guildId, userId, true);
+
+    [HttpGet("{guildId}/{userId}/image")]
+    public Task<IActionResult> GetImagePointsStatusAsync([Required, StringLength(30), DiscordId] string guildId, [Required, StringLength(30), DiscordId] string userId)
+        => ProcessAsync<ImagePointsStatusAction>(guildId, userId);
 }

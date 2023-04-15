@@ -36,9 +36,6 @@ public class CurrentPointsStatusAction : ApiActionBase
             YearBack = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired, yearBack, DateTime.MaxValue)
         };
 
-        if (!expired)
-            result.Position = await Repository.Transaction.ComputePositionAsync(guildId, result.YearBack, yearBack);
-
         return new ApiResult(StatusCodes.Status200OK, result);
     }
 }
