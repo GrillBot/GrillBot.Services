@@ -67,7 +67,7 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
         }
     }
 
-    public async Task<List<BoardItem>> ComputeLeaderboardAsync(string guildId, int skip, int count)
+    public async Task<List<BoardItem>> ComputeLeaderboardAsync(string guildId, int skip, int count, bool simple)
     {
         using (CreateCounter())
         {
@@ -79,9 +79,9 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
                 .Select(o => new BoardItem
                 {
                     UserId = o.Key,
-                    Today = o.Where(x => x.CreatedAt >= now.Date && x.CreatedAt <= now.Date.Add(endOfDay)).Sum(x => x.Value),
-                    Total = o.Sum(x => x.Value),
-                    MonthBack = o.Where(x => x.CreatedAt >= now.AddMonths(-1)).Sum(x => x.Value),
+                    Today = simple ? 0 : o.Where(x => x.CreatedAt >= now.Date && x.CreatedAt <= now.Date.Add(endOfDay)).Sum(x => x.Value),
+                    Total = simple ? 0 : o.Sum(x => x.Value),
+                    MonthBack = simple ? 0 : o.Where(x => x.CreatedAt >= now.AddMonths(-1)).Sum(x => x.Value),
                     YearBack = o.Where(x => x.CreatedAt >= now.AddYears(-1)).Sum(x => x.Value)
                 })
                 .OrderByDescending(o => o.YearBack)

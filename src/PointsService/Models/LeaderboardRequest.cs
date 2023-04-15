@@ -17,4 +17,7 @@ public class LeaderboardRequest
 
     [FromQuery]
     public int Count { get; set; }
+    
+    [FromQuery]
+    public bool Simple { get; set; }
 }
