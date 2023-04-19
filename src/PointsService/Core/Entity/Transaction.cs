@@ -7,6 +7,9 @@ namespace PointsService.Core.Entity;
 [Index(nameof(MergedCount), Name = "IX_Transactions_MergedCount", IsUnique = false)]
 [Index(nameof(CreatedAt), Name = "IX_Transactions_CreatedAt", IsUnique = false)]
 [Index(nameof(GuildId), Name = "IX_Transactions_GuildId", IsUnique = false)]
+[Index(nameof(GuildId), nameof(MessageId), nameof(MergedCount))]
+[Index(nameof(GuildId), nameof(UserId))]
+[Index(nameof(UserId))]
 public class Transaction
 {
     [Required]

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PointsService.Core.Entity;
@@ -11,9 +12,11 @@ using PointsService.Core.Entity;
 namespace PointsService.Core.Migrations
 {
     [DbContext(typeof(PointsServiceContext))]
-    partial class PointsServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20230419162354_GuildId_Index2")]
+    partial class GuildId_Index2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -77,10 +80,6 @@ namespace PointsService.Core.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("GuildId", "UserId", "MessageId", "ReactionId");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("GuildId", "UserId");
 
                     b.HasIndex("GuildId", "MessageId", "MergedCount");
 
