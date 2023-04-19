@@ -18,4 +18,6 @@ public class User
     public DateTime? LastMessageIncrement { get; set; }
     
     public bool IsUser { get; set; }
+    
+    public int PointsPosition { get; set; }
 }

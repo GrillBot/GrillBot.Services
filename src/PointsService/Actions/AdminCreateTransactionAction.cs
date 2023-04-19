@@ -1,5 +1,6 @@
 ﻿using Discord;
 using GrillBot.Core.Infrastructure.Actions;
+using PointsService.BackgroundServices;
 using PointsService.Core.Entity;
 using PointsService.Core.Repository;
 using PointsService.Models;
@@ -9,10 +10,12 @@ namespace PointsService.Actions;
 public class AdminCreateTransactionAction : ApiActionBase
 {
     private PointsServiceRepository Repository { get; }
+    private PostProcessingQueue PostProcessingQueue { get; }
 
-    public AdminCreateTransactionAction(PointsServiceRepository repository)
+    public AdminCreateTransactionAction(PointsServiceRepository repository, PostProcessingQueue postProcessingQueue)
     {
         Repository = repository;
+        PostProcessingQueue = postProcessingQueue;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -34,6 +37,8 @@ public class AdminCreateTransactionAction : ApiActionBase
 
         await Repository.AddAsync(transaction);
         await Repository.CommitAsync();
+        await PostProcessingQueue.SendRequestAsync(transaction, false);
+
         return new ApiResult(StatusCodes.Status200OK);
     }
 

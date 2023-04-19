@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
+using PointsService.BackgroundServices;
 using PointsService.Core.Repository;
 
 namespace PointsService.Actions;
@@ -6,10 +7,12 @@ namespace PointsService.Actions;
 public class DeleteTransactionsAction : ApiActionBase
 {
     private PointsServiceRepository Repository { get; }
+    private PostProcessingQueue PostProcessingQueue { get; }
 
-    public DeleteTransactionsAction(PointsServiceRepository repository)
+    public DeleteTransactionsAction(PointsServiceRepository repository, PostProcessingQueue postProcessingQueue)
     {
         Repository = repository;
+        PostProcessingQueue = postProcessingQueue;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -29,6 +32,10 @@ public class DeleteTransactionsAction : ApiActionBase
 
         Repository.RemoveCollection(transactions);
         await Repository.CommitAsync();
+
+        foreach (var transaction in transactions)
+            await PostProcessingQueue.SendRequestAsync(transaction, true);
+
         return new ApiResult(StatusCodes.Status200OK);
     }
 }

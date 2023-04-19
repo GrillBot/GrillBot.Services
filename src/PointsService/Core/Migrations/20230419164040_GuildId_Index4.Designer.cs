@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PointsService.Core.Entity;
@@ -11,9 +12,11 @@ using PointsService.Core.Entity;
 namespace PointsService.Core.Migrations
 {
     [DbContext(typeof(PointsServiceContext))]
-    partial class PointsServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20230419164040_GuildId_Index4")]
+    partial class GuildId_Index4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,11 +81,15 @@ namespace PointsService.Core.Migrations
 
                     b.HasKey("GuildId", "UserId", "MessageId", "ReactionId");
 
+                    b.HasIndex("UserId");
+
                     b.HasIndex("GuildId", "MessageId");
 
                     b.HasIndex("GuildId", "UserId");
 
                     b.HasIndex(new[] { "CreatedAt" }, "IX_Transactions_CreatedAt");
+
+                    b.HasIndex(new[] { "GuildId" }, "IX_Transactions_GuildId");
 
                     b.HasIndex(new[] { "MergedCount" }, "IX_Transactions_MergedCount");
 
@@ -110,9 +117,6 @@ namespace PointsService.Core.Migrations
 
                     b.Property<bool>("PointsDisabled")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("PointsPosition")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id", "GuildId");
 

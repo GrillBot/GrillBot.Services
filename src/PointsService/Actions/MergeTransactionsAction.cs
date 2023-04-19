@@ -1,6 +1,7 @@
 ﻿using Discord;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.Extensions.Options;
+using PointsService.BackgroundServices;
 using PointsService.Core.Entity;
 using PointsService.Core.Options;
 using PointsService.Core.Repository;
@@ -12,11 +13,13 @@ public class MergeTransactionsAction : ApiActionBase
 {
     private PointsServiceRepository Repository { get; }
     private AppOptions Options { get; }
+    private PostProcessingQueue PostProcessingQueue { get; }
 
-    public MergeTransactionsAction(PointsServiceRepository repository, IOptions<AppOptions> options)
+    public MergeTransactionsAction(PointsServiceRepository repository, IOptions<AppOptions> options, PostProcessingQueue postProcessingQueue)
     {
         Repository = repository;
         Options = options.Value;
+        PostProcessingQueue = postProcessingQueue;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -33,6 +36,11 @@ public class MergeTransactionsAction : ApiActionBase
         var mergedTransactions = MergeTransactions(transactions);
         await Repository.AddCollectionAsync(mergedTransactions);
         await Repository.CommitAsync();
+
+        foreach (var transaction in transactions)
+            await PostProcessingQueue.SendRequestAsync(transaction, true);
+        foreach (var transaction in mergedTransactions)
+            await PostProcessingQueue.SendRequestAsync(transaction, false);
 
         var result = new MergeResult
         {

@@ -36,4 +36,16 @@ public class UserRepository : RepositoryBase<PointsServiceContext>
             return await GetQueryBase(guildId, userId, disableTracking).FirstOrDefaultAsync();
         }
     }
+
+    public async Task<List<User>> GetUsersAsync(bool disableTracking = false)
+    {
+        using (CreateCounter())
+        {
+            var query = Context.Users.AsQueryable();
+            if (disableTracking)
+                query = query.AsNoTracking();
+
+            return await query.ToListAsync();
+        }
+    }
 }

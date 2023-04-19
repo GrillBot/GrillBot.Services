@@ -24,18 +24,15 @@ public class CurrentPointsStatusAction : ApiActionBase
 
     private async Task<ApiResult> ProcessAsync(string guildId, string userId, bool expired)
     {
-        var endOfDay = new TimeSpan(0, 23, 59, 59, 999);
-        var now = DateTime.UtcNow;
-        var yearBack = now.AddYears(-1);
-
-        var result = new PointsStatus
-        {
-            Total = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired, DateTime.MinValue, DateTime.MaxValue),
-            Today = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired, now.Date, now.Date.Add(endOfDay)),
-            MonthBack = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired, now.AddMonths(-1), DateTime.MaxValue),
-            YearBack = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired, yearBack, DateTime.MaxValue)
-        };
-
+        var result = expired ? await ComputeStatusOfExpiredPoints(guildId, userId) : await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired);
         return new ApiResult(StatusCodes.Status200OK, result);
+    }
+
+    private async Task<PointsStatus> ComputeStatusOfExpiredPoints(string guildId, string userId)
+    {
+        return new PointsStatus
+        {
+            Total = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, true, DateTime.MinValue, DateTime.MaxValue)
+        };
     }
 }

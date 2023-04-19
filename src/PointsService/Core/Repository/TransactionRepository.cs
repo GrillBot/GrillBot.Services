@@ -67,6 +67,31 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
         }
     }
 
+    public async Task<PointsStatus> ComputePointsStatusAsync(string guildId, string userId, bool expired)
+    {
+        using (CreateCounter())
+        {
+            var endOfDay = new TimeSpan(0, 23, 59, 59, 999);
+            var now = DateTime.UtcNow;
+            var endOfToday = now.Date.Add(endOfDay);
+
+            var query = GetBaseQuery(guildId, true).Where(o => o.UserId == userId);
+            query = expired ? query.Where(o => o.MergedCount > 0) : query.Where(o => o.MergedCount == 0);
+
+            var dtoQuery = query.GroupBy(o => 1)
+                .Select(transactions => new PointsStatus
+                {
+                    Today = transactions.Where(o => o.CreatedAt >= now.Date && o.CreatedAt <= endOfToday).Sum(o => o.Value),
+                    Total = transactions.Sum(o => o.Value),
+                    MonthBack = transactions.Where(x => x.CreatedAt >= now.AddMonths(-1)).Sum(x => x.Value),
+                    YearBack = transactions.Where(x => x.CreatedAt >= now.AddYears(-1)).Sum(x => x.Value)
+                });
+
+            var result = await dtoQuery.FirstOrDefaultAsync();
+            return result ?? new PointsStatus();
+        }
+    }
+
     public async Task<List<BoardItem>> ComputeLeaderboardAsync(string guildId, int skip, int count, bool simple)
     {
         using (CreateCounter())

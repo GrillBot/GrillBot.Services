@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PointsService.Core.Entity;
@@ -11,9 +12,11 @@ using PointsService.Core.Entity;
 namespace PointsService.Core.Migrations
 {
     [DbContext(typeof(PointsServiceContext))]
-    partial class PointsServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20230419164553_GuildId_Index5")]
+    partial class GuildId_Index5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,9 +113,6 @@ namespace PointsService.Core.Migrations
 
                     b.Property<bool>("PointsDisabled")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("PointsPosition")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id", "GuildId");
 

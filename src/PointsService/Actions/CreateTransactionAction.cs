@@ -2,6 +2,7 @@
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Random;
 using Microsoft.Extensions.Options;
+using PointsService.BackgroundServices;
 using PointsService.Core.Entity;
 using PointsService.Core.Options;
 using PointsService.Core.Repository;
@@ -14,12 +15,14 @@ public class CreateTransactionAction : ApiActionBase
     private PointsServiceRepository Repository { get; }
     private AppOptions Options { get; }
     private IRandomManager RandomManager { get; }
+    private PostProcessingQueue PostProcessingQueue { get; }
 
-    public CreateTransactionAction(PointsServiceRepository repository, IOptions<AppOptions> appOptions, IRandomManager randomManager)
+    public CreateTransactionAction(PointsServiceRepository repository, IOptions<AppOptions> appOptions, IRandomManager randomManager, PostProcessingQueue postProcessingQueue)
     {
         Repository = repository;
         Options = appOptions.Value;
         RandomManager = randomManager;
+        PostProcessingQueue = postProcessingQueue;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -48,6 +51,8 @@ public class CreateTransactionAction : ApiActionBase
         else
             author.LastMessageIncrement = transaction.CreatedAt;
         await Repository.CommitAsync();
+        await PostProcessingQueue.SendRequestAsync(transaction, false);
+
         return new ApiResult(StatusCodes.Status200OK);
     }
 
