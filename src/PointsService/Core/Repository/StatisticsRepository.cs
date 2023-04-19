@@ -17,7 +17,8 @@ public class StatisticsRepository : RepositoryBase<PointsServiceContext>
         {
             { nameof(Context.Channels), await Context.Channels.LongCountAsync() },
             { nameof(Context.Users), await Context.Users.LongCountAsync() },
-            { nameof(Context.Transactions), await Context.Transactions.LongCountAsync() }
+            { nameof(Context.Transactions), await Context.Transactions.LongCountAsync() },
+            { nameof(Context.Leaderboard), await Context.Leaderboard.LongCountAsync() }
         };
     }
 }

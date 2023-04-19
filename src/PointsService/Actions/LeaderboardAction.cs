@@ -16,7 +16,7 @@ public class LeaderboardAction : ApiActionBase
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = (LeaderboardRequest)Parameters[0]!;
-        var items = await Repository.Transaction.ComputeLeaderboardAsync(request.GuildId, request.Skip, request.Count, request.Simple);
+        var items = await Repository.Leaderboard.ReadLeaderboardAsync(request.GuildId, request.Skip, request.Count, request.Simple);
 
         return new ApiResult(StatusCodes.Status200OK, items);
     }

@@ -32,8 +32,12 @@ public class PostProcessingService : BackgroundService
     {
         using var scope = ServiceProvider.CreateScope();
 
-        var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>().ToList();
         var repository = scope.ServiceProvider.GetRequiredService<PointsServiceRepository>();
+        var pendingMigration = await repository.IsPendingMigrationsAsync();
+        while (pendingMigration)
+            pendingMigration = await repository.IsPendingMigrationsAsync();
+
+        var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>().ToList();
         var users = await repository.User.GetUsersAsync();
 
         var now = DateTime.UtcNow;

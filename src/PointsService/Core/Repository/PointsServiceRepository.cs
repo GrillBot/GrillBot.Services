@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core.Managers.Performance;
+using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
 
 namespace PointsService.Core.Repository;
@@ -12,6 +13,7 @@ public class PointsServiceRepository
     public UserRepository User { get; }
     public TransactionRepository Transaction { get; }
     public StatisticsRepository Statistics { get; }
+    public LeaderboardRepository Leaderboard { get; }
 
     public PointsServiceRepository(PointsServiceContext context, ICounterManager counterManager)
     {
@@ -22,6 +24,7 @@ public class PointsServiceRepository
         User = new UserRepository(context, counterManager);
         Transaction = new TransactionRepository(context, counterManager);
         Statistics = new StatisticsRepository(context, counterManager);
+        Leaderboard = new LeaderboardRepository(context, counterManager);
     }
 
     public Task AddAsync<TEntity>(TEntity entity) where TEntity : class
@@ -41,6 +44,14 @@ public class PointsServiceRepository
         using (CounterManager.Create("Repository.Commit"))
         {
             return await Context.SaveChangesAsync();
+        }
+    }
+
+    public async Task<bool> IsPendingMigrationsAsync()
+    {
+        using (CounterManager.Create("Repository.Migrations"))
+        {
+            return (await Context.Database.GetPendingMigrationsAsync()).Any();
         }
     }
 }

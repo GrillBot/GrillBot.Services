@@ -7,7 +7,8 @@ public static class PostProcessingExtensions
     public static IServiceCollection AddPostProcessing(this IServiceCollection services)
     {
         services
-            .AddScoped<PostProcessActionBase, RecalculatePositionAction>();
+            .AddScoped<PostProcessActionBase, RecalculatePositionAction>()
+            .AddScoped<PostProcessActionBase, RecalculateLeaderboardAction>();
 
         return services
             .AddSingleton<PostProcessingQueue>()

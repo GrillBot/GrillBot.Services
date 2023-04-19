@@ -76,70 +76,18 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
             var endOfToday = now.Date.Add(endOfDay);
 
             var query = GetBaseQuery(guildId, true).Where(o => o.UserId == userId);
-            query = expired ? query.Where(o => o.MergedCount > 0) : query.Where(o => o.MergedCount == 0);
 
             var dtoQuery = query.GroupBy(o => 1)
                 .Select(transactions => new PointsStatus
                 {
-                    Today = transactions.Where(o => o.CreatedAt >= now.Date && o.CreatedAt <= endOfToday).Sum(o => o.Value),
+                    Today = transactions.Where(expired ? t => t.MergedCount > 0 : t => t.MergedCount == 0).Where(o => o.CreatedAt >= now.Date && o.CreatedAt <= endOfToday).Sum(o => o.Value),
                     Total = transactions.Sum(o => o.Value),
-                    MonthBack = transactions.Where(x => x.CreatedAt >= now.AddMonths(-1)).Sum(x => x.Value),
-                    YearBack = transactions.Where(x => x.CreatedAt >= now.AddYears(-1)).Sum(x => x.Value)
+                    MonthBack = transactions.Where(expired ? t => t.MergedCount > 0 : t => t.MergedCount == 0).Where(x => x.CreatedAt >= now.AddMonths(-1)).Sum(x => x.Value),
+                    YearBack = transactions.Where(expired ? t => t.MergedCount > 0 : t => t.MergedCount == 0).Where(x => x.CreatedAt >= now.AddYears(-1)).Sum(x => x.Value)
                 });
 
             var result = await dtoQuery.FirstOrDefaultAsync();
             return result ?? new PointsStatus();
-        }
-    }
-
-    public async Task<List<BoardItem>> ComputeLeaderboardAsync(string guildId, int skip, int count, bool simple)
-    {
-        using (CreateCounter())
-        {
-            var endOfDay = new TimeSpan(0, 23, 59, 59, 999);
-            var now = DateTime.UtcNow;
-
-            var query = Context.Transactions.AsNoTracking().Where(o => o.MergedCount == 0 && o.GuildId == guildId);
-            var boardQuery = query.GroupBy(o => o.UserId)
-                .Select(o => new BoardItem
-                {
-                    UserId = o.Key,
-                    Today = simple ? 0 : o.Where(x => x.CreatedAt >= now.Date && x.CreatedAt <= now.Date.Add(endOfDay)).Sum(x => x.Value),
-                    Total = simple ? 0 : o.Sum(x => x.Value),
-                    MonthBack = simple ? 0 : o.Where(x => x.CreatedAt >= now.AddMonths(-1)).Sum(x => x.Value),
-                    YearBack = o.Where(x => x.CreatedAt >= now.AddYears(-1)).Sum(x => x.Value)
-                })
-                .OrderByDescending(o => o.YearBack)
-                .AsQueryable();
-
-            if (skip > 0) boardQuery = boardQuery.Skip(skip);
-            if (count > 0) boardQuery = boardQuery.Take(count);
-
-            return await boardQuery.ToListAsync();
-        }
-    }
-
-    public async Task<int> ComputeLeaderboardTotalItemsCount(string guildId)
-    {
-        using (CreateCounter())
-        {
-            var endOfDay = new TimeSpan(0, 23, 59, 59, 999);
-            var now = DateTime.UtcNow;
-
-            var query = Context.Transactions.AsNoTracking().Where(o => o.MergedCount == 0 && o.GuildId == guildId);
-            var boardQuery = query.GroupBy(o => o.UserId)
-                .Select(o => new BoardItem
-                {
-                    UserId = o.Key,
-                    Today = o.Where(x => x.CreatedAt >= now.Date && x.CreatedAt <= now.Date.Add(endOfDay)).Sum(x => x.Value),
-                    Total = o.Sum(x => x.Value),
-                    MonthBack = o.Where(x => x.CreatedAt >= now.AddMonths(-1)).Sum(x => x.Value),
-                    YearBack = o.Where(x => x.CreatedAt >= now.AddYears(-1)).Sum(x => x.Value)
-                })
-                .OrderByDescending(o => o.YearBack)
-                .AsQueryable();
-
-            return await boardQuery.CountAsync();
         }
     }
 

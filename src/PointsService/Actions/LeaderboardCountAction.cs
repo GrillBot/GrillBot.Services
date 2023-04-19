@@ -15,7 +15,7 @@ public class LeaderboardCountAction : ApiActionBase
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;
-        var result = await Repository.Transaction.ComputeLeaderboardTotalItemsCount(guildId);
+        var result = await Repository.Leaderboard.ComputeLeaderboardCountAsync(guildId);
 
         return new ApiResult(StatusCodes.Status200OK, result);
     }
