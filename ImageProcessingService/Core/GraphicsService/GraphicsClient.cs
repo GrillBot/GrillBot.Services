@@ -8,7 +8,7 @@ public class GraphicsClient : RestServiceBase, IGraphicsClient
 {
     public override string ServiceName => "Graphics";
 
-    public GraphicsClient(ICounterManager counterManager, Func<HttpClient> clientFactory) : base(counterManager, clientFactory)
+    public GraphicsClient(ICounterManager counterManager, IHttpClientFactory httpClientFactory) : base(counterManager, () => httpClientFactory.CreateClient("Graphics"))
     {
     }
 
