@@ -16,7 +16,7 @@ public class RecalculateLeaderboardAction : PostProcessActionBase
         if (request is null)
         {
             var user = GetParameter<User>();
-            if (user is not null)
+            if (user is not null && !await Repository.Leaderboard.HaveLeaderboardRecordAsync(user.GuildId, user.Id))
                 await ProcessUserAsync(user.GuildId, user.Id);
         }
         else

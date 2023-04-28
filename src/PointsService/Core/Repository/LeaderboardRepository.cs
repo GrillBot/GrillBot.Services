@@ -58,4 +58,13 @@ public class LeaderboardRepository : RepositoryBase<PointsServiceContext>
             return await GetBaseQuery(guildId, true).CountAsync();
         }
     }
+
+    public async Task<bool> HaveLeaderboardRecordAsync(string guildId, string userId)
+    {
+        using (CreateCounter())
+        {
+            return await GetBaseQuery(guildId, true)
+                .AnyAsync(o => o.UserId == userId);
+        }
+    }
 }

@@ -18,7 +18,7 @@ public class RecalculatePositionAction : PostProcessActionBase
         if (request is null)
         {
             var user = GetParameter<User>();
-            if (user is not null)
+            if (user is not null && user.PointsPosition == 0)
                 await ProcessUserAsync(user, now, yearBack);
         }
         else
