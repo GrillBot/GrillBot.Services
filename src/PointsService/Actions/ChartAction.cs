@@ -17,11 +17,29 @@ public class ChartAction : ApiActionBase
     {
         var request = (AdminListRequest)Parameters[0]!;
 
-        request.Sort.OrderBy = "Day";
-        request.Sort.Descending = false;
+        request.Sort = null;
         request.MessageId = null;
 
-        var result = await Repository.Transaction.ComputeChartDataAsync(request);
+        if (request.CreatedFrom is null || request.CreatedTo is null)
+        {
+            var range = await Repository.Transaction.ComputeTransactionDateRangeAsync(request);
+
+            request.CreatedTo = range.to;
+            request.CreatedFrom = range.from;
+        }
+
+        var from = DateOnly.FromDateTime(request.CreatedFrom.Value);
+        var to = DateOnly.FromDateTime(request.CreatedTo.Value);
+
+        var result = await Repository.DailyStats.ComputeChartAsync(from, to, request.GuildId, request.UserId);
+        foreach (var item in result)
+        {
+            if (request.OnlyMessages)
+                item.ReactionPoints = 0;
+
+            if (request.OnlyReactions)
+                item.MessagePoints = 0;
+        }
 
         return new ApiResult(StatusCodes.Status200OK, result);
     }

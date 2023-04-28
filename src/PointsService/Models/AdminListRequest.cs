@@ -31,7 +31,7 @@ public class AdminListRequest : IValidatableObject, IQueryableModel<Transaction>
     public string? MessageId { get; set; }
 
     public PaginatedParams Pagination { get; set; } = new();
-    public SortParameters Sort { get; set; } = new();
+    public SortParameters? Sort { get; set; } = new();
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -65,6 +65,9 @@ public class AdminListRequest : IValidatableObject, IQueryableModel<Transaction>
 
     public IQueryable<Transaction> SetSort(IQueryable<Transaction> query)
     {
+        if (Sort is null)
+            return query;
+        
         return Sort.OrderBy switch
         {
             "Value" => Sort.Descending ? query.OrderByDescending(o => o.Value).ThenByDescending(o => o.CreatedAt) : query.OrderBy(o => o.Value).ThenBy(o => o.CreatedAt),

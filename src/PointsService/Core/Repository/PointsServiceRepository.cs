@@ -14,6 +14,7 @@ public class PointsServiceRepository
     public TransactionRepository Transaction { get; }
     public StatisticsRepository Statistics { get; }
     public LeaderboardRepository Leaderboard { get; }
+    public DailyStatsRepository DailyStats { get; }
 
     public PointsServiceRepository(PointsServiceContext context, ICounterManager counterManager)
     {
@@ -25,6 +26,7 @@ public class PointsServiceRepository
         Transaction = new TransactionRepository(context, counterManager);
         Statistics = new StatisticsRepository(context, counterManager);
         Leaderboard = new LeaderboardRepository(context, counterManager);
+        DailyStats = new DailyStatsRepository(context, counterManager);
     }
 
     public Task AddAsync<TEntity>(TEntity entity) where TEntity : class

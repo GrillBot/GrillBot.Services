@@ -91,24 +91,6 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
         }
     }
 
-    public async Task<List<PointsChartItem>> ComputeChartDataAsync(AdminListRequest request)
-    {
-        using (CreateCounter())
-        {
-            var query = CreateQuery(request, true)
-                .GroupBy(o => o.CreatedAt.Date);
-
-            var groupedQuery = query.Select(o => new PointsChartItem
-            {
-                Day = new DateOnly(o.Key.Year, o.Key.Month, o.Key.Day),
-                MessagePoints = o.Where(x => x.ReactionId == "").Sum(x => x.Value),
-                ReactionPoints = o.Where(x => x.ReactionId != "").Sum(x => x.Value)
-            });
-
-            return await groupedQuery.ToListAsync();
-        }
-    }
-
     public async Task<PaginatedResponse<Transaction>> GetAdminListAsync(AdminListRequest request)
     {
         using (CreateCounter())
@@ -151,6 +133,64 @@ public class TransactionRepository : RepositoryBase<PointsServiceContext>
         using (CreateCounter())
         {
             return await GetTransactionsForMergeQuery(expirationDate).ToListAsync();
+        }
+    }
+
+    public async Task<(long messagePoints, long reactionPoints)> ComputeStatsForDay(string guildId, string userId, DateOnly date)
+    {
+        using (CreateCounter())
+        {
+            var dateFrom = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0, DateTimeKind.Utc);
+            var dateTo = new DateTime(date.Year, date.Month, date.Day, 23, 59, 59, DateTimeKind.Utc);
+
+            var query = Context.Transactions.AsNoTracking()
+                .Where(o => o.MergedCount == 0 && o.GuildId == guildId && o.UserId == userId && o.CreatedAt >= dateFrom && o.CreatedAt < dateTo)
+                .GroupBy(o => 1)
+                .Select(o => new
+                {
+                    MessagePoints = o.Where(x => x.ReactionId == "").Sum(x => x.Value),
+                    ReactionPoints = o.Where(x => x.ReactionId != "").Sum(x => x.Value)
+                });
+
+            var item = await query.FirstOrDefaultAsync();
+            return item is null ? (0, 0) : (item.MessagePoints, item.ReactionPoints);
+        }
+    }
+
+    public async Task<List<(DateOnly day, long messagePoints, long reactionPoints)>> ComputeAllDaysStats(string guildId, string userId)
+    {
+        using (CreateCounter())
+        {
+            var query = GetBaseQuery(guildId, true)
+                .Where(o => o.UserId == userId)
+                .GroupBy(o => o.CreatedAt.Date)
+                .Select(o => new
+                {
+                    Day = new DateOnly(o.Key.Year, o.Key.Month, o.Key.Day),
+                    MessagePoints = o.Where(x => x.ReactionId == "").Sum(x => x.Value),
+                    ReactionPoints = o.Where(x => x.ReactionId != "").Sum(x => x.Value)
+                });
+
+            var result = await query.ToListAsync();
+            return result
+                .ConvertAll(o => (o.Day, (long)o.MessagePoints, (long)o.ReactionPoints));
+        }
+    }
+
+    public async Task<(DateTime from, DateTime to)> ComputeTransactionDateRangeAsync(AdminListRequest request)
+    {
+        using (CreateCounter())
+        {
+            var query = CreateQuery(request, true)
+                .GroupBy(o => 1)
+                .Select(o => new
+                {
+                    Min = o.Min(x => x.CreatedAt.Date),
+                    Max = o.Max(x => x.CreatedAt.Date)
+                });
+
+            var data = await query.FirstOrDefaultAsync();
+            return data is null ? (DateTime.UtcNow.Date, DateTime.UtcNow.Date) : (data.Min, data.Max);
         }
     }
 }

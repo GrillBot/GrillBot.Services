@@ -8,7 +8,8 @@ public static class PostProcessingExtensions
     {
         services
             .AddScoped<PostProcessActionBase, RecalculatePositionAction>()
-            .AddScoped<PostProcessActionBase, RecalculateLeaderboardAction>();
+            .AddScoped<PostProcessActionBase, RecalculateLeaderboardAction>()
+            .AddScoped<PostProcessActionBase, CalculateDailyStatsAction>();
 
         return services
             .AddSingleton<PostProcessingQueue>()
