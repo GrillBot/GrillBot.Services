@@ -1,4 +1,5 @@
-﻿using PointsService.BackgroundServices.PostProcessAction;
+﻿using GrillBot.Core.Managers.Performance;
+using PointsService.BackgroundServices.PostProcessAction;
 using PointsService.Core.Repository;
 
 namespace PointsService.BackgroundServices;
@@ -7,13 +8,14 @@ public class PostProcessingService : BackgroundService
 {
     private IServiceProvider ServiceProvider { get; }
     private PostProcessingQueue Queue { get; }
+    private ICounterManager CounterManager { get; }
 
-    public PostProcessingService(IServiceProvider serviceServiceProvider)
+    public PostProcessingService(IServiceProvider serviceProvider)
     {
-        Queue = serviceServiceProvider.GetRequiredService<PostProcessingQueue>();
-        ServiceProvider = serviceServiceProvider;
+        Queue = serviceProvider.GetRequiredService<PostProcessingQueue>();
+        CounterManager = serviceProvider.GetRequiredService<ICounterManager>();
+        ServiceProvider = serviceProvider;
     }
-
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -41,29 +43,35 @@ public class PostProcessingService : BackgroundService
         var users = await repository.User.GetUsersAsync();
 
         var now = DateTime.UtcNow;
-        foreach (var user in users)
+        foreach (var action in actions)
         {
-            foreach (var action in actions)
+            foreach (var user in users)
             {
-                await action
-                    .SetParameters(user, now)
-                    .ProcessAsync();
+                using (CounterManager.Create($"BackgroundService.{action.GetType().Name}"))
+                {
+                    await action
+                        .SetParameters(user, now)
+                        .ProcessAsync();
+                }
             }
         }
 
         await repository.CommitAsync();
     }
 
-    private static async Task ProcessRequestAsync(IServiceScope scope, PostProcessRequest request)
+    private async Task ProcessRequestAsync(IServiceScope scope, PostProcessRequest request)
     {
         var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>().ToList();
         var now = DateTime.UtcNow;
 
         foreach (var action in actions)
         {
-            await action
-                .SetParameters(request, now)
-                .ProcessAsync();
+            using (CounterManager.Create($"BackgroundService.{action.GetType().Name}"))
+            {
+                await action
+                    .SetParameters(request, now)
+                    .ProcessAsync();
+            }
         }
     }
 }
