@@ -1,6 +1,7 @@
 ﻿using GrillBot.Core;
 using GrillBot.Core.Extensions;
 using ImageProcessingService.Actions;
+using ImageProcessingService.Caching;
 using ImageProcessingService.Core.GraphicsService;
 using ImageProcessingService.Core.Options;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -15,6 +16,7 @@ public static class CoreExtensions
             .AddDiagnostic()
             .AddCoreManagers()
             .AddFakeDiscordClient(ServiceLifetime.Singleton)
+            .AddCacheServices()
             .AddControllers(c => c.RegisterCoreFilter());
 
         // HealthChecks
