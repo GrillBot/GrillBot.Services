@@ -1,5 +1,6 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using ImageMagick;
+using ImageProcessingService.Caching;
 using ImageProcessingService.Core.GraphicsService;
 using ImageProcessingService.Core.GraphicsService.Models.Chart;
 using ImageProcessingService.Models;
@@ -10,17 +11,23 @@ namespace ImageProcessingService.Actions;
 public class ChartAction : ApiActionBase
 {
     private IGraphicsClient GraphicsClient { get; }
+    private ChartCache Cache { get; }
 
-    public ChartAction(IGraphicsClient graphicsClient)
+    public ChartAction(IGraphicsClient graphicsClient, ChartCache cache)
     {
         GraphicsClient = graphicsClient;
+        Cache = cache;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = (ChartRequest)Parameters[0]!;
-        var images = new List<MagickImage>();
 
+        var cacheItem = await Cache.GetByChartRequestAsync(request);
+        if (cacheItem is not null)
+            return new ApiResult(StatusCodes.Status200OK, new FileContentResult(cacheItem.Image, "image/png"));
+
+        var images = new List<MagickImage>();
         try
         {
             foreach (var chartRequest in request.Requests)
@@ -30,6 +37,8 @@ public class ChartAction : ApiActionBase
             }
 
             var mergedChart = MergeChartsAndGetData(images, request.Requests);
+
+            await Cache.WriteByChartRequestAsync(request, mergedChart);
             return new ApiResult(StatusCodes.Status200OK, new FileContentResult(mergedChart, "image/png"));
         }
         finally

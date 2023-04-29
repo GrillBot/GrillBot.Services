@@ -8,4 +8,16 @@ public class ChartOptions
     public string Type { get; set; } = "line";
     public string LegendPosition { get; set; } = null!;
     public int? PointsRadius { get; set; }
+
+    public IEnumerable<object> GetAtomicValues()
+    {
+        yield return Width;
+        yield return Height;
+        yield return BackgroundColor;
+        yield return Type;
+        yield return LegendPosition;
+
+        if (PointsRadius is not null)
+            yield return PointsRadius;
+    }
 }

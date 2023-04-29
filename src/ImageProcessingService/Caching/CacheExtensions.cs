@@ -1,4 +1,6 @@
-﻿namespace ImageProcessingService.Caching;
+﻿using ImageProcessingService.Caching.Models;
+
+namespace ImageProcessingService.Caching;
 
 public static class CacheExtensions
 {
@@ -6,10 +8,10 @@ public static class CacheExtensions
     {
         services.AddMemoryCache();
 
-        services
+        return services
             .AddScoped<PeepoCache>()
             .AddScoped<PointsCache>()
-            .AddScoped<WithoutAccidentCache>();
-        return services;
+            .AddScoped<WithoutAccidentCache>()
+            .AddScoped<ChartCache>();
     }
 }
