@@ -5,6 +5,7 @@ public static class ActionExtensions
     public static IServiceCollection AddActions(this IServiceCollection services)
     {
         return services
-            .AddScoped<PeepoLoveAction>();
+            .AddScoped<PeepoLoveAction>()
+            .AddScoped<PeepoAngryAction>();
     }
 }
