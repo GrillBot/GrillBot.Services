@@ -17,14 +17,16 @@ public class CalculateDailyStatsAction : PostProcessActionBase
         {
             var user = GetParameter<User>();
             if (user is not null)
+            {
                 await ComputeFullStatsAsync(user);
+                await Repository.CommitAsync();
+            }
         }
         else
         {
             await ComputeStatsForDayAsync(request);
+            await Repository.CommitAsync();
         }
-
-        await Repository.CommitAsync();
     }
 
     private async Task ComputeFullStatsAsync(User user)
