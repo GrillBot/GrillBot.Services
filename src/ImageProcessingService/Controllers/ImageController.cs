@@ -27,4 +27,8 @@ public class ImageController : ControllerBase
     [HttpPost("without-accident")]
     public Task<IActionResult> CreateWithoutAccidentImageAsync([Required, FromBody] WithoutAccidentImageRequest request)
         => ProcessAsync<WithoutAccidentAction>(request);
+
+    [HttpPost("chart")]
+    public Task<IActionResult> CreateChartImageAsync([Required, FromBody] ChartRequest request)
+        => ProcessAsync<ChartAction>(request);
 }

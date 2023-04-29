@@ -8,6 +8,7 @@ public static class ActionExtensions
             .AddScoped<PeepoLoveAction>()
             .AddScoped<PeepoAngryAction>()
             .AddScoped<PointsAction>()
-            .AddScoped<WithoutAccidentAction>();
+            .AddScoped<WithoutAccidentAction>()
+            .AddScoped<ChartAction>();
     }
 }
