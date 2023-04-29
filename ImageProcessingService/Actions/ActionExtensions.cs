@@ -6,6 +6,7 @@ public static class ActionExtensions
     {
         return services
             .AddScoped<PeepoLoveAction>()
-            .AddScoped<PeepoAngryAction>();
+            .AddScoped<PeepoAngryAction>()
+            .AddScoped<PointsAction>();
     }
 }

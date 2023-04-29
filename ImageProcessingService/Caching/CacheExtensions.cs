@@ -7,7 +7,8 @@ public static class CacheExtensions
         services.AddMemoryCache();
 
         services
-            .AddScoped<PeepoCache>();
+            .AddScoped<PeepoCache>()
+            .AddScoped<PointsCache>();
         return services;
     }
 }

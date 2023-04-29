@@ -16,6 +16,6 @@ public class AvatarInfo : IValidatableObject
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (Type != "gif" && Type != "png")
-            yield return new ValidationResult("Only gifs and png avatars are allowed.");
+            yield return new ValidationResult("Only gifs and png avatars are allowed.", new[] { nameof(Type) });
     }
 }

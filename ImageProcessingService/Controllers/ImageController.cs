@@ -19,4 +19,8 @@ public class ImageController : ControllerBase
     [HttpPost("peepoangry")]
     public Task<IActionResult> CreatePeepoangryImageAsync([Required, FromBody] PeepoRequest request)
         => ProcessAsync<PeepoAngryAction>(request);
+
+    [HttpPost("points")]
+    public Task<IActionResult> CreatePointsImageAsync([Required, FromBody] PointsRequest request)
+        => ProcessAsync<PointsAction>(request);
 }
