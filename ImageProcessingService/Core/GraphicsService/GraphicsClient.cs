@@ -20,7 +20,7 @@ public class GraphicsClient : RestServiceBase, IGraphicsClient
         );
     }
 
-    public async Task<byte[]> CreateWithoutAccidentImage(WithoutAccidentRequestData request)
+    public async Task<byte[]> CreateWithoutAccidentImageAsync(WithoutAccidentRequestData request)
     {
         return await ProcessRequestAsync(
             () => HttpClient.PostAsJsonAsync("image/without-accident", request),

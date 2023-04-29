@@ -8,7 +8,8 @@ public static class CacheExtensions
 
         services
             .AddScoped<PeepoCache>()
-            .AddScoped<PointsCache>();
+            .AddScoped<PointsCache>()
+            .AddScoped<WithoutAccidentCache>();
         return services;
     }
 }

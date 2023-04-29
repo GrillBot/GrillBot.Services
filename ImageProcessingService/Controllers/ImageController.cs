@@ -23,4 +23,8 @@ public class ImageController : ControllerBase
     [HttpPost("points")]
     public Task<IActionResult> CreatePointsImageAsync([Required, FromBody] PointsRequest request)
         => ProcessAsync<PointsAction>(request);
+
+    [HttpPost("without-accident")]
+    public Task<IActionResult> CreateWithoutAccidentImageAsync([Required, FromBody] WithoutAccidentImageRequest request)
+        => ProcessAsync<WithoutAccidentAction>(request);
 }

@@ -9,6 +9,7 @@ public class PeepoRequest
     /// Guild upload limit in bytes.
     /// </summary>
     [Required]
+    [Range(0, long.MaxValue)]
     public long GuildUploadLimit { get; set; }
 
     [Required]
