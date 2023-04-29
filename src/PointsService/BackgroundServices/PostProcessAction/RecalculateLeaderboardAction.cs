@@ -15,16 +15,18 @@ public class RecalculateLeaderboardAction : PostProcessActionBase
 
         if (request is null)
         {
-            var user = GetParameter<User>();
-            if (user is not null && !await Repository.Leaderboard.HaveLeaderboardRecordAsync(user.GuildId, user.Id))
-                await ProcessUserAsync(user.GuildId, user.Id);
+            var users = GetParameter<List<User>>();
+            if (users is not null)
+            {
+                await ProcessAllAsync(users);
+                await Repository.CommitAsync();
+            }
         }
         else
         {
             await ProcessUserAsync(request.Transaction.GuildId, request.Transaction.UserId);
+            await Repository.CommitAsync();
         }
-
-        await Repository.CommitAsync();
     }
 
     private async Task ProcessUserAsync(string guildId, string userId)
@@ -48,5 +50,16 @@ public class RecalculateLeaderboardAction : PostProcessActionBase
 
         if (isNewItem)
             await Repository.AddAsync(item);
+    }
+
+    private async Task ProcessAllAsync(IReadOnlyCollection<User> users)
+    {
+        foreach (var perGuild in users.GroupBy(o => o.GuildId))
+        {
+            var usersWithLeaderboard = await Repository.Leaderboard.GetUsersWithLeaderboardAsync(perGuild.Key);
+
+            foreach (var user in users.Where(o => !usersWithLeaderboard.Contains(o.Id)))
+                await ProcessUserAsync(user.GuildId, user.Id);
+        }
     }
 }

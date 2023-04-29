@@ -41,10 +41,17 @@ public class PostProcessingService : BackgroundService
 
         var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>().ToList();
         var users = await repository.User.GetUsersAsync();
-
         var now = DateTime.UtcNow;
+
         foreach (var action in actions)
         {
+            using (CounterManager.Create($"BackgroundService.{action.GetType().Name}"))
+            {
+                await action
+                    .SetParameters(users, now)
+                    .ProcessAsync();
+            }
+
             foreach (var user in users)
             {
                 using (CounterManager.Create($"BackgroundService.{action.GetType().Name}"))

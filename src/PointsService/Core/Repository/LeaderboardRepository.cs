@@ -59,12 +59,28 @@ public class LeaderboardRepository : RepositoryBase<PointsServiceContext>
         }
     }
 
-    public async Task<bool> HaveLeaderboardRecordAsync(string guildId, string userId)
+    public async Task<int> ComputePositionAsync(string guildId, string userId)
     {
         using (CreateCounter())
         {
-            return await GetBaseQuery(guildId, true)
-                .AnyAsync(o => o.UserId == userId);
+            var data = await GetBaseQuery(guildId, true)
+                .OrderByDescending(o => o.YearBack)
+                .Select(o => o.UserId)
+                .ToListAsync();
+
+            return data.FindIndex(o => o == userId) + 1;
+        }
+    }
+
+    public async Task<HashSet<string>> GetUsersWithLeaderboardAsync(string guildId)
+    {
+        using (CreateCounter())
+        {
+            var data = await GetBaseQuery(guildId, true)
+                .Select(o => o.UserId)
+                .ToListAsync();
+
+            return data.ToHashSet();
         }
     }
 }

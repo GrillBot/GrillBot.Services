@@ -12,28 +12,46 @@ public class RecalculatePositionAction : PostProcessActionBase
     public override async Task ProcessAsync()
     {
         var request = GetParameter<PostProcessRequest>();
-        var now = GetParameter<DateTime>().ToUniversalTime();
-        var yearBack = now.AddYears(-1);
 
         if (request is null)
         {
-            var user = GetParameter<User>();
-            if (user is not null && user.PointsPosition == 0)
-                await ProcessUserAsync(user, now, yearBack);
+            var users = GetParameter<List<User>>();
+            if (users is not null)
+            {
+                await ProcessAllAsync(users);
+                await Repository.CommitAsync();
+            }
         }
         else
         {
             var user = await Repository.User.FindUserAsync(request.Transaction.GuildId, request.Transaction.UserId);
             if (user is not null)
-                await ProcessUserAsync(user, now, yearBack);
+            {
+                await ProcessUserAsync(user);
+                await Repository.CommitAsync();
+            }
         }
-
-        await Repository.CommitAsync();
     }
 
-    private async Task ProcessUserAsync(User user, DateTime now, DateTime yearBack)
+    private async Task ProcessUserAsync(User user)
     {
-        var currentStatus = await Repository.Transaction.ComputePointsStatusAsync(user.GuildId, user.Id, false, yearBack, now);
-        user.PointsPosition = await Repository.Transaction.ComputePositionAsync(user.GuildId, currentStatus, yearBack);
+        user.PointsPosition = await Repository.Leaderboard.ComputePositionAsync(user.GuildId, user.Id);
+    }
+
+    private async Task ProcessAllAsync(IEnumerable<User> users)
+    {
+        foreach (var perGuild in users.GroupBy(o => o.GuildId))
+        {
+            var leaderboard = await Repository.Leaderboard.ReadLeaderboardAsync(perGuild.Key, 0, 0, true);
+
+            foreach (var user in perGuild)
+            {
+                var position = leaderboard.FindIndex(o => o.UserId == user.Id);
+                if (position == -1)
+                    user.PointsPosition = leaderboard.Count;
+                else
+                    user.PointsPosition = position + 1;
+            }
+        }
     }
 }
