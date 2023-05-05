@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PointsService", "src\Points
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessingService", "src\ImageProcessingService\ImageProcessingService.csproj", "{2F8ADA3C-DE0B-4227-BD4E-2F4B7E74B586}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuditLogService", "AuditLogService\AuditLogService.csproj", "{D857B0A3-5D82-43DA-BC7B-ACE3CFB33999}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{2F8ADA3C-DE0B-4227-BD4E-2F4B7E74B586}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F8ADA3C-DE0B-4227-BD4E-2F4B7E74B586}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F8ADA3C-DE0B-4227-BD4E-2F4B7E74B586}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D857B0A3-5D82-43DA-BC7B-ACE3CFB33999}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D857B0A3-5D82-43DA-BC7B-ACE3CFB33999}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D857B0A3-5D82-43DA-BC7B-ACE3CFB33999}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D857B0A3-5D82-43DA-BC7B-ACE3CFB33999}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

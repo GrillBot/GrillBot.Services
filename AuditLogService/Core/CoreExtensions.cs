@@ -1,0 +1,43 @@
+﻿using AuditLogService.Actions;
+using AuditLogService.Core.Entity;
+using AuditLogService.Core.Options;
+using AuditLogService.Core.Providers;
+using GrillBot.Core;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
+
+namespace AuditLogService.Core;
+
+public static class CoreExtensions
+{
+    public static void AddCoreServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("Default")!;
+
+        services
+            .AddDatabaseContext<AuditLogServiceContext>(b => b.UseNpgsql(connectionString));
+
+        services
+            .AddDiagnostic()
+            .AddCoreManagers()
+            .AddStatisticsProvider<StatisticsProvider>()
+            .AddFakeDiscordClient(ServiceLifetime.Singleton)
+            .AddControllers(c => c.RegisterCoreFilter());
+
+        // HealthChecks
+        services
+            .AddHealthChecks()
+            .AddNpgSql(connectionString);
+
+        // OpenAPI
+        services
+            .AddEndpointsApiExplorer()
+            .AddSwaggerGen();
+
+        services.Configure<RouteOptions>(opt => opt.LowercaseUrls = true);
+        services.Configure<ForwardedHeadersOptions>(opt => opt.ForwardedHeaders = ForwardedHeaders.All);
+        services.Configure<AppOptions>(configuration);
+
+        services.AddActions();
+    }
+}
