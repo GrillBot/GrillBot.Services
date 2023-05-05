@@ -28,12 +28,12 @@ public class AuditLogServiceContext : DbContext
             b.HasOne(o => o.MessageEdited).WithOne(o => o.LogItem).HasForeignKey<MessageEdited>(o => o.LogItemId);
             b.HasOne(o => o.OverwriteCreated).WithOne(o => o.LogItem).HasForeignKey<OverwriteCreated>(o => o.LogItemId);
             b.HasOne(o => o.OverwriteUpdated).WithOne(o => o.LogItem).HasForeignKey<OverwriteUpdated>(o => o.LogItemId);
-            b.HasOne(o => o.OverwriteDeleted).WithOne(o => o.LogItem).HasForeignKey<OverwriteUpdated>(o => o.LogItemId);
-            b.HasOne(o => o.UserJoined).WithOne(o => o.LogItem).HasForeignKey<OverwriteUpdated>(o => o.LogItemId);
-            b.HasOne(o => o.UserLeft).WithOne(o => o.LogItem).HasForeignKey<OverwriteUpdated>(o => o.LogItemId);
-            b.HasOne(o => o.InteractionCommand).WithOne(o => o.LogItem).HasForeignKey<OverwriteUpdated>(o => o.LogItemId);
-            b.HasOne(o => o.ThreadDeleted).WithOne(o => o.LogItem).HasForeignKey<OverwriteUpdated>(o => o.LogItemId);
-            b.HasOne(o => o.MemberUpdated).WithOne(o => o.LogItem).HasForeignKey<OverwriteUpdated>(o => o.LogItemId);
+            b.HasOne(o => o.OverwriteDeleted).WithOne(o => o.LogItem).HasForeignKey<OverwriteDeleted>(o => o.LogItemId);
+            b.HasOne(o => o.UserJoined).WithOne(o => o.LogItem).HasForeignKey<UserJoined>(o => o.LogItemId);
+            b.HasOne(o => o.UserLeft).WithOne(o => o.LogItem).HasForeignKey<UserLeft>(o => o.LogItemId);
+            b.HasOne(o => o.InteractionCommand).WithOne(o => o.LogItem).HasForeignKey<InteractionCommand>(o => o.LogItemId);
+            b.HasOne(o => o.ThreadDeleted).WithOne(o => o.LogItem).HasForeignKey<ThreadDeleted>(o => o.LogItemId);
+            b.HasOne(o => o.MemberUpdated).WithOne(o => o.LogItem).HasForeignKey<MemberUpdated>(o => o.LogItemId);
         });
 
         modelBuilder.Entity<ChannelCreated>(b => b.HasOne(o => o.ChannelInfo).WithMany().HasForeignKey(o => o.ChannelInfoId));
