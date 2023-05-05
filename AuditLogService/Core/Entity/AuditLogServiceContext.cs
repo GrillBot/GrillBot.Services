@@ -33,6 +33,7 @@ public class AuditLogServiceContext : DbContext
             b.HasOne(o => o.UserLeft).WithOne(o => o.LogItem).HasForeignKey<OverwriteUpdated>(o => o.LogItemId);
             b.HasOne(o => o.InteractionCommand).WithOne(o => o.LogItem).HasForeignKey<OverwriteUpdated>(o => o.LogItemId);
             b.HasOne(o => o.ThreadDeleted).WithOne(o => o.LogItem).HasForeignKey<OverwriteUpdated>(o => o.LogItemId);
+            b.HasOne(o => o.MemberUpdated).WithOne(o => o.LogItem).HasForeignKey<OverwriteUpdated>(o => o.LogItemId);
         });
 
         modelBuilder.Entity<ChannelCreated>(b => b.HasOne(o => o.ChannelInfo).WithMany().HasForeignKey(o => o.ChannelInfoId));
@@ -62,6 +63,12 @@ public class AuditLogServiceContext : DbContext
 
         modelBuilder.Entity<ThreadDeleted>(b => b.HasOne(o => o.ThreadInfo).WithMany().HasForeignKey(o => o.ThreadInfoId));
         modelBuilder.Entity<ThreadUpdated>(b =>
+        {
+            b.HasOne(o => o.Before).WithMany().HasForeignKey(o => o.BeforeId);
+            b.HasOne(o => o.After).WithMany().HasForeignKey(o => o.AfterId);
+        });
+
+        modelBuilder.Entity<MemberUpdated>(b =>
         {
             b.HasOne(o => o.Before).WithMany().HasForeignKey(o => o.BeforeId);
             b.HasOne(o => o.After).WithMany().HasForeignKey(o => o.AfterId);
@@ -96,4 +103,6 @@ public class AuditLogServiceContext : DbContext
     public DbSet<Unban> Unbans => Set<Unban>();
     public DbSet<UserJoined> UserJoinedItems => Set<UserJoined>();
     public DbSet<UserLeft> UserLeftItems => Set<UserLeft>();
+    public DbSet<MemberInfo> MemberInfos => Set<MemberInfo>();
+    public DbSet<MemberUpdated> MemberUpdatedItems => Set<MemberUpdated>();
 }

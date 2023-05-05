@@ -45,6 +45,8 @@ public class StatisticsProvider : IStatisticsProvider
             { nameof(Context.Unbans), await Context.Unbans.LongCountAsync() },
             { nameof(Context.UserJoinedItems), await Context.UserJoinedItems.LongCountAsync() },
             { nameof(Context.UserLeftItems), await Context.UserLeftItems.LongCountAsync() },
+            { nameof(Context.MemberUpdatedItems), await Context.MemberUpdatedItems.LongCountAsync() },
+            { nameof(Context.MemberInfos), await Context.MemberInfos.LongCountAsync() },
         };
     }
 }

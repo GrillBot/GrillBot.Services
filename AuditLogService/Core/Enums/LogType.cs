@@ -37,7 +37,7 @@ public enum LogType
     /// <summary>
     /// Emote deleted.
     /// </summary>
-    EmojiDeleted = 8,
+    EmoteDeleted = 8,
 
     /// <summary>
     /// Channel overwrite created.

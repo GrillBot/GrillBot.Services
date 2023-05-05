@@ -52,6 +52,7 @@ public class LogItem
     public InteractionCommand? InteractionCommand { get; set; }
     public ThreadDeleted? ThreadDeleted { get; set; }
     public ThreadUpdated? ThreadUpdated { get; set; }
+    public MemberUpdated? MemberUpdated { get; set; }
 
     #endregion
 
