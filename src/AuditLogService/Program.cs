@@ -1,4 +1,5 @@
 using AuditLogService.Core;
+using AuditLogService.Core.Discord;
 using AuditLogService.Core.Entity;
 using GrillBot.Core;
 
@@ -7,7 +8,10 @@ builder.WebHost.ConfigureKestrel(opt => opt.AddServerHeader = false);
 builder.Services.AddCoreServices(builder.Configuration);
 
 var app = builder.Build();
+
+app.Services.GetRequiredService<DiscordLogManager>();
 await app.InitDatabaseAsync<AuditLogServiceContext>();
+await app.Services.GetRequiredService<DiscordManager>().LoginAsync();
 
 app.Use((context, next) =>
 {

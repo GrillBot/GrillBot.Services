@@ -20,6 +20,7 @@ public class LogRequest : IValidatableObject
     [DiscordId]
     public string? ChannelId { get; set; }
 
+    [Required]
     public LogType Type { get; set; }
 
     public List<FileRequest> Files { get; set; } = new();
@@ -42,6 +43,7 @@ public class LogRequest : IValidatableObject
     public InteractionCommandRequest? InteractionCommand { get; set; }
     public ThreadInfoRequest? ThreadInfo { get; set; }
     public DiffRequest<ThreadInfoRequest>? ThreadUpdated { get; set; }
+    public MemberUpdatedRequest? MemberUpdated { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -72,7 +74,8 @@ public class LogRequest : IValidatableObject
             { LogType.UserLeft, UserLeft },
             { LogType.InteractionCommand, InteractionCommand },
             { LogType.ThreadDeleted, ThreadInfo },
-            { LogType.ThreadUpdated, ThreadUpdated }
+            { LogType.ThreadUpdated, ThreadUpdated },
+            { LogType.MemberUpdated, MemberUpdated }
         };
 
         if (requiredBindings.TryGetValue(Type, out var requestData) && requestData is null)
@@ -80,5 +83,13 @@ public class LogRequest : IValidatableObject
 
         if (requiredBindings.Values.Count(o => o is not null) > 1)
             yield return new ValidationResult("Only one property with data can be setted.");
+
+        var requireGuildTypes = new HashSet<LogType>
+        {
+            LogType.EmoteDeleted
+        };
+
+        if (string.IsNullOrEmpty(GuildId) && requireGuildTypes.Contains(Type))
+            yield return new ValidationResult($"Log type {Type} requires filled GuildId.");
     }
 }

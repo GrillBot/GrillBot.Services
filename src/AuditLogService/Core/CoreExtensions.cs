@@ -1,7 +1,9 @@
 ﻿using AuditLogService.Actions;
+using AuditLogService.Core.Discord;
 using AuditLogService.Core.Entity;
 using AuditLogService.Core.Options;
 using AuditLogService.Core.Providers;
+using AuditLogService.Processors;
 using GrillBot.Core;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +23,6 @@ public static class CoreExtensions
             .AddDiagnostic()
             .AddCoreManagers()
             .AddStatisticsProvider<StatisticsProvider>()
-            .AddFakeDiscordClient(ServiceLifetime.Singleton)
             .AddControllers(c => c.RegisterCoreFilter());
 
         // HealthChecks
@@ -39,5 +40,7 @@ public static class CoreExtensions
         services.Configure<AppOptions>(configuration);
 
         services.AddActions();
+        services.AddProcessors();
+        services.AddDiscord();
     }
 }

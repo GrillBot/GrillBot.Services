@@ -55,6 +55,13 @@ public class LogItem
     public MemberUpdated? MemberUpdated { get; set; }
 
     #endregion
+    
+    #region HelperProperties
+    
+    [NotMapped]
+    public bool CanCreate { get; set; }
+    
+    #endregion
 
     public LogItem()
     {
