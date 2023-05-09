@@ -19,6 +19,10 @@ public class LogRequest : IValidatableObject
     [StringLength(32)]
     [DiscordId]
     public string? ChannelId { get; set; }
+    
+    [StringLength(32)]
+    [DiscordId]
+    public string? DiscordId { get; set; }
 
     [Required]
     public LogType Type { get; set; }
@@ -33,11 +37,8 @@ public class LogRequest : IValidatableObject
     public ChannelInfoRequest? ChannelInfo { get; set; }
     public DiffRequest<ChannelInfoRequest>? ChannelUpdated { get; set; }
     public DiffRequest<GuildInfoRequest>? GuildUpdated { get; set; }
-    public List<MemberRoleUpdated>? RoleUpdates { get; set; }
     public MessageDeletedRequest? MessageDeleted { get; set; }
     public MessageEditedRequest? MessageEdited { get; set; }
-    public OverwriteInfoRequest? OverwriteInfo { get; set; }
-    public DiffRequest<OverwriteInfoRequest>? OverwriteUpdated { get; set; }
     public UserJoinedRequest? UserJoined { get; set; }
     public UserLeftRequest? UserLeft { get; set; }
     public InteractionCommandRequest? InteractionCommand { get; set; }
@@ -64,12 +65,8 @@ public class LogRequest : IValidatableObject
             { LogType.ChannelDeleted, ChannelInfo },
             { LogType.ChannelUpdated, ChannelUpdated },
             { LogType.GuildUpdated, GuildUpdated },
-            { LogType.MemberRoleUpdated, RoleUpdates },
             { LogType.MessageDeleted, MessageDeleted },
             { LogType.MessageEdited, MessageEdited },
-            { LogType.OverwriteCreated, OverwriteInfo },
-            { LogType.OverwriteDeleted, OverwriteInfo },
-            { LogType.OverwriteUpdated, OverwriteUpdated },
             { LogType.UserJoined, UserJoined },
             { LogType.UserLeft, UserLeft },
             { LogType.InteractionCommand, InteractionCommand },

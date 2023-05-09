@@ -3,16 +3,10 @@ using GrillBot.Core.Managers.Performance;
 
 namespace AuditLogService.Core.Discord.Cache;
 
-public sealed class AuditLogCache : IDisposable
+public sealed class AuditLogCache : GuildCacheBase<Dictionary<ActionType, IReadOnlyCollection<IAuditLogEntry>>>
 {
-    private static readonly object Locker = new();
-    private readonly Dictionary<ulong, Dictionary<ActionType, IReadOnlyCollection<IAuditLogEntry>>> _cachedEntries = new();
-
-    private ICounterManager CounterManager { get; }
-
-    public AuditLogCache(ICounterManager counterManager)
+    public AuditLogCache(ICounterManager counterManager) : base(counterManager)
     {
-        CounterManager = counterManager;
     }
 
     public IEnumerable<IAuditLogEntry>? GetAuditLogs(ulong guildId, ActionType type)
@@ -21,7 +15,7 @@ public sealed class AuditLogCache : IDisposable
         {
             lock (Locker)
             {
-                return _cachedEntries.TryGetValue(guildId, out var guildLogs) && guildLogs.TryGetValue(type, out var logs) ? logs : null;
+                return CachedData.TryGetValue(guildId, out var guildLogs) && guildLogs.TryGetValue(type, out var logs) ? logs : null;
             }
         }
     }
@@ -32,25 +26,17 @@ public sealed class AuditLogCache : IDisposable
         {
             lock (Locker)
             {
-                if (!_cachedEntries.ContainsKey(guildId))
-                    _cachedEntries.Add(guildId, new Dictionary<ActionType, IReadOnlyCollection<IAuditLogEntry>>());
+                if (!CachedData.ContainsKey(guildId))
+                    CachedData.Add(guildId, new Dictionary<ActionType, IReadOnlyCollection<IAuditLogEntry>>());
 
-                if (!_cachedEntries[guildId].ContainsKey(type))
-                    _cachedEntries[guildId].Add(type, logs);
+                if (!CachedData[guildId].ContainsKey(type))
+                    CachedData[guildId].Add(type, logs);
                 else
-                    _cachedEntries[guildId][type] = logs;
+                    CachedData[guildId][type] = logs;
             }
         }
     }
 
-    public void Dispose()
-    {
-        lock (Locker)
-        {
-            foreach (var guild in _cachedEntries)
-                guild.Value.Clear();
-
-            _cachedEntries.Clear();
-        }
-    }
+    protected override void DisposeItem(Dictionary<ActionType, IReadOnlyCollection<IAuditLogEntry>> data)
+        => data.Clear();
 }

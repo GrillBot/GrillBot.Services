@@ -12,6 +12,7 @@ public sealed class DiscordManager : IDisposable
     private ICounterManager CounterManager { get; }
 
     private AuditLogCache AuditLogCache { get; }
+    private GuildCache GuildCache { get; }
 
     public DiscordManager(IDiscordClient discordClient, IConfiguration configuration, ICounterManager counterManager)
     {
@@ -20,6 +21,7 @@ public sealed class DiscordManager : IDisposable
         DiscordClient = (DiscordRestClient)discordClient;
 
         AuditLogCache = new AuditLogCache(counterManager);
+        GuildCache = new GuildCache(counterManager);
     }
 
     public async Task LoginAsync()
@@ -34,9 +36,16 @@ public sealed class DiscordManager : IDisposable
 
     public async Task<IGuild> GetGuildAsync(ulong guildId)
     {
+        var cachedGuild = GuildCache.GetGuild(guildId);
+        if (cachedGuild is not null)
+            return cachedGuild;
+
         using (CounterManager.Create("Discord.API.Guild"))
         {
-            return await DiscordClient.GetGuildAsync(guildId);
+            var guild = await DiscordClient.GetGuildAsync(guildId);
+
+            GuildCache.StoreGuild(guildId, guild);
+            return guild;
         }
     }
 
@@ -63,5 +72,6 @@ public sealed class DiscordManager : IDisposable
     public void Dispose()
     {
         AuditLogCache.Dispose();
+        GuildCache.Dispose();
     }
 }

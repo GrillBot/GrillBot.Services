@@ -1,24 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using GrillBot.Core.Validation;
 
 namespace AuditLogService.Models.Request;
 
 public class MemberRoleUpdated
 {
+    /// <summary>
+    /// ID of audit log record in the discord.
+    /// </summary>
     [Required]
     [StringLength(32)]
-    public string UserId { get; set; } = null!;
-
-    [Required]
-    [StringLength(32)]
-    public string RoleId { get; set; } = null!;
-
-    [Required]
-    public string RoleName { get; set; } = null!;
-
-    [Required]
-    [StringLength(32)]
-    public string RoleColor { get; set; } = null!;
-
-    [Required]
-    public bool IsAdded { get; set; }
+    [DiscordId]
+    public string DiscordLogId { get; set; } = null!;
 }

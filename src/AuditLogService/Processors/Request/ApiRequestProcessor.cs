@@ -1,13 +1,13 @@
-﻿using AuditLogService.Core.Discord;
-using AuditLogService.Core.Entity;
+﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
 using AuditLogService.Models.Request;
+using AuditLogService.Processors.Request.Abstractions;
 
 namespace AuditLogService.Processors.Request;
 
 public class ApiRequestProcessor : RequestProcessorBase
 {
-    public ApiRequestProcessor(DiscordManager discordManager) : base(discordManager)
+    public ApiRequestProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }
     

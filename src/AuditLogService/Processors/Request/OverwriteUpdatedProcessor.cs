@@ -1,7 +1,6 @@
-﻿using AuditLogService.Core.Discord;
-using AuditLogService.Core.Entity;
-using AuditLogService.Core.Enums;
+﻿using AuditLogService.Core.Entity;
 using AuditLogService.Models.Request;
+using AuditLogService.Processors.Request.Abstractions;
 using Discord;
 using Discord.Rest;
 
@@ -9,16 +8,13 @@ namespace AuditLogService.Processors.Request;
 
 public class OverwriteUpdatedProcessor : OverwriteProcessorBase
 {
-    public OverwriteUpdatedProcessor(DiscordManager discordManager, AuditLogServiceContext context) : base(discordManager, context)
+    public OverwriteUpdatedProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }
 
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
-        if (entity.Type != LogType.OverwriteUpdated)
-            return;
-
-        var logItem = await FindAuditLogAsync(entity.GuildId!, entity.ChannelId!, ActionType.OverwriteUpdated);
+        var logItem = await FindAuditLogAsync(request);
         if (logItem is null)
         {
             entity.CanCreate = false;
@@ -31,6 +27,7 @@ public class OverwriteUpdatedProcessor : OverwriteProcessorBase
 
         entity.DiscordId = logItem.Id.ToString();
         entity.UserId = logItem.User.Id.ToString();
+        entity.CreatedAt = logItem.CreatedAt.UtcDateTime;
         entity.OverwriteUpdated = new OverwriteUpdated
         {
             After = after,

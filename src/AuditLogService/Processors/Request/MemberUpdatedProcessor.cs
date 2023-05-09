@@ -1,7 +1,6 @@
-﻿using AuditLogService.Core.Discord;
-using AuditLogService.Core.Entity;
-using AuditLogService.Core.Enums;
+﻿using AuditLogService.Core.Entity;
 using AuditLogService.Models.Request;
+using AuditLogService.Processors.Request.Abstractions;
 using Discord;
 using Discord.Rest;
 using GrillBot.Core.Extensions;
@@ -11,15 +10,12 @@ namespace AuditLogService.Processors.Request;
 
 public class MemberUpdatedProcessor : RequestProcessorBase
 {
-    public MemberUpdatedProcessor(DiscordManager discordManager) : base(discordManager)
+    public MemberUpdatedProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }
 
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
-        if (entity.Type != LogType.MemberUpdated)
-            return;
-
         if (request.MemberUpdated!.IsApiUpdate())
         {
             var before = CreateMemberInfo(request.MemberUpdated.UserId, request.MemberUpdated.SelfUnverifyMinimalTime!.Before, request.MemberUpdated.Flags!.Before);

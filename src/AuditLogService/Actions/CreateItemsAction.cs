@@ -1,19 +1,20 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Models.Request;
-using AuditLogService.Processors.Request;
+using AuditLogService.Processors;
 using GrillBot.Core.Infrastructure.Actions;
+using File = AuditLogService.Core.Entity.File;
 
 namespace AuditLogService.Actions;
 
 public class CreateItemsAction : ApiActionBase
 {
     private AuditLogServiceContext Context { get; }
-    private IEnumerable<RequestProcessorBase> RequestProcessors { get; }
+    private RequestProcessorFactory RequestProcessorFactory { get; }
 
-    public CreateItemsAction(AuditLogServiceContext context, IEnumerable<RequestProcessorBase> requestProcessors)
+    public CreateItemsAction(AuditLogServiceContext context, RequestProcessorFactory requestProcessorFactory)
     {
         Context = context;
-        RequestProcessors = requestProcessors;
+        RequestProcessorFactory = requestProcessorFactory;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -45,14 +46,23 @@ public class CreateItemsAction : ApiActionBase
             CanCreate = true
         };
 
-        foreach (var processor in RequestProcessors)
-        {
-            await processor.ProcessAsync(entity, request);
+        foreach (var file in request.Files.Select(ConvertFileRequest))
+            entity.Files.Add(file);
 
-            // If someone block creation, is not required to run next processors. This entity will not be created in the database.
-            if (!entity.CanCreate) break;
-        }
+        var requestProcessor = RequestProcessorFactory.Create(entity.Type);
+        await requestProcessor.ProcessAsync(entity, request);
 
         return entity;
+    }
+    
+    private static File ConvertFileRequest(FileRequest request)
+    {
+        return new File
+        {
+            Extension = request.Extension,
+            Id = Guid.NewGuid(),
+            Filename = request.Filename,
+            Size = request.Size
+        };
     }
 }

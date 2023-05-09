@@ -1,17 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Discord;
+using GrillBot.Core.Validation;
 
 namespace AuditLogService.Models.Request;
 
 public class OverwriteInfoRequest
 {
-    [Required]
-    public PermissionTarget Target { get; set; }
-
+    /// <summary>
+    /// ID of audit log record in the discord.
+    /// </summary>
     [Required]
     [StringLength(32)]
-    public string TargetId { get; set; } = null!;
-
-    public string AllowValue { get; set; } = "0";
-    public string DenyValue { get; set; } = "0";
+    [DiscordId]
+    public string DiscordLogId { get; set; } = null!;
 }

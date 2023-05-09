@@ -1,7 +1,7 @@
-﻿using AuditLogService.Core.Discord;
-using AuditLogService.Core.Entity;
+﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
 using AuditLogService.Models.Request;
+using AuditLogService.Processors.Request.Abstractions;
 using Discord;
 using Discord.Rest;
 using GrillBot.Core.Extensions;
@@ -10,7 +10,7 @@ namespace AuditLogService.Processors.Request;
 
 public class DeletedEmoteProcessor : RequestProcessorBase
 {
-    public DeletedEmoteProcessor(DiscordManager discordManager) : base(discordManager)
+    public DeletedEmoteProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }
 
