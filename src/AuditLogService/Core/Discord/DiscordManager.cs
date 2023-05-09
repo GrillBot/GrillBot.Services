@@ -69,6 +69,16 @@ public sealed class DiscordManager : IDisposable
         }
     }
 
+    public async Task<IBan?> GetBanAsync(ulong guildId, ulong userId)
+    {
+        var guild = await GetGuildAsync(guildId);
+
+        using (CounterManager.Create("Discord.API.Ban"))
+        {
+            return await guild.GetBanAsync(userId);
+        }
+    }
+
     public void Dispose()
     {
         AuditLogCache.Dispose();

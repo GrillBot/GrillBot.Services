@@ -69,5 +69,5 @@ public class GuildUpdatedProcessor : RequestProcessorBase
     }
 
     protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
-        => entry.CreatedAt.LocalDateTime >= DateTime.Now.AddMinutes(-5);
+        => entry.CreatedAt.UtcDateTime >= DateTime.UtcNow.AddMinutes(-5);
 }
