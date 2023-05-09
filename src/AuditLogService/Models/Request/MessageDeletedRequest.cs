@@ -13,5 +13,5 @@ public class MessageDeletedRequest
 
     public string? Content { get; set; }
 
-    public string? EmbedJson { get; set; }
+    public List<string> Embeds { get; set; } = new();
 }
