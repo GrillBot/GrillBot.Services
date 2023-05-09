@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Core.Enums;
 using AuditLogService.Models.Request;
 using AuditLogService.Processors.Request.Abstractions;
 using Discord;
@@ -17,11 +16,7 @@ public class ChannelUpdatedProcessor : RequestProcessorBase
 
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
-        if (entity.Type != LogType.ChannelUpdated)
-            return;
-
-        var auditLogs = await DiscordManager.GetAuditLogsAsync(entity.GuildId!.ToUlong(), actionType: ActionType.ChannelUpdated);
-        var logItem = auditLogs.FirstOrDefault(o => ((ChannelUpdateAuditLogData)o.Data).ChannelId == request.ChannelId.ToUlong());
+        var logItem = await FindAuditLogAsync(request);
         if (logItem is null && request.ChannelUpdated!.Before!.Position == request.ChannelUpdated.After!.Position)
         {
             entity.CanCreate = false;
@@ -32,8 +27,13 @@ public class ChannelUpdatedProcessor : RequestProcessorBase
         var before = CreateChannelInfo(logData?.Before, request.ChannelUpdated!.Before!);
         var after = CreateChannelInfo(logData?.After, request.ChannelUpdated!.After!);
 
-        entity.DiscordId = logItem?.Id.ToString();
-        entity.UserId = logItem?.User?.Id.ToString();
+        if (logItem is not null)
+        {
+            entity.DiscordId = logItem.Id.ToString();
+            entity.UserId = logItem.User.Id.ToString();
+            entity.CreatedAt = logItem.CreatedAt.UtcDateTime;
+        }
+
         entity.ChannelUpdated = new ChannelUpdated
         {
             After = after,
@@ -62,4 +62,7 @@ public class ChannelUpdatedProcessor : RequestProcessorBase
         result.SlowMode = info.Value.SlowModeInterval;
         return result;
     }
+
+    protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
+        => ((ChannelUpdateAuditLogData)entry.Data).ChannelId == request.ChannelId.ToUlong();
 }

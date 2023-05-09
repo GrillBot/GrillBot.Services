@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Core.Enums;
 using AuditLogService.Models.Request;
 using AuditLogService.Processors.Request.Abstractions;
 
@@ -10,12 +9,9 @@ public class ApiRequestProcessor : RequestProcessorBase
     public ApiRequestProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }
-    
+
     public override Task ProcessAsync(LogItem entity, LogRequest request)
     {
-        if (entity.Type is not LogType.Api)
-            return Task.CompletedTask;
-
         var apiRequest = request.ApiRequest!;
         entity.ApiRequest = new ApiRequest
         {

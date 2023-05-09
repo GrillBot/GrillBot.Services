@@ -33,6 +33,7 @@ public sealed class RequestProcessorFactory : IDisposable
             LogType.Unban => new UnbanProcessor(ServiceProvider),
             LogType.MemberUpdated => new MemberUpdatedProcessor(ServiceProvider),
             LogType.MemberRoleUpdated => new MemberRoleUpdatedProcessor(ServiceProvider),
+            LogType.Api => new ApiRequestProcessor(ServiceProvider),
             _ => throw new NotSupportedException($"Unsupported type {type}")
         };
 

@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Core.Enums;
 using AuditLogService.Models.Request;
 using AuditLogService.Processors.Request.Abstractions;
 using Discord;
@@ -16,25 +15,25 @@ public class DeletedEmoteProcessor : RequestProcessorBase
 
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
-        if (entity.Type != LogType.EmoteDeleted)
-            return;
-
-        var auditLogs = await DiscordManager.GetAuditLogsAsync(entity.GuildId!.ToUlong(), actionType: ActionType.EmojiDeleted);
-        var auditLogItem = auditLogs.FirstOrDefault(o => ((EmoteDeleteAuditLogData)o.Data).EmoteId == request.DeletedEmote!.EmoteId.ToUlong());
-        if (auditLogItem is null)
+        var logItem = await FindAuditLogAsync(request);
+        if (logItem is null)
         {
             entity.CanCreate = false;
             return;
         }
 
-        var removedEmoteData = (EmoteDeleteAuditLogData)auditLogItem.Data;
+        var removedEmoteData = (EmoteDeleteAuditLogData)logItem.Data;
 
-        entity.UserId = auditLogItem.User.Id.ToString();
-        entity.DiscordId = auditLogItem.Id.ToString();
+        entity.UserId = logItem.User.Id.ToString();
+        entity.DiscordId = logItem.Id.ToString();
+        entity.CreatedAt = logItem.CreatedAt.UtcDateTime;
         entity.DeletedEmote = new DeletedEmote
         {
             EmoteId = removedEmoteData.EmoteId.ToString(),
             EmoteName = removedEmoteData.Name
         };
     }
+
+    protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
+        => ((EmoteDeleteAuditLogData)entry.Data).EmoteId == request.DeletedEmote!.EmoteId.ToUlong();
 }

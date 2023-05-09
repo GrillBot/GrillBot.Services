@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Core.Enums;
 using AuditLogService.Models.Request;
 using Discord;
 using GrillBot.Core.Extensions;
@@ -32,38 +31,22 @@ public abstract class BatchRequestProcessorBase : RequestProcessorBase
             .ToHashSet();
     }
 
-    private static ActionType ConvertActionType(LogType type)
-    {
-        return type switch
-        {
-            LogType.OverwriteCreated => ActionType.OverwriteCreated,
-            LogType.OverwriteDeleted => ActionType.OverwriteDeleted,
-            LogType.OverwriteUpdated => ActionType.OverwriteUpdated,
-            LogType.MemberRoleUpdated => ActionType.MemberRoleUpdated,
-            _ => throw new ArgumentException($"Unsupported type ({type})", nameof(type))
-        };
-    }
-
     protected async Task<IAuditLogEntry?> FindAuditLogAsync(LogRequest logRequest)
     {
-        var actionType = ConvertActionType(logRequest.Type);
         var ignoredLogIds = await GetIgnoredDiscordIdsAsync(logRequest);
-        var auditLogs = await DiscordManager.GetAuditLogsAsync(logRequest.GuildId.ToUlong(), actionType: actionType);
+        var auditLogs = await base.FindAuditLogsAsync(logRequest);
 
         return auditLogs
-            .FirstOrDefault(o => !ignoredLogIds.Contains(o.Id) && IsValidItem(o, logRequest));
+            .FirstOrDefault(o => !ignoredLogIds.Contains(o.Id));
     }
 
     protected async Task<List<IAuditLogEntry>> FindAuditLogsAsync(LogRequest logRequest)
     {
-        var actionType = ConvertActionType(logRequest.Type);
         var ignoredLogIds = await GetIgnoredDiscordIdsAsync(logRequest);
-        var auditLogs = await DiscordManager.GetAuditLogsAsync(logRequest.GuildId.ToUlong(), actionType: actionType);
+        var auditLogs = await base.FindAuditLogsAsync(logRequest);
 
         return auditLogs
-            .Where(o => !ignoredLogIds.Contains(o.Id) && IsValidItem(o, logRequest))
+            .Where(o => !ignoredLogIds.Contains(o.Id))
             .ToList();
     }
-
-    protected abstract bool IsValidItem(IAuditLogEntry entry, LogRequest request);
 }

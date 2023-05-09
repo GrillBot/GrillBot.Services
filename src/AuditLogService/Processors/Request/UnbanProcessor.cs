@@ -25,6 +25,7 @@ public class UnbanProcessor : RequestProcessorBase
 
         entity.UserId = logItem.User.Id.ToString();
         entity.DiscordId = logItem.Id.ToString();
+        entity.CreatedAt = logItem.CreatedAt.UtcDateTime;
         entity.Unban = new Unban { UserId = request.Unban!.UserId };
     }
 }

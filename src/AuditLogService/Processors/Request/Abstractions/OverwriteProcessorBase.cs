@@ -11,7 +11,7 @@ public abstract class OverwriteProcessorBase : BatchRequestProcessorBase
     {
     }
 
-    protected override bool IsValidItem(IAuditLogEntry entry, LogRequest request)
+    protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
         => request.DiscordId.ToUlong() == entry.Id;
 
     protected static OverwriteInfo CreateOverwriteInfo(Overwrite overwrite)

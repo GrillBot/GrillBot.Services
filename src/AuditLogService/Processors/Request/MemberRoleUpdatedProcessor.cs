@@ -40,6 +40,6 @@ public class MemberRoleUpdatedProcessor : BatchRequestProcessorBase
         }).ToHashSet();
     }
 
-    protected override bool IsValidItem(IAuditLogEntry entry, LogRequest request)
+    protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
         => request.DiscordId.ToUlong() == entry.Id;
 }

@@ -31,8 +31,7 @@ public class MemberUpdatedProcessor : RequestProcessorBase
         }
         else
         {
-            var auditLogs = await DiscordManager.GetAuditLogsAsync(entity.GuildId!.ToUlong(), actionType: ActionType.MemberUpdated);
-            var logItem = auditLogs.FirstOrDefault(o => ((MemberUpdateAuditLogData)o.Data).Target.Id == request.MemberUpdated.UserId.ToUlong());
+            var logItem = await FindAuditLogAsync(request);
             if (logItem is null)
             {
                 entity.CanCreate = false;
@@ -45,6 +44,7 @@ public class MemberUpdatedProcessor : RequestProcessorBase
 
             entity.DiscordId = logItem.Id.ToString();
             entity.UserId = logItem.User.Id.ToString();
+            entity.CreatedAt = logItem.CreatedAt.UtcDateTime;
             entity.MemberUpdated = new MemberUpdated
             {
                 After = after,
@@ -77,4 +77,7 @@ public class MemberUpdatedProcessor : RequestProcessorBase
             SelfUnverifyMinimalTime = selfUnverifyMinimalTime
         };
     }
+
+    protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
+        => ((MemberUpdateAuditLogData)entry.Data).Target.Id == request.MemberUpdated!.UserId.ToUlong();
 }

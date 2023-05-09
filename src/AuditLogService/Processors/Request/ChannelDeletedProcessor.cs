@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Core.Enums;
 using AuditLogService.Models.Request;
 using AuditLogService.Processors.Request.Abstractions;
 using Discord;
@@ -17,11 +16,7 @@ public class ChannelDeletedProcessor : RequestProcessorBase
 
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
-        if (entity.Type != LogType.ChannelDeleted)
-            return;
-
-        var auditLogs = await DiscordManager.GetAuditLogsAsync(entity.GuildId!.ToUlong(), actionType: ActionType.ChannelDeleted);
-        var logItem = auditLogs.FirstOrDefault(o => ((ChannelDeleteAuditLogData)o.Data).ChannelId == request.ChannelId!.ToUlong());
+        var logItem = await FindAuditLogAsync(request);
         if (logItem is null)
         {
             entity.CanCreate = false;
@@ -41,6 +36,7 @@ public class ChannelDeletedProcessor : RequestProcessorBase
             SlowMode = logData.SlowModeInterval
         };
 
+        entity.CreatedAt = logItem.CreatedAt.UtcDateTime;
         entity.DiscordId = logItem.Id.ToString();
         entity.UserId = logItem.User.Id.ToString();
         entity.ChannelDeleted = new ChannelDeleted
@@ -49,4 +45,7 @@ public class ChannelDeletedProcessor : RequestProcessorBase
             ChannelInfoId = channelInfo.Id
         };
     }
+
+    protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
+        => ((ChannelDeleteAuditLogData)entry.Data).ChannelId == request.ChannelId!.ToUlong();
 }

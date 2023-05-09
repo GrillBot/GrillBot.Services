@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Core.Enums;
 using AuditLogService.Models.Request;
 using AuditLogService.Processors.Request.Abstractions;
 using Discord;
@@ -17,11 +16,7 @@ public class ChannelCreatedProcessor : RequestProcessorBase
 
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
-        if (entity.Type != LogType.ChannelCreated)
-            return;
-
-        var auditLogs = await DiscordManager.GetAuditLogsAsync(entity.GuildId!.ToUlong(), actionType: ActionType.ChannelCreated);
-        var logItem = auditLogs.FirstOrDefault(o => ((ChannelCreateAuditLogData)o.Data).ChannelId == request.ChannelId!.ToUlong());
+        var logItem = await FindAuditLogAsync(request);
         if (logItem is null)
         {
             entity.CanCreate = false;
@@ -41,6 +36,7 @@ public class ChannelCreatedProcessor : RequestProcessorBase
             SlowMode = logData.SlowModeInterval
         };
 
+        entity.CreatedAt = logItem.CreatedAt.UtcDateTime;
         entity.UserId = logItem.User.Id.ToString();
         entity.DiscordId = logItem.Id.ToString();
         entity.ChannelCreated = new ChannelCreated
@@ -49,4 +45,7 @@ public class ChannelCreatedProcessor : RequestProcessorBase
             ChannelInfoId = channelInfo.Id
         };
     }
+
+    protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
+        => ((ChannelCreateAuditLogData)entry.Data).ChannelId == request.ChannelId!.ToUlong();
 }
