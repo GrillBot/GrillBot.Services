@@ -34,6 +34,7 @@ public sealed class RequestProcessorFactory : IDisposable
             LogType.MemberUpdated => new MemberUpdatedProcessor(ServiceProvider),
             LogType.MemberRoleUpdated => new MemberRoleUpdatedProcessor(ServiceProvider),
             LogType.Api => new ApiRequestProcessor(ServiceProvider),
+            LogType.GuildUpdated => new GuildUpdatedProcessor(ServiceProvider),
             _ => throw new NotSupportedException($"Unsupported type {type}")
         };
 
