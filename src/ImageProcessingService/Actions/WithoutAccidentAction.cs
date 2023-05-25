@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
+using ImageMagick;
 using ImageProcessingService.Caching;
 using ImageProcessingService.Core.GraphicsService;
 using ImageProcessingService.Core.GraphicsService.Models.Images;
@@ -26,10 +27,13 @@ public class WithoutAccidentAction : ApiActionBase
         if (cacheItem is not null)
             return new ApiResult(StatusCodes.Status200OK, new FileContentResult(cacheItem.Image, "image/png"));
 
+        using var profilePicture = new MagickImage(request.AvatarInfo.AvatarContent);
+        profilePicture.Resize(512, 512);
+
         var imageRequest = new WithoutAccidentRequestData
         {
             Days = request.DaysCount,
-            ProfilePicture = Convert.ToBase64String(request.AvatarInfo.AvatarContent)
+            ProfilePicture = profilePicture.ToBase64()
         };
 
         var image = await GraphicsClient.CreateWithoutAccidentImageAsync(imageRequest);
