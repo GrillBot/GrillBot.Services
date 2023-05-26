@@ -15,10 +15,6 @@ public class MemberCacheItem
     [Required]
     public string Username { get; set; } = null!;
 
-    [StringLength(4)]
-    [Required]
-    public string Discriminator { get; set; } = null!;
-
     [Required]
     public string AvatarUrl { get; set; } = null!;
 }
