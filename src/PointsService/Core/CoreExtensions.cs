@@ -25,7 +25,6 @@ public static class CoreExtensions
             .AddDiagnostic()
             .AddCoreManagers()
             .AddStatisticsProvider<StatisticsProvider>()
-            .AddFakeDiscordClient(ServiceLifetime.Singleton)
             .AddControllers(c => c.RegisterCoreFilter());
 
         // HealthChecks
