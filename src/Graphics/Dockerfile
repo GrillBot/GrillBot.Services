@@ -15,7 +15,7 @@ FROM node:18-alpine as production
 WORKDIR /usr/src/app
 EXPOSE 3000
 ENV NODE_ENV production
-LABEL org.opencontainers.image.source https://github.com/grillbot/grillbot-graphics
+LABEL org.opencontainers.image.source https://github.com/grillbot/grillbot.services
 
 # Dependencies
 RUN apk add build-base g++ cairo-dev jpeg-dev pango-dev giflib-dev

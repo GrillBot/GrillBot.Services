@@ -15,19 +15,19 @@
     "chart.js": "^3.9.1",
     "chartjs-node-canvas": "^4.1.6",
     "express": "^4.18.2",
-    "express-actuator": "^1.8.3",
-    "express-validator": "^6.14.2",
+    "express-actuator": "^1.8.4",
+    "express-validator": "^7.0.1",
     "express-winston": "^4.2.0",
     "winston": "^3.8.2",
-    "canvas": "^2.11.0",
+    "canvas": "^2.11.2",
     "color": "4.2.3"
   },
   "devDependencies": {
-    "@types/express": "^4.17.15",
+    "@types/express": "^4.17.17",
     "@types/express-actuator": "^1.8.0",
-    "@types/node": "^18.11.18",
-    "nodemon": "^2.0.20",
-    "typescript": "^4.9.4",
+    "@types/node": "^20.2.5",
+    "nodemon": "^2.0.22",
+    "typescript": "^5.0.4",
     "copyfiles": "^2.4.1",
     "@types/color": "3.0.3"
   }

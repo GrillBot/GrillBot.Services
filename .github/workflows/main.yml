@@ -183,15 +183,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Login to the container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build container
-        run: docker build -t ghcr.io/grillbot/grillbot.services:graphics src/Graphics
-      - name: Push container
-        run: docker push ghcr.io/grillbot/grillbot.services:graphics
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: src/Graphics
+          push: true
+          tags: ghcr.io/grillbot/grillbot.services:graphics
   Graphics_Deploy_Production:
     runs-on: ubuntu-latest
     environment: 'Production_Graphics'
