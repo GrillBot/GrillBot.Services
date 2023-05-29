@@ -81,10 +81,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build container
-        run: docker build -t ghcr.io/grillbot/grillbot.services:file_service --build-arg github_actions_token=${{ secrets.GITHUB_TOKEN }} src/FileService
-      - name: Push container
-        run: docker push ghcr.io/grillbot/grillbot.services:file_service
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: src/FileService
+          push: true
+          tags: ghcr.io/grillbot/grillbot.services:file_service
+          build-args: |
+            github_actions_token=${{ secrets.GITHUB_TOKEN }}
   FileService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: 'Production_FileService'
@@ -136,10 +140,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build container
-        run: docker build -t ghcr.io/grillbot/grillbot.services:rubbergod_service --build-arg github_actions_token=${{ secrets.GITHUB_TOKEN }} src/RubbergodService
-      - name: Push container
-        run: docker push ghcr.io/grillbot/grillbot.services:rubbergod_service
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: src/RubbergodService
+          push: true
+          tags: ghcr.io/grillbot/grillbot.services:rubbergod_service
+          build-args: |
+            github_actions_token=${{ secrets.GITHUB_TOKEN }}
   RubbergodService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: 'Production_RubbergodService'
@@ -245,10 +253,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build container
-        run: docker build -t ghcr.io/grillbot/grillbot.services:points_service --build-arg github_actions_token=${{ secrets.GITHUB_TOKEN }} src/PointsService
-      - name: Push container
-        run: docker push ghcr.io/grillbot/grillbot.services:points_service
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: src/PointsService
+          push: true
+          tags: ghcr.io/grillbot/grillbot.services:points_service
+          build-args: |
+            github_actions_token=${{ secrets.GITHUB_TOKEN }}
   PointsService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: 'Production_PointsService'
@@ -300,10 +312,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build container
-        run: docker build -t ghcr.io/grillbot/grillbot.services:image_processing_service --build-arg github_actions_token=${{ secrets.GITHUB_TOKEN }} src/ImageProcessingService
-      - name: Push container
-        run: docker push ghcr.io/grillbot/grillbot.services:image_processing_service
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: src/ImageProcessingService
+          push: true
+          tags: ghcr.io/grillbot/grillbot.services:image_processing_service
+          build-args: |
+            github_actions_token=${{ secrets.GITHUB_TOKEN }}
   ImageProcessingService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: 'Production_ImageProcessingService'

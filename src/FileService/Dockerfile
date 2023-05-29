@@ -14,10 +14,11 @@ RUN mkdir -p /publish
 RUN dotnet publish /src/FileService -c Release -o /publish --no-restore -r linux-musl-x64 --self-contained false
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine as FinalImage
-LABEL org.opencontainers.image.source https://github.com/grillbot/fileService
+LABEL org.opencontainers.image.source https://github.com/grillbot/grillbot.services
 
 WORKDIR /app
 EXPOSE 5273
+
 ENV TZ=Europe/Prague
 ENV ASPNETCORE_URLS 'http://+:5273'
 ENV DOTNET_PRINT_TELEMETRY_MESSAGE 'false'
