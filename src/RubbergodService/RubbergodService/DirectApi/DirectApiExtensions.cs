@@ -2,9 +2,10 @@
 
 public static class DirectApiExtensions
 {
-    public static IServiceCollection AddDirectApi(this IServiceCollection services)
+    public static void AddDirectApi(this IServiceCollection services)
     {
-        return services
-            .AddSingleton<DirectApiClient>();
+        services
+            .AddSingleton<DirectApiClient>()
+            .AddScoped<DirectApiManager>();
     }
 }
