@@ -33,7 +33,6 @@ public class GetKarmaPageAction : ApiActionBase
                 Position = parameters.Skip() + counter,
                 User = new User
                 {
-                    Discriminator = user.Discriminator,
                     AvatarUrl = user.AvatarUrl,
                     Username = user.Username,
                     Id = user.UserId

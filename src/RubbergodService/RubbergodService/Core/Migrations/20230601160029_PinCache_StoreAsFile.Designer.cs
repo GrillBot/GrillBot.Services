@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RubbergodService.Core.Entity;
@@ -11,9 +12,11 @@ using RubbergodService.Core.Entity;
 namespace RubbergodService.Core.Migrations
 {
     [DbContext(typeof(RubbergodServiceContext))]
-    partial class RubbergodServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20230601160029_PinCache_StoreAsFile")]
+    partial class PinCache_StoreAsFile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -76,6 +79,10 @@ namespace RubbergodService.Core.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
+                    b.Property<string>("UserId")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
                     b.Property<string>("Filename")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
@@ -87,7 +94,9 @@ namespace RubbergodService.Core.Migrations
                         .IsRequired()
                         .HasColumnType("bytea");
 
-                    b.HasKey("GuildId", "ChannelId", "Filename");
+                    b.HasKey("GuildId", "ChannelId", "UserId", "Filename");
+
+                    b.HasIndex("CreatedAtUtc");
 
                     b.ToTable("PinCache");
                 });

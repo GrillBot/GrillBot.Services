@@ -16,14 +16,22 @@ public sealed class RubbergodServiceRepository : IDisposable, IAsyncDisposable
         Karma = new KarmaRepository(Context, counterManager);
         MemberCache = new MemberCacheRepository(Context, counterManager);
         Statistics = new StatisticsRepository(Context, counterManager);
+        PinCache = new PinCacheRepository(Context, counterManager);
     }
 
     public KarmaRepository Karma { get; }
     public MemberCacheRepository MemberCache { get; }
     public StatisticsRepository Statistics { get; }
+    public PinCacheRepository PinCache { get; }
 
     public Task AddAsync<TEntity>(TEntity entity) where TEntity : class
         => Context.Set<TEntity>().AddAsync(entity).AsTask();
+
+    public void RemoveCollection<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
+        => Context.Set<TEntity>().RemoveRange(entities);
+
+    public void Remove<TEntity>(TEntity entity) where TEntity : class
+        => Context.Set<TEntity>().Remove(entity);
 
     public Task<int> CommitAsync()
     {

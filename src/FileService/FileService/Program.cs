@@ -20,7 +20,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
 builder.Services.AddControllers(c => c.RegisterCoreFilter());
 builder.Services.AddDiagnostic();
-builder.Services.AddFakeDiscordClient(ServiceLifetime.Singleton);
 builder.Services.AddCoreManagers();
 builder.Services.AddActions();
 builder.Services.AddScoped<BlobContainerFactory>();

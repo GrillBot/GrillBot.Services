@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RubbergodService.Core.Entity;
@@ -11,9 +12,11 @@ using RubbergodService.Core.Entity;
 namespace RubbergodService.Core.Migrations
 {
     [DbContext(typeof(RubbergodServiceContext))]
-    partial class RubbergodServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20230601173759_PinCache_UnusedIndexes")]
+    partial class PinCache_UnusedIndexes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

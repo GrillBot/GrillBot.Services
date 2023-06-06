@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Discord;
 using RubbergodService.Core.Helpers;
+using RubbergodService.DirectApi.Models;
 
 namespace RubbergodService.DirectApi;
 
@@ -25,7 +26,7 @@ public class DirectApiClient
             .ToHashSet();
     }
 
-    public async Task<string> SendAsync(ulong channelId, JsonDocument data, int timeout, int timeoutChecks)
+    public async Task<ApiResponse> SendAsync(ulong channelId, JsonDocument data, int timeout, int timeoutChecks)
     {
         var channel = await GetChannelAsync(channelId);
         var jsonData = await JsonHelper.SerializeJsonDocumentAsync(data);
@@ -56,7 +57,7 @@ public class DirectApiClient
         }
     }
 
-    private async Task<string> ReadResponseAsync(int timeout, int timeoutChecks, IUserMessage request)
+    private async Task<ApiResponse> ReadResponseAsync(int timeout, int timeoutChecks, IUserMessage request)
     {
         var delay = Convert.ToInt32(timeout / timeoutChecks);
 
@@ -72,7 +73,15 @@ public class DirectApiClient
 
         if (response is null)
             throw new HttpRequestException("Unable to find response message");
-        return await HttpClient.GetStringAsync(response.Attachments.First().Url);
+
+        var attachment = response.Attachments.First();
+        var fileContent = await HttpClient.GetByteArrayAsync(attachment.Url);
+
+        return new ApiResponse
+        {
+            Content = fileContent,
+            Filename = attachment.Filename
+        };
     }
 
     private bool IsValidResponse(IMessage? response, IUserMessage request)

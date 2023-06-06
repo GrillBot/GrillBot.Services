@@ -14,10 +14,11 @@ RUN mkdir -p /publish
 RUN dotnet publish /src/RubbergodService -c Release -o /publish --no-restore -r linux-x64 --self-contained false
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 as FinalImage
-LABEL org.opencontainers.image.source https://github.com/grillbot/rubbergodService
+LABEL org.opencontainers.image.source https://github.com/grillbot/grillbot.services
 
 WORKDIR /app
 EXPOSE 5031
+
 ENV TZ=Europe/Prague
 ENV ASPNETCORE_URLS 'http://+:5031'
 ENV DOTNET_PRINT_TELEMETRY_MESSAGE 'false'

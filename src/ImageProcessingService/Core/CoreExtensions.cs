@@ -15,7 +15,6 @@ public static class CoreExtensions
         services
             .AddDiagnostic()
             .AddCoreManagers()
-            .AddFakeDiscordClient(ServiceLifetime.Singleton)
             .AddCacheServices()
             .AddControllers(c => c.RegisterCoreFilter());
 

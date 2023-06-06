@@ -49,13 +49,11 @@ public class MemberSyncService : BackgroundService
         if (user is null)
         {
             member.Username = "Deleted user";
-            member.Discriminator = "0000";
             member.AvatarUrl = CDN.GetDefaultUserAvatarUrl(0);
         }
         else
         {
             member.Username = user.Username;
-            member.Discriminator = user.Discriminator;
             member.AvatarUrl = user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl();
         }
 

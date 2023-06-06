@@ -19,6 +19,7 @@ LABEL org.opencontainers.image.source https://github.com/grillbot/grillbot.servi
 WORKDIR /app
 EXPOSE 5213
 ENV TZ=Europe/Prague
+
 ENV ASPNETCORE_URLS 'http://+:5213'
 ENV DOTNET_PRINT_TELEMETRY_MESSAGE 'false'
 

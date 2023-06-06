@@ -15,7 +15,7 @@ namespace RubbergodService.Core;
 
 public static class CoreExtensions
 {
-    public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration)
+    public static void AddCoreServices(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("Default")!;
 
@@ -51,11 +51,9 @@ public static class CoreExtensions
         services.AddActions();
         services.AddDirectApi();
         services.AddMemberSync();
-
-        return services;
     }
 
-    public static IServiceCollection AddDiscord(this IServiceCollection services)
+    private static void AddDiscord(this IServiceCollection services)
     {
         var config = new DiscordRestConfig
         {
@@ -67,6 +65,5 @@ public static class CoreExtensions
             .AddSingleton<IDiscordClient>(new DiscordRestClient(config))
             .AddSingleton<DiscordLogManager>()
             .AddScoped<DiscordManager>();
-        return services;
     }
 }

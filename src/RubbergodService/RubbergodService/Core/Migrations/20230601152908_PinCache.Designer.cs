@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RubbergodService.Core.Entity;
@@ -11,9 +12,11 @@ using RubbergodService.Core.Entity;
 namespace RubbergodService.Core.Migrations
 {
     [DbContext(typeof(RubbergodServiceContext))]
-    partial class RubbergodServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20230601152908_PinCache")]
+    partial class PinCache
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -76,9 +79,9 @@ namespace RubbergodService.Core.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
-                    b.Property<string>("Filename")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                    b.Property<string>("UserId")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
@@ -87,7 +90,14 @@ namespace RubbergodService.Core.Migrations
                         .IsRequired()
                         .HasColumnType("bytea");
 
-                    b.HasKey("GuildId", "ChannelId", "Filename");
+                    b.Property<bool>("IsValid")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("GuildId", "ChannelId", "UserId");
+
+                    b.HasIndex("CreatedAtUtc");
+
+                    b.HasIndex("IsValid");
 
                     b.ToTable("PinCache");
                 });

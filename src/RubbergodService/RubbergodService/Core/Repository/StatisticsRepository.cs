@@ -18,7 +18,8 @@ public class StatisticsRepository : RepositoryBase<RubbergodServiceContext>
             return new Dictionary<string, long>
             {
                 { nameof(Context.Karma), await Context.Karma.CountAsync() },
-                { nameof(Context.MemberCache), await Context.MemberCache.CountAsync() }
+                { nameof(Context.MemberCache), await Context.MemberCache.CountAsync() },
+                { nameof(Context.PinCache), await Context.PinCache.CountAsync() }
             };
         }
     }
