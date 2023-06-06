@@ -23,4 +23,7 @@ public class ThreadInfoRequest
     public bool IsLocked { get; set; }
 
     public List<string> Tags { get; set; } = new();
+
+    [Required]
+    public string ParentChannelId { get; set; } = null!;
 }

@@ -33,11 +33,16 @@ public sealed class RequestProcessorFactory : IDisposable
             LogType.Unban => new UnbanProcessor(ServiceProvider),
             LogType.MemberUpdated => new MemberUpdatedProcessor(ServiceProvider),
             LogType.MemberRoleUpdated => new MemberRoleUpdatedProcessor(ServiceProvider),
-            LogType.Api => new ApiRequestProcessor(ServiceProvider),
             LogType.GuildUpdated => new GuildUpdatedProcessor(ServiceProvider),
             LogType.UserLeft => new UserLeftProcessor(ServiceProvider),
+            LogType.UserJoined => new UserJoinedProcessor(ServiceProvider),
             LogType.MessageEdited => new MessageEditedProcessor(ServiceProvider),
             LogType.MessageDeleted => new MessageDeletedProcessor(ServiceProvider),
+            LogType.InteractionCommand => new InteractionCommandProcessor(ServiceProvider),
+            LogType.ThreadDeleted => new ThreadDeletedProcessor(ServiceProvider),
+            LogType.JobCompleted => new JobCompletedProcessor(ServiceProvider),
+            LogType.Api => new ApiRequestProcessor(ServiceProvider),
+            LogType.ThreadUpdated => new ThreadUpdatedProcessor(ServiceProvider),
             _ => throw new NotSupportedException($"Unsupported type {type}")
         };
 

@@ -14,7 +14,7 @@ public class ThreadInfo
     public int? SlowMode { get; set; }
     public ThreadType Type { get; set; }
     public bool IsArchived { get; set; }
-    public int ArchiveDuration { get; set; }
+    public ThreadArchiveDuration ArchiveDuration { get; set; }
     public bool IsLocked { get; set; }
 
     [Column(TypeName = "jsonb")]
