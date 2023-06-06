@@ -61,6 +61,9 @@ public sealed class DiscordManager : IDisposable
         }
 
         var guild = await GetGuildAsync(guildId);
+        if (guild is null)
+            return new List<IAuditLogEntry>();
+
         using (CounterManager.Create("Discord.API.AuditLogs"))
         {
             var logs = await guild.GetAuditLogsAsync(limit, actionType: actionType);
@@ -74,6 +77,8 @@ public sealed class DiscordManager : IDisposable
     public async Task<IBan?> GetBanAsync(ulong guildId, ulong userId)
     {
         var guild = await GetGuildAsync(guildId);
+        if (guild is null)
+            return null;
 
         using (CounterManager.Create("Discord.API.Ban"))
         {

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AuditLogService.Core.Enums;
+using AuditLogService.Validators;
 using GrillBot.Core.Validation;
 
 namespace AuditLogService.Models.Request;
@@ -48,45 +49,7 @@ public class LogRequest : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (CreatedAt.HasValue && CreatedAt.Value.Kind != DateTimeKind.Utc)
-            yield return new ValidationResult("Only UTC value is allowed.", new[] { nameof(CreatedAt) });
-
-        // <Type, Object>
-        var requiredBindings = new Dictionary<LogType, object?>()
-        {
-            { LogType.Api, ApiRequest },
-            { LogType.Info, LogMessage },
-            { LogType.Warning, LogMessage },
-            { LogType.Error, LogMessage },
-            { LogType.EmoteDeleted, DeletedEmote },
-            { LogType.Unban, Unban },
-            { LogType.JobCompleted, JobExecution },
-            { LogType.ChannelCreated, ChannelInfo },
-            { LogType.ChannelDeleted, ChannelInfo },
-            { LogType.ChannelUpdated, ChannelUpdated },
-            { LogType.GuildUpdated, GuildUpdated },
-            { LogType.MessageDeleted, MessageDeleted },
-            { LogType.MessageEdited, MessageEdited },
-            { LogType.UserJoined, UserJoined },
-            { LogType.UserLeft, UserLeft },
-            { LogType.InteractionCommand, InteractionCommand },
-            { LogType.ThreadDeleted, ThreadInfo },
-            { LogType.ThreadUpdated, ThreadUpdated },
-            { LogType.MemberUpdated, MemberUpdated }
-        };
-
-        if (requiredBindings.TryGetValue(Type, out var requestData) && requestData is null)
-            yield return new ValidationResult($"Missing data for type {Type}");
-
-        if (requiredBindings.Values.Count(o => o is not null) > 1)
-            yield return new ValidationResult("Only one property with data can be setted.");
-
-        var requireGuildTypes = new HashSet<LogType>
-        {
-            LogType.EmoteDeleted
-        };
-
-        if (string.IsNullOrEmpty(GuildId) && requireGuildTypes.Contains(Type))
-            yield return new ValidationResult($"Log type {Type} requires filled GuildId.");
+        var validator = new LogRequestValidator();
+        return validator.Validate(this, validationContext);
     }
 }
