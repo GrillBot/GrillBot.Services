@@ -15,17 +15,19 @@ public class UnbanProcessor : RequestProcessorBase
 
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
-        var auditLogs = await DiscordManager.GetAuditLogsAsync(entity.GuildId!.ToUlong(), actionType: ActionType.Unban);
-        var logItem = auditLogs.FirstOrDefault(o => ((UnbanAuditLogData)o.Data).Target.Id == request.Unban!.UserId.ToUlong());
-        if (logItem is null)
+        var auditLog = await FindAuditLogAsync(request);
+        if (auditLog is null)
         {
             entity.CanCreate = false;
             return;
         }
 
-        entity.UserId = logItem.User.Id.ToString();
-        entity.DiscordId = logItem.Id.ToString();
-        entity.CreatedAt = logItem.CreatedAt.UtcDateTime;
+        entity.UserId = auditLog.User.Id.ToString();
+        entity.DiscordId = auditLog.Id.ToString();
+        entity.CreatedAt = auditLog.CreatedAt.UtcDateTime;
         entity.Unban = new Unban { UserId = request.Unban!.UserId };
     }
+
+    protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
+        => ((UnbanAuditLogData)entry.Data).Target.Id == request.Unban!.UserId.ToUlong();
 }

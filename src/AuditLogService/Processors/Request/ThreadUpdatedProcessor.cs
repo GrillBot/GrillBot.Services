@@ -1,5 +1,4 @@
-﻿using AuditLogService.Core.Discord;
-using AuditLogService.Core.Entity;
+﻿using AuditLogService.Core.Entity;
 using AuditLogService.Models.Request;
 using AuditLogService.Processors.Request.Abstractions;
 using Discord;
@@ -25,15 +24,8 @@ public class ThreadUpdatedProcessor : RequestProcessorBase
             return;
         }
 
-        var forum = await FindForumAsync(request);
-        if (forum is null)
-        {
-            entity.CanCreate = false;
-            return;
-        }
-
-        var before = CreateThreadInfo(request, request.ThreadUpdated!.Before!, forum);
-        var after = CreateThreadInfo(request, request.ThreadUpdated!.After!, forum);
+        var before = CreateThreadInfo(request.ThreadUpdated!.Before!);
+        var after = CreateThreadInfo(request.ThreadUpdated!.After!);
 
         entity.DiscordId = logItem.Id.ToString();
         entity.UserId = logItem.User.Id.ToString();
@@ -47,7 +39,7 @@ public class ThreadUpdatedProcessor : RequestProcessorBase
         };
     }
 
-    private ThreadInfo CreateThreadInfo(LogRequest request, ThreadInfoRequest threadInfo, IForumChannel forum)
+    private static ThreadInfo CreateThreadInfo(ThreadInfoRequest threadInfo)
     {
         return new ThreadInfo
         {
@@ -58,22 +50,8 @@ public class ThreadUpdatedProcessor : RequestProcessorBase
             IsArchived = threadInfo.IsArchived,
             IsLocked = threadInfo.IsLocked,
             SlowMode = threadInfo.SlowMode,
-            ThreadName = threadInfo.ThreadName
+            ThreadName = threadInfo.ThreadName!
         };
-    }
-
-    private async Task<IForumChannel?> FindForumAsync(LogRequest request)
-    {
-        var forumId = request.ThreadUpdated?.Before?.ParentChannelId ?? request.ThreadUpdated?.After?.ParentChannelId;
-        if (string.IsNullOrEmpty(forumId))
-            return null;
-
-        var guild = await DiscordManager.GetGuildAsync(request.GuildId!.ToUlong());
-        if (guild is null)
-            return null;
-
-        var forum = await guild.GetChannelAsync(request.ThreadUpdated!.Before!.ParentChannelId.ToUlong());
-        return forum as IForumChannel;
     }
 
     protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)

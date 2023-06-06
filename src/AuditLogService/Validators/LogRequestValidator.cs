@@ -17,12 +17,12 @@ public class LogRequestValidator : ModelValidator<LogRequest>
     {
         LogType.InteractionCommand
     };
-    
+
     private static readonly HashSet<LogType> TypesWithRequriedChannelId = new()
     {
         LogType.ChannelCreated, LogType.ChannelDeleted, LogType.ChannelUpdated, LogType.InteractionCommand
     };
-    
+
     private static readonly HashSet<LogType> TypesWithRequriedDiscordId = new()
     {
         LogType.MemberRoleUpdated
@@ -33,6 +33,7 @@ public class LogRequestValidator : ModelValidator<LogRequest>
         yield return ValidateDateTime;
         yield return ValidateDataBindings;
         yield return ValidateIdBindings;
+        yield return ValidateThreadUpdatedProperties;
     }
 
     private static IEnumerable<ValidationResult> ValidateDateTime(LogRequest request, ValidationContext _)
@@ -72,7 +73,7 @@ public class LogRequestValidator : ModelValidator<LogRequest>
         if (requiredBindings.TryGetValue(request.Type, out var requestData) && requestData is null)
             yield return new ValidationResult($"Missing data for type {request.Type}");
 
-        if (requiredBindings.Values.Count(o => o is not null) > 1)
+        if (requiredBindings.Values.Where(o => o is not null).DistinctBy(o => o!.GetType().FullName).Count() > 1)
             yield return new ValidationResult("Only one property with data can be setted.");
     }
 
@@ -89,5 +90,31 @@ public class LogRequestValidator : ModelValidator<LogRequest>
 
         if (string.IsNullOrEmpty(request.DiscordId) && TypesWithRequriedDiscordId.Contains(request.Type))
             yield return new ValidationResult($"Missing required property DiscordId for type {request.Type}.", new[] { nameof(request.DiscordId) });
+    }
+
+    private static IEnumerable<ValidationResult> ValidateThreadUpdatedProperties(LogRequest request, ValidationContext context)
+    {
+        if (request.Type is not LogType.ThreadUpdated)
+            yield break;
+
+        IEnumerable<ValidationResult> CheckThreadInfo(ThreadInfoRequest? threadInfoRequest)
+        {
+            var requiredAttribute = new RequiredAttribute();
+
+            var validationResult = requiredAttribute.GetValidationResult(threadInfoRequest, context);
+            if (validationResult is not null) yield return validationResult;
+
+            validationResult = requiredAttribute.GetValidationResult(threadInfoRequest!.ThreadName, context);
+            if (validationResult is not null) yield return validationResult;
+
+            validationResult = requiredAttribute.GetValidationResult(threadInfoRequest.Type, context);
+            if (validationResult is not null) yield return validationResult;
+        }
+
+        foreach (var validationError in CheckThreadInfo(request.ThreadUpdated?.Before))
+            yield return validationError;
+
+        foreach (var validationError in CheckThreadInfo(request.ThreadUpdated?.After))
+            yield return validationError;
     }
 }

@@ -11,7 +11,9 @@ var app = builder.Build();
 
 app.Services.GetRequiredService<DiscordLogManager>();
 await app.InitDatabaseAsync<AuditLogServiceContext>();
-await app.Services.GetRequiredService<DiscordManager>().LoginAsync();
+
+using var scope = app.Services.CreateScope();
+await scope.ServiceProvider.GetRequiredService<DiscordManager>().LoginAsync();
 
 app.Use((context, next) =>
 {

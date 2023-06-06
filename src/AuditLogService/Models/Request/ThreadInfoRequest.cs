@@ -1,29 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Discord;
+﻿using Discord;
 
 namespace AuditLogService.Models.Request;
 
 public class ThreadInfoRequest
 {
-    [Required]
-    public string ThreadName { get; set; } = null!;
-    
+    public string? ThreadName { get; set; }
     public int? SlowMode { get; set; }
-    
-    [Required]
     public ThreadType Type { get; set; }
-    
-    [Required]
     public bool IsArchived { get; set; }
-    
-    [Required]
     public int ArchiveDuration { get; set; }
-    
-    [Required]
     public bool IsLocked { get; set; }
-
     public List<string> Tags { get; set; } = new();
-
-    [Required]
-    public string ParentChannelId { get; set; } = null!;
 }
