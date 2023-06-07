@@ -16,7 +16,7 @@ public class UserLeftProcessor : RequestProcessorBase
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var ban = await DiscordManager.GetBanAsync(request.GuildId.ToUlong(), request.UserLeft!.UserId.ToUlong());
-        var logActionType = ban is null ? ActionType.Ban : ActionType.Kick;
+        var logActionType = ban is not null ? ActionType.Ban : ActionType.Kick;
         var logItem = await FindAuditLogAsync(request, logActionType);
 
         if (logItem is not null)
