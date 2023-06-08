@@ -48,38 +48,29 @@ public class MessageDeletedProcessor : RequestProcessorBase
         return entry.CreatedAt.UtcDateTime >= timeLimit && data.Target.Id == request.MessageDeleted!.AuthorId.ToUlong() && data.ChannelId == request.ChannelId!.ToUlong();
     }
 
-    private static EmbedInfo? ConvertEmbed(string json)
+    private static EmbedInfo? ConvertEmbed(EmbedRequest request)
     {
-        if (!EmbedBuilder.TryParse(json, out var embedBuilder))
-            return null;
-
-        var embed = embedBuilder.Build();
-        var providerName = embed.Provider?.Name;
         var embedEntity = new EmbedInfo
         {
             Id = Guid.NewGuid(),
-            Title = embed.Title,
-            Type = embed.Type.ToString(),
-            AuthorName = embed.Author?.Name,
-            ContainsFooter = embed.Footer is not null,
-            VideoInfo = ParseVideoInfo(embed.Video, providerName),
-            ProviderName = providerName
+            Title = request.Title,
+            Type = request.Type,
+            AuthorName = request.AuthorName,
+            ContainsFooter = request.ContainsFooter,
+            VideoInfo = request.VideoInfo,
+            ProviderName = request.ProviderName,
+            ImageInfo = request.ImageInfo,
+            ThumbnailInfo = request.ThumbnailInfo
         };
 
-        if (embed.Image is not null)
-            embedEntity.ImageInfo = $"{embed.Image.Value.Url} ({embed.Image.Value.Width}x{embed.Image.Value.Height})";
-
-        if (embed.Thumbnail is not null)
-            embedEntity.ThumbnailInfo = $"{embed.Thumbnail.Value.Url} ({embed.Thumbnail.Value.Width}x{embed.Thumbnail.Value.Height})";
-
-        foreach (var field in embed.Fields)
+        foreach (var field in request.Fields)
         {
             embedEntity.Fields.Add(new EmbedField
             {
                 Id = Guid.NewGuid(),
                 Name = field.Name,
-                Value = field.Value,
-                Inline = field.Inline
+                Value = field.Value.ToString()!,
+                Inline = field.IsInline
             });
         }
 
