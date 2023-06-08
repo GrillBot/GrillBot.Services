@@ -3,7 +3,6 @@ using AuditLogService.Models.Request;
 using AuditLogService.Processors.Request.Abstractions;
 using Discord;
 using Discord.Rest;
-using GrillBot.Core.Extensions;
 
 namespace AuditLogService.Processors.Request;
 
@@ -35,5 +34,5 @@ public class DeletedEmoteProcessor : RequestProcessorBase
     }
 
     protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
-        => ((EmoteDeleteAuditLogData)entry.Data).EmoteId == request.DeletedEmote!.EmoteId.ToUlong();
+        => ((EmoteDeleteAuditLogData)entry.Data).EmoteId == Emote.Parse(request.DeletedEmote!.EmoteId).Id;
 }

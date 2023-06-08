@@ -18,18 +18,16 @@ public class ThreadUpdatedProcessor : RequestProcessorBase
     {
         var logItems = await FindAuditLogsAsync(request);
         var logItem = logItems.MaxBy(o => o.CreatedAt.UtcDateTime);
-        if (logItem is null)
-        {
-            entity.CanCreate = false;
-            return;
-        }
-
         var before = CreateThreadInfo(request.ThreadUpdated!.Before!);
         var after = CreateThreadInfo(request.ThreadUpdated!.After!);
 
-        entity.DiscordId = logItem.Id.ToString();
-        entity.UserId = logItem.User.Id.ToString();
-        entity.CreatedAt = logItem.CreatedAt.UtcDateTime;
+        if (logItem is not null)
+        {
+            entity.DiscordId = logItem.Id.ToString();
+            entity.UserId = logItem.User.Id.ToString();
+            entity.CreatedAt = logItem.CreatedAt.UtcDateTime;
+        }
+
         entity.ThreadUpdated = new ThreadUpdated
         {
             Before = before,
@@ -37,6 +35,18 @@ public class ThreadUpdatedProcessor : RequestProcessorBase
             AfterId = after.Id,
             BeforeId = before.Id
         };
+    }
+
+    protected override async Task<List<IAuditLogEntry>> FindAuditLogsAsync(LogRequest request, ActionType? type = null)
+    {
+        try
+        {
+            return await base.FindAuditLogsAsync(request, type);
+        }
+        catch (NullReferenceException)
+        {
+            return new List<IAuditLogEntry>(); // TODO Remove this catch hack after fix in the discord.net lib.
+        }
     }
 
     private static ThreadInfo CreateThreadInfo(ThreadInfoRequest threadInfo)
@@ -54,6 +64,7 @@ public class ThreadUpdatedProcessor : RequestProcessorBase
         };
     }
 
+    // TODO Limit filter only on audit logs with applied tags.
     protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
         => ((ThreadUpdateAuditLogData)entry.Data).Thread.Id == request.ChannelId!.ToUlong();
 }

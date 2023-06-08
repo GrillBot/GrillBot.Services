@@ -49,7 +49,8 @@ public class ChannelUpdatedProcessor : RequestProcessorBase
         {
             Position = request.Position,
             Id = Guid.NewGuid(),
-            Topic = request.Topic
+            Topic = request.Topic,
+            Flags = request.Flags
         };
 
         if (info is null)
