@@ -1,7 +1,10 @@
 ﻿using AuditLogService.Actions;
-using AuditLogService.Models.Request;
+using AuditLogService.Actions.Search;
 using AuditLogService.Models.Request.CreateItems;
+using AuditLogService.Models.Request.Search;
 using AuditLogService.Models.Response;
+using AuditLogService.Models.Response.Search;
+using GrillBot.Core.Models.Pagination;
 using Microsoft.AspNetCore.Mvc;
 using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
@@ -24,4 +27,10 @@ public class LogItemController : ControllerBase
     [ProducesResponseType(typeof(DeleteItemResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteItemAsync(Guid id)
         => await ProcessAsync<DeleteItemAction>(id);
+
+    [HttpPost("search")]
+    [ProducesResponseType(typeof(PaginatedResponse<LogListItem>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SearchItemsAsync(SearchRequest request)
+        => await ProcessAsync<SearchItemsAction>(request);
 }

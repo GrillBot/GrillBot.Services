@@ -39,4 +39,7 @@ public class ApiRequest : ChildEntityBase
 
     [StringLength(128)]
     public string Ip { get; set; } = null!;
+
+    [StringLength(255)]
+    public string Result { get; set; } = null!;
 }
