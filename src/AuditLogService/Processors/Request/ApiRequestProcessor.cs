@@ -28,7 +28,8 @@ public class ApiRequestProcessor : RequestProcessorBase
             EndAt = apiRequest.EndAt,
             StartAt = apiRequest.StartAt,
             TemplatePath = apiRequest.TemplatePath,
-            ApiGroupName = apiRequest.ApiGroupName
+            ApiGroupName = apiRequest.ApiGroupName,
+            Result = apiRequest.Result
         };
 
         return Task.CompletedTask;

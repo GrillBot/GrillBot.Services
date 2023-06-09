@@ -49,4 +49,8 @@ public class ApiRequestRequest
     [Required]
     [StringLength(128)]
     public string Ip { get; set; } = null!;
+
+    [Required]
+    [StringLength(255)]
+    public string Result { get; set; } = null!;
 }

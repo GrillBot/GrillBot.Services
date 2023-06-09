@@ -175,7 +175,7 @@ public partial class SearchItemsAction
         var baseQuery = result.Type switch
         {
             LogType.OverwriteCreated => Context.OverwriteCreatedItems.AsNoTracking().Where(o => o.LogItemId == result.Id).Select(o => o.OverwriteInfo),
-            LogType.OverwriteDeleted => Context.OverwriteCreatedItems.AsNoTracking().Where(o => o.LogItemId == result.Id).Select(o => o.OverwriteInfo),
+            LogType.OverwriteDeleted => Context.OverwriteDeletedItems.AsNoTracking().Where(o => o.LogItemId == result.Id).Select(o => o.OverwriteInfo),
             _ => null
         };
 
