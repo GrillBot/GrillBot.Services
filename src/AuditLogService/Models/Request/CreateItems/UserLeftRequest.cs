@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GrillBot.Core.Validation;
 
-namespace AuditLogService.Models.Request;
+namespace AuditLogService.Models.Request.CreateItems;
 
 public class UserLeftRequest : UserJoinedRequest
 {

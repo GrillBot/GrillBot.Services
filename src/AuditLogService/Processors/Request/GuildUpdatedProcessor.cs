@@ -1,5 +1,6 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Models.Request;
+using AuditLogService.Models.Request.CreateItems;
 using AuditLogService.Processors.Request.Abstractions;
 using Discord;
 using GuildInfo = AuditLogService.Core.Entity.GuildInfo;

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AuditLogService.Core.Enums;
 using AuditLogService.Models.Request;
+using AuditLogService.Models.Request.CreateItems;
 
 namespace AuditLogService.Validators;
 

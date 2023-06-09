@@ -1,4 +1,4 @@
-﻿namespace AuditLogService.Models.Request;
+﻿namespace AuditLogService.Models.Request.CreateItems;
 
 public class DiffRequest<TType>
 {

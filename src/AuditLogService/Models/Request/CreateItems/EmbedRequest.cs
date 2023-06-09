@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Discord;
 
-namespace AuditLogService.Models.Request;
+namespace AuditLogService.Models.Request.CreateItems;
 
 public class EmbedRequest
 {

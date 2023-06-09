@@ -2,6 +2,7 @@
 using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
 using AuditLogService.Models.Request;
+using AuditLogService.Models.Request.CreateItems;
 using Discord;
 using GrillBot.Core.Extensions;
 

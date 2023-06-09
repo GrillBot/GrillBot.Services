@@ -1,5 +1,6 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Models.Request;
+using AuditLogService.Models.Request.CreateItems;
 using Discord;
 using GrillBot.Core.Extensions;
 using Microsoft.EntityFrameworkCore;

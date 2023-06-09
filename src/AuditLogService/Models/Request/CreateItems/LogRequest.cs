@@ -3,7 +3,7 @@ using AuditLogService.Core.Enums;
 using AuditLogService.Validators;
 using GrillBot.Core.Validation;
 
-namespace AuditLogService.Models.Request;
+namespace AuditLogService.Models.Request.CreateItems;
 
 public class LogRequest : IValidatableObject
 {

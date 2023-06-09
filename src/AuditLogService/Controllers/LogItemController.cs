@@ -1,5 +1,6 @@
 ﻿using AuditLogService.Actions;
 using AuditLogService.Models.Request;
+using AuditLogService.Models.Request.CreateItems;
 using AuditLogService.Models.Response;
 using Microsoft.AspNetCore.Mvc;
 using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
