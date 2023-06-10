@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AuditLogService.Core.Enums;
+using AuditLogService.Validators;
 using GrillBot.Core.Models;
 using GrillBot.Core.Models.Pagination;
 using GrillBot.Core.Validation;
@@ -33,18 +34,13 @@ public class SearchRequest : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (IgnoreTypes.Intersect(ShowTypes).Any())
-            yield return new ValidationResult("You cannot filter and exclude the same types at the same time.", new[] { nameof(ShowTypes), nameof(IgnoreTypes) });
-
-        if (CreatedTo > CreatedFrom)
-            yield return new ValidationResult("Unallowed interval of created from date and created to date.", new[] { nameof(ShowTypes), nameof(IgnoreTypes) });
+        var validator = new SearchRequestValidator();
+        return validator.Validate(this, validationContext);
     }
 
     public bool IsAdvancedFilterSet(LogType type)
     {
-        if (!ShowTypes.Contains(type))
-            return false;
-        if (AdvancedSearch is null)
+        if (!ShowTypes.Contains(type) || AdvancedSearch is null)
             return false;
 
         IAdvancedSearchRequest? advancedSearchRequest = type switch

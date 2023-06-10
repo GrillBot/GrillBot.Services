@@ -1,8 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace AuditLogService.Models.Request.Search;
 
-namespace AuditLogService.Models.Request.Search;
-
-public class ApiSearchRequest : IAdvancedSearchRequest, IValidatableObject
+public class ApiSearchRequest : IAdvancedSearchRequest
 {
     public string? ControllerName { get; set; }
     public string? ActionName { get; set; }
@@ -16,11 +14,5 @@ public class ApiSearchRequest : IAdvancedSearchRequest, IValidatableObject
     {
         return !string.IsNullOrEmpty(ControllerName) || !string.IsNullOrEmpty(ActionName) || !string.IsNullOrEmpty(PathTemplate) || DurationFrom is not null || DurationTo is not null ||
                !string.IsNullOrEmpty(Method) || !string.IsNullOrEmpty(ApiGroupName);
-    }
-
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        if (DurationTo > DurationFrom)
-            yield return new ValidationResult("Unallowed interval of durations.", new[] { nameof(DurationFrom), nameof(DurationTo) });
     }
 }

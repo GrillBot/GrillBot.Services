@@ -15,4 +15,19 @@ public abstract class ModelValidator<TModel> where TModel : class
     }
 
     protected abstract IEnumerable<Func<TModel, ValidationContext, IEnumerable<ValidationResult>>> GetValidations();
+
+    protected static ValidationResult? CheckUtcDateTime(DateTime? dateTime, string propertyName)
+    {
+        if (dateTime.HasValue && dateTime.Value.Kind != DateTimeKind.Utc)
+            return new ValidationResult("Only UTC value is allowed.", new[] { propertyName });
+        return null;
+    }
+
+    protected static ValidationResult? CheckDurationRange(int? from, int? to, string fromPropertyName, string toPropertyName)
+    {
+        if (from is null || to is null)
+            return null;
+
+        return from > to ? new ValidationResult("Unallowed interval of duration range.", new[] { fromPropertyName, toPropertyName }) : null;
+    }
 }

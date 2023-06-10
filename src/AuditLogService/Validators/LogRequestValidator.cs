@@ -60,13 +60,6 @@ public class LogRequestValidator : ModelValidator<LogRequest>
         return dateTimeValidations.Where(o => o is not null)!;
     }
 
-    private static ValidationResult? CheckUtcDateTime(DateTime? dateTime, string propertyName)
-    {
-        if (dateTime.HasValue && dateTime.Value.Kind != DateTimeKind.Utc)
-            return new ValidationResult("Only UTC value is allowed.", new[] { propertyName });
-        return null;
-    }
-
     private static IEnumerable<ValidationResult> ValidateDataBindings(LogRequest request, ValidationContext _)
     {
         // <Type, Object>
