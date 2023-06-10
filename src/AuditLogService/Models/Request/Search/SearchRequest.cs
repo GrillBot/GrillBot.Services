@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 using AuditLogService.Core.Enums;
 using GrillBot.Core.Models;
 using GrillBot.Core.Models.Pagination;
@@ -15,6 +14,10 @@ public class SearchRequest : IValidatableObject
 
     [DiscordId]
     public List<string> UserIds { get; set; } = new();
+
+    [DiscordId]
+    [StringLength(32)]
+    public string? ChannelId { get; set; }
 
     public List<LogType> ShowTypes { get; set; } = new();
     public List<LogType> IgnoreTypes { get; set; } = new();

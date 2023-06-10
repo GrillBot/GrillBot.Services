@@ -35,7 +35,7 @@ public partial class SearchItemsAction
             );
         }
 
-        if (request.IsAdvancedFilterSet(LogType.Warning))
+        if (request.IsAdvancedFilterSet(LogType.Error))
         {
             result.AddRange(
                 await Context.LogMessages.AsNoTracking()
@@ -178,6 +178,8 @@ public partial class SearchItemsAction
             query = query.Where(o => o.GuildId == request.GuildId);
         if (request.UserIds.Count > 0)
             query = query.Where(o => !string.IsNullOrEmpty(o.UserId) && request.UserIds.Contains(o.UserId));
+        if (!string.IsNullOrEmpty(request.ChannelId))
+            query = query.Where(o => o.ChannelId == request.ChannelId);
         if (request.ShowTypes.Count > 0)
             query = query.Where(o => request.ShowTypes.Contains(o.Type));
         else if (request.IgnoreTypes.Count > 0)

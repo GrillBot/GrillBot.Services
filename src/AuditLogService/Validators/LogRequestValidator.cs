@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AuditLogService.Core.Enums;
-using AuditLogService.Models.Request;
 using AuditLogService.Models.Request.CreateItems;
 
 namespace AuditLogService.Validators;
@@ -9,9 +8,8 @@ public class LogRequestValidator : ModelValidator<LogRequest>
 {
     private static readonly HashSet<LogType> TypesWithRequiredGuildId = new()
     {
-        LogType.ThreadUpdated, LogType.GuildUpdated, LogType.EmoteDeleted, LogType.ChannelCreated, LogType.ChannelDeleted, LogType.ThreadDeleted, LogType.MemberUpdated,
-        LogType.ChannelUpdated, LogType.UserLeft, LogType.MessageDeleted, LogType.OverwriteUpdated, LogType.MemberRoleUpdated, LogType.OverwriteCreated, LogType.OverwriteDeleted,
-        LogType.InteractionCommand
+        LogType.ThreadUpdated, LogType.GuildUpdated, LogType.EmoteDeleted, LogType.ChannelCreated, LogType.ChannelDeleted, LogType.ThreadDeleted, LogType.ChannelUpdated, LogType.UserLeft,
+        LogType.MessageDeleted, LogType.OverwriteUpdated, LogType.MemberRoleUpdated, LogType.OverwriteCreated, LogType.OverwriteDeleted, LogType.InteractionCommand
     };
 
     private static readonly HashSet<LogType> TypesWithRequiredUserId = new()
@@ -39,8 +37,34 @@ public class LogRequestValidator : ModelValidator<LogRequest>
 
     private static IEnumerable<ValidationResult> ValidateDateTime(LogRequest request, ValidationContext _)
     {
-        if (request.CreatedAt.HasValue && request.CreatedAt.Value.Kind != DateTimeKind.Utc)
-            yield return new ValidationResult("Only UTC value is allowed.", new[] { nameof(request.CreatedAt) });
+        var dateTimeValidations = new List<ValidationResult?>
+        {
+            CheckUtcDateTime(request.CreatedAt, nameof(request.CreatedAt))
+        };
+
+        if (request.ApiRequest is not null)
+        {
+            dateTimeValidations.Add(CheckUtcDateTime(request.ApiRequest.StartAt, nameof(request.ApiRequest.StartAt)));
+            dateTimeValidations.Add(CheckUtcDateTime(request.ApiRequest.EndAt, nameof(request.ApiRequest.EndAt)));
+        }
+
+        if (request.JobExecution is not null)
+        {
+            dateTimeValidations.Add(CheckUtcDateTime(request.JobExecution.StartAt, nameof(request.JobExecution.StartAt)));
+            dateTimeValidations.Add(CheckUtcDateTime(request.JobExecution.EndAt, nameof(request.JobExecution.EndAt)));
+        }
+
+        if (request.MessageDeleted is not null)
+            dateTimeValidations.Add(CheckUtcDateTime(request.MessageDeleted.MessageCreatedAt, nameof(request.MessageDeleted.MessageCreatedAt)));
+
+        return dateTimeValidations.Where(o => o is not null)!;
+    }
+
+    private static ValidationResult? CheckUtcDateTime(DateTime? dateTime, string propertyName)
+    {
+        if (dateTime.HasValue && dateTime.Value.Kind != DateTimeKind.Utc)
+            return new ValidationResult("Only UTC value is allowed.", new[] { propertyName });
+        return null;
     }
 
     private static IEnumerable<ValidationResult> ValidateDataBindings(LogRequest request, ValidationContext _)
@@ -80,8 +104,13 @@ public class LogRequestValidator : ModelValidator<LogRequest>
 
     private static IEnumerable<ValidationResult> ValidateIdBindings(LogRequest request, ValidationContext _)
     {
-        if (string.IsNullOrEmpty(request.GuildId) && TypesWithRequiredGuildId.Contains(request.Type))
-            yield return new ValidationResult($"Missing required property GuildId for type {request.Type}.", new[] { nameof(request.GuildId) });
+        if (string.IsNullOrEmpty(request.GuildId))
+        {
+            if (TypesWithRequiredGuildId.Contains(request.Type))
+                yield return new ValidationResult($"Missing required property GuildId for type {request.Type}.", new[] { nameof(request.GuildId) });
+            else if (request.MemberUpdated is not null && !request.MemberUpdated.IsApiUpdate())
+                yield return new ValidationResult($"Missing required property GuildId for type MemberUpdated.", new[] { nameof(request.GuildId) });
+        }
 
         if (string.IsNullOrEmpty(request.UserId) && TypesWithRequiredUserId.Contains(request.Type))
             yield return new ValidationResult($"Missing required property UserId for type {request.Type}.", new[] { nameof(request.UserId) });
