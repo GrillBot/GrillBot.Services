@@ -1,6 +1,4 @@
-﻿using AuditLogService.Actions.Search;
-
-namespace AuditLogService.Actions;
+﻿namespace AuditLogService.Actions;
 
 public static class ActionExtensions
 {
@@ -9,6 +7,7 @@ public static class ActionExtensions
         services
             .AddScoped<CreateItemsAction>()
             .AddScoped<DeleteItemAction>()
-            .AddScoped<SearchItemsAction>();
+            .AddScoped<Search.SearchItemsAction>()
+            .AddScoped<Detail.ReadDetailAction>();
     }
 }

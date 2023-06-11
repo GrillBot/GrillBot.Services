@@ -1,4 +1,5 @@
 ﻿using AuditLogService.Actions;
+using AuditLogService.Actions.Detail;
 using AuditLogService.Actions.Search;
 using AuditLogService.Models.Request.CreateItems;
 using AuditLogService.Models.Request.Search;
@@ -33,4 +34,10 @@ public class LogItemController : ControllerBase
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SearchItemsAsync(SearchRequest request)
         => await ProcessAsync<SearchItemsAction>(request);
+
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DetailAsync(Guid id)
+        => await ProcessAsync<ReadDetailAction>(id);
 }

@@ -393,7 +393,6 @@ public partial class SearchItemsAction
 
         result.IsDetailAvailable = true;
         result.Preview = await query.FirstOrDefaultAsync();
-        result.Preview ??= new JobPreview();
     }
 
     private async Task SetApiPreviewAsync(LogListItem result)
