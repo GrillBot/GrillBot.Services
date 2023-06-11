@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Discord;
 
-namespace AuditLogService.Models.Request;
+namespace AuditLogService.Models.Request.CreateItems;
 
 public class GuildInfoRequest
 {
@@ -14,10 +14,6 @@ public class GuildInfoRequest
     public string? IconId { get; set; }
     public byte[]? IconData { get; set; }
     public string? VoiceRegionId { get; set; }
-
-    [Required]
-    [StringLength(32)]
-    public string OwnerId { get; set; } = null!;
 
     [StringLength(32)]
     public string? PublicUpdatesChannelId { get; set; }

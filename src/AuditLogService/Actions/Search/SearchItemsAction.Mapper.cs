@@ -269,7 +269,6 @@ public partial class SearchItemsAction
                 IconId = o.Before.IconId != o.After.IconId,
                 MfaLevel = o.Before.MfaLevel != o.After.MfaLevel,
                 NsfwLevel = o.Before.NsfwLevel != o.After.NsfwLevel,
-                OwnerId = o.Before.OwnerId != o.After.OwnerId,
                 PremiumTier = o.Before.PremiumTier != o.After.PremiumTier,
                 SplashId = o.Before.SplashId != o.After.SplashId,
                 VanityUrl = o.Before.VanityUrl != o.After.VanityUrl,

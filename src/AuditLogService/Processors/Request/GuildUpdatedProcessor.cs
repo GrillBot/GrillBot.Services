@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Models.Request;
 using AuditLogService.Models.Request.CreateItems;
 using AuditLogService.Processors.Request.Abstractions;
 using Discord;
@@ -52,7 +51,6 @@ public class GuildUpdatedProcessor : RequestProcessorBase
             IconId = request.IconId,
             MfaLevel = request.MfaLevel,
             NsfwLevel = request.NsfwLevel,
-            OwnerId = request.OwnerId,
             PremiumTier = request.PremiumTier,
             SplashId = request.SplashId,
             VanityUrl = request.VanityUrl,

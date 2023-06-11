@@ -109,7 +109,6 @@ public partial class ReadDetailAction
 
         var result = new GuildUpdatedDetail
         {
-            OwnerId = new Diff<string?>(before.OwnerId, after.OwnerId).NullIfEquals(),
             Name = new Diff<string>(before.Name, after.Name).NullIfEquals(),
             Description = new Diff<string?>(before.Description, after.Description).NullIfEquals(),
             Features = new Diff<GuildFeature>(before.Features, after.Features).NullIfEquals(),

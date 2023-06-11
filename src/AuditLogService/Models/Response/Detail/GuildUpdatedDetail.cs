@@ -13,7 +13,6 @@ public class GuildUpdatedDetail
     public Diff<string?>? SplashId { get; set; } 
     public Diff<string?>? IconId { get; set; } 
     public Diff<byte[]?>? IconData { get; set; } 
-    public Diff<string?>? OwnerId { get; set; } 
     public Diff<string?>? PublicUpdatesChannelId { get; set; } 
     public Diff<string?>? RulesChannelId { get; set; } 
     public Diff<string?>? SystemChannelId { get; set; } 

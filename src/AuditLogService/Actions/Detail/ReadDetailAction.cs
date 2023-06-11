@@ -1,6 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
-using AuditLogService.Models.Response.Detail;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,44 +23,48 @@ public partial class ReadDetailAction : ApiActionBase
         if (logHeader is null)
             return new ApiResult(StatusCodes.Status404NotFound);
 
-        object? detailDto = null;
+        var result = new Models.Response.Detail.Detail
+        {
+            Type = logHeader.Type
+        };
+
         switch (logHeader.Type)
         {
             case LogType.Info or LogType.Warning or LogType.Error:
-                detailDto = await CreateMessageDetailAsync(logHeader);
+                result.Data = await CreateMessageDetailAsync(logHeader);
                 break;
             case LogType.ChannelUpdated:
-                detailDto = await CreateChannelUpdatedDetailAsync(logHeader);
+                result.Data = await CreateChannelUpdatedDetailAsync(logHeader);
                 break;
             case LogType.OverwriteUpdated:
-                detailDto = await CreateOverwriteUpdatedDetailAsync(logHeader);
+                result.Data = await CreateOverwriteUpdatedDetailAsync(logHeader);
                 break;
             case LogType.MemberUpdated:
-                detailDto = await CreateMemberUpdatedDetailAsync(logHeader);
+                result.Data = await CreateMemberUpdatedDetailAsync(logHeader);
                 break;
             case LogType.GuildUpdated:
-                detailDto = await CreateGuildUpdatedDetailAsync(logHeader);
+                result.Data = await CreateGuildUpdatedDetailAsync(logHeader);
                 break;
             case LogType.MessageDeleted:
-                detailDto = await CreateMessageDeletedDetailAsync(logHeader);
+                result.Data = await CreateMessageDeletedDetailAsync(logHeader);
                 break;
             case LogType.InteractionCommand:
-                detailDto = await CreateInteractionCommandDetailAsync(logHeader);
+                result.Data = await CreateInteractionCommandDetailAsync(logHeader);
                 break;
             case LogType.ThreadDeleted:
-                detailDto = await CreateThreadDeletedDetailAsync(logHeader);
+                result.Data = await CreateThreadDeletedDetailAsync(logHeader);
                 break;
             case LogType.JobCompleted:
-                detailDto = await CreateJobExecutionDetailAsync(logHeader);
+                result.Data = await CreateJobExecutionDetailAsync(logHeader);
                 break;
             case LogType.Api:
-                detailDto = await CreateApiRequestDetailAsync(logHeader);
+                result.Data = await CreateApiRequestDetailAsync(logHeader);
                 break;
             case LogType.ThreadUpdated:
-                detailDto = await CreateThreaduUpdatedDetailAsync(logHeader);
+                result.Data = await CreateThreaduUpdatedDetailAsync(logHeader);
                 break;
         }
 
-        return detailDto is null ? new ApiResult(StatusCodes.Status404NotFound) : new ApiResult(StatusCodes.Status200OK, detailDto);
+        return new ApiResult(StatusCodes.Status200OK, result);
     }
 }
