@@ -9,6 +9,12 @@ public static class ActionExtensions
             .AddScoped<DeleteItemAction>()
             .AddScoped<Search.SearchItemsAction>()
             .AddScoped<Detail.ReadDetailAction>()
-            .AddScoped<Archivation.ArchiveOldLogsAction>();
+            .AddScoped<Archivation.ArchiveOldLogsAction>()
+            .AddScoped<Statistics.GetAuditLogStatisticsAction>()
+            .AddScoped<Statistics.GetInteractionStatisticsListAction>()
+            .AddScoped<Statistics.GetUserCommandStatisticsAction>()
+            .AddScoped<Statistics.GetApiStatisticsAction>()
+            .AddScoped<Statistics.GetUserApiStatisticsAction>()
+            .AddScoped<Statistics.GetAvgTimesAction>();
     }
 }

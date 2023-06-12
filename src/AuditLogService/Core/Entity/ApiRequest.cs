@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Core.Entity;
 
+[Index(nameof(Method), nameof(TemplatePath))]
 public class ApiRequest : ChildEntityBase
 {
     [StringLength(128)]
