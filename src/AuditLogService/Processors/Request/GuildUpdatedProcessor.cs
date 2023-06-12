@@ -62,7 +62,6 @@ public class GuildUpdatedProcessor : RequestProcessorBase
             RulesChannelId = request.RulesChannelId,
             SystemChannelFlags = request.SystemChannelFlags,
             SystemChannelId = request.SystemChannelId,
-            VoiceRegionId = request.VoiceRegionId,
             PublicUpdatesChannelId = request.PublicUpdatesChannelId
         };
     }

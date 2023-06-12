@@ -18,9 +18,11 @@ public partial class SearchItemsAction : ApiActionBase
         var request = (SearchRequest)Parameters[0]!;
 
         request.UserIds = request.UserIds.Distinct().ToList();
-        request.Ids = request.Ids.Distinct().ToList();
 
-        if (request.Ids.Count == 0)
+        if (request.Ids is not null)
+            request.Ids = request.Ids.Distinct().ToList();
+
+        if (request.Ids is null || request.Ids.Count == 0)
             request.Ids = await SearchIdsFromAdvancedFilterAsync(request);
 
         var headers = await ReadLogHeaders(request);

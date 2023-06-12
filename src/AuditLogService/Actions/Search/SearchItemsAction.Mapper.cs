@@ -96,18 +96,22 @@ public partial class SearchItemsAction
 
     private async Task SetTextPreviewAsync(LogListItem result)
     {
-        var logMessage = await Context.LogMessages.AsNoTracking()
+        var preview = await Context.LogMessages.AsNoTracking()
             .Where(o => o.LogItemId == result.Id)
-            .Select(o => o.Message)
+            .Select(o => new TextPreview
+            {
+                Message = o.Message,
+                FullSource = $"{o.SourceAppName}/{o.Source}"
+            })
             .FirstOrDefaultAsync();
-        logMessage ??= "";
+        if (preview is null)
+            return;
 
         const int maxLength = 1000;
-        result.IsDetailAvailable = logMessage.Length > maxLength;
-        result.Preview = new TextPreview
-        {
-            Message = logMessage.Cut(maxLength) ?? ""
-        };
+        result.IsDetailAvailable = preview.Message.Length > maxLength;
+
+        preview.Message = preview.Message.Cut(maxLength) ?? "";
+        result.Preview = preview;
     }
 
     private async Task SetChannelPreviewAsync(LogListItem result)

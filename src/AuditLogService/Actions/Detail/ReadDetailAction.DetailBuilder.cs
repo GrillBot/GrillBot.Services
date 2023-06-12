@@ -16,7 +16,12 @@ public partial class ReadDetailAction
     {
         return await Context.LogMessages.AsNoTracking()
             .Where(o => o.LogItemId == header.Id)
-            .Select(o => new MessageDetail { Text = o.Message })
+            .Select(o => new MessageDetail
+            {
+                Text = o.Message,
+                Source = o.Source,
+                SourceAppName = o.SourceAppName
+            })
             .FirstOrDefaultAsync();
     }
 

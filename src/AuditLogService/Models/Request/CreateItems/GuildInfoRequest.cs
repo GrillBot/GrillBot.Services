@@ -13,7 +13,6 @@ public class GuildInfoRequest
     public string? SplashId { get; set; }
     public string? IconId { get; set; }
     public byte[]? IconData { get; set; }
-    public string? VoiceRegionId { get; set; }
 
     [StringLength(32)]
     public string? PublicUpdatesChannelId { get; set; }

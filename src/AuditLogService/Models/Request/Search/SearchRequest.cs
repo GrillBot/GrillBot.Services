@@ -25,7 +25,7 @@ public class SearchRequest : IValidatableObject
     public DateTime? CreatedFrom { get; set; }
     public DateTime? CreatedTo { get; set; }
     public bool OnlyWithFiles { get; set; }
-    public List<Guid> Ids { get; set; } = new();
+    public List<Guid>? Ids { get; set; }
 
     public AdvancedSearchRequest? AdvancedSearch { get; set; }
 

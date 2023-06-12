@@ -14,4 +14,16 @@ public class AdvancedSearchRequest
     public UserIdSearchRequest? MemberRolesUpdated { get; set; }
     public UserIdSearchRequest? MemberUpdated { get; set; }
     public MessageDeletedSearchRequest? MessageDeleted { get; set; }
+
+    public bool IsAnySet()
+    {
+        var items = new IAdvancedSearchRequest?[]
+        {
+            Info, Warning, Error, Interaction, Job, Api,
+            OverwriteCreated, OverwriteDeleted, OverwriteUpdated,
+            MemberRolesUpdated, MemberUpdated, MessageDeleted
+        };
+
+        return items.Any(o => o?.IsSet() == true);
+    }
 }

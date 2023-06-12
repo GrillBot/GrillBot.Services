@@ -9,40 +9,42 @@ namespace AuditLogService.Actions.Search;
 
 public partial class SearchItemsAction
 {
-    private async Task<List<Guid>> SearchIdsFromAdvancedFilterAsync(SearchRequest request)
+    private async Task<List<Guid>?> SearchIdsFromAdvancedFilterAsync(SearchRequest request)
     {
         var result = new List<Guid>();
-        if (request.Ids.Count > 0 || request.ShowTypes.Count == 0 || request.AdvancedSearch is null)
-            return result; // Ignore advanced filters if IDs was specified explicitly.
+        if ((request.Ids is not null && request.Ids.Count > 0) || request.ShowTypes.Count == 0 || request.AdvancedSearch?.IsAnySet() != true)
+            return null; // Ignore advanced filters if IDs was specified explicitly.
 
-        if (request.IsAdvancedFilterSet(LogType.Info))
+        if (request.IsAdvancedFilterSet(LogType.Info) || request.IsAdvancedFilterSet(LogType.Warning) || request.IsAdvancedFilterSet(LogType.Error))
         {
-            result.AddRange(
-                await Context.LogMessages.AsNoTracking()
-                    .Where(o => o.Message.Contains(request.AdvancedSearch.Info!.Text!) && o.Severity == LogSeverity.Info)
-                    .Select(o => o.LogItemId)
-                    .ToListAsync()
-            );
-        }
+            var query = Context.LogMessages.AsNoTracking();
+            TextSearchRequest? searchReq = null;
 
-        if (request.IsAdvancedFilterSet(LogType.Warning))
-        {
-            result.AddRange(
-                await Context.LogMessages.AsNoTracking()
-                    .Where(o => o.Message.Contains(request.AdvancedSearch.Warning!.Text!) && o.Severity == LogSeverity.Warning)
-                    .Select(o => o.LogItemId)
-                    .ToListAsync()
-            );
-        }
+            if (request.IsAdvancedFilterSet(LogType.Info))
+            {
+                searchReq = request.AdvancedSearch.Info;
+                query = query.Where(o => o.Severity == LogSeverity.Info);
+            }
+            else if (request.IsAdvancedFilterSet(LogType.Warning))
+            {
+                searchReq = request.AdvancedSearch.Warning;
+                query = query.Where(o => o.Severity == LogSeverity.Warning);
+            }
+            else if (request.IsAdvancedFilterSet(LogType.Error))
+            {
+                searchReq = request.AdvancedSearch.Error;
+                query = query.Where(o => o.Severity == LogSeverity.Error);
+            }
 
-        if (request.IsAdvancedFilterSet(LogType.Error))
-        {
-            result.AddRange(
-                await Context.LogMessages.AsNoTracking()
-                    .Where(o => o.Message.Contains(request.AdvancedSearch.Error!.Text!) && o.Severity == LogSeverity.Error)
-                    .Select(o => o.LogItemId)
-                    .ToListAsync()
-            );
+            if (searchReq is not null)
+            {
+                if (!string.IsNullOrEmpty(searchReq.Source))
+                    query = query.Where(o => EF.Functions.ILike(o.Source, searchReq.Source));
+                if (!string.IsNullOrEmpty(searchReq.SourceAppName))
+                    query = query.Where(o => EF.Functions.ILike(o.SourceAppName, searchReq.SourceAppName));
+
+                result.AddRange(await query.Select(o => o.LogItemId).ToListAsync());
+            }
         }
 
         if (request.IsAdvancedFilterSet(LogType.InteractionCommand))
@@ -190,7 +192,7 @@ public partial class SearchItemsAction
             query = query.Where(o => o.CreatedAt <= request.CreatedTo.Value);
         if (request.OnlyWithFiles)
             query = query.Where(o => o.Files.Count > 0);
-        if (request.Ids.Count > 0)
+        if (request.Ids is not null)
             query = query.Where(o => request.Ids.Contains(o.Id));
 
         query = request.Sort.Descending ? query.OrderByDescending(o => o.CreatedAt) : query.OrderBy(o => o.CreatedAt);

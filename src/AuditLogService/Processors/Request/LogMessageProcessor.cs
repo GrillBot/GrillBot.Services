@@ -17,7 +17,9 @@ public class LogMessageProcessor : RequestProcessorBase
         entity.LogMessage = new LogMessage
         {
             Message = message.Message,
-            Severity = message.Severity
+            Severity = message.Severity,
+            SourceAppName = message.SourceAppName,
+            Source = message.Source
         };
 
         return Task.CompletedTask;
