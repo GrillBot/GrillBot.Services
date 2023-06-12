@@ -8,6 +8,7 @@ public static class ActionExtensions
             .AddScoped<CreateItemsAction>()
             .AddScoped<DeleteItemAction>()
             .AddScoped<Search.SearchItemsAction>()
-            .AddScoped<Detail.ReadDetailAction>();
+            .AddScoped<Detail.ReadDetailAction>()
+            .AddScoped<Archivation.ArchiveOldLogsAction>();
     }
 }
