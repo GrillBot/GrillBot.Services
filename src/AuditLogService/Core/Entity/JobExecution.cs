@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Core.Entity;
 
+[Index(nameof(JobName))]
 public class JobExecution : ChildEntityBase
 {
     [StringLength(128)]
