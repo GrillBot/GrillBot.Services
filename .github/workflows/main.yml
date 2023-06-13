@@ -2,10 +2,10 @@ name: CI/CD
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    types: [ opened, reopened, synchronize ]
-    branches: [ master ]
+    types: [opened, reopened, synchronize]
+    branches: [master]
   workflow_dispatch:
 
 env:
@@ -21,6 +21,7 @@ jobs:
       Graphics: ${{ steps.filter.outputs.Graphics }}
       PointsService: ${{ steps.filter.outputs.PointsService }}
       ImageProcessingService: ${{ steps.filter.outputs.ImageProcessingService }}
+      AuditLogService: ${{ steps.filter.outputs.AuditLogService }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -44,6 +45,9 @@ jobs:
             ImageProcessingService:
               - .github/workflows/**
               - 'src/ImageProcessingService/**'
+            AuditLogService:
+              - .github/workflows/**
+              - 'src/AuditLogService/**'
   FileService_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -91,7 +95,7 @@ jobs:
             github_actions_token=${{ secrets.GITHUB_TOKEN }}
   FileService_Deploy_Production:
     runs-on: ubuntu-latest
-    environment: 'Production_FileService'
+    environment: "Production_FileService"
     needs: FileService_BuildContainer
     if: github.ref == 'refs/heads/master'
     steps:
@@ -150,7 +154,7 @@ jobs:
             github_actions_token=${{ secrets.GITHUB_TOKEN }}
   RubbergodService_Deploy_Production:
     runs-on: ubuntu-latest
-    environment: 'Production_RubbergodService'
+    environment: "Production_RubbergodService"
     needs: RubbergodService_BuildContainer
     if: github.ref == 'refs/heads/master'
     steps:
@@ -204,7 +208,7 @@ jobs:
           tags: ghcr.io/grillbot/grillbot.services:graphics
   Graphics_Deploy_Production:
     runs-on: ubuntu-latest
-    environment: 'Production_Graphics'
+    environment: "Production_Graphics"
     needs: Graphics_BuildContainer
     if: github.ref == 'refs/heads/master'
     steps:
@@ -263,7 +267,7 @@ jobs:
             github_actions_token=${{ secrets.GITHUB_TOKEN }}
   PointsService_Deploy_Production:
     runs-on: ubuntu-latest
-    environment: 'Production_PointsService'
+    environment: "Production_PointsService"
     needs: PointsService_BuildContainer
     if: github.ref == 'refs/heads/master'
     steps:
@@ -322,7 +326,7 @@ jobs:
             github_actions_token=${{ secrets.GITHUB_TOKEN }}
   ImageProcessingService_Deploy_Production:
     runs-on: ubuntu-latest
-    environment: 'Production_ImageProcessingService'
+    environment: "Production_ImageProcessingService"
     needs: ImageProcessingService_BuildContainer
     if: github.ref == 'refs/heads/master'
     steps:
@@ -334,3 +338,61 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-image-processing
+  AuditLogService_Build:
+    runs-on: ubuntu-latest
+    needs: PathsFilter
+    if: needs.PathsFilter.outputs.AuditLogService == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+          source-url: https://nuget.pkg.github.com/GrillBot/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Install dependencies
+        run: dotnet restore -r linux-x64 src/AuditLogService/
+      - name: Build (DEBUG)
+        run: dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/AuditLogService/
+      - name: Build (RELEASE)
+        run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/AuditLogService/
+  AuditLogService_BuildContainer:
+    runs-on: ubuntu-latest
+    needs: AuditLogService_Build
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Login to the container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: src/AuditLogService
+          push: true
+          tags: ghcr.io/grillbot/grillbot.services:audit_log_service
+          build-args: |
+            github_actions_token=${{ secrets.GITHUB_TOKEN }}
+  AuditLogService_Deploy_Production:
+    runs-on: ubuntu-latest
+    environment: "Production_AuditLogService"
+    needs: AuditLogService_BuildContainer
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Execute deployment on SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_Username }}
+          password: ${{ secrets.SSH_Password }}
+          port: 22
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-audit-log-service
