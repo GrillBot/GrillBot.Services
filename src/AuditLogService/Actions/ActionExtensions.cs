@@ -16,6 +16,7 @@ public static class ActionExtensions
             .AddScoped<Statistics.GetApiStatisticsAction>()
             .AddScoped<Statistics.GetUserApiStatisticsAction>()
             .AddScoped<Statistics.GetAvgTimesAction>()
-            .AddScoped<Info.GetJobsInfoAction>();
+            .AddScoped<Info.GetJobsInfoAction>()
+            .AddScoped<Info.GetDashboardInfoAction>();
     }
 }
