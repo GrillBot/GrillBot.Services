@@ -26,7 +26,7 @@ public class GetUserCommandStatisticsAction : ApiActionBase
             Action = $"{o.Name} ({o.ModuleName}/{o.MethodName})",
             Count = o.Count,
             UserId = o.UserId!
-        }).OrderBy(o => o.Action).ToList();
+        }).ToList();
 
         return new ApiResult(StatusCodes.Status200OK, result);
     }

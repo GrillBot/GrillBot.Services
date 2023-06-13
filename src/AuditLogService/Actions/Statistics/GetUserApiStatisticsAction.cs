@@ -30,7 +30,6 @@ public class GetUserApiStatisticsAction : ApiActionBase
                 Count = o.Count,
                 UserId = o.User
             })
-            .OrderBy(o => o.Action)
             .ToList();
 
         return new ApiResult(StatusCodes.Status200OK, result);

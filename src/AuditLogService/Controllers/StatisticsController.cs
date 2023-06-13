@@ -36,7 +36,7 @@ public class StatisticsController : ControllerBase
     public async Task<IActionResult> GetUseApiStatisticsAsync(string criteria)
         => await ProcessAsync<GetUserApiStatisticsAction>(criteria);
 
-    [HttpGet("api/avgTimes")]
+    [HttpGet("avgTimes")]
     [ProducesResponseType(typeof(AvgExecutionTimes), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAvgTimesAsync()
         => await ProcessAsync<GetAvgTimesAction>();
