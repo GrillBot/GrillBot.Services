@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 namespace AuditLogService.Core.Entity;
 
 [Index(nameof(Method), nameof(TemplatePath))]
+[Index(nameof(ApiGroupName))]
+[Index(nameof(EndAt))]
 public class ApiRequest : ChildEntityBase
 {
     [StringLength(128)]

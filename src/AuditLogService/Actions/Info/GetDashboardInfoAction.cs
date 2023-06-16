@@ -1,5 +1,4 @@
-﻿using System.Net;
-using AuditLogService.Core.Entity;
+﻿using AuditLogService.Core.Entity;
 using AuditLogService.Models.Response.Info.Dashboard;
 using GrillBot.Core.Helpers;
 using GrillBot.Core.Infrastructure.Actions;
@@ -83,12 +82,12 @@ public class GetDashboardInfoAction : ApiActionBase
             .AverageAsync(o => (long?)o.Duration) ?? 0;
 
         var jobs = await Context.JobExecutions.AsNoTracking()
-            .Where(o => o.LogItem.CreatedAt >= startOfDay && o.LogItem.CreatedAt < endOfDay)
+            .Where(o => o.EndAt >= startOfDay && o.EndAt < endOfDay)
             .Select(o => (long)Math.Round((o.EndAt - o.StartAt).TotalMilliseconds))
             .AverageAsync(o => (long?)o) ?? 0;
 
         var apiBaseQuery = Context.ApiRequests.AsNoTracking()
-            .Where(o => o.LogItem.CreatedAt >= startOfDay && o.LogItem.CreatedAt < endOfDay)
+            .Where(o => o.EndAt >= startOfDay && o.EndAt < endOfDay)
             .Select(o => new { Duration = (long)Math.Round((o.EndAt - o.StartAt).TotalMilliseconds), o.ApiGroupName });
 
         var publicApi = await apiBaseQuery.Where(o => o.ApiGroupName == "V2").AverageAsync(o => (long?)o.Duration) ?? 0;

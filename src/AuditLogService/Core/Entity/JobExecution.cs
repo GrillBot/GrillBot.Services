@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AuditLogService.Core.Entity;
 
 [Index(nameof(JobName))]
+[Index(nameof(EndAt))]
 public class JobExecution : ChildEntityBase
 {
     [StringLength(128)]
