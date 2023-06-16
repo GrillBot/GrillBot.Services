@@ -56,32 +56,19 @@ public class GetApiStatisticsAction : ApiActionBase
             .Select(o => $"{(int)o} ({o})")
             .ToList();
 
-        var items = await Context.ApiRequests.AsNoTracking()
+        return await Context.ApiRequests.AsNoTracking()
             .GroupBy(o => new { o.Method, o.TemplatePath })
             .Select(o => new StatisticItem
             {
                 Key = $"{o.Key.Method} {o.Key.TemplatePath}",
-                Last = o.Max(x => x.LogItem.CreatedAt),
+                Last = o.Max(x => x.EndAt),
                 FailedCount = o.Count(x => !successStatusCodes.Contains(x.Result)),
                 MaxDuration = o.Max(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)),
                 MinDuration = o.Min(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)),
                 SuccessCount = o.Count(x => successStatusCodes.Contains(x.Result)),
-                TotalDuration = o.Sum(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds))
+                TotalDuration = o.Sum(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)),
+                LastRunDuration = o.OrderByDescending(x => x.EndAt).Select(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)).First()
             })
             .ToListAsync();
-
-        foreach (var item in items)
-        {
-            var fields = item.Key.Split(' ');
-            var lastItem = await Context.ApiRequests.AsNoTracking()
-                .Where(o => o.Method == fields[0] && o.TemplatePath == fields[1])
-                .OrderByDescending(x => x.LogItem.CreatedAt)
-                .FirstOrDefaultAsync();
-            if (lastItem is null)
-                continue;
-            item.LastRunDuration = (int)Math.Round((lastItem.EndAt - lastItem.StartAt).TotalMilliseconds);
-        }
-
-        return items;
     }
 }
