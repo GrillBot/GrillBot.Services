@@ -56,7 +56,7 @@ public class GetApiStatisticsAction : ApiActionBase
             .Select(o => $"{(int)o} ({o})")
             .ToList();
 
-        return await Context.ApiRequests.AsNoTracking()
+        var items = await Context.ApiRequests.AsNoTracking()
             .GroupBy(o => new { o.Method, o.TemplatePath })
             .Select(o => new StatisticItem
             {
@@ -70,5 +70,10 @@ public class GetApiStatisticsAction : ApiActionBase
                 LastRunDuration = o.OrderByDescending(x => x.EndAt).Select(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)).First()
             })
             .ToListAsync();
+
+        return items
+            .OrderByDescending(o => o.AvgDuration)
+            .ThenBy(o => o.Key)
+            .ToList();
     }
 }
