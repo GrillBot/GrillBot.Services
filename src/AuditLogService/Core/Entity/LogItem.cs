@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AuditLogService.Core.Entity;
 
 [Index(nameof(CreatedAt), Name = "IX_LogItem_CreatedAt")]
+[Index(nameof(GuildId))]
 public class LogItem
 {
     [Key]

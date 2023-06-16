@@ -21,4 +21,9 @@ public class InfoController : ControllerBase
     [ProducesResponseType(typeof(DashboardInfo), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDashboardInfoAsync()
         => await ProcessAsync<GetDashboardInfoAction>();
+
+    [HttpGet("guild/{guildId}/count")]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetItemsCountOfGuildAsync(string guildId)
+        => await ProcessAsync<GetItemsCountOfGuildAction>(guildId);
 }
