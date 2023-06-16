@@ -42,6 +42,8 @@ public partial class SearchItemsAction
                     query = query.Where(o => EF.Functions.ILike(o.Source, searchReq.Source));
                 if (!string.IsNullOrEmpty(searchReq.SourceAppName))
                     query = query.Where(o => EF.Functions.ILike(o.SourceAppName, searchReq.SourceAppName));
+                if (!string.IsNullOrEmpty(searchReq.Text))
+                    query = query.Where(o => EF.Functions.ILike(o.Message, $"%{searchReq.Text}%"));
 
                 result.AddRange(await query.Select(o => o.LogItemId).ToListAsync());
             }
