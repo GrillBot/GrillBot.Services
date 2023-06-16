@@ -30,15 +30,6 @@ builder.Services.Configure<ForwardedHeadersOptions>(opt => opt.ForwardedHeaders 
 
 var app = builder.Build();
 
-app.Use((context, next) =>
-{
-    context.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
-    context.Response.Headers.Add("X-Xss-Protection", "1; mode=block");
-    context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
-
-    return next();
-});
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
