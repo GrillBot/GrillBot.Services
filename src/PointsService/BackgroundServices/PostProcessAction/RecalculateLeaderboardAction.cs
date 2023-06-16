@@ -58,7 +58,7 @@ public class RecalculateLeaderboardAction : PostProcessActionBase
         {
             var usersWithLeaderboard = await Repository.Leaderboard.GetUsersWithLeaderboardAsync(perGuild.Key);
 
-            foreach (var user in users.Where(o => !usersWithLeaderboard.Contains(o.Id)))
+            foreach (var user in perGuild.Where(o => !usersWithLeaderboard.Contains(o.Id)))
                 await ProcessUserAsync(user.GuildId, user.Id);
         }
     }
