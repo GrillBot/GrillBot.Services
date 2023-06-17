@@ -16,7 +16,7 @@ public class MessageEditedProcessor : RequestProcessorBase
         entity.MessageEdited = new MessageEdited
         {
             ContentAfter = request.MessageEdited!.ContentAfter,
-            ContentBefore = request.MessageEdited.ContentBefore,
+            ContentBefore = request.MessageEdited.ContentBefore ?? "",
             JumpUrl = request.MessageEdited.JumpUrl
         };
 

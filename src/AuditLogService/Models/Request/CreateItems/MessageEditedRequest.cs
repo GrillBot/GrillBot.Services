@@ -7,8 +7,7 @@ public class MessageEditedRequest
     [Required]
     public string JumpUrl { get; set; } = null!;
     
-    [Required]
-    public string ContentBefore { get; set; } = null!;
+    public string? ContentBefore { get; set; }
     
     [Required]
     public string ContentAfter { get; set; } = null!;
