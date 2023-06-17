@@ -18,7 +18,7 @@ public partial class ArchiveOldLogsAction
         RemoveItem(item.ChannelDeleted);
         RemoveItem(item.ChannelUpdated);
         RemoveItem(item.GuildUpdated);
-        RemoveItem(item.MemberRolesUpdated);
+        RemoveItems(item.MemberRolesUpdated);
         RemoveItem(item.MessageDeleted);
         RemoveItem(item.MessageEdited);
         RemoveItem(item.OverwriteCreated);
@@ -37,5 +37,11 @@ public partial class ArchiveOldLogsAction
     {
         if (entity is not null)
             Context.Set<TEntity>().Remove(entity);
+    }
+
+    private void RemoveItems<TEntity>(IEnumerable<TEntity>? entities) where TEntity : class
+    {
+        if (entities is not null)
+            Context.Set<TEntity>().RemoveRange(entities);
     }
 }
