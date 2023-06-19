@@ -180,6 +180,20 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-rubbergodservice
+  RubbergodService_Deploy_Development:
+    runs-on: ubuntu-latest
+    environment: "Development"
+    needs: RubbergodService_BuildContainer
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          password: ${{ secrets.SSH_DEV_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-rubbergod-service
   Graphics_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -234,6 +248,20 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-graphics
+  Graphics_Deploy_Development:
+    runs-on: ubuntu-latest
+    environment: "Development"
+    needs: Graphics_BuildContainer
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          password: ${{ secrets.SSH_DEV_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-graphics
   PointsService_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -293,6 +321,20 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-points
+  PointsService_Deploy_Development:
+    runs-on: ubuntu-latest
+    environment: "Development"
+    needs: PointsService_BuildContainer
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          password: ${{ secrets.SSH_DEV_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-points-service
   ImageProcessingService_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -352,6 +394,20 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-image-processing
+  ImageProcessingService_Deploy_Development:
+    runs-on: ubuntu-latest
+    environment: "Development"
+    needs: ImageProcessingService_BuildContainer
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          password: ${{ secrets.SSH_DEV_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-image-processing-service
   AuditLogService_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -410,3 +466,17 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-audit-log-service
+  AuditLogService_Deploy_Development:
+    runs-on: ubuntu-latest
+    environment: "Development"
+    needs: AuditLogService_BuildContainer
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          password: ${{ secrets.SSH_DEV_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-audit-log-service
