@@ -95,6 +95,20 @@ jobs:
             github_actions_token=${{ secrets.GITHUB_TOKEN }}
   FileService_Deploy_Production:
     runs-on: ubuntu-latest
+    environment: "Development"
+    needs: FileService_BuildContainer
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          password: ${{ secrets.SSH_DEV_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-file-service
+  FileService_Deploy_Production:
+    runs-on: ubuntu-latest
     environment: "Production_FileService"
     needs: FileService_BuildContainer
     if: github.ref == 'refs/heads/master'
