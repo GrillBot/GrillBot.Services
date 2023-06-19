@@ -93,7 +93,7 @@ jobs:
           tags: ghcr.io/grillbot/grillbot.services:file_service
           build-args: |
             github_actions_token=${{ secrets.GITHUB_TOKEN }}
-  FileService_Deploy_Production:
+  FileService_Deploy_Development:
     runs-on: ubuntu-latest
     environment: "Development"
     needs: FileService_BuildContainer
