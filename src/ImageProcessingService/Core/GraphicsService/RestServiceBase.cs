@@ -10,6 +10,8 @@ public abstract class RestServiceBase
     protected HttpClient HttpClient { get; }
     private ICounterManager CounterManager { get; }
     public abstract string ServiceName { get; }
+    
+    protected static readonly Task<object?> EmptyResult = Task.FromResult((object?)null);
 
     protected RestServiceBase(ICounterManager counterManager, Func<HttpClient> clientFactory)
     {

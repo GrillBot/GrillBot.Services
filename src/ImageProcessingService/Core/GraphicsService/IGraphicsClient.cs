@@ -5,6 +5,7 @@ namespace ImageProcessingService.Core.GraphicsService;
 
 public interface IGraphicsClient
 {
+    Task<bool> IsAvailableAsync();
     Task<byte[]> CreateChartAsync(ChartRequestData request);
     Task<byte[]> CreateWithoutAccidentImageAsync(WithoutAccidentRequestData request);
     Task<byte[]> CreatePointsImageAsync(PointsImageRequest imageRequest);

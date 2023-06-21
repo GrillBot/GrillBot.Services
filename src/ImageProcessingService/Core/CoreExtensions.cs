@@ -19,7 +19,9 @@ public static class CoreExtensions
             .AddControllers(c => c.RegisterCoreFilter());
 
         // HealthChecks
-        services.AddHealthChecks();
+        services
+            .AddHealthChecks()
+            .AddCheck<GraphicsServiceHealthCheck>(nameof(GraphicsServiceHealthCheck));
 
         // OpenAPI
         services
