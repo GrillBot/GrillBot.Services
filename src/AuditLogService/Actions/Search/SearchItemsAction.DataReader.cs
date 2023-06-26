@@ -55,7 +55,12 @@ public partial class SearchItemsAction
             var searchReq = request.AdvancedSearch.Interaction!;
 
             if (!string.IsNullOrEmpty(searchReq.ActionName))
-                baseQuery = baseQuery.Where(o => $"{o.Name} ({o.ModuleName}/{o.MethodName})".Contains(searchReq.ActionName));
+            {
+                baseQuery = baseQuery.Where(o =>
+                    EF.Functions.ILike(o.Name, $"%{searchReq.ActionName}%") || EF.Functions.ILike(o.ModuleName, $"%{searchReq.ActionName}%") ||
+                    EF.Functions.ILike(o.MethodName, $"%{searchReq.ActionName}%"));
+            }
+
             if (searchReq.Success is not null)
                 baseQuery = baseQuery.Where(o => o.IsSuccess == searchReq.Success);
             if (searchReq.DurationFrom is not null)
