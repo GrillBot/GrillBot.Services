@@ -30,4 +30,12 @@ public abstract class ModelValidator<TModel> where TModel : class
 
         return from > to ? new ValidationResult("Unallowed interval of duration range.", new[] { fromPropertyName, toPropertyName }) : null;
     }
+
+    protected static ValidationResult? CheckDateTimeRange(DateTime? from, DateTime? to, string fromPropertyName, string toPropertyName)
+    {
+        if (from is null || to is null)
+            return null;
+
+        return from > to ? new ValidationResult("Unallowed interval of datetime duration range.", new[] { fromPropertyName, toPropertyName }) : null;
+    }
 }

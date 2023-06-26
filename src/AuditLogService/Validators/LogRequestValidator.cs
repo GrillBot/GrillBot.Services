@@ -9,7 +9,7 @@ public class LogRequestValidator : ModelValidator<LogRequest>
     private static readonly HashSet<LogType> TypesWithRequiredGuildId = new()
     {
         LogType.ThreadUpdated, LogType.GuildUpdated, LogType.EmoteDeleted, LogType.ChannelCreated, LogType.ChannelDeleted, LogType.ThreadDeleted, LogType.ChannelUpdated, LogType.UserLeft,
-        LogType.MessageDeleted, LogType.OverwriteUpdated, LogType.MemberRoleUpdated, LogType.OverwriteCreated, LogType.OverwriteDeleted, LogType.InteractionCommand
+        LogType.MessageDeleted, LogType.OverwriteUpdated, LogType.MemberRoleUpdated, LogType.OverwriteCreated, LogType.OverwriteDeleted
     };
 
     private static readonly HashSet<LogType> TypesWithRequiredUserId = new()
@@ -33,6 +33,7 @@ public class LogRequestValidator : ModelValidator<LogRequest>
         yield return ValidateDataBindings;
         yield return ValidateIdBindings;
         yield return ValidateThreadUpdatedProperties;
+        yield return ValidateInteractionCommandProperties;
     }
 
     private static IEnumerable<ValidationResult> ValidateDateTime(LogRequest request, ValidationContext _)
@@ -46,12 +47,14 @@ public class LogRequestValidator : ModelValidator<LogRequest>
         {
             dateTimeValidations.Add(CheckUtcDateTime(request.ApiRequest.StartAt, nameof(request.ApiRequest.StartAt)));
             dateTimeValidations.Add(CheckUtcDateTime(request.ApiRequest.EndAt, nameof(request.ApiRequest.EndAt)));
+            dateTimeValidations.Add(CheckDateTimeRange(request.ApiRequest.StartAt, request.ApiRequest.EndAt, nameof(request.ApiRequest.StartAt), nameof(request.ApiRequest.EndAt)));
         }
 
         if (request.JobExecution is not null)
         {
             dateTimeValidations.Add(CheckUtcDateTime(request.JobExecution.StartAt, nameof(request.JobExecution.StartAt)));
             dateTimeValidations.Add(CheckUtcDateTime(request.JobExecution.EndAt, nameof(request.JobExecution.EndAt)));
+            dateTimeValidations.Add(CheckDateTimeRange(request.JobExecution.StartAt, request.JobExecution.EndAt, nameof(request.JobExecution.StartAt), nameof(request.JobExecution.EndAt)));
         }
 
         if (request.MessageDeleted is not null)
@@ -102,7 +105,9 @@ public class LogRequestValidator : ModelValidator<LogRequest>
             if (TypesWithRequiredGuildId.Contains(request.Type))
                 yield return new ValidationResult($"Missing required property GuildId for type {request.Type}.", new[] { nameof(request.GuildId) });
             else if (request.MemberUpdated is not null && !request.MemberUpdated.IsApiUpdate())
-                yield return new ValidationResult($"Missing required property GuildId for type MemberUpdated.", new[] { nameof(request.GuildId) });
+                yield return new ValidationResult("Missing required property GuildId for type MemberUpdated.", new[] { nameof(request.GuildId) });
+            else if (request.Type is LogType.InteractionCommand && !IsAllowedDmInteraction(request.InteractionCommand!))
+                yield return new ValidationResult("Missing required property GuildId for type InteractionCommand.", new[] { nameof(request.GuildId) });
         }
 
         if (string.IsNullOrEmpty(request.UserId) && TypesWithRequiredUserId.Contains(request.Type))
@@ -139,5 +144,23 @@ public class LogRequestValidator : ModelValidator<LogRequest>
 
         foreach (var validationError in CheckThreadInfo(request.ThreadUpdated?.After))
             yield return validationError;
+    }
+
+    private static bool IsAllowedDmInteraction(InteractionCommandRequest interaction)
+        => interaction is { ModuleName: "RemindModule", MethodName: "HandleRemindPostpone" };
+
+    private static IEnumerable<ValidationResult> ValidateInteractionCommandProperties(LogRequest request, ValidationContext context)
+    {
+        if (request.Type != LogType.InteractionCommand || request.InteractionCommand is null || request.InteractionCommand.IsSuccess)
+            yield break;
+
+        if (request.InteractionCommand.CommandError is null)
+            yield return new ValidationResult("CommandError property is mandatory if interaction failed.", new[] { nameof(request.InteractionCommand.CommandError) });
+
+        if (string.IsNullOrEmpty(request.InteractionCommand.ErrorReason) && string.IsNullOrEmpty(request.InteractionCommand.Exception))
+        {
+            yield return new ValidationResult("Required ErrorReason or exception if interaction failed.",
+                new[] { nameof(request.InteractionCommand.ErrorReason), nameof(request.InteractionCommand.Exception) });
+        }
     }
 }

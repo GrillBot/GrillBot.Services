@@ -20,7 +20,7 @@ public class LogRequest : IValidatableObject
     [StringLength(32)]
     [DiscordId]
     public string? ChannelId { get; set; }
-    
+
     [StringLength(32)]
     [DiscordId]
     public string? DiscordId { get; set; }
@@ -48,8 +48,5 @@ public class LogRequest : IValidatableObject
     public MemberUpdatedRequest? MemberUpdated { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        var validator = new LogRequestValidator();
-        return validator.Validate(this, validationContext);
-    }
+        => new LogRequestValidator().Validate(this, validationContext);
 }
