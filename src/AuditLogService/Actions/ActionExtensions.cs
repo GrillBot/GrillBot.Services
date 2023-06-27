@@ -17,7 +17,10 @@ public static class ActionExtensions
             .AddScoped<Statistics.GetUserApiStatisticsAction>()
             .AddScoped<Statistics.GetAvgTimesAction>()
             .AddScoped<Info.GetJobsInfoAction>()
-            .AddScoped<Info.GetDashboardInfoAction>()
-            .AddScoped<Info.GetItemsCountOfGuildAction>();
+            .AddScoped<Info.GetItemsCountOfGuildAction>()
+            .AddScoped<Dashboard.GetApiDashboardAction>()
+            .AddScoped<Dashboard.GetInteractionsDashboardAction>()
+            .AddScoped<Dashboard.GetJobsDashboardListAction>()
+            .AddScoped<Dashboard.GetTodayAvgTimesDashboard>();
     }
 }
