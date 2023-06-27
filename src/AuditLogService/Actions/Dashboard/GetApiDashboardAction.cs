@@ -26,6 +26,6 @@ public class GetApiDashboardAction : DashboardListBaseAction<ApiRequest>
     protected override Expression<Func<ApiRequest, bool>> CreateFilter()
     {
         var apiGroup = (string)Parameters[0]!;
-        return entity => entity.ApiGroupName == apiGroup && entity.ActionName != "GetDashboardAsync";
+        return entity => entity.ApiGroupName == apiGroup && entity.ActionName != "GetDashboardAsync" && entity.ControllerName != "DashboardController";
     }
 }
