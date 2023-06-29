@@ -62,4 +62,7 @@ public class SearchRequest : IValidatableObject
 
         return advancedSearchRequest?.IsSet() == true;
     }
+
+    public bool IsAnyAdvancedFilterSet()
+        => ShowTypes.Count > 0 && AdvancedSearch is not null && Enum.GetValues<LogType>().Any(IsAdvancedFilterSet);
 }

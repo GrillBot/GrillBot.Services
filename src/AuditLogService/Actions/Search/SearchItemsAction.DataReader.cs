@@ -11,9 +11,11 @@ public partial class SearchItemsAction
 {
     private async Task<List<Guid>?> SearchIdsFromAdvancedFilterAsync(SearchRequest request)
     {
-        var result = new List<Guid>();
-        if ((request.Ids is not null && request.Ids.Count > 0) || request.ShowTypes.Count == 0 || request.AdvancedSearch?.IsAnySet() != true)
+        if ((request.Ids is not null && request.Ids.Count > 0) || !request.IsAnyAdvancedFilterSet())
             return null; // Ignore advanced filters if IDs was specified explicitly.
+
+        var result = new List<Guid>();
+        var advancedSearch = request.AdvancedSearch!;
 
         if (request.IsAdvancedFilterSet(LogType.Info) || request.IsAdvancedFilterSet(LogType.Warning) || request.IsAdvancedFilterSet(LogType.Error))
         {
@@ -22,17 +24,17 @@ public partial class SearchItemsAction
 
             if (request.IsAdvancedFilterSet(LogType.Info))
             {
-                searchReq = request.AdvancedSearch.Info;
+                searchReq = advancedSearch.Info;
                 query = query.Where(o => o.Severity == LogSeverity.Info);
             }
             else if (request.IsAdvancedFilterSet(LogType.Warning))
             {
-                searchReq = request.AdvancedSearch.Warning;
+                searchReq = advancedSearch.Warning;
                 query = query.Where(o => o.Severity == LogSeverity.Warning);
             }
             else if (request.IsAdvancedFilterSet(LogType.Error))
             {
-                searchReq = request.AdvancedSearch.Error;
+                searchReq = advancedSearch.Error;
                 query = query.Where(o => o.Severity == LogSeverity.Error);
             }
 
@@ -52,7 +54,7 @@ public partial class SearchItemsAction
         if (request.IsAdvancedFilterSet(LogType.InteractionCommand))
         {
             var baseQuery = Context.InteractionCommands.AsNoTracking();
-            var searchReq = request.AdvancedSearch.Interaction!;
+            var searchReq = advancedSearch.Interaction!;
 
             if (!string.IsNullOrEmpty(searchReq.ActionName))
             {
@@ -74,7 +76,7 @@ public partial class SearchItemsAction
         if (request.IsAdvancedFilterSet(LogType.JobCompleted))
         {
             var baseQuery = Context.JobExecutions.AsNoTracking();
-            var searchReq = request.AdvancedSearch.Job!;
+            var searchReq = advancedSearch.Job!;
 
             if (!string.IsNullOrEmpty(searchReq.ActionName))
                 baseQuery = baseQuery.Where(o => o.JobName.Contains(searchReq.ActionName));
@@ -91,7 +93,7 @@ public partial class SearchItemsAction
         if (request.IsAdvancedFilterSet(LogType.Api))
         {
             var baseQuery = Context.ApiRequests.AsNoTracking();
-            var searchReq = request.AdvancedSearch.Api!;
+            var searchReq = advancedSearch.Api!;
 
             if (!string.IsNullOrEmpty(searchReq.ControllerName))
                 baseQuery = baseQuery.Where(o => o.ControllerName.Contains(searchReq.ControllerName));
@@ -115,7 +117,7 @@ public partial class SearchItemsAction
         {
             result.AddRange(
                 await Context.OverwriteCreatedItems.AsNoTracking()
-                    .Where(o => o.OverwriteInfo.TargetId == request.AdvancedSearch.OverwriteCreated!.UserId)
+                    .Where(o => o.OverwriteInfo.TargetId == advancedSearch.OverwriteCreated!.UserId)
                     .Select(o => o.LogItemId)
                     .ToListAsync()
             );
@@ -125,7 +127,7 @@ public partial class SearchItemsAction
         {
             result.AddRange(
                 await Context.OverwriteDeletedItems.AsNoTracking()
-                    .Where(o => o.OverwriteInfo.TargetId == request.AdvancedSearch.OverwriteDeleted!.UserId)
+                    .Where(o => o.OverwriteInfo.TargetId == advancedSearch.OverwriteDeleted!.UserId)
                     .Select(o => o.LogItemId)
                     .ToListAsync()
             );
@@ -135,7 +137,7 @@ public partial class SearchItemsAction
         {
             result.AddRange(
                 await Context.OverwriteUpdatedItems.AsNoTracking()
-                    .Where(o => o.Before.TargetId == request.AdvancedSearch.OverwriteUpdated!.UserId || o.After.TargetId == request.AdvancedSearch.OverwriteUpdated!.UserId)
+                    .Where(o => o.Before.TargetId == advancedSearch.OverwriteUpdated!.UserId || o.After.TargetId == advancedSearch.OverwriteUpdated!.UserId)
                     .Select(o => o.LogItemId)
                     .ToListAsync()
             );
@@ -145,7 +147,7 @@ public partial class SearchItemsAction
         {
             result.AddRange(
                 await Context.MemberRoleUpdatedItems.AsNoTracking()
-                    .Where(o => o.UserId == request.AdvancedSearch.MemberRolesUpdated!.UserId)
+                    .Where(o => o.UserId == advancedSearch.MemberRolesUpdated!.UserId)
                     .Select(o => o.LogItemId)
                     .ToListAsync()
             );
@@ -155,7 +157,7 @@ public partial class SearchItemsAction
         {
             result.AddRange(
                 await Context.MemberUpdatedItems.AsNoTracking()
-                    .Where(o => o.Before.UserId == request.AdvancedSearch.MemberUpdated!.UserId || o.After.UserId == request.AdvancedSearch.MemberUpdated!.UserId)
+                    .Where(o => o.Before.UserId == advancedSearch.MemberUpdated!.UserId || o.After.UserId == advancedSearch.MemberUpdated!.UserId)
                     .Select(o => o.LogItemId)
                     .ToListAsync()
             );
@@ -164,7 +166,7 @@ public partial class SearchItemsAction
         if (request.IsAdvancedFilterSet(LogType.MessageDeleted))
         {
             var baseQuery = Context.MessageDeletedItems.AsNoTracking();
-            var searchReq = request.AdvancedSearch.MessageDeleted!;
+            var searchReq = advancedSearch.MessageDeleted!;
 
             if (searchReq.ContainsEmbed is not null)
                 baseQuery = searchReq.ContainsEmbed.Value ? baseQuery.Where(o => o.Embeds.Count > 0) : baseQuery.Where(o => o.Embeds.Count == 0);
