@@ -1,5 +1,6 @@
 ﻿using GrillBot.Core.Managers.Performance;
-using PointsService.BackgroundServices.PostProcessAction;
+using PointsService.BackgroundServices.Actions;
+using PointsService.Core.Entity;
 using PointsService.Core.Repository;
 
 namespace PointsService.BackgroundServices;
@@ -7,78 +8,64 @@ namespace PointsService.BackgroundServices;
 public class PostProcessingService : BackgroundService
 {
     private IServiceProvider ServiceProvider { get; }
-    private PostProcessingQueue Queue { get; }
     private ICounterManager CounterManager { get; }
+
+    private bool IsCheckedMigrations { get; set; }
 
     public PostProcessingService(IServiceProvider serviceProvider)
     {
-        Queue = serviceProvider.GetRequiredService<PostProcessingQueue>();
         CounterManager = serviceProvider.GetRequiredService<ICounterManager>();
         ServiceProvider = serviceProvider;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await InitAsync();
-
         while (!stoppingToken.IsCancellationRequested)
         {
-            var request = await Queue.ReadRequestAsync(stoppingToken);
-
-            using var scope = ServiceProvider.CreateScope();
-            await ProcessRequestAsync(scope, request);
-        }
-    }
-
-    private async Task InitAsync()
-    {
-        using var scope = ServiceProvider.CreateScope();
-
-        var repository = scope.ServiceProvider.GetRequiredService<PointsServiceRepository>();
-        var pendingMigration = await repository.IsPendingMigrationsAsync();
-        while (pendingMigration)
-            pendingMigration = await repository.IsPendingMigrationsAsync();
-
-        var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>().ToList();
-        var users = await repository.User.GetUsersAsync();
-        var now = DateTime.UtcNow;
-
-        foreach (var action in actions)
-        {
-            using (CounterManager.Create($"BackgroundService.{action.GetType().Name}"))
+            var user = await FindPendingUserAsync();
+            if (user is null)
             {
-                await action
-                    .SetParameters(users, now)
-                    .ProcessAsync();
+                await Task.Delay(30000, stoppingToken);
+                continue;
             }
 
-            foreach (var user in users)
+            using var scope = ServiceProvider.CreateScope();
+            var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>();
+            await ResetPendingStateAsync(scope, user);
+
+            foreach (var action in actions)
             {
                 using (CounterManager.Create($"BackgroundService.{action.GetType().Name}"))
                 {
-                    await action
-                        .SetParameters(user, now)
-                        .ProcessAsync();
+                    await action.ProcessAsync(user);
                 }
             }
         }
-
-        await repository.CommitAsync();
     }
 
-    private async Task ProcessRequestAsync(IServiceScope scope, PostProcessRequest request)
+    private async Task<User?> FindPendingUserAsync()
     {
-        var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>().ToList();
-        var now = DateTime.UtcNow;
+        using var scope = ServiceProvider.CreateScope();
+        var repository = scope.ServiceProvider.GetRequiredService<PointsServiceRepository>();
 
-        foreach (var action in actions)
-        {
-            using (CounterManager.Create($"BackgroundService.{action.GetType().Name}"))
-            {
-                await action
-                    .SetParameters(request, now)
-                    .ProcessAsync();
-            }
-        }
+        if (IsCheckedMigrations)
+            return await repository.User.FindFirstUserForPostProcessing();
+
+        var pendingMigration = await repository.IsPendingMigrationsAsync();
+        while (pendingMigration)
+            pendingMigration = await repository.IsPendingMigrationsAsync();
+        IsCheckedMigrations = true;
+
+        return await repository.User.FindFirstUserForPostProcessing();
+    }
+
+    private static async Task ResetPendingStateAsync(IServiceScope scope, User user)
+    {
+        var repository = scope.ServiceProvider.GetRequiredService<PointsServiceRepository>();
+
+        var entity = await repository.User.FindUserAsync(user.GuildId, user.Id);
+        entity!.PendingRecalculation = false;
+
+        await repository.CommitAsync();
     }
 }

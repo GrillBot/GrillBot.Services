@@ -20,4 +20,6 @@ public class User
     public bool IsUser { get; set; }
     
     public int PointsPosition { get; set; }
+    
+    public bool PendingRecalculation { get; set; }
 }

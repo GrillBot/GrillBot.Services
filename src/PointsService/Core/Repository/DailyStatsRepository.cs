@@ -21,15 +21,6 @@ public class DailyStatsRepository : RepositoryBase<PointsServiceContext>
         return query;
     }
 
-    public async Task<DailyStat?> FindStatsForDayAsync(string guildId, string userId, DateOnly day, bool disableTracking = false)
-    {
-        using (CreateCounter())
-        {
-            return await GetBaseQuery(guildId, disableTracking)
-                .FirstOrDefaultAsync(o => o.UserId == userId && o.Date == day);
-        }
-    }
-
     public async Task<List<DailyStat>> FindAllStatsForUserAsync(string guildId, string userId)
     {
         using (CreateCounter())

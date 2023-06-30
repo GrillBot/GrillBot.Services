@@ -1,18 +1,17 @@
-﻿using PointsService.BackgroundServices.PostProcessAction;
+﻿using PointsService.BackgroundServices.Actions;
 
 namespace PointsService.BackgroundServices;
 
 public static class PostProcessingExtensions
 {
-    public static IServiceCollection AddPostProcessing(this IServiceCollection services)
+    public static void AddPostProcessing(this IServiceCollection services)
     {
         services
             .AddScoped<PostProcessActionBase, RecalculateLeaderboardAction>()
             .AddScoped<PostProcessActionBase, RecalculatePositionAction>()
             .AddScoped<PostProcessActionBase, CalculateDailyStatsAction>();
 
-        return services
-            .AddSingleton<PostProcessingQueue>()
+        services
             .AddHostedService<PostProcessingService>();
     }
 }

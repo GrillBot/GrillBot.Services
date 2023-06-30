@@ -1,5 +1,5 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
-using PointsService.BackgroundServices;
+using PointsService.Core.Entity;
 using PointsService.Core.Repository;
 
 namespace PointsService.Actions;
@@ -7,12 +7,10 @@ namespace PointsService.Actions;
 public class DeleteTransactionsAction : ApiActionBase
 {
     private PointsServiceRepository Repository { get; }
-    private PostProcessingQueue PostProcessingQueue { get; }
 
-    public DeleteTransactionsAction(PointsServiceRepository repository, PostProcessingQueue postProcessingQueue)
+    public DeleteTransactionsAction(PointsServiceRepository repository)
     {
         Repository = repository;
-        PostProcessingQueue = postProcessingQueue;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -31,11 +29,24 @@ public class DeleteTransactionsAction : ApiActionBase
             return new ApiResult(StatusCodes.Status204NoContent);
 
         Repository.RemoveCollection(transactions);
+        await SetPendingStatusAsync(transactions);
         await Repository.CommitAsync();
 
-        foreach (var transaction in transactions)
-            await PostProcessingQueue.SendRequestAsync(transaction, true);
-
         return new ApiResult(StatusCodes.Status200OK);
+    }
+
+    private async Task SetPendingStatusAsync(IEnumerable<Transaction> transactions)
+    {
+        var users = transactions
+            .GroupBy(o => new { o.GuildId, o.UserId })
+            .Select(o => o.First())
+            .ToList();
+        foreach (var user in users)
+        {
+            var entity = await Repository.User.FindUserAsync(user.GuildId, user.UserId);
+            if (entity is null) continue;
+
+            entity.PendingRecalculation = true;
+        }
     }
 }

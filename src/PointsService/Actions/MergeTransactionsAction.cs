@@ -1,7 +1,6 @@
 ﻿using Discord;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.Extensions.Options;
-using PointsService.BackgroundServices;
 using PointsService.Core.Entity;
 using PointsService.Core.Options;
 using PointsService.Core.Repository;
@@ -13,13 +12,11 @@ public class MergeTransactionsAction : ApiActionBase
 {
     private PointsServiceRepository Repository { get; }
     private AppOptions Options { get; }
-    private PostProcessingQueue PostProcessingQueue { get; }
 
-    public MergeTransactionsAction(PointsServiceRepository repository, IOptions<AppOptions> options, PostProcessingQueue postProcessingQueue)
+    public MergeTransactionsAction(PointsServiceRepository repository, IOptions<AppOptions> options)
     {
         Repository = repository;
         Options = options.Value;
-        PostProcessingQueue = postProcessingQueue;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -35,12 +32,9 @@ public class MergeTransactionsAction : ApiActionBase
 
         var mergedTransactions = MergeTransactions(transactions);
         await Repository.AddCollectionAsync(mergedTransactions);
+        await SetProcessingAsync(transactions);
+        await SetProcessingAsync(mergedTransactions);
         await Repository.CommitAsync();
-
-        foreach (var transaction in transactions)
-            await PostProcessingQueue.SendRequestAsync(transaction, true);
-        foreach (var transaction in mergedTransactions)
-            await PostProcessingQueue.SendRequestAsync(transaction, false);
 
         var result = new MergeResult
         {
@@ -95,5 +89,19 @@ public class MergeTransactionsAction : ApiActionBase
         }
 
         return result;
+    }
+
+    private async Task SetProcessingAsync(IEnumerable<Transaction> transactions)
+    {
+        var users = transactions
+            .GroupBy(o => new { o.GuildId, o.UserId })
+            .Select(o => o.First());
+
+        foreach (var user in users)
+        {
+            var entity = await Repository.User.FindUserAsync(user.GuildId, user.UserId);
+            if (entity is not null)
+                entity.PendingRecalculation = true;
+        }
     }
 }

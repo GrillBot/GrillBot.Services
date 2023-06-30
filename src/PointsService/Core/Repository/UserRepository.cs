@@ -37,15 +37,22 @@ public class UserRepository : RepositoryBase<PointsServiceContext>
         }
     }
 
-    public async Task<List<User>> GetUsersAsync(bool disableTracking = false)
+    public async Task<User?> FindFirstUserForPostProcessing()
     {
         using (CreateCounter())
         {
-            var query = Context.Users.AsQueryable();
-            if (disableTracking)
-                query = query.AsNoTracking();
+            return await Context.Users.AsNoTracking()
+                .FirstOrDefaultAsync(o => o.PendingRecalculation);
+        }
+    }
 
-            return await query.ToListAsync();
+    public async Task<List<User>> FindUsersWithSamePositionAsync(string guildId, string exceptUserId, int position)
+    {
+        using (CreateCounter())
+        {
+            return await Context.Users
+                .Where(o => o.GuildId == guildId && o.Id != exceptUserId && o.PointsPosition == position)
+                .ToListAsync();
         }
     }
 }

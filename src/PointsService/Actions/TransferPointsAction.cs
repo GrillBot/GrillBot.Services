@@ -12,12 +12,10 @@ namespace PointsService.Actions;
 public class TransferPointsAction : ApiActionBase
 {
     private PointsServiceRepository Repository { get; }
-    private PostProcessingQueue PostProcessingQueue { get; }
 
-    public TransferPointsAction(PointsServiceRepository repository, PostProcessingQueue postProcessingQueue)
+    public TransferPointsAction(PointsServiceRepository repository)
     {
         Repository = repository;
-        PostProcessingQueue = postProcessingQueue;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -34,11 +32,11 @@ public class TransferPointsAction : ApiActionBase
             CreateTransaction(request.GuildId, request.ToUserId, request.Amount)
         };
 
+        await SetProcessingAsync(request.GuildId, request.FromUserId);
+        await SetProcessingAsync(request.GuildId, request.ToUserId);
+
         await Repository.AddCollectionAsync(transactions);
         await Repository.CommitAsync();
-
-        foreach (var transaction in transactions)
-            await PostProcessingQueue.SendRequestAsync(transaction, false);
 
         return new ApiResult(StatusCodes.Status200OK);
     }
@@ -82,5 +80,12 @@ public class TransferPointsAction : ApiActionBase
             Value = amount,
             UserId = userId
         };
+    }
+
+    private async Task SetProcessingAsync(string guildId, string userId)
+    {
+        var user = await Repository.User.FindUserAsync(guildId, userId);
+        if (user is not null)
+            user.PendingRecalculation = true;
     }
 }
