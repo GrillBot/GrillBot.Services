@@ -21,7 +21,7 @@ export const renderLineChart = (request: RequestData): Promise<Buffer> => {
         backgroundColour: request.options.backgroundColor
     });
 
-    return service.renderToBuffer(config);
+    return service.renderToBuffer(config, 'image/jpeg');
 };
 
 const createConfig = (data: any, options: ChartOptions): ChartConfiguration => {

@@ -22,12 +22,12 @@ public class ChartAction : ApiActionBase
 
         var imageTasks = request.Requests.ConvertAll(r => GraphicsClient.CreateChartAsync(r));
         var imagesData = await Task.WhenAll(imageTasks);
-        var images = imagesData.Select(img => new MagickImage(img, MagickFormat.Png)).AsParallel().ToList();
+        var images = imagesData.Select(img => new MagickImage(img, MagickFormat.Jpg)).AsParallel().ToList();
 
         try
         {
             var mergedChart = MergeChartsAndGetData(images, request.Requests);
-            return new ApiResult(StatusCodes.Status200OK, new FileContentResult(mergedChart, "image/png"));
+            return new ApiResult(StatusCodes.Status200OK, new FileContentResult(mergedChart, "image/jpeg"));
         }
         finally
         {
@@ -55,6 +55,6 @@ public class ChartAction : ApiActionBase
         }
 
         drawables.Draw(resultImage);
-        return resultImage.ToByteArray(MagickFormat.Png);
+        return resultImage.ToByteArray(MagickFormat.Jpg);
     }
 }
