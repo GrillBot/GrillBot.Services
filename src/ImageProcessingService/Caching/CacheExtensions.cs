@@ -11,7 +11,6 @@ public static class CacheExtensions
         return services
             .AddScoped<PeepoCache>()
             .AddScoped<PointsCache>()
-            .AddScoped<WithoutAccidentCache>()
-            .AddScoped<ChartCache>();
+            .AddScoped<WithoutAccidentCache>();
     }
 }

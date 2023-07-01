@@ -1,6 +1,5 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using ImageMagick;
-using ImageProcessingService.Caching;
 using ImageProcessingService.Core.GraphicsService;
 using ImageProcessingService.Core.GraphicsService.Models.Chart;
 using ImageProcessingService.Models;
@@ -11,40 +10,28 @@ namespace ImageProcessingService.Actions;
 public class ChartAction : ApiActionBase
 {
     private IGraphicsClient GraphicsClient { get; }
-    private ChartCache Cache { get; }
 
-    public ChartAction(IGraphicsClient graphicsClient, ChartCache cache)
+    public ChartAction(IGraphicsClient graphicsClient)
     {
         GraphicsClient = graphicsClient;
-        Cache = cache;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = (ChartRequest)Parameters[0]!;
 
-        var cacheItem = await Cache.GetByChartRequestAsync(request);
-        if (cacheItem is not null)
-            return new ApiResult(StatusCodes.Status200OK, new FileContentResult(cacheItem.Image, "image/png"));
+        var imageTasks = request.Requests.ConvertAll(r => GraphicsClient.CreateChartAsync(r));
+        var imagesData = await Task.WhenAll(imageTasks);
+        var images = imagesData.Select(img => new MagickImage(img, MagickFormat.Png)).AsParallel().ToList();
 
-        var images = new List<MagickImage>();
         try
         {
-            foreach (var chartRequest in request.Requests)
-            {
-                var image = await GraphicsClient.CreateChartAsync(chartRequest);
-                images.Add(new MagickImage(image, MagickFormat.Png));
-            }
-
             var mergedChart = MergeChartsAndGetData(images, request.Requests);
-
-            await Cache.WriteByChartRequestAsync(request, mergedChart);
             return new ApiResult(StatusCodes.Status200OK, new FileContentResult(mergedChart, "image/png"));
         }
         finally
         {
-            foreach (var image in images)
-                image.Dispose();
+            Parallel.ForEach(images, img => img.Dispose());
         }
     }
 
