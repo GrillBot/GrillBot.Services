@@ -21,6 +21,7 @@ public static class ActionExtensions
             .AddScoped<Dashboard.GetApiDashboardAction>()
             .AddScoped<Dashboard.GetInteractionsDashboardAction>()
             .AddScoped<Dashboard.GetJobsDashboardListAction>()
-            .AddScoped<Dashboard.GetTodayAvgTimesDashboard>();
+            .AddScoped<Dashboard.GetTodayAvgTimesDashboard>()
+            .AddScoped<Info.GetStatusInfoAction>();
     }
 }
