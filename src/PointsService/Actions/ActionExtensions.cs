@@ -2,9 +2,9 @@
 
 public static class ActionExtensions
 {
-    public static IServiceCollection AddActions(this IServiceCollection services)
+    public static void AddActions(this IServiceCollection services)
     {
-        return services
+        services
             .AddScoped<CreateTransactionAction>()
             .AddScoped<DeleteTransactionsAction>()
             .AddScoped<SynchronizationAction>()
@@ -17,6 +17,7 @@ public static class ActionExtensions
             .AddScoped<AdminCreateTransactionAction>()
             .AddScoped<TransactionExistsAction>()
             .AddScoped<ImagePointsStatusAction>()
-            .AddScoped<LeaderboardCountAction>();
+            .AddScoped<LeaderboardCountAction>()
+            .AddScoped<GetStatusInfoAction>();
     }
 }

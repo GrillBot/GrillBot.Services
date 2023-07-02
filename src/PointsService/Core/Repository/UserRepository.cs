@@ -55,4 +55,13 @@ public class UserRepository : RepositoryBase<PointsServiceContext>
                 .ToListAsync();
         }
     }
+
+    public async Task<int> CountUsersToProcessAsync()
+    {
+        using (CreateCounter())
+        {
+            return await Context.Users.AsNoTracking()
+                .CountAsync(o => o.PendingRecalculation);
+        }
+    }
 }
