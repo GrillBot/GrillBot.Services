@@ -17,6 +17,6 @@ public class LeaderboardCountAction : ApiActionBase
         var guildId = (string)Parameters[0]!;
         var result = await Repository.Leaderboard.ComputeLeaderboardCountAsync(guildId);
 
-        return new ApiResult(StatusCodes.Status200OK, result);
+        return ApiResult.FromSuccess(result);
     }
 }

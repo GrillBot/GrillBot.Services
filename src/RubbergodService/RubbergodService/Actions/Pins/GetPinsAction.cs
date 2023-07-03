@@ -37,7 +37,7 @@ public class GetPinsAction : ApiActionBase
     }
 
     private static ApiResult CreateResult(PinCacheItem item, string contentType)
-        => new(StatusCodes.Status200OK, new FileContentResult(item.Data, contentType));
+        => ApiResult.FromSuccess(new FileContentResult(item.Data, contentType));
 
     private async Task<PinCacheItem?> TryFindFromCacheAsync(ulong guildId, ulong channelId, bool markdown)
     {

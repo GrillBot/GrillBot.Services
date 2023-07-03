@@ -6,7 +6,7 @@ using RubbergodService.Core.Entity;
 
 namespace RubbergodService.Core.Repository;
 
-public class KarmaRepository : RepositoryBase<RubbergodServiceContext>
+public class KarmaRepository : SubRepositoryBase<RubbergodServiceContext>
 {
     public KarmaRepository(RubbergodServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {

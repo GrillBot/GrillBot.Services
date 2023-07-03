@@ -29,7 +29,7 @@ public class UploadFileAction : ApiActionBase
                 await Client.UploadBlobAsync(file.FileName, stream);
             }
 
-            return new ApiResult(StatusCodes.Status200OK);
+            return ApiResult.FromSuccess();
         }
         catch (RequestFailedException ex) when (ex.ErrorCode == BlobErrorCode.BlobAlreadyExists)
         {

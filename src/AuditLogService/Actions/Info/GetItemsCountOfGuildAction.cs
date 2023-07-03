@@ -18,6 +18,6 @@ public class GetItemsCountOfGuildAction : ApiActionBase
         var guildId = (string)Parameters[0]!;
         var count = await Context.LogItems.AsNoTracking().CountAsync(o => o.GuildId == guildId);
 
-        return new ApiResult(StatusCodes.Status200OK, count);
+        return ApiResult.FromSuccess(count);
     }
 }

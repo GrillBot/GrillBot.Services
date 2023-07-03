@@ -22,6 +22,6 @@ public class InvalidateCacheAction : ApiActionBase
         Repository.RemoveCollection(channels);
         await Repository.CommitAsync();
 
-        return new ApiResult(StatusCodes.Status200OK);
+        return ApiResult.FromSuccess();
     }
 }

@@ -17,6 +17,6 @@ public class RefreshUserAction : ApiActionBase
         var memberId = (string)Parameters[0]!;
 
         await MemberSyncQueue.AddToQueueAsync(memberId);
-        return new ApiResult(StatusCodes.Status200OK);
+        return ApiResult.FromSuccess();
     }
 }

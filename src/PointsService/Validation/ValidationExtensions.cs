@@ -2,9 +2,9 @@
 
 public static class ValidatorExtensions
 {
-    public static IServiceCollection AddValidations(this IServiceCollection services)
+    public static void AddValidations(this IServiceCollection services)
     {
-        return services
+        services
             .AddScoped<TransactionRequestValidator>();
     }
 }

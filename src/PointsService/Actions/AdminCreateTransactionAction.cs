@@ -36,7 +36,7 @@ public class AdminCreateTransactionAction : ApiActionBase
         await Repository.AddAsync(transaction);
         await Repository.CommitAsync();
 
-        return new ApiResult(StatusCodes.Status200OK);
+        return ApiResult.FromSuccess();
     }
 
     private async Task<bool> CanCreateTransactionAsync(AdminTransactionRequest request, User user, string messageId)

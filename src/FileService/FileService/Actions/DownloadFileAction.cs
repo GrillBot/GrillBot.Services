@@ -26,7 +26,7 @@ public class DownloadFileAction : ApiActionBase
         var filename = (string)Parameters[0]!;
 
         if (Cache.TryGet(filename, out var contentType, out var content))
-            return new ApiResult(StatusCodes.Status200OK, new FileContentResult(content, contentType) { FileDownloadName = filename });
+            return CreateResult(content, contentType, filename);
 
         var blobClient = Client.GetBlobClient(filename);
 
@@ -42,7 +42,7 @@ public class DownloadFileAction : ApiActionBase
                 contentType = response.Value.Details.ContentType;
 
                 Cache.Add(filename, contentType, content);
-                return new ApiResult(StatusCodes.Status200OK, new FileContentResult(content, contentType) { FileDownloadName = filename });
+                return CreateResult(content, contentType, filename);
             }
         }
         catch (RequestFailedException ex) when (ex.ErrorCode == BlobErrorCode.BlobNotFound)
@@ -50,4 +50,7 @@ public class DownloadFileAction : ApiActionBase
             return new ApiResult(StatusCodes.Status404NotFound);
         }
     }
+
+    private static ApiResult CreateResult(byte[] content, string contentType, string filename)
+        => ApiResult.FromSuccess(new FileContentResult(content, contentType) { FileDownloadName = filename });
 }

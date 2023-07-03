@@ -5,7 +5,7 @@ using RubbergodService.Core.Entity;
 
 namespace RubbergodService.Core.Repository;
 
-public class MemberCacheRepository : RepositoryBase<RubbergodServiceContext>
+public class MemberCacheRepository : SubRepositoryBase<RubbergodServiceContext>
 {
     public MemberCacheRepository(RubbergodServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {

@@ -31,7 +31,7 @@ public class CreateItemsAction : ApiActionBase
             await Context.SaveChangesAsync();
         }
 
-        return new ApiResult(StatusCodes.Status200OK);
+        return ApiResult.FromSuccess();
     }
 
     private async Task<LogItem> CreateEntityAsync(LogRequest request)

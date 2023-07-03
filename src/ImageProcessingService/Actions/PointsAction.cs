@@ -26,7 +26,7 @@ public class PointsAction : ApiActionBase
 
         var cacheData = await Cache.GetByPointsRequestAsync(request);
         if (cacheData is not null)
-            return new ApiResult(StatusCodes.Status200OK, new FileContentResult(cacheData.Image, "image/png"));
+            return CreateResult(cacheData.Image);
 
         using var profilePicture = new MagickImage(request.AvatarInfo.AvatarContent);
 
@@ -46,7 +46,7 @@ public class PointsAction : ApiActionBase
         var image = await GraphicsClient.CreatePointsImageAsync(imageRequest);
 
         await Cache.WriteByPointsRequestAsync(request, image);
-        return new ApiResult(StatusCodes.Status200OK, new FileContentResult(image, "image/png"));
+        return CreateResult(image);
     }
 
     private static MagickColor GetDominantColor(MagickImage image)
@@ -65,4 +65,7 @@ public class PointsAction : ApiActionBase
 
         return MagickColor.FromRgba(tmpColor.R, tmpColor.G, tmpColor.B, tmpColor.A);
     }
+
+    private static ApiResult CreateResult(byte[] image)
+        => ApiResult.FromSuccess(new FileContentResult(image, "image/png"));
 }

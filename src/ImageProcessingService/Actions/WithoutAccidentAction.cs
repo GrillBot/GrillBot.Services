@@ -25,7 +25,7 @@ public class WithoutAccidentAction : ApiActionBase
 
         var cacheItem = await Cache.GetByRequestAsync(request);
         if (cacheItem is not null)
-            return new ApiResult(StatusCodes.Status200OK, new FileContentResult(cacheItem.Image, "image/png"));
+            return CreateResult(cacheItem.Image);
 
         using var profilePicture = new MagickImage(request.AvatarInfo.AvatarContent);
         profilePicture.Resize(512, 512);
@@ -39,6 +39,9 @@ public class WithoutAccidentAction : ApiActionBase
         var image = await GraphicsClient.CreateWithoutAccidentImageAsync(imageRequest);
 
         await Cache.WriteByRequestAsync(request, image);
-        return new ApiResult(StatusCodes.Status200OK, new FileContentResult(image, "image/png"));
+        return CreateResult(image);
     }
+
+    private static ApiResult CreateResult(byte[] image)
+        => ApiResult.FromSuccess(new FileContentResult(image, "image/png"));
 }

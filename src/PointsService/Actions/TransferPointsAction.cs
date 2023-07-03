@@ -38,7 +38,7 @@ public class TransferPointsAction : ApiActionBase
         await Repository.AddCollectionAsync(transactions);
         await Repository.CommitAsync();
 
-        return new ApiResult(StatusCodes.Status200OK);
+        return ApiResult.FromSuccess();
     }
 
     private async Task<ValidationProblemDetails?> ValidateRequestAsync(TransferPointsRequest request)

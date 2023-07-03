@@ -26,7 +26,7 @@ public class GetApiStatisticsAction : ApiActionBase
             Endpoints = await GetEndpointStatisticsAsync()
         };
 
-        return new ApiResult(StatusCodes.Status200OK, statistics);
+        return ApiResult.FromSuccess(statistics);
     }
 
     private async Task<Dictionary<string, int>> GetApiStatisticsByDateForApiGroupAsync(string apiGroupName)

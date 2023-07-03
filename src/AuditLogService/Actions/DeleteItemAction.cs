@@ -30,7 +30,7 @@ public class DeleteItemAction : ApiActionBase
         await Context.SaveChangesAsync();
 
         response.Exists = true;
-        return new ApiResult(StatusCodes.Status200OK, response);
+        return ApiResult.FromSuccess(response);
     }
 
     private async Task SetFilesAndRemoveAsync(DeleteItemResponse response, LogItem item)

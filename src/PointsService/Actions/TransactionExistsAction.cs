@@ -18,6 +18,6 @@ public class TransactionExistsAction : ApiActionBase
         var userId = (string)Parameters[1]!;
 
         var result = await Repository.Transaction.ExistsAnyTransactionAsync(guildId, userId);
-        return new ApiResult(StatusCodes.Status200OK, result);
+        return ApiResult.FromSuccess(result);
     }
 }

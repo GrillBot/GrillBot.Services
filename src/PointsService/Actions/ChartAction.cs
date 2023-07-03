@@ -41,6 +41,6 @@ public class ChartAction : ApiActionBase
                 item.MessagePoints = 0;
         }
 
-        return new ApiResult(StatusCodes.Status200OK, result);
+        return ApiResult.FromSuccess(result);
     }
 }

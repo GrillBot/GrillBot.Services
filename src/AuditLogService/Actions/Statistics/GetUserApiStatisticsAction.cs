@@ -32,7 +32,7 @@ public class GetUserApiStatisticsAction : ApiActionBase
             })
             .ToList();
 
-        return new ApiResult(StatusCodes.Status200OK, result);
+        return ApiResult.FromSuccess(result);
     }
 
     private static IQueryable<ApiRequest> Filter(IQueryable<ApiRequest> query, string criteria)

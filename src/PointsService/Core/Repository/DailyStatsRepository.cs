@@ -6,7 +6,7 @@ using PointsService.Models;
 
 namespace PointsService.Core.Repository;
 
-public class DailyStatsRepository : RepositoryBase<PointsServiceContext>
+public class DailyStatsRepository : SubRepositoryBase<PointsServiceContext>
 {
     public DailyStatsRepository(PointsServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {

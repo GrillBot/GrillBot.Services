@@ -13,7 +13,7 @@ namespace PointsService.Core;
 
 public static class CoreExtensions
 {
-    public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration)
+    public static void AddCoreServices(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("Default")!;
 
@@ -46,7 +46,5 @@ public static class CoreExtensions
         services.AddActions();
         services.AddValidations();
         services.AddPostProcessing();
-
-        return services;
     }
 }

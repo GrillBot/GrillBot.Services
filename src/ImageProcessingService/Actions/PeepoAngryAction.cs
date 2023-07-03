@@ -24,7 +24,7 @@ public class PeepoAngryAction : ApiActionBase
 
         var cachedImage = await Cache.GetByPeepoRequestAsync(request, "PeepoAngry");
         if (cachedImage is not null)
-            return new ApiResult(StatusCodes.Status200OK, new FileContentResult(cachedImage.Image, cachedImage.ContentType));
+            return CreateResult(cachedImage.Image, cachedImage.ContentType);
 
         var isAnimated = request.IsAnimated();
         var profilePictureFrames = new List<byte[]>();
@@ -69,6 +69,9 @@ public class PeepoAngryAction : ApiActionBase
         }
 
         await Cache.WriteByPeepoRequest(request, "PeepoAngry", resultImage, resultContentType);
-        return new ApiResult(StatusCodes.Status200OK, new FileContentResult(resultImage, resultContentType));
+        return CreateResult(resultImage, resultContentType);
     }
+
+    private static ApiResult CreateResult(byte[] image, string contentType)
+        => ApiResult.FromSuccess(new FileContentResult(image, contentType));
 }

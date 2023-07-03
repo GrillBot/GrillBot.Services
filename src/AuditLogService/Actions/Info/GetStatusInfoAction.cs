@@ -28,6 +28,6 @@ public class GetStatusInfoAction : ApiActionBase
                 .CountAsync(o => o.CreatedAt <= expirationDate)
         };
 
-        return new ApiResult(StatusCodes.Status200OK, result);
+        return ApiResult.FromSuccess(result);
     }
 }

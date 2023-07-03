@@ -5,7 +5,7 @@ using RubbergodService.Core.Entity;
 
 namespace RubbergodService.Core.Repository;
 
-public class PinCacheRepository : RepositoryBase<RubbergodServiceContext>
+public class PinCacheRepository : SubRepositoryBase<RubbergodServiceContext>
 {
     public PinCacheRepository(RubbergodServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {

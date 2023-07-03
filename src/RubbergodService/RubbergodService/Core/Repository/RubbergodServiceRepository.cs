@@ -1,18 +1,13 @@
-﻿using GrillBot.Core.Managers.Performance;
+﻿using GrillBot.Core.Database.Repository;
+using GrillBot.Core.Managers.Performance;
 using RubbergodService.Core.Entity;
 
 namespace RubbergodService.Core.Repository;
 
-public sealed class RubbergodServiceRepository : IDisposable, IAsyncDisposable
+public class RubbergodServiceRepository : RepositoryBase<RubbergodServiceContext>
 {
-    private RubbergodServiceContext Context { get; set; }
-    private ICounterManager CounterManager { get; }
-
-    public RubbergodServiceRepository(RubbergodServiceContext context, ICounterManager counterManager)
+    public RubbergodServiceRepository(RubbergodServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {
-        Context = context;
-        CounterManager = counterManager;
-
         Karma = new KarmaRepository(Context, counterManager);
         MemberCache = new MemberCacheRepository(Context, counterManager);
         Statistics = new StatisticsRepository(Context, counterManager);
@@ -23,35 +18,4 @@ public sealed class RubbergodServiceRepository : IDisposable, IAsyncDisposable
     public MemberCacheRepository MemberCache { get; }
     public StatisticsRepository Statistics { get; }
     public PinCacheRepository PinCache { get; }
-
-    public Task AddAsync<TEntity>(TEntity entity) where TEntity : class
-        => Context.Set<TEntity>().AddAsync(entity).AsTask();
-
-    public void RemoveCollection<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
-        => Context.Set<TEntity>().RemoveRange(entities);
-
-    public void Remove<TEntity>(TEntity entity) where TEntity : class
-        => Context.Set<TEntity>().Remove(entity);
-
-    public Task<int> CommitAsync()
-    {
-        using (CounterManager.Create("Repository.Commit"))
-        {
-            return Context.SaveChangesAsync();
-        }
-    }
-
-    public void Dispose()
-    {
-        Context.ChangeTracker.Clear();
-        Context.Dispose();
-        Context = null!;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        Context.ChangeTracker.Clear();
-        await Context.DisposeAsync();
-        Context = null!;
-    }
 }

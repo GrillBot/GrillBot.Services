@@ -7,7 +7,7 @@ using PointsService.Models;
 
 namespace PointsService.Core.Repository;
 
-public class TransactionRepository : RepositoryBase<PointsServiceContext>
+public class TransactionRepository : SubRepositoryBase<PointsServiceContext>
 {
     public TransactionRepository(PointsServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {

@@ -5,7 +5,7 @@ using PointsService.Core.Entity;
 
 namespace PointsService.Core.Repository;
 
-public class StatisticsRepository : RepositoryBase<PointsServiceContext>
+public class StatisticsRepository : SubRepositoryBase<PointsServiceContext>
 {
     public StatisticsRepository(PointsServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {
@@ -13,13 +13,16 @@ public class StatisticsRepository : RepositoryBase<PointsServiceContext>
 
     public async Task<Dictionary<string, long>> GetStatisticsAsync()
     {
-        return new Dictionary<string, long>
+        using (CreateCounter())
         {
-            { nameof(Context.Channels), await Context.Channels.LongCountAsync() },
-            { nameof(Context.Users), await Context.Users.LongCountAsync() },
-            { nameof(Context.Transactions), await Context.Transactions.LongCountAsync() },
-            { nameof(Context.Leaderboard), await Context.Leaderboard.LongCountAsync() },
-            { nameof(Context.DailyStats), await Context.DailyStats.LongCountAsync() }
-        };
+            return new Dictionary<string, long>
+            {
+                { nameof(Context.Channels), await Context.Channels.LongCountAsync() },
+                { nameof(Context.Users), await Context.Users.LongCountAsync() },
+                { nameof(Context.Transactions), await Context.Transactions.LongCountAsync() },
+                { nameof(Context.Leaderboard), await Context.Leaderboard.LongCountAsync() },
+                { nameof(Context.DailyStats), await Context.DailyStats.LongCountAsync() }
+            };
+        }
     }
 }

@@ -41,6 +41,6 @@ public class GetKarmaPageAction : ApiActionBase
             };
         });
 
-        return new ApiResult(StatusCodes.Status200OK, result);
+        return ApiResult.FromSuccess(result);
     }
 }

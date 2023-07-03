@@ -22,7 +22,7 @@ public class SynchronizationAction : ApiActionBase
         await ProcessChannelsAsync(request);
         await Repository.CommitAsync();
 
-        return new ApiResult(StatusCodes.Status200OK);
+        return ApiResult.FromSuccess();
     }
 
     private async Task ProcessUsersAsync(SynchronizationRequest request)

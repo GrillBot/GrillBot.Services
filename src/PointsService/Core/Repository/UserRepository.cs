@@ -5,7 +5,7 @@ using PointsService.Core.Entity;
 
 namespace PointsService.Core.Repository;
 
-public class UserRepository : RepositoryBase<PointsServiceContext>
+public class UserRepository : SubRepositoryBase<PointsServiceContext>
 {
     public UserRepository(PointsServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {

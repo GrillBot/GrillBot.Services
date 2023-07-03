@@ -5,7 +5,7 @@ using PointsService.Core.Entity;
 
 namespace PointsService.Core.Repository;
 
-public class ChannelRepository : RepositoryBase<PointsServiceContext>
+public class ChannelRepository : SubRepositoryBase<PointsServiceContext>
 {
     public ChannelRepository(PointsServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {

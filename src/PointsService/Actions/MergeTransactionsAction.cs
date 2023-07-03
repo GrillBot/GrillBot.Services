@@ -46,7 +46,7 @@ public class MergeTransactionsAction : ApiActionBase
             UserCount = mergedTransactions.DistinctBy(o => o.UserId).Count()
         };
 
-        return new ApiResult(StatusCodes.Status200OK, result);
+        return ApiResult.FromSuccess(result);
     }
 
     private async Task<bool> CanProcessAsync(DateTime expirationDate)

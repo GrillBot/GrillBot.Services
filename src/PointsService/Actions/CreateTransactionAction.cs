@@ -55,7 +55,7 @@ public class CreateTransactionAction : ApiActionBase
         }
 
         await Repository.CommitAsync();
-        return new ApiResult(StatusCodes.Status200OK);
+        return ApiResult.FromSuccess();
     }
 
     private async Task<bool> CanCreateTransactionAsync(User author, User? reactionUser, Channel channel, TransactionRequest request)

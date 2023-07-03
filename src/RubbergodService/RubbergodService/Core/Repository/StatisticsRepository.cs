@@ -5,7 +5,7 @@ using RubbergodService.Core.Entity;
 
 namespace RubbergodService.Core.Repository;
 
-public class StatisticsRepository : RepositoryBase<RubbergodServiceContext>
+public class StatisticsRepository : SubRepositoryBase<RubbergodServiceContext>
 {
     public StatisticsRepository(RubbergodServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {

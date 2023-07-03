@@ -28,6 +28,6 @@ public class GetUserCommandStatisticsAction : ApiActionBase
             UserId = o.UserId!
         }).ToList();
 
-        return new ApiResult(StatusCodes.Status200OK, result);
+        return ApiResult.FromSuccess(result);
     }
 }

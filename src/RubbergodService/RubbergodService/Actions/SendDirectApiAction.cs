@@ -25,6 +25,6 @@ public class SendDirectApiAction : ApiActionBase
         using var document = JsonDocument.Parse(response.Content);
         var json = await JsonHelper.SerializeJsonDocumentAsync(document);
 
-        return new ApiResult(StatusCodes.Status200OK, json);
+        return ApiResult.FromSuccess(json);
     }
 }

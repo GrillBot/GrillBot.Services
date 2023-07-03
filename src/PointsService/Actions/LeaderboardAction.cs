@@ -18,6 +18,6 @@ public class LeaderboardAction : ApiActionBase
         var request = (LeaderboardRequest)Parameters[0]!;
         var items = await Repository.Leaderboard.ReadLeaderboardAsync(request.GuildId, request.Skip, request.Count, request.Simple);
 
-        return new ApiResult(StatusCodes.Status200OK, items);
+        return ApiResult.FromSuccess(items);
     }
 }

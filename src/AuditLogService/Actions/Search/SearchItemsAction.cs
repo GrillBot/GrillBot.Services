@@ -27,6 +27,6 @@ public partial class SearchItemsAction : ApiActionBase
 
         var headers = await ReadLogHeaders(request);
         var mapped = await MapAsync(headers);
-        return new ApiResult(StatusCodes.Status200OK, mapped);
+        return ApiResult.FromSuccess(mapped);
     }
 }

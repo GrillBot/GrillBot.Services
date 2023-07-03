@@ -6,7 +6,7 @@ using PointsService.Models;
 
 namespace PointsService.Core.Repository;
 
-public class LeaderboardRepository : RepositoryBase<PointsServiceContext>
+public class LeaderboardRepository : SubRepositoryBase<PointsServiceContext>
 {
     public LeaderboardRepository(PointsServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {

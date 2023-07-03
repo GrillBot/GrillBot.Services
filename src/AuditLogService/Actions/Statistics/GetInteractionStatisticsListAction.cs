@@ -37,6 +37,6 @@ public class GetInteractionStatisticsListAction : ApiActionBase
             .ThenBy(o => o.Key)
             .ToList();
 
-        return new ApiResult(StatusCodes.Status200OK, result);
+        return ApiResult.FromSuccess(result);
     }
 }

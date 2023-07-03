@@ -30,6 +30,6 @@ public partial class ArchiveOldLogsAction : ApiActionBase
         if (Context.ChangeTracker.HasChanges())
             await Context.SaveChangesAsync();
 
-        return new ApiResult(StatusCodes.Status200OK, result);
+        return ApiResult.FromSuccess(result);
     }
 }

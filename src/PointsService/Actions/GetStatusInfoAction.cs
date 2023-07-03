@@ -27,6 +27,6 @@ public class GetStatusInfoAction : ApiActionBase
             TransactionsToMerge = await Repository.Transaction.GetCountOfTransactionsForMergeAsync(expirationDate)
         };
 
-        return new ApiResult(StatusCodes.Status200OK, result);
+        return ApiResult.FromSuccess(result);
     }
 }

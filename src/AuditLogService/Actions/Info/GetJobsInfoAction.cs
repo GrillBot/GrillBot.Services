@@ -41,6 +41,6 @@ public class GetJobsInfoAction : ApiActionBase
             job.LastRunDuration = lastItem is null ? null : (int)Math.Round((lastItem.EndAt - lastItem.StartAt).TotalMilliseconds);
         }
 
-        return new ApiResult(StatusCodes.Status200OK, result);
+        return ApiResult.FromSuccess(result);
     }
 }

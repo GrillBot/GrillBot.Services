@@ -30,6 +30,6 @@ public class DeleteFileAction : ApiActionBase
 
         Cache.Remove(filename);
         Cache.RemoveSasLink(filename);
-        return new ApiResult(StatusCodes.Status200OK);
+        return ApiResult.FromSuccess();
     }
 }

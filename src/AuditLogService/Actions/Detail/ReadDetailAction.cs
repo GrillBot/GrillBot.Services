@@ -65,6 +65,6 @@ public partial class ReadDetailAction : ApiActionBase
                 break;
         }
 
-        return new ApiResult(StatusCodes.Status200OK, result);
+        return ApiResult.FromSuccess(result);
     }
 }

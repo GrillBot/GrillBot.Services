@@ -1,14 +1,11 @@
-﻿using GrillBot.Core.Managers.Performance;
-using Microsoft.EntityFrameworkCore;
+﻿using GrillBot.Core.Database.Repository;
+using GrillBot.Core.Managers.Performance;
 using PointsService.Core.Entity;
 
 namespace PointsService.Core.Repository;
 
-public class PointsServiceRepository
+public class PointsServiceRepository : RepositoryBase<PointsServiceContext>
 {
-    private PointsServiceContext Context { get; }
-    private ICounterManager CounterManager { get; }
-
     public ChannelRepository Channel { get; }
     public UserRepository User { get; }
     public TransactionRepository Transaction { get; }
@@ -16,44 +13,13 @@ public class PointsServiceRepository
     public LeaderboardRepository Leaderboard { get; }
     public DailyStatsRepository DailyStats { get; }
 
-    public PointsServiceRepository(PointsServiceContext context, ICounterManager counterManager)
+    public PointsServiceRepository(PointsServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {
-        Context = context;
-        CounterManager = counterManager;
-
         Channel = new ChannelRepository(context, counterManager);
         User = new UserRepository(context, counterManager);
         Transaction = new TransactionRepository(context, counterManager);
         Statistics = new StatisticsRepository(context, counterManager);
         Leaderboard = new LeaderboardRepository(context, counterManager);
         DailyStats = new DailyStatsRepository(context, counterManager);
-    }
-
-    public Task AddAsync<TEntity>(TEntity entity) where TEntity : class
-        => Context.Set<TEntity>().AddAsync(entity).AsTask();
-
-    public Task AddCollectionAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
-        => Context.Set<TEntity>().AddRangeAsync(entities);
-
-    public void Remove<TEntity>(TEntity entity) where TEntity : class
-        => Context.Set<TEntity>().Remove(entity);
-
-    public void RemoveCollection<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
-        => Context.Set<TEntity>().RemoveRange(entities);
-
-    public async Task<int> CommitAsync()
-    {
-        using (CounterManager.Create("Repository.Commit"))
-        {
-            return await Context.SaveChangesAsync();
-        }
-    }
-
-    public async Task<bool> IsPendingMigrationsAsync()
-    {
-        using (CounterManager.Create("Repository.Migrations"))
-        {
-            return (await Context.Database.GetPendingMigrationsAsync()).Any();
-        }
     }
 }
