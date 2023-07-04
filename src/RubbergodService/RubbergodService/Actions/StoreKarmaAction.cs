@@ -1,18 +1,15 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using RubbergodService.Core.Entity;
 using RubbergodService.Core.Repository;
-using RubbergodService.MemberSynchronization;
 
 namespace RubbergodService.Actions;
 
 public class StoreKarmaAction : ApiActionBase
 {
-    private MemberSyncQueue MemberSyncQueue { get; }
     private RubbergodServiceRepository Repository { get; }
 
-    public StoreKarmaAction(MemberSyncQueue queue, RubbergodServiceRepository repository)
+    public StoreKarmaAction(RubbergodServiceRepository repository)
     {
-        MemberSyncQueue = queue;
         Repository = repository;
     }
 
@@ -27,11 +24,9 @@ public class StoreKarmaAction : ApiActionBase
                 await Repository.AddAsync(item);
             else
             {
-                if (karma.IsEqual(item)) continue;
-                karma.Update(item);
+                if (!karma.IsEqual(item))
+                    karma.Update(item);
             }
-
-            await MemberSyncQueue.AddToQueueAsync(item.MemberId);
         }
 
         await Repository.CommitAsync();

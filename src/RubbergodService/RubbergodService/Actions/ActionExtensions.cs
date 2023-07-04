@@ -14,7 +14,6 @@ public static class ActionExtensions
         return services
             .AddScoped<SendDirectApiAction>()
             .AddScoped<StoreKarmaAction>()
-            .AddScoped<GetKarmaPageAction>()
-            .AddScoped<RefreshUserAction>();
+            .AddScoped<GetKarmaPageAction>();
     }
 }

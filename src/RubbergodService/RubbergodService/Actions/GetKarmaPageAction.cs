@@ -17,28 +17,20 @@ public class GetKarmaPageAction : ApiActionBase
     public override async Task<ApiResult> ProcessAsync()
     {
         var parameters = (PaginatedParams)Parameters[0]!;
-
         var karma = await Repository.Karma.GetKarmaPageAsync(parameters);
 
         var counter = 0;
-        var result = await PaginatedResponse<UserKarma>.CopyAndMapAsync(karma, async entity =>
+        var result = await PaginatedResponse<UserKarma>.CopyAndMapAsync(karma, entity =>
         {
-            var user = (await Repository.MemberCache.FindMemberByIdAsync(entity.MemberId))!;
-
             counter++;
-            return new UserKarma
+            return Task.FromResult(new UserKarma
             {
                 Negative = entity.Negative,
                 Positive = entity.Positive,
                 Position = parameters.Skip() + counter,
-                User = new User
-                {
-                    AvatarUrl = user.AvatarUrl,
-                    Username = user.Username,
-                    Id = user.UserId
-                },
+                UserId = entity.MemberId,
                 Value = entity.KarmaValue
-            };
+            });
         });
 
         return ApiResult.FromSuccess(result);

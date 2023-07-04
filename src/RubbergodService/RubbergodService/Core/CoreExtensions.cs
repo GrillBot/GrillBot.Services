@@ -9,7 +9,6 @@ using RubbergodService.Core.Providers;
 using RubbergodService.Core.Repository;
 using RubbergodService.DirectApi;
 using RubbergodService.Discord;
-using RubbergodService.MemberSynchronization;
 
 namespace RubbergodService.Core;
 
@@ -50,7 +49,6 @@ public static class CoreExtensions
         // Actions
         services.AddActions();
         services.AddDirectApi();
-        services.AddMemberSync();
     }
 
     private static void AddDiscord(this IServiceCollection services)

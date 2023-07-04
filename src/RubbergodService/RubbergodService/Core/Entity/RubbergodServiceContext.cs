@@ -14,6 +14,5 @@ public class RubbergodServiceContext : DbContext
     }
 
     public DbSet<Karma> Karma => Set<Karma>();
-    public DbSet<MemberCacheItem> MemberCache => Set<MemberCacheItem>();
     public DbSet<PinCacheItem> PinCache => Set<PinCacheItem>();
 }
