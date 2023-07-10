@@ -27,8 +27,10 @@ public class ImagePointsStatusAction : ApiActionBase
         var yearBack = now.AddYears(-1);
 
         var user = await Repository.User.FindUserAsync(guildId, userId, true);
-        var points = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, false, yearBack, DateTime.MaxValue);
+        if (user is null)
+            return new ApiResult(StatusCodes.Status404NotFound);
 
+        var points = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, false, yearBack, DateTime.MaxValue);
         var result = new ImagePointsStatus
         {
             Points = points,
