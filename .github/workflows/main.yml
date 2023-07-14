@@ -120,7 +120,7 @@ jobs:
           username: ${{ secrets.SSH_Username }}
           password: ${{ secrets.SSH_Password }}
           port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-fileservice
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-file-service
   RubbergodService_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -179,7 +179,7 @@ jobs:
           username: ${{ secrets.SSH_Username }}
           password: ${{ secrets.SSH_Password }}
           port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-rubbergodservice
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-rubbergod-service
   RubbergodService_Deploy_Development:
     runs-on: ubuntu-latest
     environment: "Development"
@@ -247,7 +247,7 @@ jobs:
           username: ${{ secrets.SSH_Username }}
           password: ${{ secrets.SSH_Password }}
           port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-graphics
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-graphics
   Graphics_Deploy_Development:
     runs-on: ubuntu-latest
     environment: "Development"
@@ -320,7 +320,7 @@ jobs:
           username: ${{ secrets.SSH_Username }}
           password: ${{ secrets.SSH_Password }}
           port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-points
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-points-service
   PointsService_Deploy_Development:
     runs-on: ubuntu-latest
     environment: "Development"
@@ -393,7 +393,7 @@ jobs:
           username: ${{ secrets.SSH_Username }}
           password: ${{ secrets.SSH_Password }}
           port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-image-processing
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-image-processing-service
   ImageProcessingService_Deploy_Development:
     runs-on: ubuntu-latest
     environment: "Development"
@@ -465,7 +465,7 @@ jobs:
           username: ${{ secrets.SSH_Username }}
           password: ${{ secrets.SSH_Password }}
           port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/podman-reload.py grillbot-audit-log-service
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-audit-log-service
   AuditLogService_Deploy_Development:
     runs-on: ubuntu-latest
     environment: "Development"
