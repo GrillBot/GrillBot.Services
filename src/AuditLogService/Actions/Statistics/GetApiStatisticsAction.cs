@@ -34,7 +34,7 @@ public class GetApiStatisticsAction : ApiActionBase
             .Where(o => o.ApiGroup == apiGroupName)
             .GroupBy(o => new { o.Date.Year, o.Date.Month })
             .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
-            .Select(o => new { Key = $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", Count = o.LongCount() })
+            .Select(o => new { Key = $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", Count = o.Sum(x => x.Count) })
             .ToDictionaryAsync(o => o.Key, o => o.Count);
     }
 
