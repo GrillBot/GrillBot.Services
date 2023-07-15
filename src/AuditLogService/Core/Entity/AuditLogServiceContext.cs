@@ -4,7 +4,7 @@ namespace AuditLogService.Core.Entity;
 
 public class AuditLogServiceContext : DbContext
 {
-    public AuditLogServiceContext(DbContextOptions options) : base(options)
+    public AuditLogServiceContext(DbContextOptions<AuditLogServiceContext> options) : base(options)
     {
     }
 

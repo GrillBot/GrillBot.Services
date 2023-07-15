@@ -3,16 +3,19 @@ using AuditLogService.Core.Enums;
 using AuditLogService.Models.Response;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Channels;
 
 namespace AuditLogService.Actions;
 
 public class DeleteItemAction : ApiActionBase
 {
     private AuditLogServiceContext Context { get; }
+    private Channel<LogItem> Channel { get; }
 
-    public DeleteItemAction(AuditLogServiceContext context)
+    public DeleteItemAction(AuditLogServiceContext context, Channel<LogItem> channel)
     {
         Context = context;
+        Channel = channel;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -20,93 +23,99 @@ public class DeleteItemAction : ApiActionBase
         var id = (Guid)Parameters[0]!;
         var response = new DeleteItemResponse();
 
-        var logItem = await Context.LogItems.FirstOrDefaultAsync(o => o.Id == id);
+        var logItem = await ReadLogItemAsync(id);
         if (logItem is null)
             return new ApiResult(StatusCodes.Status404NotFound, response);
 
-        Context.Remove(logItem);
-        await SetFilesAndRemoveAsync(response, logItem);
-        await DeleteChildItemsAsync(id, logItem.Type);
-        await Context.SaveChangesAsync();
-
+        response.FilesToDelete = logItem.Files.Select(o => o.Filename).Distinct().ToList();
         response.Exists = true;
+
+        Context.Remove(logItem);
+        await Context.SaveChangesAsync();
+        await Channel.Writer.WriteAsync(logItem);
+
         return ApiResult.FromSuccess(response);
     }
 
-    private async Task SetFilesAndRemoveAsync(DeleteItemResponse response, LogItem item)
+    private async Task<LogItem?> ReadLogItemAsync(Guid id)
     {
-        var files = await Context.Files.Where(o => o.LogItemId == item.Id).ToListAsync();
-        if (files.Count == 0)
-            return;
+        var logItemType = await Context.LogItems.AsNoTracking()
+            .Where(o => o.Id == id)
+            .Select(o => o.Type)
+            .FirstOrDefaultAsync();
+        if (logItemType is LogType.None)
+            return null;
 
-        response.FilesToDelete.AddRange(files.Select(o => o.Filename));
-        Context.RemoveRange(files);
-    }
-
-    private async Task DeleteChildItemsAsync(Guid logItemId, LogType type)
-    {
-        switch (type)
+        var query = Context.LogItems.Include(o => o.Files).Where(o => o.Id == id);
+        switch (logItemType)
         {
             case LogType.Info or LogType.Warning or LogType.Error:
-                Context.RemoveRange(await Context.LogMessages.Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.LogMessage);
                 break;
             case LogType.ChannelCreated:
-                Context.RemoveRange(await Context.ChannelCreatedItems.Include(o => o.ChannelInfo).Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.ChannelCreated!.ChannelInfo);
                 break;
             case LogType.ChannelDeleted:
-                Context.RemoveRange(await Context.ChannelDeletedItems.Include(o => o.ChannelInfo).Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.ChannelDeleted!.ChannelInfo);
                 break;
             case LogType.ChannelUpdated:
-                Context.RemoveRange(await Context.ChannelUpdatedItems.Include(o => o.Before).Include(o => o.After).Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.ChannelUpdated!.Before);
+                query = query.Include(o => o.ChannelUpdated!.After);
                 break;
             case LogType.EmoteDeleted:
-                Context.RemoveRange(await Context.DeletedEmotes.Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.DeletedEmote);
                 break;
             case LogType.OverwriteCreated:
-                Context.RemoveRange(await Context.OverwriteCreatedItems.Include(o => o.OverwriteInfo).Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.OverwriteCreated!.OverwriteInfo);
                 break;
             case LogType.OverwriteDeleted:
-                Context.RemoveRange(await Context.OverwriteDeletedItems.Include(o => o.OverwriteInfo).Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.OverwriteDeleted!.OverwriteInfo);
                 break;
             case LogType.OverwriteUpdated:
-                Context.RemoveRange(await Context.OverwriteUpdatedItems.Include(o => o.Before).Include(o => o.After).Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.OverwriteUpdated!.Before);
+                query = query.Include(o => o.OverwriteUpdated!.After);
                 break;
             case LogType.Unban:
-                Context.RemoveRange(await Context.Unbans.Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.Unban);
                 break;
             case LogType.MemberUpdated:
-                Context.RemoveRange(await Context.MemberUpdatedItems.Include(o => o.Before).Include(o => o.After).Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.MemberUpdated!.Before);
+                query = query.Include(o => o.MemberUpdated!.After);
                 break;
             case LogType.MemberRoleUpdated:
-                Context.RemoveRange(await Context.MemberRoleUpdatedItems.Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.MemberRolesUpdated);
                 break;
             case LogType.GuildUpdated:
-                Context.RemoveRange(await Context.GuildUpdatedItems.Include(o => o.Before).Include(o => o.After).Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.GuildUpdated!.Before);
+                query = query.Include(o => o.GuildUpdated!.After);
                 break;
             case LogType.UserLeft:
-                Context.RemoveRange(await Context.UserLeftItems.Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.UserLeft);
                 break;
             case LogType.UserJoined:
-                Context.RemoveRange(await Context.UserJoinedItems.Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.UserJoined);
                 break;
             case LogType.MessageEdited:
-                Context.RemoveRange(await Context.MessageEditedItems.Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.MessageEdited);
                 break;
             case LogType.MessageDeleted:
-                Context.RemoveRange(await Context.MessageDeletedItems.Include(o => o.Embeds).ThenInclude(o => o.Fields).Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.MessageDeleted!.Embeds).ThenInclude(o => o.Fields);
                 break;
             case LogType.ThreadDeleted:
-                Context.RemoveRange(await Context.ThreadDeletedItems.Include(o => o.ThreadInfo).Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.ThreadDeleted!.ThreadInfo);
                 break;
             case LogType.JobCompleted:
-                Context.RemoveRange(await Context.JobExecutions.Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.Job);
                 break;
             case LogType.Api:
-                Context.RemoveRange(await Context.ApiRequests.Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.ApiRequest);
                 break;
             case LogType.ThreadUpdated:
-                Context.RemoveRange(await Context.ThreadUpdatedItems.Include(o => o.Before).Include(o => o.After).Where(o => o.LogItemId == logItemId).ToListAsync());
+                query = query.Include(o => o.ThreadUpdated!.Before);
+                query = query.Include(o => o.ThreadUpdated!.After);
                 break;
         }
+
+        return await query.FirstOrDefaultAsync();
     }
 }

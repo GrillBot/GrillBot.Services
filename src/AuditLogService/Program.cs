@@ -1,6 +1,7 @@
 using AuditLogService.Core;
 using AuditLogService.Core.Discord;
 using AuditLogService.Core.Entity;
+using AuditLogService.Core.Entity.Statistics;
 using GrillBot.Core;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,7 @@ var app = builder.Build();
 
 app.Services.GetRequiredService<DiscordLogManager>();
 await app.InitDatabaseAsync<AuditLogServiceContext>();
+await app.InitDatabaseAsync<AuditLogStatisticsContext>();
 
 using var scope = app.Services.CreateScope();
 await scope.ServiceProvider.GetRequiredService<DiscordManager>().LoginAsync();

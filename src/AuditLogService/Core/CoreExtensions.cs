@@ -1,12 +1,15 @@
 ﻿using AuditLogService.Actions;
+using AuditLogService.BackgroundServices;
 using AuditLogService.Core.Discord;
 using AuditLogService.Core.Entity;
+using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Core.Options;
 using AuditLogService.Core.Providers;
 using AuditLogService.Processors;
 using GrillBot.Core;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Channels;
 
 namespace AuditLogService.Core;
 
@@ -17,7 +20,8 @@ public static class CoreExtensions
         var connectionString = configuration.GetConnectionString("Default")!;
 
         services
-            .AddDatabaseContext<AuditLogServiceContext>(b => b.UseNpgsql(connectionString));
+            .AddDatabaseContext<AuditLogServiceContext>(b => b.UseNpgsql(connectionString))
+            .AddDatabaseContext<AuditLogStatisticsContext>(b => b.UseNpgsql(connectionString));
 
         services
             .AddDiagnostic()
@@ -42,5 +46,6 @@ public static class CoreExtensions
         services.AddActions();
         services.AddProcessors();
         services.AddDiscord();
+        services.AddPostProcessing();
     }
 }

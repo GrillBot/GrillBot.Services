@@ -1,5 +1,4 @@
-﻿using System.Net;
-using AuditLogService.Core.Entity;
+﻿using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Models.Response.Statistics;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
@@ -8,11 +7,11 @@ namespace AuditLogService.Actions.Statistics;
 
 public class GetApiStatisticsAction : ApiActionBase
 {
-    private AuditLogServiceContext Context { get; }
+    private AuditLogStatisticsContext StatisticsContext { get; }
 
-    public GetApiStatisticsAction(AuditLogServiceContext context)
+    public GetApiStatisticsAction(AuditLogStatisticsContext statisticsContext)
     {
-        Context = context;
+        StatisticsContext = statisticsContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -29,45 +28,38 @@ public class GetApiStatisticsAction : ApiActionBase
         return ApiResult.FromSuccess(statistics);
     }
 
-    private async Task<Dictionary<string, int>> GetApiStatisticsByDateForApiGroupAsync(string apiGroupName)
+    private async Task<Dictionary<string, long>> GetApiStatisticsByDateForApiGroupAsync(string apiGroupName)
     {
-        return await Context.ApiRequests.AsNoTracking()
-            .Where(o => o.ApiGroupName == apiGroupName)
-            .GroupBy(o => new { o.EndAt.Year, o.EndAt.Month })
+        return await StatisticsContext.DateCountStatistics.AsNoTracking()
+            .Where(o => o.ApiGroup == apiGroupName)
+            .GroupBy(o => new { o.Date.Year, o.Date.Month })
             .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
-            .Select(o => new { Key = $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", Count = o.Count() })
+            .Select(o => new { Key = $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", Count = o.LongCount() })
             .ToDictionaryAsync(o => o.Key, o => o.Count);
     }
 
-    private async Task<Dictionary<string, int>> GetApiStatisticsByResultForApiGroupAsync(string apiGroupName)
+    private async Task<Dictionary<string, long>> GetApiStatisticsByResultForApiGroupAsync(string apiGroupName)
     {
-        return await Context.ApiRequests.AsNoTracking()
-            .Where(o => o.ApiGroupName == apiGroupName)
-            .GroupBy(o => o.Result)
-            .OrderBy(o => o.Key)
-            .Select(o => new { o.Key, Count = o.Count() })
-            .ToDictionaryAsync(o => o.Key, o => o.Count);
+        return await StatisticsContext.ResultCountStatistic.AsNoTracking()
+            .Where(o => o.ApiGroup == apiGroupName)
+            .OrderBy(o => o.Result)
+            .Select(o => new { o.Result, o.Count })
+            .ToDictionaryAsync(o => o.Result, o => o.Count);
     }
 
     private async Task<List<StatisticItem>> GetEndpointStatisticsAsync()
     {
-        var successStatusCodes = Enum.GetValues<HttpStatusCode>()
-            .Where(o => o < HttpStatusCode.BadRequest)
-            .Select(o => $"{(int)o} ({o})")
-            .ToList();
-
-        var items = await Context.ApiRequests.AsNoTracking()
-            .GroupBy(o => new { o.Method, o.TemplatePath })
+        var items = await StatisticsContext.RequestStats.AsNoTracking()
             .Select(o => new StatisticItem
             {
-                Key = $"{o.Key.Method} {o.Key.TemplatePath}",
-                Last = o.Max(x => x.EndAt),
-                FailedCount = o.Count(x => !successStatusCodes.Contains(x.Result)),
-                MaxDuration = o.Max(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)),
-                MinDuration = o.Min(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)),
-                SuccessCount = o.Count(x => successStatusCodes.Contains(x.Result)),
-                TotalDuration = o.Sum(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)),
-                LastRunDuration = o.OrderByDescending(x => x.EndAt).Select(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)).First()
+                FailedCount = o.FailedCount,
+                Key = o.Endpoint,
+                Last = o.LastRequest,
+                LastRunDuration = o.LastRunDuration,
+                MaxDuration = o.MaxDuration,
+                MinDuration = o.MinDuration,
+                SuccessCount = o.SuccessCount,
+                TotalDuration = o.TotalDuration
             })
             .ToListAsync();
 

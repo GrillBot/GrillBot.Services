@@ -1,4 +1,4 @@
-﻿using AuditLogService.Core.Entity;
+﻿using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Models.Response.Statistics;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
@@ -7,11 +7,11 @@ namespace AuditLogService.Actions.Statistics;
 
 public class GetAvgTimesAction : ApiActionBase
 {
-    private AuditLogServiceContext Context { get; }
+    private AuditLogStatisticsContext StatisticsContext { get; }
 
-    public GetAvgTimesAction(AuditLogServiceContext context)
+    public GetAvgTimesAction(AuditLogStatisticsContext statisticsContext)
     {
-        Context = context;
+        StatisticsContext = statisticsContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -29,29 +29,33 @@ public class GetAvgTimesAction : ApiActionBase
 
     private async Task<Dictionary<string, double>> GetAvgTimesOfApiAsync(string apiGroupName)
     {
-        return await Context.ApiRequests.AsNoTracking()
-            .Where(o => o.ApiGroupName == apiGroupName)
-            .GroupBy(o => o.LogItem.CreatedAt.Date)
-            .OrderBy(o => o.Key)
-            .Select(o => new { o.Key, AvgTimes = Math.Round(o.Average(x => (x.EndAt - x.StartAt).TotalMilliseconds)) })
-            .ToDictionaryAsync(o => $"{o.Key:dd. MM. yyyy}", o => o.AvgTimes);
+        var baseQuery = StatisticsContext.DailyAvgTimes.AsNoTracking()
+            .OrderBy(o => o.Date);
+
+        var queryData = apiGroupName == "V2" ?
+            baseQuery.Select(o => new { o.Date, AvgTimes = Math.Round(o.ExternalApi) }) :
+            baseQuery.Select(o => new { o.Date, AvgTimes = Math.Round(o.InternalApi) });
+
+        return await queryData
+            .Where(o => o.AvgTimes > -1)
+            .ToDictionaryAsync(o => $"{o.Date:dd. MM. yyyy}", o => o.AvgTimes);
     }
 
     private async Task<Dictionary<string, double>> GetAvgTimesOfJobsAsync()
     {
-        return await Context.JobExecutions.AsNoTracking()
-            .GroupBy(o => o.LogItem.CreatedAt.Date)
-            .OrderBy(o => o.Key)
-            .Select(o => new { o.Key, AvgTimes = Math.Round(o.Average(x => (x.EndAt - x.StartAt).TotalMilliseconds)) })
-            .ToDictionaryAsync(o => $"{o.Key:dd. MM. yyyy}", o => o.AvgTimes);
+        return await StatisticsContext.DailyAvgTimes.AsNoTracking()
+            .OrderBy(o => o.Date)
+            .Where(o => o.Jobs > -1)
+            .Select(o => new { o.Date, AvgTimes = Math.Round(o.Jobs) })
+            .ToDictionaryAsync(o => $"{o.Date:dd. MM. yyyy}", o => o.AvgTimes);
     }
 
     private async Task<Dictionary<string, double>> GetAvgTimesOfInteractionsAsync()
     {
-        return await Context.InteractionCommands.AsNoTracking()
-            .GroupBy(o => o.LogItem.CreatedAt.Date)
-            .OrderBy(o => o.Key)
-            .Select(o => new { o.Key, AvgTimes = Math.Round(o.Average(x => x.Duration)) })
-            .ToDictionaryAsync(o => $"{o.Key:dd. MM. yyyy}", o => o.AvgTimes);
+        return await StatisticsContext.DailyAvgTimes.AsNoTracking()
+            .OrderBy(o => o.Date)
+            .Where(o => o.Interactions > -1)
+            .Select(o => new { o.Date, AvgTimes = Math.Round(o.Interactions) })
+            .ToDictionaryAsync(o => $"{o.Date:dd. MM. yyyy}", o => o.AvgTimes);
     }
 }

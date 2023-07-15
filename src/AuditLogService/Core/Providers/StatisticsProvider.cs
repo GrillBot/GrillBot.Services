@@ -1,4 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
+using AuditLogService.Core.Entity.Statistics;
 using GrillBot.Core.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,10 +8,12 @@ namespace AuditLogService.Core.Providers;
 public class StatisticsProvider : IStatisticsProvider
 {
     private AuditLogServiceContext Context { get; }
+    private AuditLogStatisticsContext StatisticsContext { get; }
 
-    public StatisticsProvider(AuditLogServiceContext context)
+    public StatisticsProvider(AuditLogServiceContext context, AuditLogStatisticsContext statisticsContext)
     {
         Context = context;
+        StatisticsContext = statisticsContext;
     }
 
     public async Task<Dictionary<string, long>> GetTableStatisticsAsync()
@@ -47,6 +50,11 @@ public class StatisticsProvider : IStatisticsProvider
             { nameof(Context.UserLeftItems), await Context.UserLeftItems.LongCountAsync() },
             { nameof(Context.MemberUpdatedItems), await Context.MemberUpdatedItems.LongCountAsync() },
             { nameof(Context.MemberInfos), await Context.MemberInfos.LongCountAsync() },
+
+            { $"Statistics.{nameof(StatisticsContext.DailyAvgTimes)}", await StatisticsContext.DailyAvgTimes.LongCountAsync() },
+            { $"Statistics.{nameof(StatisticsContext.DateCountStatistics)}", await StatisticsContext.DateCountStatistics.LongCountAsync() },
+            { $"Statistics.{nameof(StatisticsContext.RequestStats)}", await StatisticsContext.RequestStats.LongCountAsync() },
+            { $"Statistics.{nameof(StatisticsContext.ResultCountStatistic)}", await StatisticsContext.ResultCountStatistic.LongCountAsync() },
         };
     }
 }
