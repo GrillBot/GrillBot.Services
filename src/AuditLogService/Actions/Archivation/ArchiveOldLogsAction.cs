@@ -25,10 +25,6 @@ public partial class ArchiveOldLogsAction : ApiActionBase
 
         var items = await ReadItemsToArchiveAsync(expirationDate);
         var result = CreateArchive(items);
-        items.ForEach(RemoveItem);
-
-        if (Context.ChangeTracker.HasChanges())
-            await Context.SaveChangesAsync();
 
         return ApiResult.FromSuccess(result);
     }

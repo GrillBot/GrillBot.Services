@@ -32,6 +32,8 @@ public partial class ArchiveOldLogsAction
 
     private static XElement ProcessLogItem(LogItem item, ArchivationResult result)
     {
+        result.Ids.Add(item.Id);
+
         var xml = new XElement(
             "Item",
             new XAttribute("Id", item.Id.ToString()),

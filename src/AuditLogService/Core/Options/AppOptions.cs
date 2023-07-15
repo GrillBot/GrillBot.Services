@@ -2,6 +2,6 @@
 
 public class AppOptions
 {
-    public int MinimalItemsToArchive { get; set; }
+    public int ItemsToArchive { get; set; }
     public int ExpirationMonths { get; set; }
 }
