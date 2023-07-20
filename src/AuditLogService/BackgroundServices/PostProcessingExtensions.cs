@@ -19,6 +19,7 @@ public static class PostProcessingExtensions
             .AddScoped<PostProcessActionBase, ComputeApiResultCountsAction>()
             .AddScoped<PostProcessActionBase, ComputeApiRequestStatsAction>()
             .AddScoped<PostProcessActionBase, ComputeAvgTimesAction>()
+            .AddScoped<PostProcessActionBase, ComputeApiUserStatisticsAction>()
             .AddScoped<PostProcessActionBase, DeleteInvalidStatisticsAction>();
     }
 }

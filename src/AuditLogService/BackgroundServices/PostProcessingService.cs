@@ -22,8 +22,6 @@ public class PostProcessingService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        //await ComputeOldStatisticsAsync();
-
         await CheckMigrationsAsync();
 
         while (!stoppingToken.IsCancellationRequested)
@@ -49,6 +47,7 @@ public class PostProcessingService : BackgroundService
 
         await CheckMigrationsAsync<AuditLogServiceContext>(scope);
         await CheckMigrationsAsync<AuditLogStatisticsContext>(scope);
+        //await MigrateDataAsync(scope);
     }
 
     private static async Task CheckMigrationsAsync<TContext>(IServiceScope scope) where TContext : DbContext
@@ -60,67 +59,26 @@ public class PostProcessingService : BackgroundService
             pendingMigrations = (await context.Database.GetPendingMigrationsAsync()).Any();
     }
 
-    private async Task ComputeOldStatisticsAsync()
+    private async Task MigrateDataAsync(IServiceScope scope)
     {
-        using var scope = ServiceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
-        var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>();
+        var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>()
+            .Where(o => o is ComputeApiUserStatisticsAction or DeleteInvalidStatisticsAction)
+            .ToArray();
 
-        var logItems = await context.LogItems.Where(o => o.Type == Core.Enums.LogType.Api).AsNoTracking()
-            .Include(o => o.ApiRequest).ToListAsync();
-        logItems = logItems.Where(o => o.ApiRequest is not null).ToList();
+        var logItems = await context.LogItems.Where(o => o.Type == Core.Enums.LogType.Api).Include(o => o.ApiRequest).ToListAsync();
+        logItems = logItems.FindAll(o => o.ApiRequest is not null);
 
-        var perDate = logItems.GroupBy(o => o.CreatedAt.Date).Select(o => o.First()).ToList();
-        var perResult = logItems.GroupBy(o => o.ApiRequest!.Result).Select(o => o.First()).ToList();
-        var perEndpoint = logItems.GroupBy(o => $"{o.ApiRequest!.Method} {o.ApiRequest.TemplatePath}").Select(o => o.First()).ToList();
+        var groupedItems = logItems
+            .GroupBy(o => new { User = o.UserId ?? o.ApiRequest!.Identification, o.ApiRequest!.Method, o.ApiRequest!.TemplatePath })
+            .Select(o => o.First())
+            .ToList();
 
-        foreach (var item in perDate)
+        foreach (var logItem in groupedItems)
         {
-            foreach (var action in actions.Where(o => o is ComputeApiDateCountsAction or ComputeAvgTimesAction or DeleteInvalidStatisticsAction))
+            foreach (var action in actions)
             {
-                await action.ProcessAsync(item);
-            }
-        }
-
-        foreach (var item in perResult)
-        {
-            foreach (var action in actions.Where(a => a is ComputeApiResultCountsAction or DeleteInvalidStatisticsAction))
-            {
-                await action.ProcessAsync(item);
-            }
-        }
-
-        foreach (var item in perEndpoint)
-        {
-            foreach (var action in actions.Where(a => a is ComputeApiRequestStatsAction or DeleteInvalidStatisticsAction))
-            {
-                await action.ProcessAsync(item);
-            }
-        }
-
-        logItems = await context.LogItems.Where(o => o.Type == Core.Enums.LogType.JobCompleted).AsNoTracking()
-            .Include(o => o.Job).ToListAsync();
-        logItems = logItems.FindAll(o => o.Job is not null);
-
-        perDate = logItems.GroupBy(o => o.CreatedAt.Date).Select(o => o.First()).ToList();
-        foreach (var item in perDate)
-        {
-            foreach (var action in actions.Where(a => a is ComputeAvgTimesAction or DeleteInvalidStatisticsAction))
-            {
-                await action.ProcessAsync(item);
-            }
-        }
-
-        logItems = await context.LogItems.Where(o => o.Type == Core.Enums.LogType.InteractionCommand).AsNoTracking()
-            .Include(o => o.InteractionCommand).ToListAsync();
-        logItems = logItems.FindAll(o => o.InteractionCommand is not null);
-
-        perDate = logItems.GroupBy(o => o.CreatedAt.Date).Select(o => o.First()).ToList();
-        foreach (var item in perDate)
-        {
-            foreach (var action in actions.Where(a => a is ComputeAvgTimesAction or DeleteInvalidStatisticsAction))
-            {
-                await action.ProcessAsync(item);
+                await action.ProcessAsync(logItem);
             }
         }
     }

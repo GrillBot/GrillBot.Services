@@ -1,4 +1,4 @@
-﻿using AuditLogService.Core.Entity;
+﻿using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Models.Response.Statistics;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
@@ -7,43 +7,38 @@ namespace AuditLogService.Actions.Statistics;
 
 public class GetUserApiStatisticsAction : ApiActionBase
 {
-    private AuditLogServiceContext Context { get; }
+    private AuditLogStatisticsContext StatisticsContext { get; }
 
-    public GetUserApiStatisticsAction(AuditLogServiceContext context)
+    public GetUserApiStatisticsAction(AuditLogStatisticsContext statisticsContext)
     {
-        Context = context;
+        StatisticsContext = statisticsContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
         var criteria = (string)Parameters[0]!;
 
-        var data = await Filter(Context.ApiRequests.AsNoTracking(), criteria)
-            .GroupBy(o => new { User = o.LogItem.UserId ?? o.Identification, o.Method, o.TemplatePath })
-            .Select(o => new { Count = o.Count(), o.Key.User, o.Key.Method, o.Key.TemplatePath })
+        var data = await Filter(StatisticsContext.ApiUserActionStatistics.AsNoTracking(), criteria)
+            .Select(o => new { o.Action, o.Count, o.UserId })
             .ToListAsync();
 
-        var result = data
-            .Select(o => new UserActionCountItem
-            {
-                Action = $"{o.Method} {o.TemplatePath}",
-                Count = o.Count,
-                UserId = o.User
-            })
-            .ToList();
+        var result = data.ConvertAll(o => new UserActionCountItem
+        {
+            Action = o.Action,
+            Count = o.Count,
+            UserId = o.UserId
+        });
 
         return ApiResult.FromSuccess(result);
     }
 
-    private static IQueryable<ApiRequest> Filter(IQueryable<ApiRequest> query, string criteria)
+    private static IQueryable<ApiUserActionStatistic> Filter(IQueryable<ApiUserActionStatistic> query, string criteria)
     {
-        query = query.Where(o => !string.IsNullOrEmpty(o.LogItem.UserId) || o.Identification != "UnknownIdentification");
-
         return criteria switch
         {
-            "v1-private" => query.Where(o => o.ApiGroupName == "V1" && o.Identification.StartsWith("ApiV1(Private/")),
-            "v1-public" => query.Where(o => o.ApiGroupName == "V1" && o.Identification.StartsWith("ApiV1(Public/")),
-            "v2" => query.Where(o => o.ApiGroupName == "V2"),
+            "v1-private" => query.Where(o => o.ApiGroup == "V1" && !o.IsPublic),
+            "v1-public" => query.Where(o => o.ApiGroup == "V1" && o.IsPublic),
+            "v2" => query.Where(o => o.ApiGroup == "V2"),
             _ => throw new NotSupportedException("Unsupported criteria.")
         };
     }

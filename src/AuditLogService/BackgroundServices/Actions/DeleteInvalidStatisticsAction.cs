@@ -29,6 +29,10 @@ public class DeleteInvalidStatisticsAction : PostProcessActionBase
             var requestStats = await StatisticsContext.RequestStats.Where(o => o.FailedCount == 0 && o.SuccessCount == 0).ToListAsync();
             if (requestStats.Count > 0)
                 StatisticsContext.RemoveRange(requestStats);
+
+            var apiUserStatistics = await StatisticsContext.ApiUserActionStatistics.Where(o => o.Count == 0).ToListAsync();
+            if (apiUserStatistics.Count > 0)
+                StatisticsContext.RemoveRange(apiUserStatistics);
         }
 
         var dailyAvgTimes = await StatisticsContext.DailyAvgTimes.Where(o => o.ExternalApi == -1 && o.Interactions == -1 && o.InternalApi == -1 && o.Jobs == -1).ToListAsync();
