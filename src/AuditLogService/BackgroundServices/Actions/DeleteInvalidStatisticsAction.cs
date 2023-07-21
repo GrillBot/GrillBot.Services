@@ -39,6 +39,13 @@ public class DeleteInvalidStatisticsAction : PostProcessActionBase
         if (dailyAvgTimes.Count > 0)
             StatisticsContext.RemoveRange(dailyAvgTimes);
 
+        if (logItem.Type is LogType.InteractionCommand)
+        {
+            var interactionUserStatistics = await StatisticsContext.InteractionUserActionStatistics.Where(o => o.Count == 0).ToListAsync();
+            if (interactionUserStatistics.Count > 0)
+                StatisticsContext.RemoveRange(interactionUserStatistics);
+        }
+
         await StatisticsContext.SaveChangesAsync();
     }
 }

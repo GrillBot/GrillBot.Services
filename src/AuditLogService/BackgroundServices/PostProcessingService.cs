@@ -63,14 +63,14 @@ public class PostProcessingService : BackgroundService
     {
         var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
         var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>()
-            .Where(o => o is ComputeApiUserStatisticsAction or DeleteInvalidStatisticsAction)
+            .Where(o => o is ComputeInteractionUserStatisticsAction or DeleteInvalidStatisticsAction)
             .ToArray();
 
-        var logItems = await context.LogItems.Where(o => o.Type == Core.Enums.LogType.Api).Include(o => o.ApiRequest).ToListAsync();
-        logItems = logItems.FindAll(o => o.ApiRequest is not null);
+        var logItems = await context.LogItems.Where(o => o.Type == Core.Enums.LogType.InteractionCommand).Include(o => o.InteractionCommand).ToListAsync();
+        logItems = logItems.FindAll(o => o.InteractionCommand is not null);
 
         var groupedItems = logItems
-            .GroupBy(o => new { User = o.UserId ?? o.ApiRequest!.Identification, o.ApiRequest!.Method, o.ApiRequest!.TemplatePath })
+            .GroupBy(o => new { o.UserId, o.InteractionCommand!.Name, o.InteractionCommand.ModuleName, o.InteractionCommand.MethodName })
             .Select(o => o.First())
             .ToList();
 

@@ -1,4 +1,4 @@
-﻿using AuditLogService.Core.Entity;
+﻿using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Models.Response.Statistics;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
@@ -7,26 +7,22 @@ namespace AuditLogService.Actions.Statistics;
 
 public class GetUserCommandStatisticsAction : ApiActionBase
 {
-    private AuditLogServiceContext Context { get; }
+    private AuditLogStatisticsContext StatisticsContext { get; }
 
-    public GetUserCommandStatisticsAction(AuditLogServiceContext context)
+    public GetUserCommandStatisticsAction(AuditLogStatisticsContext statisticsContext)
     {
-        Context = context;
+        StatisticsContext = statisticsContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var data = await Context.InteractionCommands.AsNoTracking()
-            .GroupBy(o => new { o.LogItem.UserId, o.Name, o.ModuleName, o.MethodName })
-            .Select(o => new { o.Key.UserId, o.Key.ModuleName, o.Key.MethodName, o.Key.Name, Count = o.Count() })
-            .ToListAsync();
-
-        var result = data.Select(o => new UserActionCountItem
+        var data = await StatisticsContext.InteractionUserActionStatistics.AsNoTracking().ToListAsync();
+        var result = data.ConvertAll(o => new UserActionCountItem
         {
-            Action = $"{o.Name} ({o.ModuleName}/{o.MethodName})",
+            Action = o.Action,
             Count = o.Count,
             UserId = o.UserId!
-        }).ToList();
+        });
 
         return ApiResult.FromSuccess(result);
     }
