@@ -24,4 +24,5 @@ public class AuditLogStatisticsContext : DbContext
     public DbSet<DailyAvgTimes> DailyAvgTimes => Set<DailyAvgTimes>();
     public DbSet<ApiUserActionStatistic> ApiUserActionStatistics => Set<ApiUserActionStatistic>();
     public DbSet<InteractionUserActionStatistic> InteractionUserActionStatistics => Set<InteractionUserActionStatistic>();
+    public DbSet<AuditLogTypeStatistic> TypeStatistics => Set<AuditLogTypeStatistic>();
 }

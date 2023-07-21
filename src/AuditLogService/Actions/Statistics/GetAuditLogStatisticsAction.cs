@@ -1,5 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Core.Enums;
+using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Models.Response.Statistics;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +9,12 @@ namespace AuditLogService.Actions.Statistics;
 public class GetAuditLogStatisticsAction : ApiActionBase
 {
     private AuditLogServiceContext Context { get; }
+    private AuditLogStatisticsContext StatisticsContext { get; }
 
-    public GetAuditLogStatisticsAction(AuditLogServiceContext context)
+    public GetAuditLogStatisticsAction(AuditLogServiceContext context, AuditLogStatisticsContext statisticsContext)
     {
         Context = context;
+        StatisticsContext = statisticsContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -28,18 +30,14 @@ public class GetAuditLogStatisticsAction : ApiActionBase
         return ApiResult.FromSuccess(result);
     }
 
-    private async Task<Dictionary<string, int>> GetStatisticsByTypeAsync()
+    private async Task<Dictionary<string, long>> GetStatisticsByTypeAsync()
     {
-        var statistics = await Context.LogItems.AsNoTracking()
-            .GroupBy(o => o.Type)
-            .Select(o => new { o.Key, Count = o.Count() })
-            .ToDictionaryAsync(o => o.Key, o => o.Count);
+        var data = await StatisticsContext.TypeStatistics.AsNoTracking().ToListAsync();
 
-        return Enum.GetValues<LogType>()
-            .Where(o => o != LogType.None)
-            .Select(o => new { Key = o.ToString(), Value = statistics.TryGetValue(o, out var value) ? value : 0 })
-            .OrderBy(o => o.Key)
-            .ToDictionary(o => o.Key, o => o.Value);
+        return data
+            .Select(o => new { Type = o.Type.ToString(), o.Count })
+            .OrderBy(o => o.Type)
+            .ToDictionary(o => o.Type, o => o.Count);
     }
 
     private async Task<Dictionary<string, int>> GetStatisticsByDateAsync()

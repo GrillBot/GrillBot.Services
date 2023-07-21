@@ -62,24 +62,18 @@ public class PostProcessingService : BackgroundService
     private async Task MigrateDataAsync(IServiceScope scope)
     {
         var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
-        var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>()
-            .Where(o => o is ComputeInteractionUserStatisticsAction or DeleteInvalidStatisticsAction)
-            .ToArray();
+        var action = scope.ServiceProvider.GetServices<PostProcessActionBase>()
+            .First(o => o is ComputeTypeStatitistics);
 
-        var logItems = await context.LogItems.Where(o => o.Type == Core.Enums.LogType.InteractionCommand).Include(o => o.InteractionCommand).ToListAsync();
-        logItems = logItems.FindAll(o => o.InteractionCommand is not null);
-
+        var logItems = await context.LogItems.ToListAsync();
         var groupedItems = logItems
-            .GroupBy(o => new { o.UserId, o.InteractionCommand!.Name, o.InteractionCommand.ModuleName, o.InteractionCommand.MethodName })
+            .GroupBy(o => o.Type)
             .Select(o => o.First())
             .ToList();
 
         foreach (var logItem in groupedItems)
         {
-            foreach (var action in actions)
-            {
-                await action.ProcessAsync(logItem);
-            }
+            await action.ProcessAsync(logItem);
         }
     }
 }

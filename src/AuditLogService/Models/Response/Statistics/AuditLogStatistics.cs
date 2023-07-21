@@ -6,7 +6,7 @@ public class AuditLogStatistics
     /// Statistics by type.
     /// Key is type name, value is count of records.
     /// </summary>
-    public Dictionary<string, int> ByType { get; set; } = new();
+    public Dictionary<string, long> ByType { get; set; } = new();
 
     /// <summary>
     /// Statistics by date.
