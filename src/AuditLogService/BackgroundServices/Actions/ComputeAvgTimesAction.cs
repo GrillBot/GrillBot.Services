@@ -17,7 +17,7 @@ public class ComputeAvgTimesAction : PostProcessActionBase
     public override async Task ProcessAsync(LogItem logItem)
     {
         var date = DateOnly.FromDateTime(logItem.CreatedAt);
-        var stats = await GetOrCreateStatsAsync(date);
+        var stats = await GetOrCreateStatisticEntity<DailyAvgTimes>(o => o.Date == date);
 
         var startOfday = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var endOfDay = date.ToDateTime(new TimeOnly(23, 59, 59, 999), DateTimeKind.Utc);
@@ -27,21 +27,8 @@ public class ComputeAvgTimesAction : PostProcessActionBase
         await ProcessInteractionsAsync(logItem, stats, startOfday, endOfDay);
         await ProcessJobsAsync(logItem, stats, startOfday, endOfDay);
 
+        stats.Date = date;
         await StatisticsContext.SaveChangesAsync();
-    }
-
-    private async Task<DailyAvgTimes> GetOrCreateStatsAsync(DateOnly date)
-    {
-        var entity = await StatisticsContext.DailyAvgTimes
-            .FirstOrDefaultAsync(o => o.Date == date);
-
-        if (entity is null)
-        {
-            entity = new DailyAvgTimes { Date = date };
-            await StatisticsContext.AddAsync(entity);
-        }
-
-        return entity;
     }
 
     private async Task ProcessApiTimesAsync(string expectedApiGroup, LogItem logItem, DailyAvgTimes stats, DateTime startOfDay, DateTime endOfDay)

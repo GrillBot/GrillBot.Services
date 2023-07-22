@@ -20,7 +20,7 @@ public class ComputeApiUserStatisticsAction : PostProcessActionBase
         var apiGroup = logItem.ApiRequest.ApiGroupName;
         var isPublic = logItem.ApiRequest!.Identification.StartsWith("ApiV1(Public/");
         var userId = logItem.UserId ?? logItem.ApiRequest!.Identification;
-        var currentStats = await GetOrCreateStatisticAsync(action, apiGroup, isPublic, userId);
+        var stats = await GetOrCreateStatisticEntity<ApiUserActionStatistic>(o => o.Action == action && o.ApiGroup == apiGroup && o.IsPublic == isPublic && o.UserId == userId);
 
         var countQuery = Context.ApiRequests.AsNoTracking()
             .Where(o => !string.IsNullOrEmpty(o.LogItem.UserId) || o.Identification != "UnknownIdentification")
@@ -39,28 +39,11 @@ public class ComputeApiUserStatisticsAction : PostProcessActionBase
                 countQuery = countQuery.Where(o => o.Identification.StartsWith("ApiV1(Private/"));
         }
 
-        currentStats.Count = await countQuery.CountAsync();
+        stats.UserId = userId;
+        stats.IsPublic = isPublic;
+        stats.Action = action;
+        stats.ApiGroup = apiGroup;
+        stats.Count = await countQuery.CountAsync();
         await StatisticsContext.SaveChangesAsync();
-    }
-
-    private async Task<ApiUserActionStatistic> GetOrCreateStatisticAsync(string action, string apiGroup, bool isPublic, string userId)
-    {
-        var stats = await StatisticsContext.ApiUserActionStatistics
-            .FirstOrDefaultAsync(o => o.Action == action && o.ApiGroup == apiGroup && o.IsPublic == isPublic && o.UserId == userId);
-
-        if (stats is null)
-        {
-            stats = new ApiUserActionStatistic
-            {
-                UserId = userId,
-                IsPublic = isPublic,
-                Action = action,
-                ApiGroup = apiGroup
-            };
-
-            await StatisticsContext.AddAsync(stats);
-        }
-
-        return stats;
     }
 }

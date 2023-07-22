@@ -24,7 +24,8 @@ public class ComputeApiRequestStatsAction : PostProcessActionBase
 
         var method = logItem.ApiRequest!.Method;
         var templatePath = logItem.ApiRequest!.TemplatePath;
-        var stats = await GetOrCreateStatAsync(method, templatePath);
+        var endpoint = $"{method} {templatePath}";
+        var stats = await GetOrCreateStatisticEntity<ApiRequestStat>(o => o.Endpoint == endpoint);
         var data = await Context.ApiRequests.AsNoTracking()
             .Where(o => o.Method == method && o.TemplatePath == templatePath)
             .GroupBy(_ => 1)
@@ -39,6 +40,7 @@ public class ComputeApiRequestStatsAction : PostProcessActionBase
                 LastRunDuration = g.OrderByDescending(x => x.EndAt).Select(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)).First()
             }).FirstOrDefaultAsync();
 
+        stats.Endpoint = endpoint;
         if (data is null)
         {
             stats.FailedCount = 0;
@@ -56,20 +58,5 @@ public class ComputeApiRequestStatsAction : PostProcessActionBase
         }
 
         await StatisticsContext.SaveChangesAsync();
-    }
-
-    private async Task<ApiRequestStat> GetOrCreateStatAsync(string method, string templatePath)
-    {
-        var endpoint = $"{method} {templatePath}";
-        var item = await StatisticsContext.RequestStats
-            .FirstOrDefaultAsync(o => o.Endpoint == endpoint);
-
-        if (item is null)
-        {
-            item = new ApiRequestStat { Endpoint = endpoint };
-            await StatisticsContext.AddAsync(item);
-        }
-
-        return item;
     }
 }

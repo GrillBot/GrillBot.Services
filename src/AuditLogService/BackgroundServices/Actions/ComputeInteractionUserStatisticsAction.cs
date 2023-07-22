@@ -19,29 +19,12 @@ public class ComputeInteractionUserStatisticsAction : PostProcessActionBase
         var interaction = logItem.InteractionCommand!;
         var action = $"{interaction.Name} ({interaction.ModuleName}/{interaction.MethodName})";
         var userId = logItem.UserId!;
-        var currentStats = await GetOrCreateStatisticAsync(action, userId);
+        var stats = await GetOrCreateStatisticEntity<InteractionUserActionStatistic>(o => o.Action == action && o.UserId == userId);
 
-        currentStats.Count = await Context.InteractionCommands.AsNoTracking()
+        stats.UserId = userId;
+        stats.Action = action;
+        stats.Count = await Context.InteractionCommands.AsNoTracking()
             .CountAsync(o => o.LogItem.UserId == userId && o.Name == interaction.Name && o.ModuleName == interaction.ModuleName && o.MethodName == interaction.MethodName);
         await StatisticsContext.SaveChangesAsync();
-    }
-
-    private async Task<InteractionUserActionStatistic> GetOrCreateStatisticAsync(string action, string userId)
-    {
-        var stats = await StatisticsContext.InteractionUserActionStatistics
-            .FirstOrDefaultAsync(o => o.Action == action && o.UserId == userId);
-
-        if (stats is null)
-        {
-            stats = new InteractionUserActionStatistic
-            {
-                UserId = userId,
-                Action = action
-            };
-
-            await StatisticsContext.AddAsync(stats);
-        }
-
-        return stats;
     }
 }

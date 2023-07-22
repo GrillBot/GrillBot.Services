@@ -1,6 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Entity.Statistics;
-using AuditLogService.Core.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.BackgroundServices.Actions;
@@ -15,28 +14,11 @@ public class ComputeTypeStatitistics : PostProcessActionBase
 
     public override async Task ProcessAsync(LogItem logItem)
     {
-        var currentStats = await GetOrCreateCurrentStatsAsync(logItem.Type);
+        var stats = await GetOrCreateStatisticEntity<AuditLogTypeStatistic>(o => o.Type == logItem.Type);
 
-        currentStats.Count = await Context.LogItems.AsNoTracking()
+        stats.Type = logItem.Type;
+        stats.Count = await Context.LogItems.AsNoTracking()
             .LongCountAsync(o => o.Type == logItem.Type);
         await StatisticsContext.SaveChangesAsync();
-    }
-
-    private async Task<AuditLogTypeStatistic> GetOrCreateCurrentStatsAsync(LogType type)
-    {
-        var stats = await StatisticsContext.TypeStatistics
-            .FirstOrDefaultAsync(o => o.Type == type);
-
-        if (stats is null)
-        {
-            stats = new AuditLogTypeStatistic
-            {
-                Type = type
-            };
-
-            await StatisticsContext.AddAsync(stats);
-        }
-
-        return stats;
     }
 }
