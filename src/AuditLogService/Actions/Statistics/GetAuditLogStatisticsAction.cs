@@ -40,12 +40,12 @@ public class GetAuditLogStatisticsAction : ApiActionBase
             .ToDictionary(o => o.Type, o => o.Count);
     }
 
-    private async Task<Dictionary<string, int>> GetStatisticsByDateAsync()
+    private async Task<Dictionary<string, long>> GetStatisticsByDateAsync()
     {
-        return await Context.LogItems.AsNoTracking()
-            .GroupBy(o => new { o.CreatedAt.Year, o.CreatedAt.Month })
+        return await StatisticsContext.DateStatistics.AsNoTracking()
+            .GroupBy(o => new { o.Date.Year, o.Date.Month })
             .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
-            .Select(o => new { Date = $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", Count = o.Count() })
+            .Select(o => new { Date = $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", Count = o.Sum(x => x.Count) })
             .ToDictionaryAsync(o => o.Date, o => o.Count);
     }
 

@@ -12,7 +12,7 @@ public class AuditLogStatistics
     /// Statistics by date.
     /// Key is month and year, value is count of records.
     /// </summary>
-    public Dictionary<string, int> ByDate { get; set; } = new();
+    public Dictionary<string, long> ByDate { get; set; } = new();
 
     /// <summary>
     /// Statistics of stored files in the audit log.

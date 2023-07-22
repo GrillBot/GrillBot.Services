@@ -1,5 +1,7 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Entity.Statistics;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace AuditLogService.BackgroundServices.Actions;
 
@@ -16,4 +18,18 @@ public abstract class PostProcessActionBase
 
     public abstract bool CanProcess(LogItem logItem);
     public abstract Task ProcessAsync(LogItem logItem);
+
+    protected async Task<TStatisticEntity> GetOrCreateStatisticEntity<TStatisticEntity>(Expression<Func<TStatisticEntity, bool>> searchExpression) where TStatisticEntity : class
+    {
+        var stats = await StatisticsContext.Set<TStatisticEntity>()
+            .FirstOrDefaultAsync(searchExpression);
+
+        if (stats is null)
+        {
+            stats = Activator.CreateInstance<TStatisticEntity>();
+            await StatisticsContext.AddAsync(stats);
+        }
+
+        return stats;
+    }
 }

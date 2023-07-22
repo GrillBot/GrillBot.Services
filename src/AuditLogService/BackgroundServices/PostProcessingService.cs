@@ -63,11 +63,11 @@ public class PostProcessingService : BackgroundService
     {
         var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
         var action = scope.ServiceProvider.GetServices<PostProcessActionBase>()
-            .First(o => o is ComputeTypeStatitistics);
+            .First(o => o is ComputeDateStatisticsAction);
 
         var logItems = await context.LogItems.ToListAsync();
         var groupedItems = logItems
-            .GroupBy(o => o.Type)
+            .GroupBy(o => o.CreatedAt.Date)
             .Select(o => o.First())
             .ToList();
 
