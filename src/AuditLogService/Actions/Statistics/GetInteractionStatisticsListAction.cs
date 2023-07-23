@@ -1,4 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
+using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Models.Response.Statistics;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
@@ -7,27 +8,26 @@ namespace AuditLogService.Actions.Statistics;
 
 public class GetInteractionStatisticsListAction : ApiActionBase
 {
-    private AuditLogServiceContext Context { get; }
+    private AuditLogStatisticsContext StatisticsContext { get; }
 
-    public GetInteractionStatisticsListAction(AuditLogServiceContext context)
+    public GetInteractionStatisticsListAction(AuditLogStatisticsContext statisticsContext)
     {
-        Context = context;
+        StatisticsContext = statisticsContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var result = await Context.InteractionCommands.AsNoTracking()
-            .GroupBy(o => new { o.Name, o.ModuleName, o.MethodName })
+        var result = await StatisticsContext.InteractionStatistics.AsNoTracking()
             .Select(o => new StatisticItem
             {
-                Key = $"{o.Key.Name} ({o.Key.ModuleName}/{o.Key.MethodName})",
-                Last = o.Max(x => x.LogItem.CreatedAt),
-                FailedCount = o.Count(x => !x.IsSuccess),
-                MaxDuration = o.Max(x => x.Duration),
-                MinDuration = o.Min(x => x.Duration),
-                SuccessCount = o.Count(x => x.IsSuccess),
-                TotalDuration = o.Sum(x => x.Duration),
-                LastRunDuration = o.OrderByDescending(x => x.LogItem.CreatedAt).First().Duration
+                FailedCount = o.FailedCount,
+                Key = o.Action,
+                Last = o.LastRun,
+                LastRunDuration = o.LastRunDuration,
+                MaxDuration = o.MaxDuration,
+                MinDuration = o.MinDuration,
+                SuccessCount = o.SuccessCount,
+                TotalDuration = o.TotalDuration
             })
             .ToListAsync();
 

@@ -23,7 +23,8 @@ public static class PostProcessingExtensions
             .AddScoped<PostProcessActionBase, ComputeInteractionUserStatisticsAction>()
             .AddScoped<PostProcessActionBase, ComputeTypeStatitistics>()
             .AddScoped<PostProcessActionBase, ComputeDateStatisticsAction>()
-            .AddScoped<PostProcessActionBase, ComputeFileExtensionStatisticsAction>();
+            .AddScoped<PostProcessActionBase, ComputeFileExtensionStatisticsAction>()
+            .AddScoped<PostProcessActionBase, ComputeInteractionStatisticsAction>();
 
         services
             .AddScoped<PostProcessActionBase, DeleteInvalidStatisticsAction>();

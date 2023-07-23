@@ -62,42 +62,17 @@ public class PostProcessingService : BackgroundService
     private async Task MigrateDataAsync(IServiceScope scope)
     {
         var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
-        var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>()
-            .Where(o => o is ComputeDateStatisticsAction or ComputeFileExtensionStatisticsAction)
-            .ToList();
+        var action = scope.ServiceProvider.GetServices<PostProcessActionBase>()
+            .First(o => o is ComputeInteractionStatisticsAction);
 
-        var logItems = await context.LogItems
-            .Include(o => o.Files)
-            .ToListAsync();
+        var logItems = await context.LogItems.Where(o => o.Type == Core.Enums.LogType.InteractionCommand).Include(o => o.InteractionCommand).ToListAsync();
         var groupedItems = logItems
-            .GroupBy(o => o.CreatedAt.Date)
+            .Where(o => o.InteractionCommand is not null)
+            .GroupBy(o => $"{o.InteractionCommand!.Name} ({o.InteractionCommand.ModuleName}/{o.InteractionCommand.MethodName})")
             .Select(o => o.First())
             .ToList();
 
-        var action = actions.First(o => o is ComputeDateStatisticsAction);
         foreach (var logItem in groupedItems)
-        {
-            await action.ProcessAsync(logItem);
-        }
-
-        var fileGroupedItems = new Dictionary<Guid, LogItem>();
-        var extensions = new HashSet<string?>();
-        foreach (var logItem in logItems)
-        {
-            foreach (var file in logItem.Files.Select(o => o.Extension))
-            {
-                if (extensions.Contains(file))
-                    continue;
-                if (fileGroupedItems.ContainsKey(logItem.Id))
-                    continue;
-
-                fileGroupedItems.Add(logItem.Id, logItem);
-                extensions.Add(file);
-            }
-        }
-
-        action = actions.First(o => o is ComputeFileExtensionStatisticsAction);
-        foreach (var logItem in fileGroupedItems.Values)
         {
             await action.ProcessAsync(logItem);
         }

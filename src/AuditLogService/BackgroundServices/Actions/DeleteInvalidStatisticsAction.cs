@@ -31,6 +31,7 @@ public class DeleteInvalidStatisticsAction : PostProcessActionBase
             if (logItem.Type is LogType.InteractionCommand)
             {
                 await ClearStatisticsAsync<InteractionUserActionStatistic>(o => o.Count == 0);
+                await ClearStatisticsAsync<InteractionStatistic>(o => o.FailedCount == 0 && o.SuccessCount == 0);
             }
         }
 
