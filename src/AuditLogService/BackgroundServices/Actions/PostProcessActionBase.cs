@@ -19,14 +19,14 @@ public abstract class PostProcessActionBase
     public abstract bool CanProcess(LogItem logItem);
     public abstract Task ProcessAsync(LogItem logItem);
 
-    protected async Task<TStatisticEntity> GetOrCreateStatisticEntity<TStatisticEntity>(Expression<Func<TStatisticEntity, bool>> searchExpression) where TStatisticEntity : class
+    protected async Task<TStatisticEntity> GetOrCreateStatisticEntity<TStatisticEntity>(Expression<Func<TStatisticEntity, bool>> searchExpression, params object[] primaryKeyData) where TStatisticEntity : class
     {
         var stats = await StatisticsContext.Set<TStatisticEntity>()
             .FirstOrDefaultAsync(searchExpression);
 
         if (stats is null)
         {
-            stats = Activator.CreateInstance<TStatisticEntity>();
+            stats = (TStatisticEntity)Activator.CreateInstance(typeof(TStatisticEntity), primaryKeyData)!;
             await StatisticsContext.AddAsync(stats);
         }
 

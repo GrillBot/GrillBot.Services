@@ -19,7 +19,7 @@ public class ComputeInteractionUserStatisticsAction : PostProcessActionBase
         var interaction = logItem.InteractionCommand!;
         var action = $"{interaction.Name} ({interaction.ModuleName}/{interaction.MethodName})";
         var userId = logItem.UserId!;
-        var stats = await GetOrCreateStatisticEntity<InteractionUserActionStatistic>(o => o.Action == action && o.UserId == userId);
+        var stats = await GetOrCreateStatisticEntity<InteractionUserActionStatistic>(o => o.Action == action && o.UserId == userId, action, userId);
 
         stats.UserId = userId;
         stats.Action = action;

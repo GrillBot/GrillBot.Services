@@ -9,4 +9,14 @@ public class ApiDateCountStatistic
 
     [StringLength(5)]
     public string ApiGroup { get; set; } = null!;
+
+    public ApiDateCountStatistic()
+    {
+    }
+
+    public ApiDateCountStatistic(DateOnly date, string apiGroup)
+    {
+        Date = date;
+        ApiGroup = apiGroup;
+    }
 }

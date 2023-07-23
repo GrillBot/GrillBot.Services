@@ -15,7 +15,7 @@ public class ComputeDateStatisticsAction : PostProcessActionBase
     public override async Task ProcessAsync(LogItem logItem)
     {
         var date = DateOnly.FromDateTime(logItem.CreatedAt);
-        var stats = await GetOrCreateStatisticEntity<AuditLogDateStatistic>(o => o.Date == date);
+        var stats = await GetOrCreateStatisticEntity<AuditLogDateStatistic>(o => o.Date == date, date);
 
         stats.Date = date;
         stats.Count = await Context.LogItems.AsNoTracking()

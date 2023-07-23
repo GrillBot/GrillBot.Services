@@ -18,7 +18,7 @@ public class ComputeApiDateCountsAction : PostProcessActionBase
     {
         var date = DateOnly.FromDateTime(logItem.CreatedAt.Date);
         var apiGroup = logItem.ApiRequest!.ApiGroupName;
-        var stats = await GetOrCreateStatisticEntity<ApiDateCountStatistic>(o => o.Date == date && o.ApiGroup == apiGroup);
+        var stats = await GetOrCreateStatisticEntity<ApiDateCountStatistic>(o => o.Date == date && o.ApiGroup == apiGroup, date, apiGroup);
 
         stats.ApiGroup = apiGroup;
         stats.Date = date;

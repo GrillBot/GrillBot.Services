@@ -18,7 +18,7 @@ public class AuditLogStatistics
     /// Statistics of stored files in the audit log.
     /// Key is file extension, value is count of files.
     /// </summary>
-    public Dictionary<string, int> FileCounts { get; set; } = new();
+    public Dictionary<string, long> FileCounts { get; set; } = new();
 
     /// <summary>
     /// Statistics of stored files in the audit log.

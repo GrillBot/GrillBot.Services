@@ -10,4 +10,13 @@ public class AuditLogDateStatistic
     public DateOnly Date { get; set; }
 
     public long Count { get; set; }
+
+    public AuditLogDateStatistic()
+    {
+    }
+
+    public AuditLogDateStatistic(DateOnly date)
+    {
+        Date = date;
+    }
 }

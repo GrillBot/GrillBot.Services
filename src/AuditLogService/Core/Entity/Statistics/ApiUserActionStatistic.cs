@@ -8,4 +8,14 @@ public class ApiUserActionStatistic : UserActionStatBase
     public string ApiGroup { get; set; } = null!;
 
     public bool IsPublic { get; set; }
+
+    public ApiUserActionStatistic()
+    {
+    }
+
+    public ApiUserActionStatistic(string action, string userId, string apiGroup, bool isPublic) : base(action, userId)
+    {
+        ApiGroup = apiGroup;
+        IsPublic = isPublic;
+    }
 }

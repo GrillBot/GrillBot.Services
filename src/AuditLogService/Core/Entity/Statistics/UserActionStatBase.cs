@@ -11,4 +11,14 @@ public class UserActionStatBase
     public string UserId { get; set; } = null!;
 
     public long Count { get; set; }
+
+    public UserActionStatBase()
+    {
+    }
+
+    public UserActionStatBase(string action, string userId)
+    {
+        Action = action;
+        UserId = userId;
+    }
 }

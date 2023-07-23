@@ -15,4 +15,13 @@ public class ApiRequestStat
     public long SuccessCount { get; set; }
     public long TotalDuration { get; set; }
     public long LastRunDuration { get; set; }
+
+    public ApiRequestStat()
+    {
+    }
+
+    public ApiRequestStat(string endpoint)
+    {
+        Endpoint = endpoint;
+    }
 }

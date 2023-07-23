@@ -18,7 +18,7 @@ public class ComputeApiResultCountsAction : PostProcessActionBase
     {
         var result = logItem.ApiRequest!.Result;
         var apiGroup = logItem.ApiRequest!.ApiGroupName;
-        var stats = await GetOrCreateStatisticEntity<ApiResultCountStatistic>(o => o.Result == result && o.ApiGroup == apiGroup);
+        var stats = await GetOrCreateStatisticEntity<ApiResultCountStatistic>(o => o.Result == result && o.ApiGroup == apiGroup, result, apiGroup);
 
         stats.ApiGroup = apiGroup;
         stats.Result = result;

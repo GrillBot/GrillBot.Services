@@ -20,7 +20,10 @@ public class ComputeApiUserStatisticsAction : PostProcessActionBase
         var apiGroup = logItem.ApiRequest.ApiGroupName;
         var isPublic = logItem.ApiRequest!.Identification.StartsWith("ApiV1(Public/");
         var userId = logItem.UserId ?? logItem.ApiRequest!.Identification;
-        var stats = await GetOrCreateStatisticEntity<ApiUserActionStatistic>(o => o.Action == action && o.ApiGroup == apiGroup && o.IsPublic == isPublic && o.UserId == userId);
+        var stats = await GetOrCreateStatisticEntity<ApiUserActionStatistic>(
+            o => o.Action == action && o.ApiGroup == apiGroup && o.IsPublic == isPublic && o.UserId == userId,
+            action, userId, apiGroup, isPublic
+        );
 
         var countQuery = Context.ApiRequests.AsNoTracking()
             .Where(o => !string.IsNullOrEmpty(o.LogItem.UserId) || o.Identification != "UnknownIdentification")

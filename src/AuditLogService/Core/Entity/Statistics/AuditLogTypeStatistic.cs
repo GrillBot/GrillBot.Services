@@ -11,4 +11,13 @@ public class AuditLogTypeStatistic
     public LogType Type { get; set; }
 
     public long Count { get; set; }
+
+    public AuditLogTypeStatistic()
+    {
+    }
+
+    public AuditLogTypeStatistic(LogType type)
+    {
+        Type = type;
+    }
 }

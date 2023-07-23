@@ -1,5 +1,4 @@
-﻿using AuditLogService.Core.Entity;
-using AuditLogService.Core.Entity.Statistics;
+﻿using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Models.Response.Statistics;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
@@ -8,12 +7,10 @@ namespace AuditLogService.Actions.Statistics;
 
 public class GetAuditLogStatisticsAction : ApiActionBase
 {
-    private AuditLogServiceContext Context { get; }
     private AuditLogStatisticsContext StatisticsContext { get; }
 
-    public GetAuditLogStatisticsAction(AuditLogServiceContext context, AuditLogStatisticsContext statisticsContext)
+    public GetAuditLogStatisticsAction(AuditLogStatisticsContext statisticsContext)
     {
-        Context = context;
         StatisticsContext = statisticsContext;
     }
 
@@ -49,21 +46,19 @@ public class GetAuditLogStatisticsAction : ApiActionBase
             .ToDictionaryAsync(o => o.Date, o => o.Count);
     }
 
-    private async Task<Dictionary<string, int>> GetFileStatisticsWithCountAsync()
+    private async Task<Dictionary<string, long>> GetFileStatisticsWithCountAsync()
     {
-        return await Context.Files.AsNoTracking()
-            .GroupBy(o => o.Extension)
-            .Select(o => new { Key = o.Key ?? ".Noextension", Count = o.Count() })
-            .OrderBy(o => o.Key)
-            .ToDictionaryAsync(o => o.Key, o => o.Count);
+        return await StatisticsContext.FileExtensionStatistics.AsNoTracking()
+            .Select(o => new { o.Extension, o.Count })
+            .OrderBy(o => o.Extension)
+            .ToDictionaryAsync(o => o.Extension, o => o.Count);
     }
 
     private async Task<Dictionary<string, long>> GetFileStatisticsWithSizeAsync()
     {
-        return await Context.Files.AsNoTracking()
-            .GroupBy(o => o.Extension)
-            .Select(o => new { Key = o.Key ?? ".NoExtension", Size = o.Sum(x => x.Size) })
-            .OrderBy(o => o.Key)
-            .ToDictionaryAsync(o => o.Key, o => o.Size);
+        return await StatisticsContext.FileExtensionStatistics.AsNoTracking()
+            .Select(o => new { o.Extension, o.Size })
+            .OrderBy(o => o.Extension)
+            .ToDictionaryAsync(o => o.Extension, o => o.Size);
     }
 }

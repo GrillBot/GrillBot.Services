@@ -14,7 +14,7 @@ public class ComputeTypeStatitistics : PostProcessActionBase
 
     public override async Task ProcessAsync(LogItem logItem)
     {
-        var stats = await GetOrCreateStatisticEntity<AuditLogTypeStatistic>(o => o.Type == logItem.Type);
+        var stats = await GetOrCreateStatisticEntity<AuditLogTypeStatistic>(o => o.Type == logItem.Type, logItem.Type);
 
         stats.Type = logItem.Type;
         stats.Count = await Context.LogItems.AsNoTracking()

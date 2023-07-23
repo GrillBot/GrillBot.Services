@@ -11,4 +11,14 @@ public class ApiResultCountStatistic
     public string ApiGroup { get; set; } = null!;
 
     public long Count { get; set; }
+
+    public ApiResultCountStatistic()
+    {
+    }
+
+    public ApiResultCountStatistic(string result, string apiGroup)
+    {
+        Result = result;
+        ApiGroup = apiGroup;
+    }
 }

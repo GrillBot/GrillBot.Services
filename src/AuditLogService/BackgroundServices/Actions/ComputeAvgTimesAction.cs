@@ -17,7 +17,7 @@ public class ComputeAvgTimesAction : PostProcessActionBase
     public override async Task ProcessAsync(LogItem logItem)
     {
         var date = DateOnly.FromDateTime(logItem.CreatedAt);
-        var stats = await GetOrCreateStatisticEntity<DailyAvgTimes>(o => o.Date == date);
+        var stats = await GetOrCreateStatisticEntity<DailyAvgTimes>(o => o.Date == date, date);
 
         var startOfday = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var endOfDay = date.ToDateTime(new TimeOnly(23, 59, 59, 999), DateTimeKind.Utc);
