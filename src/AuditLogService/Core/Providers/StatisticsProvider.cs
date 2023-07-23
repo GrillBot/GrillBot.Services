@@ -51,10 +51,16 @@ public class StatisticsProvider : IStatisticsProvider
             { nameof(Context.MemberUpdatedItems), await Context.MemberUpdatedItems.LongCountAsync() },
             { nameof(Context.MemberInfos), await Context.MemberInfos.LongCountAsync() },
 
-            { $"Statistics.{nameof(StatisticsContext.DailyAvgTimes)}", await StatisticsContext.DailyAvgTimes.LongCountAsync() },
             { $"Statistics.{nameof(StatisticsContext.DateCountStatistics)}", await StatisticsContext.DateCountStatistics.LongCountAsync() },
-            { $"Statistics.{nameof(StatisticsContext.RequestStats)}", await StatisticsContext.RequestStats.LongCountAsync() },
             { $"Statistics.{nameof(StatisticsContext.ResultCountStatistic)}", await StatisticsContext.ResultCountStatistic.LongCountAsync() },
+            { $"Statistics.{nameof(StatisticsContext.RequestStats)}", await StatisticsContext.RequestStats.LongCountAsync() },
+            { $"Statistics.{nameof(StatisticsContext.DailyAvgTimes)}", await StatisticsContext.DailyAvgTimes.LongCountAsync() },
+            { $"Statistics.{nameof(StatisticsContext.ApiUserActionStatistics)}", await StatisticsContext.ApiUserActionStatistics.LongCountAsync() },
+            { $"Statistics.{nameof(StatisticsContext.InteractionUserActionStatistics)}", await StatisticsContext.InteractionUserActionStatistics.LongCountAsync() },
+            { $"Statistics.{nameof(StatisticsContext.TypeStatistics)}", await StatisticsContext.TypeStatistics.LongCountAsync() },
+            { $"Statistics.{nameof(StatisticsContext.DateStatistics)}", await StatisticsContext.DateStatistics.LongCountAsync() },
+            { $"Statistics.{nameof(StatisticsContext.FileExtensionStatistics)}", await StatisticsContext.FileExtensionStatistics.LongCountAsync() },
+            { $"Statistics.{nameof(StatisticsContext.InteractionStatistics)}", await StatisticsContext.InteractionStatistics.LongCountAsync() }
         };
     }
 }
