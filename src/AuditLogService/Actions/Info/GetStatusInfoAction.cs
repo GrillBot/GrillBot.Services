@@ -1,4 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
+using AuditLogService.Core.Enums;
 using AuditLogService.Core.Options;
 using AuditLogService.Models.Response.Info;
 using GrillBot.Core.Infrastructure.Actions;
@@ -25,7 +26,11 @@ public class GetStatusInfoAction : ApiActionBase
         var result = new StatusInfo
         {
             ItemsToArchive = await Context.LogItems.AsNoTracking()
-                .CountAsync(o => o.CreatedAt <= expirationDate)
+                .CountAsync(o => o.CreatedAt <= expirationDate),
+            ItemsToDelete = await Context.LogItems.AsNoTracking()
+                .CountAsync(o => (o.Flags & LogItemFlag.Deleted) != 0),
+            ItemsToProcess = await Context.LogItems.AsNoTracking()
+                .CountAsync(o => (o.Flags & LogItemFlag.ToProcess) != 0)
         };
 
         return ApiResult.FromSuccess(result);
