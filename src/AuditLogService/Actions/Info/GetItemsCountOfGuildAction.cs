@@ -1,4 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
+using AuditLogService.Core.Enums;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +17,8 @@ public class GetItemsCountOfGuildAction : ApiActionBase
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;
-        var count = await Context.LogItems.AsNoTracking().CountAsync(o => o.GuildId == guildId);
+        var count = await Context.LogItems.AsNoTracking()
+            .CountAsync(o => (o.Flags & LogItemFlag.Deleted) == 0 && o.GuildId == guildId);
 
         return ApiResult.FromSuccess(count);
     }

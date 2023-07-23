@@ -1,5 +1,4 @@
-﻿using AuditLogService.Core.Entity;
-using AuditLogService.Core.Entity.Statistics;
+﻿using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Models.Response.Statistics;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;

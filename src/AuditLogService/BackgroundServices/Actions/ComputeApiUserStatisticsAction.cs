@@ -26,6 +26,7 @@ public class ComputeApiUserStatisticsAction : PostProcessActionBase
         );
 
         var countQuery = Context.ApiRequests.AsNoTracking()
+            .Where(o => (o.LogItem.Flags & LogItemFlag.Deleted) == 0)
             .Where(o => !string.IsNullOrEmpty(o.LogItem.UserId) || o.Identification != "UnknownIdentification")
             .Where(o => o.Method == logItem.ApiRequest.Method && o.TemplatePath == logItem.ApiRequest.TemplatePath && (o.LogItem.UserId ?? o.Identification) == userId);
         if (apiGroup == "V2")

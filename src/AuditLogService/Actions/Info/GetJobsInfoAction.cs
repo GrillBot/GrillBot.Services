@@ -1,4 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
+using AuditLogService.Core.Enums;
 using AuditLogService.Models.Response.Info;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ public class GetJobsInfoAction : ApiActionBase
     public override async Task<ApiResult> ProcessAsync()
     {
         var result = await Context.JobExecutions.AsNoTracking()
+            .Where(o => (o.LogItem.Flags & LogItemFlag.Deleted) == 0)
             .GroupBy(o => o.JobName)
             .Select(o => new JobInfo
             {
@@ -34,7 +36,7 @@ public class GetJobsInfoAction : ApiActionBase
         foreach (var job in result)
         {
             var lastItem = await Context.JobExecutions.AsNoTracking()
-                .Where(o => o.JobName == job.Name)
+                .Where(o => o.JobName == job.Name && (o.LogItem.Flags & LogItemFlag.Deleted) == 0)
                 .OrderByDescending(o => o.StartAt)
                 .Select(o => new { o.EndAt, o.StartAt })
                 .FirstOrDefaultAsync();

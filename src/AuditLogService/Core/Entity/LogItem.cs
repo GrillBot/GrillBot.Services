@@ -31,6 +31,8 @@ public class LogItem
 
     public ISet<File> Files { get; set; }
 
+    public LogItemFlag Flags { get; set; }
+
     #region Data
 
     public ApiRequest? ApiRequest { get; set; }
@@ -56,12 +58,15 @@ public class LogItem
     public MemberUpdated? MemberUpdated { get; set; }
 
     #endregion
-    
+
     #region HelperProperties
-    
+
     [NotMapped]
     public bool CanCreate { get; set; }
-    
+
+    [NotMapped]
+    public bool IsDeleted => (Flags & LogItemFlag.Deleted) != 0;
+
     #endregion
 
     public LogItem()

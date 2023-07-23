@@ -9,17 +9,15 @@ using System.Threading.Channels;
 
 namespace AuditLogService.BackgroundServices;
 
-public class PostProcessingService : BackgroundService
+public partial class PostProcessingService : BackgroundService
 {
     private IServiceProvider ServiceProvider { get; }
     private ICounterManager CounterManager { get; }
-    private Channel<LogItem> Channel { get; }
 
     public PostProcessingService(IServiceProvider serviceProvider)
     {
         CounterManager = serviceProvider.GetRequiredService<ICounterManager>();
         ServiceProvider = serviceProvider;
-        Channel = serviceProvider.GetRequiredService<Channel<LogItem>>();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -28,13 +26,19 @@ public class PostProcessingService : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var logItem = await Channel.Reader.ReadAsync(stoppingToken);
+            var logItem = await ReadLogItemToProcessAsync(stoppingToken);
+            if (logItem is null)
+            {
+                await Task.Delay(10000, stoppingToken);
+                continue;
+            }
 
             using var scope = ServiceProvider.CreateScope();
             var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>();
 
             foreach (var action in actions)
                 await ProcessActionAsync(action, logItem, scope);
+            await FinishLogItemProcessingAsync(logItem, stoppingToken);
         }
     }
 

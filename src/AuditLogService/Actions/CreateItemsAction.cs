@@ -1,9 +1,8 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Models.Request;
+using AuditLogService.Core.Enums;
 using AuditLogService.Models.Request.CreateItems;
 using AuditLogService.Processors;
 using GrillBot.Core.Infrastructure.Actions;
-using System.Threading.Channels;
 using File = AuditLogService.Core.Entity.File;
 
 namespace AuditLogService.Actions;
@@ -12,13 +11,11 @@ public class CreateItemsAction : ApiActionBase
 {
     private AuditLogServiceContext Context { get; }
     private RequestProcessorFactory RequestProcessorFactory { get; }
-    private Channel<LogItem> Channel { get; }
 
-    public CreateItemsAction(AuditLogServiceContext context, RequestProcessorFactory requestProcessorFactory, Channel<LogItem> channel)
+    public CreateItemsAction(AuditLogServiceContext context, RequestProcessorFactory requestProcessorFactory)
     {
         Context = context;
         RequestProcessorFactory = requestProcessorFactory;
-        Channel = channel;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -32,7 +29,6 @@ public class CreateItemsAction : ApiActionBase
 
             await Context.AddAsync(entity);
             await Context.SaveChangesAsync();
-            await Channel.Writer.WriteAsync(entity);
         }
 
         return ApiResult.FromSuccess();
@@ -48,7 +44,8 @@ public class CreateItemsAction : ApiActionBase
             ChannelId = request.ChannelId,
             CreatedAt = request.CreatedAt ?? DateTime.UtcNow,
             UserId = request.UserId,
-            CanCreate = true
+            CanCreate = true,
+            Flags = LogItemFlag.ToProcess
         };
 
         foreach (var file in request.Files.Select(ConvertFileRequest))

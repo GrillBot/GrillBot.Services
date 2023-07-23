@@ -19,7 +19,7 @@ public partial class ReadDetailAction : ApiActionBase
     {
         var id = (Guid)Parameters[0]!;
 
-        var logHeader = await Context.LogItems.AsNoTracking().FirstOrDefaultAsync(o => o.Id == id);
+        var logHeader = await Context.LogItems.AsNoTracking().FirstOrDefaultAsync(o => (o.Flags & LogItemFlag.Deleted) == 0 && o.Id == id);
         if (logHeader is null)
             return new ApiResult(StatusCodes.Status404NotFound);
 

@@ -23,7 +23,7 @@ public class ComputeApiResultCountsAction : PostProcessActionBase
         stats.ApiGroup = apiGroup;
         stats.Result = result;
         stats.Count = await Context.ApiRequests.AsNoTracking()
-            .LongCountAsync(o => o.Result == result && o.ApiGroupName == apiGroup);
+            .LongCountAsync(o => o.Result == result && o.ApiGroupName == apiGroup && (o.LogItem.Flags & LogItemFlag.Deleted) == 0);
         await StatisticsContext.SaveChangesAsync();
     }
 }

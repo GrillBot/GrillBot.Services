@@ -27,7 +27,7 @@ public class ComputeApiRequestStatsAction : PostProcessActionBase
         var endpoint = $"{method} {templatePath}";
         var stats = await GetOrCreateStatisticEntity<ApiRequestStat>(o => o.Endpoint == endpoint, endpoint);
         var data = await Context.ApiRequests.AsNoTracking()
-            .Where(o => o.Method == method && o.TemplatePath == templatePath)
+            .Where(o => o.Method == method && o.TemplatePath == templatePath && (o.LogItem.Flags & LogItemFlag.Deleted) == 0)
             .GroupBy(_ => 1)
             .Select(g => new
             {
