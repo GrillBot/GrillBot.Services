@@ -17,7 +17,6 @@ public partial class ArchiveOldLogsAction
         var items = await Context.LogItems
             .Include(o => o.Files)
             .Where(o => o.CreatedAt <= expirationDate)
-            .Take(AppOptions.ItemsToArchive)
             .ToListAsync();
 
         foreach (var item in items)
