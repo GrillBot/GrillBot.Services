@@ -184,7 +184,7 @@ public partial class SearchItemsAction
     private async Task<PaginatedResponse<LogItem>> ReadLogHeaders(SearchRequest request)
     {
         var query = Context.LogItems.Include(o => o.Files).AsNoTracking()
-            .Where(o => (o.Flags & LogItemFlag.Deleted) == 0);
+            .Where(o => !o.IsDeleted);
 
         if (!string.IsNullOrEmpty(request.GuildId))
             query = query.Where(o => o.GuildId == request.GuildId);

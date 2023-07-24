@@ -68,6 +68,11 @@ public partial class ArchiveOldLogsAction
         var dataXml = ProcessData(item, result);
         if (dataXml is not null) xml.Add(dataXml);
 
+        var typeStr = item.Type.ToString();
+        if (!result.PerType.ContainsKey(typeStr))
+            result.PerType.Add(typeStr, 0);
+        result.PerType[typeStr]++;
+
         return xml;
     }
 

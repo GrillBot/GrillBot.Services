@@ -7,6 +7,8 @@ namespace AuditLogService.Core.Entity;
 
 [Index(nameof(CreatedAt), Name = "IX_LogItem_CreatedAt")]
 [Index(nameof(GuildId))]
+[Index(nameof(IsDeleted))]
+[Index(nameof(IsPendingProcess))]
 public class LogItem
 {
     [Key]
@@ -31,7 +33,8 @@ public class LogItem
 
     public ISet<File> Files { get; set; }
 
-    public LogItemFlag Flags { get; set; }
+    public bool IsDeleted { get; set; }
+    public bool IsPendingProcess { get; set; }
 
     #region Data
 
@@ -63,10 +66,7 @@ public class LogItem
 
     [NotMapped]
     public bool CanCreate { get; set; }
-
-    [NotMapped]
-    public bool IsDeleted => (Flags & LogItemFlag.Deleted) != 0;
-
+    
     #endregion
 
     public LogItem()

@@ -36,7 +36,8 @@ public class ComputeAvgTimesAction : PostProcessActionBase
         if (logItem.Type is not LogType.Api || logItem.ApiRequest!.ApiGroupName != expectedApiGroup) return;
 
         var query = Context.ApiRequests.AsNoTracking()
-            .Where(o => o.ApiGroupName == expectedApiGroup && o.EndAt >= startOfDay && o.EndAt < endOfDay && (o.LogItem.Flags & LogItemFlag.Deleted) == 0)
+            .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
+            .Where(o => o.ApiGroupName == expectedApiGroup && o.EndAt >= startOfDay && o.EndAt < endOfDay)
             .Select(o => (long)Math.Round((o.EndAt - o.StartAt).TotalMilliseconds));
         var avgTime = await query.AverageAsync(o => (long?)o) ?? -1;
 
@@ -51,7 +52,7 @@ public class ComputeAvgTimesAction : PostProcessActionBase
         if (logItem.Type is not LogType.InteractionCommand) return;
 
         var query = Context.InteractionCommands.AsNoTracking()
-            .Where(o => o.LogItem.CreatedAt >= startOfDay && o.LogItem.CreatedAt < endOfday && (o.LogItem.Flags & LogItemFlag.Deleted) == 0);
+            .Where(o => !o.LogItem.IsDeleted && o.LogItem.CreatedAt >= startOfDay && o.LogItem.CreatedAt < endOfday);
         stats.Interactions = await query.AverageAsync(o => (long?)o.Duration) ?? -1;
     }
 
@@ -60,7 +61,8 @@ public class ComputeAvgTimesAction : PostProcessActionBase
         if (logItem.Type is not LogType.JobCompleted) return;
 
         var query = Context.JobExecutions.AsNoTracking()
-            .Where(o => o.EndAt >= startOfDay && o.EndAt < endOfDay && (o.LogItem.Flags & LogItemFlag.Deleted) == 0)
+            .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
+            .Where(o => o.EndAt >= startOfDay && o.EndAt < endOfDay)
             .Select(o => (long)Math.Round((o.EndAt - o.StartAt).TotalMilliseconds));
         stats.Jobs = await query.AverageAsync(o => (long?)o) ?? -1;
     }

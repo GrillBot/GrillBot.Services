@@ -45,7 +45,7 @@ public class CreateItemsAction : ApiActionBase
             CreatedAt = request.CreatedAt ?? DateTime.UtcNow,
             UserId = request.UserId,
             CanCreate = true,
-            Flags = LogItemFlag.ToProcess
+            IsPendingProcess = true
         };
 
         foreach (var file in request.Files.Select(ConvertFileRequest))

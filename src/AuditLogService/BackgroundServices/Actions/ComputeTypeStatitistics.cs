@@ -19,7 +19,7 @@ public class ComputeTypeStatitistics : PostProcessActionBase
 
         stats.Type = logItem.Type;
         stats.Count = await Context.LogItems.AsNoTracking()
-            .LongCountAsync(o => o.Type == logItem.Type && (o.Flags & LogItemFlag.Deleted) == 0);
+            .LongCountAsync(o => o.Type == logItem.Type && !o.IsDeleted);
         await StatisticsContext.SaveChangesAsync();
     }
 }

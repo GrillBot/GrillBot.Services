@@ -23,7 +23,8 @@ public class ComputeApiDateCountsAction : PostProcessActionBase
         stats.ApiGroup = apiGroup;
         stats.Date = date;
         stats.Count = await Context.ApiRequests.AsNoTracking()
-            .LongCountAsync(o => o.EndAt.Date == logItem.CreatedAt.Date && o.ApiGroupName == apiGroup && (o.LogItem.Flags & LogItemFlag.Deleted) == 0);
+            .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
+            .LongCountAsync(o => o.EndAt.Date == logItem.CreatedAt.Date && o.ApiGroupName == apiGroup);
         await StatisticsContext.SaveChangesAsync();
     }
 }

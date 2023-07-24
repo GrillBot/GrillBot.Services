@@ -24,7 +24,7 @@ public class ComputeInteractionUserStatisticsAction : PostProcessActionBase
         stats.UserId = userId;
         stats.Action = action;
         stats.Count = await Context.InteractionCommands.AsNoTracking()
-            .Where(o => (o.LogItem.Flags & LogItemFlag.Deleted) == 0)
+            .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
             .CountAsync(o => o.LogItem.UserId == userId && o.Name == interaction.Name && o.ModuleName == interaction.ModuleName && o.MethodName == interaction.MethodName);
         await StatisticsContext.SaveChangesAsync();
     }

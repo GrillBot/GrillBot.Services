@@ -1,6 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Entity.Statistics;
-using AuditLogService.Core.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.BackgroundServices.Actions;
@@ -20,7 +19,9 @@ public class ComputeFileExtensionStatisticsAction : PostProcessActionBase
         {
             var extension = file ?? ".NoExtension";
             var stats = await GetOrCreateStatisticEntity<FileExtensionStatistic>(o => o.Extension == extension, extension);
-            var baseQuery = Context.Files.AsNoTracking().Where(o => o.Extension == file && (o.LogItem.Flags & LogItemFlag.Deleted) == 0);
+            var baseQuery = Context.Files.AsNoTracking()
+                .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
+                .Where(o => o.Extension == file);
 
             stats.Extension = extension;
             stats.Count = await baseQuery.LongCountAsync();

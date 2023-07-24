@@ -1,6 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Entity.Statistics;
-using AuditLogService.Core.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.BackgroundServices.Actions;
@@ -20,7 +19,7 @@ public class ComputeDateStatisticsAction : PostProcessActionBase
 
         stats.Date = date;
         stats.Count = await Context.LogItems.AsNoTracking()
-            .LongCountAsync(o => o.CreatedAt.Date == logItem.CreatedAt.Date && (o.Flags & LogItemFlag.Deleted) == 0);
+            .LongCountAsync(o => o.CreatedAt.Date == logItem.CreatedAt.Date && !o.IsDeleted);
         await StatisticsContext.SaveChangesAsync();
     }
 }

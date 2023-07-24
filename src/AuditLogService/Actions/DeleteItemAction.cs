@@ -27,7 +27,8 @@ public class DeleteItemAction : ApiActionBase
         response.FilesToDelete = logItem.Files.Select(o => o.Filename).Distinct().ToList();
         response.Exists = true;
 
-        logItem.Flags = LogItemFlag.Deleted | LogItemFlag.ToProcess;
+        logItem.IsDeleted = true;
+        logItem.IsPendingProcess = true;
 
         await Context.SaveChangesAsync();
         return ApiResult.FromSuccess(response);
@@ -37,6 +38,6 @@ public class DeleteItemAction : ApiActionBase
     {
         return await Context.LogItems
             .Include(o => o.Files)
-            .FirstOrDefaultAsync(o => o.Id == id && (o.Flags & LogItemFlag.Deleted) == 0);
+            .FirstOrDefaultAsync(o => o.Id == id && !o.IsDeleted);
     }
 }

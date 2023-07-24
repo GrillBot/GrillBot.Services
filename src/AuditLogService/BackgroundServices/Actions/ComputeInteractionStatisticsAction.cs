@@ -20,7 +20,8 @@ public class ComputeInteractionStatisticsAction : PostProcessActionBase
         var action = $"{interaction.Name} ({interaction.ModuleName}/{interaction.MethodName})";
         var stats = await GetOrCreateStatisticEntity<InteractionStatistic>(o => o.Action == action, action);
         var data = await Context.InteractionCommands.AsNoTracking()
-            .Where(o => (o.LogItem.Flags & LogItemFlag.Deleted) == 0 && o.Name == interaction.Name && o.ModuleName == interaction.ModuleName && o.MethodName == interaction.MethodName)
+            .Where(o => !o.LogItem.IsDeleted)
+            .Where(o => o.Name == interaction.Name && o.ModuleName == interaction.ModuleName && o.MethodName == interaction.MethodName)
             .GroupBy(_ => 1)
             .Select(o => new
             {

@@ -12,8 +12,8 @@ public partial class PostProcessingService
         var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
 
         var metadata = await context.LogItems.AsNoTracking()
-            .Where(o => (o.Flags & LogItemFlag.ToProcess) != 0)
-            .OrderBy(o => o.CreatedAt)
+            .Where(o => o.IsPendingProcess)
+            .OrderByDescending(o => o.CreatedAt)
             .Select(o => new { o.Id, o.Type })
             .FirstOrDefaultAsync(cancellationToken);
         if (metadata is null)
@@ -115,15 +115,21 @@ public partial class PostProcessingService
         if (latestLogItem.IsDeleted)
         {
             if (!oldLogItem.IsDeleted)
-                latestLogItem.Flags = LogItemFlag.ToProcess | LogItemFlag.Deleted;
+            {
+                latestLogItem.IsDeleted = true;
+                latestLogItem.IsPendingProcess = true;
+            }
             else
+            {
                 context.Remove(latestLogItem);
+            }
         }
         else
         {
-            latestLogItem.Flags = LogItemFlag.None;
+            latestLogItem.IsPendingProcess = false;
+            latestLogItem.IsDeleted = false;
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
     }
 }
