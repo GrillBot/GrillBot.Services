@@ -13,7 +13,6 @@ public partial class PostProcessingService
 
         var metadata = await context.LogItems.AsNoTracking()
             .Where(o => o.IsPendingProcess)
-            .OrderByDescending(o => o.CreatedAt)
             .Select(o => new { o.Id, o.Type })
             .FirstOrDefaultAsync(cancellationToken);
         if (metadata is null)
