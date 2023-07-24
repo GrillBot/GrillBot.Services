@@ -46,4 +46,6 @@ public class ApiRequest : ChildEntityBase
 
     [StringLength(255)]
     public string Result { get; set; } = null!;
+    
+    public bool IsSuccess { get; set; }
 }

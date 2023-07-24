@@ -2,6 +2,7 @@
 using AuditLogService.Models.Request;
 using AuditLogService.Models.Request.CreateItems;
 using AuditLogService.Processors.Request.Abstractions;
+using System.Net;
 
 namespace AuditLogService.Processors.Request;
 
@@ -13,6 +14,11 @@ public class ApiRequestProcessor : RequestProcessorBase
 
     public override Task ProcessAsync(LogItem entity, LogRequest request)
     {
+        var successStatusCodes = Enum.GetValues<HttpStatusCode>()
+            .Where(o => o < HttpStatusCode.BadRequest)
+            .Select(o => $"{(int)o} ({o})")
+            .ToHashSet();
+
         var apiRequest = request.ApiRequest!;
         entity.ApiRequest = new ApiRequest
         {
@@ -29,7 +35,8 @@ public class ApiRequestProcessor : RequestProcessorBase
             StartAt = apiRequest.StartAt,
             TemplatePath = apiRequest.TemplatePath,
             ApiGroupName = apiRequest.ApiGroupName,
-            Result = apiRequest.Result
+            Result = apiRequest.Result,
+            IsSuccess = successStatusCodes.Contains(apiRequest.Result)
         };
 
         return Task.CompletedTask;

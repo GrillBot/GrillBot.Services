@@ -2,7 +2,6 @@
 using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Core.Enums;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 
 namespace AuditLogService.BackgroundServices.Actions;
 
@@ -17,11 +16,6 @@ public class ComputeApiRequestStatsAction : PostProcessActionBase
 
     public override async Task ProcessAsync(LogItem logItem)
     {
-        var successStatusCodes = Enum.GetValues<HttpStatusCode>()
-            .Where(o => o < HttpStatusCode.BadRequest)
-            .Select(o => $"{(int)o} ({o})")
-            .ToList();
-
         var method = logItem.ApiRequest!.Method;
         var templatePath = logItem.ApiRequest!.TemplatePath;
         var endpoint = $"{method} {templatePath}";
@@ -32,10 +26,10 @@ public class ComputeApiRequestStatsAction : PostProcessActionBase
             .Select(g => new
             {
                 LastRequest = g.Max(x => x.EndAt),
-                FailedCount = g.LongCount(x => !successStatusCodes.Contains(x.Result)),
+                FailedCount = g.LongCount(x => !x.IsSuccess),
                 MaxDuration = g.Max(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)),
                 MinDuration = g.Min(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)),
-                SuccessCount = g.LongCount(x => successStatusCodes.Contains(x.Result)),
+                SuccessCount = g.LongCount(x => x.IsSuccess),
                 TotalDuration = g.Sum(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)),
                 LastRunDuration = g.OrderByDescending(x => x.EndAt).Select(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)).First()
             }).FirstOrDefaultAsync();

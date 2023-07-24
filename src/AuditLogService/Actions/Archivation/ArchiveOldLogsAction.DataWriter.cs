@@ -481,7 +481,8 @@ public partial class ArchiveOldLogsAction
             new XAttribute("ApiGroupName", item.ApiRequest.ApiGroupName),
             new XAttribute("Identification", item.ApiRequest.Identification),
             new XAttribute("Ip", item.ApiRequest.Ip),
-            new XAttribute("Result", item.ApiRequest.Result)
+            new XAttribute("Result", item.ApiRequest.Result),
+            new XAttribute("IsSuccess", item.ApiRequest.IsSuccess)
         );
 
         foreach (var param in item.ApiRequest.Parameters)
