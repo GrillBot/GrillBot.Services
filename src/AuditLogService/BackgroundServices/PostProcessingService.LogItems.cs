@@ -1,134 +1,149 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
+using Discord;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.BackgroundServices;
 
 public partial class PostProcessingService
 {
-    private async Task<LogItem?> ReadLogItemToProcessAsync(CancellationToken cancellationToken)
+    private async Task<List<LogItem>> ReadItemsToProcessAsync(CancellationToken cancellationToken)
     {
         using var scope = ServiceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
 
-        var metadata = await context.LogItems.AsNoTracking()
+        var headers = await context.LogItems.AsNoTracking()
             .Where(o => o.IsPendingProcess)
-            .Select(o => new { o.Id, o.Type })
-            .FirstOrDefaultAsync(cancellationToken);
-        if (metadata is null)
-            return null;
+            .OrderByDescending(o => o.CreatedAt)
+            .Take(100)
+            .ToListAsync(cancellationToken);
+        if (headers.Count == 0)
+            return headers;
 
-        return await ReadLogItemAsync(context, metadata.Id, metadata.Type, true, cancellationToken);
+        foreach (var item in headers)
+            await SetDataAsync(context, item, cancellationToken);
+
+        var mergedItems = new List<LogItem>();
+        foreach (var item in headers)
+        {
+            var mergedItem = FindRootItemForMerge(mergedItems, item);
+            if (mergedItem is null)
+            {
+                mergedItems.Add(item);
+                continue;
+            }
+
+            mergedItem.MergedItems.Add(item);
+        }
+
+        return mergedItems;
     }
 
-    private static async Task<LogItem?> ReadLogItemAsync(AuditLogServiceContext context, Guid id, LogType type, bool disableTracking, CancellationToken cancellationToken)
+    private static async Task SetDataAsync(AuditLogServiceContext context, LogItem header, CancellationToken cancellationToken)
     {
-        var query = context.LogItems.Include(o => o.Files).Where(o => o.Id == id);
-        switch (type)
+        IQueryable<TData> WithCommonFilter<TData>(IQueryable<TData> query) where TData : ChildEntityBase
+            => query.Where(o => o.LogItemId == header.Id).AsNoTracking();
+
+        // For some types data is not loaded due to performance reasons.
+        switch (header.Type)
         {
             case LogType.Info or LogType.Warning or LogType.Error:
-                query = query.Include(o => o.LogMessage);
-                break;
             case LogType.ChannelCreated:
-                query = query.Include(o => o.ChannelCreated!.ChannelInfo);
-                break;
             case LogType.ChannelDeleted:
-                query = query.Include(o => o.ChannelDeleted!.ChannelInfo);
-                break;
             case LogType.ChannelUpdated:
-                query = query.Include(o => o.ChannelUpdated!.Before);
-                query = query.Include(o => o.ChannelUpdated!.After);
-                break;
             case LogType.EmoteDeleted:
-                query = query.Include(o => o.DeletedEmote);
-                break;
             case LogType.OverwriteCreated:
-                query = query.Include(o => o.OverwriteCreated!.OverwriteInfo);
-                break;
             case LogType.OverwriteDeleted:
-                query = query.Include(o => o.OverwriteDeleted!.OverwriteInfo);
-                break;
             case LogType.OverwriteUpdated:
-                query = query.Include(o => o.OverwriteUpdated!.Before);
-                query = query.Include(o => o.OverwriteUpdated!.After);
-                break;
             case LogType.Unban:
-                query = query.Include(o => o.Unban);
-                break;
             case LogType.MemberUpdated:
-                query = query.Include(o => o.MemberUpdated!.Before);
-                query = query.Include(o => o.MemberUpdated!.After);
-                break;
             case LogType.MemberRoleUpdated:
-                query = query.Include(o => o.MemberRolesUpdated);
-                break;
             case LogType.GuildUpdated:
-                query = query.Include(o => o.GuildUpdated!.Before);
-                query = query.Include(o => o.GuildUpdated!.After);
-                break;
             case LogType.UserLeft:
-                query = query.Include(o => o.UserLeft);
-                break;
             case LogType.UserJoined:
-                query = query.Include(o => o.UserJoined);
-                break;
             case LogType.MessageEdited:
-                query = query.Include(o => o.MessageEdited);
                 break;
             case LogType.MessageDeleted:
-                query = query.Include(o => o.MessageDeleted!.Embeds).ThenInclude(o => o.Fields);
+                var files = await context.Files.AsNoTracking().Where(o => o.LogItemId == header.Id).ToListAsync(cancellationToken);
+                header.Files = files.ToHashSet();
                 break;
             case LogType.InteractionCommand:
-                query = query.Include(o => o.InteractionCommand);
+                header.InteractionCommand = await WithCommonFilter(context.InteractionCommands).FirstOrDefaultAsync(cancellationToken);
                 break;
             case LogType.ThreadDeleted:
-                query = query.Include(o => o.ThreadDeleted!.ThreadInfo);
                 break;
             case LogType.JobCompleted:
-                query = query.Include(o => o.Job);
+                header.Job = await WithCommonFilter(context.JobExecutions).FirstOrDefaultAsync(cancellationToken);
                 break;
             case LogType.Api:
-                query = query.Include(o => o.ApiRequest);
+                header.ApiRequest = await WithCommonFilter(context.ApiRequests).FirstOrDefaultAsync(cancellationToken);
                 break;
             case LogType.ThreadUpdated:
-                query = query.Include(o => o.ThreadUpdated!.Before);
-                query = query.Include(o => o.ThreadUpdated!.After);
                 break;
         }
-
-        if (disableTracking)
-            query = query.AsNoTracking();
-
-        return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
-    private async Task FinishLogItemProcessingAsync(LogItem oldLogItem, CancellationToken cancellationToken)
+    private static LogItem? FindRootItemForMerge(List<LogItem> mergedItems, LogItem item)
+    {
+        var query = mergedItems
+            .Where(o => o.Type == item.Type && o.Id != item.Id);
+
+        if (item.Type == LogType.InteractionCommand)
+        {
+            var interaction = item.InteractionCommand!;
+            query = query.Where(o =>
+                o.InteractionCommand!.Name == interaction.Name &&
+                o.InteractionCommand.ModuleName == interaction.ModuleName &&
+                o.InteractionCommand.MethodName == interaction.MethodName &&
+                o.InteractionCommand.IsSuccess == interaction.IsSuccess &&
+                o.CreatedAt.Date == item.CreatedAt.Date &&
+                o.UserId == item.UserId
+            );
+        }
+        else if (item.Type == LogType.Api)
+        {
+            var request = item.ApiRequest!;
+            query = query.Where(o =>
+                o.ApiRequest!.RequestDate == request.RequestDate &&
+                o.ApiRequest.Method == request.Method &&
+                o.ApiRequest.TemplatePath == request.TemplatePath
+            );
+        }
+        else if (item.Type == LogType.JobCompleted)
+        {
+            var job = item.Job!;
+            query = query.Where(o => o.Job!.EndAt.Date == job.EndAt.Date);
+        }
+        else if (item.Type == LogType.MessageDeleted)
+        {
+            var itemFileExtensions = item.Files.Select(o => o.Extension).Distinct().OrderBy(o => o).ToList();
+            query = query.Where(o => o.Files.Select(x => x.Extension).Distinct().OrderBy(x => x).SequenceEqual(itemFileExtensions));
+        }
+
+        return query.FirstOrDefault();
+    }
+
+    private async Task ResetProcessFlagAsync(LogItem item)
     {
         using var scope = ServiceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
 
-        var latestLogItem = await ReadLogItemAsync(context, oldLogItem.Id, oldLogItem.Type, false, cancellationToken);
-        if (latestLogItem is null)
+        await ResetProcessFlagAsync(context, new[] { item.Id });
+        if (item.MergedItems.Count == 0)
+        {
+            await context.SaveChangesAsync();
             return;
-
-        if (latestLogItem.IsDeleted)
-        {
-            if (!oldLogItem.IsDeleted)
-            {
-                latestLogItem.IsDeleted = true;
-                latestLogItem.IsPendingProcess = true;
-            }
-            else
-            {
-                context.Remove(latestLogItem);
-            }
-        }
-        else
-        {
-            latestLogItem.IsPendingProcess = false;
-            latestLogItem.IsDeleted = false;
         }
 
-        await context.SaveChangesAsync(cancellationToken);
+        var mergedItemIds = item.MergedItems.Select(o => o.Id).ToArray();
+        await ResetProcessFlagAsync(context, mergedItemIds);
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task ResetProcessFlagAsync(AuditLogServiceContext context, Guid[] ids)
+    {
+        var items = await context.LogItems.Where(o => ids.Contains(o.Id)).ToListAsync();
+        foreach (var item in items)
+            item.IsPendingProcess = false;
     }
 }

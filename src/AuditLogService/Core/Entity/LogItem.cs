@@ -66,6 +66,9 @@ public class LogItem
 
     [NotMapped]
     public bool CanCreate { get; set; }
+
+    [NotMapped]
+    public List<LogItem> MergedItems { get; set; } = new();
     
     #endregion
 
