@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using AuditLogService.Core.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AuditLogService.Core.Migrations
 {
     [DbContext(typeof(AuditLogServiceContext))]
-    partial class AuditLogServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20230725154318_ApiRequestRole")]
+    partial class ApiRequestRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,8 +93,7 @@ namespace AuditLogService.Core.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<string>("Role")
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("StartAt")
                         .HasColumnType("timestamp with time zone");
@@ -112,8 +114,6 @@ namespace AuditLogService.Core.Migrations
                         .HasFilter("\"Role\" IS NOT NULL");
 
                     b.HasIndex("Method", "TemplatePath");
-
-                    b.HasIndex("LogItemId", "Method", "TemplatePath", "ApiGroupName", "Identification");
 
                     b.ToTable("ApiRequests");
                 });

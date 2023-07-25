@@ -246,7 +246,8 @@ public partial class ReadDetailAction
                 ActionName = o.ActionName,
                 ControllerName = o.ControllerName,
                 TemplatePath = $"{o.Method} {o.TemplatePath}",
-                ApiGroupName = o.ApiGroupName
+                ApiGroupName = o.ApiGroupName,
+                Role = o.Role
             }).FirstOrDefaultAsync();
     }
 

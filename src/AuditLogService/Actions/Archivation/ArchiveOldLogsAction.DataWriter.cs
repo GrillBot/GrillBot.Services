@@ -485,6 +485,9 @@ public partial class ArchiveOldLogsAction
             new XAttribute("IsSuccess", item.ApiRequest.IsSuccess)
         );
 
+        if (!string.IsNullOrEmpty(item.ApiRequest.Role))
+            xml.Add(new XAttribute("Role", item.ApiRequest.Role));
+
         foreach (var param in item.ApiRequest.Parameters)
         {
             xml.Add(new XElement(

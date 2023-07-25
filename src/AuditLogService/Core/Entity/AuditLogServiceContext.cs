@@ -73,6 +73,8 @@ public class AuditLogServiceContext : DbContext
             b.HasOne(o => o.Before).WithMany().HasForeignKey(o => o.BeforeId);
             b.HasOne(o => o.After).WithMany().HasForeignKey(o => o.AfterId);
         });
+
+        modelBuilder.Entity<ApiRequest>(b => b.HasIndex(x => x.Role).HasFilter("\"Role\" IS NOT NULL"));
     }
 
     public DbSet<ApiRequest> ApiRequests => Set<ApiRequest>();

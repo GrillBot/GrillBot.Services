@@ -53,4 +53,7 @@ public class ApiRequestRequest
     [Required]
     [StringLength(255)]
     public string Result { get; set; } = null!;
+
+    [StringLength(32)]
+    public string? Role { get; set; }
 }

@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Models.Request;
 using AuditLogService.Models.Request.CreateItems;
 using AuditLogService.Processors.Request.Abstractions;
 using System.Net;
@@ -37,8 +36,20 @@ public class ApiRequestProcessor : RequestProcessorBase
             ApiGroupName = apiRequest.ApiGroupName,
             Result = apiRequest.Result,
             IsSuccess = successStatusCodes.Contains(apiRequest.Result),
-            RequestDate = DateOnly.FromDateTime(apiRequest.EndAt)
+            RequestDate = DateOnly.FromDateTime(apiRequest.EndAt),
         };
+
+        if (!string.IsNullOrEmpty(apiRequest.Role))
+        {
+            entity.ApiRequest.Role = apiRequest.Role;
+        }
+        else if (apiRequest.ApiGroupName == "V1")
+        {
+            if (apiRequest.Identification.StartsWith("ApiV1(Private/"))
+                entity.ApiRequest.Role = "Admin";
+            else if (apiRequest.Identification.StartsWith("ApiV1(Public/"))
+                entity.ApiRequest.Role = "User";
+        }
 
         return Task.CompletedTask;
     }
