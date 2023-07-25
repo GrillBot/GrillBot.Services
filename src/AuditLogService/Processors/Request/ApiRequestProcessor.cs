@@ -36,7 +36,8 @@ public class ApiRequestProcessor : RequestProcessorBase
             TemplatePath = apiRequest.TemplatePath,
             ApiGroupName = apiRequest.ApiGroupName,
             Result = apiRequest.Result,
-            IsSuccess = successStatusCodes.Contains(apiRequest.Result)
+            IsSuccess = successStatusCodes.Contains(apiRequest.Result),
+            RequestDate = DateOnly.FromDateTime(apiRequest.EndAt)
         };
 
         return Task.CompletedTask;
