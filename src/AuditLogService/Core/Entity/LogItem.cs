@@ -7,8 +7,7 @@ namespace AuditLogService.Core.Entity;
 
 [Index(nameof(CreatedAt), Name = "IX_LogItem_CreatedAt")]
 [Index(nameof(GuildId))]
-[Index(nameof(IsDeleted))]
-[Index(nameof(IsPendingProcess))]
+[Index(nameof(LogDate))]
 public class LogItem
 {
     [Key]
@@ -35,6 +34,8 @@ public class LogItem
 
     public bool IsDeleted { get; set; }
     public bool IsPendingProcess { get; set; }
+
+    public DateOnly LogDate { get; set; }
 
     #region Data
 

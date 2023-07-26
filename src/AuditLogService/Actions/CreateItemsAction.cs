@@ -35,16 +35,18 @@ public class CreateItemsAction : ApiActionBase
 
     private async Task<LogItem> CreateEntityAsync(LogRequest request)
     {
+        var createdAt = request.CreatedAt ?? DateTime.UtcNow;
         var entity = new LogItem
         {
             GuildId = request.GuildId,
             Id = Guid.NewGuid(),
             Type = request.Type,
             ChannelId = request.ChannelId,
-            CreatedAt = request.CreatedAt ?? DateTime.UtcNow,
+            CreatedAt = createdAt,
             UserId = request.UserId,
             CanCreate = true,
-            IsPendingProcess = true
+            IsPendingProcess = true,
+            LogDate = DateOnly.FromDateTime(createdAt)
         };
 
         foreach (var file in request.Files.Select(ConvertFileRequest))

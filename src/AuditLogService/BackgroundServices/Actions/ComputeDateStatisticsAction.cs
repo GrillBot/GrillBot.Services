@@ -19,7 +19,7 @@ public class ComputeDateStatisticsAction : PostProcessActionBase
 
         stats.Date = date;
         stats.Count = await Context.LogItems.AsNoTracking()
-            .LongCountAsync(o => o.CreatedAt.Date == logItem.CreatedAt.Date && !o.IsDeleted);
+            .LongCountAsync(o => o.LogDate == date && !o.IsDeleted);
         await StatisticsContext.SaveChangesAsync();
     }
 }
