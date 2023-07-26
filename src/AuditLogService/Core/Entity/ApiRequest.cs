@@ -48,11 +48,14 @@ public class ApiRequest : ChildEntityBase
 
     [StringLength(255)]
     public string Result { get; set; } = null!;
-    
+
     public bool IsSuccess { get; set; }
 
     public DateOnly RequestDate { get; set; }
 
     [StringLength(32)]
     public string? Role { get; set; }
+
+    [StringLength(128)]
+    public string? ForwardedIp { get; set; }
 }

@@ -39,18 +39,30 @@ public class ApiRequestProcessor : RequestProcessorBase
             RequestDate = DateOnly.FromDateTime(apiRequest.EndAt),
         };
 
-        if (!string.IsNullOrEmpty(apiRequest.Role))
-        {
-            entity.ApiRequest.Role = apiRequest.Role;
-        }
-        else if (apiRequest.ApiGroupName == "V1")
-        {
-            if (apiRequest.Identification.StartsWith("ApiV1(Private/"))
-                entity.ApiRequest.Role = "Admin";
-            else if (apiRequest.Identification.StartsWith("ApiV1(Public/"))
-                entity.ApiRequest.Role = "User";
-        }
+        SetUserRole(apiRequest, entity.ApiRequest);
+        SetForwardedIp(apiRequest, entity.ApiRequest);
 
         return Task.CompletedTask;
+    }
+
+    private static void SetUserRole(ApiRequestRequest request, ApiRequest entity)
+    {
+        if (!string.IsNullOrEmpty(request.Role))
+        {
+            entity.Role = request.Role;
+        }
+        else if (request.ApiGroupName == "V1")
+        {
+            if (request.Identification.StartsWith("ApiV1(Private/"))
+                entity.Role = "Admin";
+            else if (request.Identification.StartsWith("ApiV1(Public/"))
+                entity.Role = "User";
+        }
+    }
+
+    private static void SetForwardedIp(ApiRequestRequest request, ApiRequest entity)
+    {
+        if (request.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor))
+            entity.ForwardedIp = forwardedFor;
     }
 }

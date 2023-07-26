@@ -90,6 +90,7 @@ public partial class PostProcessingService : BackgroundService
 
         await CheckMigrationsAsync<AuditLogServiceContext>(scope);
         await CheckMigrationsAsync<AuditLogStatisticsContext>(scope);
+        //await MigrateDataAsync(scope);
     }
 
     private static async Task CheckMigrationsAsync<TContext>(IServiceScope scope) where TContext : DbContext
@@ -99,5 +100,29 @@ public partial class PostProcessingService : BackgroundService
         var pendingMigrations = (await context.Database.GetPendingMigrationsAsync()).Any();
         while (pendingMigrations)
             pendingMigrations = (await context.Database.GetPendingMigrationsAsync()).Any();
+    }
+
+    private async Task MigrateDataAsync(IServiceScope scope)
+    {
+        var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
+
+        async Task<List<ApiRequest>> ReadLogRequestsAsync(DateTime lastRequest)
+            => await context.ApiRequests.Where(o => o.ForwardedIp == null && o.EndAt > lastRequest).Take(1000).ToListAsync();
+
+        var lastRequest = DateTime.MinValue;
+        var items = await ReadLogRequestsAsync(lastRequest);
+        while (items.Count > 0)
+        {
+            foreach (var item in items)
+            {
+                if (item.Headers.TryGetValue("X-Forwarded-For", out var forwardedIp))
+                    item.ForwardedIp = forwardedIp;
+
+                lastRequest = item.EndAt;
+            }
+
+            await context.SaveChangesAsync();
+            items = await ReadLogRequestsAsync(lastRequest);
+        }
     }
 }

@@ -12,10 +12,12 @@ namespace AuditLogService.Actions.Detail;
 
 public partial class ReadDetailAction
 {
+    private IQueryable<TData> GetBaseQuery<TData>(LogItem header) where TData : ChildEntityBase
+        => Context.Set<TData>().Where(o => o.LogItemId == header.Id).AsNoTracking();
+
     private async Task<MessageDetail?> CreateMessageDetailAsync(LogItem header)
     {
-        return await Context.LogMessages.AsNoTracking()
-            .Where(o => o.LogItemId == header.Id)
+        return await GetBaseQuery<Core.Entity.LogMessage>(header)
             .Select(o => new MessageDetail
             {
                 Text = o.Message,
@@ -27,8 +29,7 @@ public partial class ReadDetailAction
 
     private async Task<ChannelUpdatedDetail?> CreateChannelUpdatedDetailAsync(LogItem header)
     {
-        var channelInfos = await Context.ChannelUpdatedItems.AsNoTracking()
-            .Where(o => o.LogItemId == header.Id)
+        var channelInfos = await GetBaseQuery<ChannelUpdated>(header)
             .Select(o => new { o.Before, o.After })
             .FirstOrDefaultAsync();
         if (channelInfos is null)
@@ -53,8 +54,7 @@ public partial class ReadDetailAction
 
     private async Task<OverwriteUpdatedDetail?> CreateOverwriteUpdatedDetailAsync(LogItem header)
     {
-        var overwriteInfos = await Context.OverwriteUpdatedItems.AsNoTracking()
-            .Where(o => o.LogItemId == header.Id)
+        var overwriteInfos = await GetBaseQuery<OverwriteUpdated>(header)
             .Select(o => new { o.Before, o.After })
             .FirstOrDefaultAsync();
         if (overwriteInfos is null)
@@ -77,8 +77,7 @@ public partial class ReadDetailAction
 
     private async Task<MemberUpdatedDetail?> CreateMemberUpdatedDetailAsync(LogItem header)
     {
-        var memberInfos = await Context.MemberUpdatedItems.AsNoTracking()
-            .Where(o => o.LogItemId == header.Id)
+        var memberInfos = await GetBaseQuery<MemberUpdated>(header)
             .Select(o => new { o.Before, o.After })
             .FirstOrDefaultAsync();
         if (memberInfos is null)
@@ -102,8 +101,7 @@ public partial class ReadDetailAction
 
     private async Task<GuildUpdatedDetail?> CreateGuildUpdatedDetailAsync(LogItem header)
     {
-        var guildInfos = await Context.GuildUpdatedItems.AsNoTracking()
-            .Where(o => o.LogItemId == header.Id)
+        var guildInfos = await GetBaseQuery<GuildUpdated>(header)
             .Select(o => new { o.Before, o.After })
             .FirstOrDefaultAsync();
         if (guildInfos is null)
@@ -142,8 +140,7 @@ public partial class ReadDetailAction
 
     private async Task<MessageDeletedDetail?> CreateMessageDeletedDetailAsync(LogItem header)
     {
-        return await Context.MessageDeletedItems.AsNoTracking()
-            .Where(o => o.LogItemId == header.Id)
+        return await GetBaseQuery<MessageDeleted>(header)
             .Select(o => new MessageDeletedDetail
             {
                 MessageCreatedAt = o.MessageCreatedAt,
@@ -171,9 +168,7 @@ public partial class ReadDetailAction
 
     private async Task<InteractionCommandDetail?> CreateInteractionCommandDetailAsync(LogItem header)
     {
-        var command = await Context.InteractionCommands.AsNoTracking()
-            .Where(o => o.LogItemId == header.Id)
-            .FirstOrDefaultAsync();
+        var command = await GetBaseQuery<InteractionCommand>(header).FirstOrDefaultAsync();
         if (command is null)
             return null;
 
@@ -183,12 +178,12 @@ public partial class ReadDetailAction
             Duration = command.Duration,
             Exception = command.Exception,
             Locale = command.Locale,
-            Parameters = command.Parameters.Select(p => new InteractionCommandParameter
+            Parameters = command.Parameters.ConvertAll(p => new InteractionCommandParameter
             {
                 Name = p.Name,
                 Value = p.Value,
                 Type = p.Type
-            }).ToList(),
+            }),
             ErrorReason = command.ErrorReason,
             FullName = $"{command.Name} ({command.ModuleName}/{command.MethodName})",
             HasResponded = command.HasResponded,
@@ -199,8 +194,7 @@ public partial class ReadDetailAction
 
     private async Task<ThreadDeletedDetail?> CreateThreadDeletedDetailAsync(LogItem header)
     {
-        return await Context.ThreadDeletedItems.AsNoTracking()
-            .Where(o => o.LogItemId == header.Id)
+        return await GetBaseQuery<ThreadDeleted>(header)
             .Select(o => new ThreadDeletedDetail
             {
                 Name = o.ThreadInfo.ThreadName,
@@ -215,8 +209,7 @@ public partial class ReadDetailAction
 
     private async Task<JobExecutionDetail?> CreateJobExecutionDetailAsync(LogItem header)
     {
-        return await Context.JobExecutions.AsNoTracking()
-            .Where(o => o.LogItemId == header.Id)
+        return await GetBaseQuery<JobExecution>(header)
             .Select(o => new JobExecutionDetail
             {
                 Result = o.Result,
@@ -230,8 +223,7 @@ public partial class ReadDetailAction
 
     private async Task<ApiRequestDetail?> CreateApiRequestDetailAsync(LogItem header)
     {
-        return await Context.ApiRequests.AsNoTracking()
-            .Where(o => o.LogItemId == header.Id)
+        return await GetBaseQuery<ApiRequest>(header)
             .Select(o => new ApiRequestDetail
             {
                 StartAt = o.StartAt,
@@ -247,25 +239,26 @@ public partial class ReadDetailAction
                 ControllerName = o.ControllerName,
                 TemplatePath = $"{o.Method} {o.TemplatePath}",
                 ApiGroupName = o.ApiGroupName,
-                Role = o.Role
+                Role = o.Role,
+                ForwardedIp = o.ForwardedIp
             }).FirstOrDefaultAsync();
     }
 
     private async Task<ThreadUpdatedDetail?> CreateThreaduUpdatedDetailAsync(LogItem header)
     {
-        var threadInfos = await Context.ThreadUpdatedItems.AsNoTracking()
-            .Where(o => o.LogItemId == header.Id)
-            .Select(o => new { o.Before, o.After })
+        var threadInfos = await GetBaseQuery<ThreadUpdated>(header)
+            .Select(o => new
+            {
+                TagsBefore = o.Before.Tags,
+                TagsAfter = o.After.Tags
+            })
             .FirstOrDefaultAsync();
         if (threadInfos is null)
             return null;
 
-        var before = threadInfos.Before;
-        var after = threadInfos.After;
-
         var result = new ThreadUpdatedDetail
         {
-            Tags = new Diff<List<string>>(before.Tags, after.Tags).NullIfEquals()
+            Tags = new Diff<List<string>>(threadInfos.TagsBefore, threadInfos.TagsAfter).NullIfEquals()
         };
 
         return ModelHelper.IsModelEmpty(result) ? null : result;

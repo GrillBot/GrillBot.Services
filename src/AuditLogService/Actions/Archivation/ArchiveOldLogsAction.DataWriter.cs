@@ -485,9 +485,6 @@ public partial class ArchiveOldLogsAction
             new XAttribute("IsSuccess", item.ApiRequest.IsSuccess)
         );
 
-        if (!string.IsNullOrEmpty(item.ApiRequest.Role))
-            xml.Add(new XAttribute("Role", item.ApiRequest.Role));
-
         foreach (var param in item.ApiRequest.Parameters)
         {
             xml.Add(new XElement(
@@ -505,6 +502,12 @@ public partial class ArchiveOldLogsAction
                 new XAttribute("Value", param.Value)
             ));
         }
+
+        if (!string.IsNullOrEmpty(item.ApiRequest.Role))
+            xml.Add(new XAttribute("Role", item.ApiRequest.Role));
+
+        if (!string.IsNullOrEmpty(item.ApiRequest.ForwardedIp))
+            xml.Add(new XAttribute("ForwardedIp", item.ApiRequest.ForwardedIp));
 
         return xml;
     }
