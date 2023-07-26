@@ -12,14 +12,15 @@ public class HardDeleteAction : PostProcessActionBase
     }
 
     public override bool CanProcess(LogItem logItem)
-        => true;
+        => logItem.IsDeleted;
 
     public override async Task ProcessAsync(LogItem logItem)
     {
-        var itemsToDelete = await Context.LogItems
-            .Where(o => o.IsDeleted && !o.IsPendingProcess && o.Type == logItem.Type)
-            .ToListAsync();
+        var itemsToDeleteQuery = Context.LogItems.Where(o => o.IsDeleted && !o.IsPendingProcess && o.Type == logItem.Type);
+        if (!await itemsToDeleteQuery.AsNoTracking().AnyAsync())
+            return;
 
+        var itemsToDelete = await itemsToDeleteQuery.ToListAsync();
         foreach (var item in itemsToDelete)
         {
             Context.Remove(item);
