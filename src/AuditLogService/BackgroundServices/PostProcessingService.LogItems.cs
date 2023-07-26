@@ -9,34 +9,37 @@ public partial class PostProcessingService
 {
     private async Task<List<LogItem>> ReadItemsToProcessAsync(CancellationToken cancellationToken)
     {
-        using var scope = ServiceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
-
-        var headers = await context.LogItems.AsNoTracking()
-            .Where(o => o.IsPendingProcess)
-            .OrderByDescending(o => o.CreatedAt)
-            .Take(100)
-            .ToListAsync(cancellationToken);
-        if (headers.Count == 0)
-            return headers;
-
-        foreach (var item in headers)
-            await SetDataAsync(context, item, cancellationToken);
-
-        var mergedItems = new List<LogItem>();
-        foreach (var item in headers)
+        using (CounterManager.Create("BackgroundServices.ReadItems"))
         {
-            var mergedItem = FindRootItemForMerge(mergedItems, item);
-            if (mergedItem is null)
+            using var scope = ServiceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
+
+            var headers = await context.LogItems.AsNoTracking()
+                .Where(o => o.IsPendingProcess)
+                .OrderByDescending(o => o.CreatedAt)
+                .Take(100)
+                .ToListAsync(cancellationToken);
+            if (headers.Count == 0)
+                return headers;
+
+            foreach (var item in headers)
+                await SetDataAsync(context, item, cancellationToken);
+
+            var mergedItems = new List<LogItem>();
+            foreach (var item in headers)
             {
-                mergedItems.Add(item);
-                continue;
+                var mergedItem = FindRootItemForMerge(mergedItems, item);
+                if (mergedItem is null)
+                {
+                    mergedItems.Add(item);
+                    continue;
+                }
+
+                mergedItem.MergedItems.Add(item);
             }
 
-            mergedItem.MergedItems.Add(item);
+            return mergedItems;
         }
-
-        return mergedItems;
     }
 
     private static async Task SetDataAsync(AuditLogServiceContext context, LogItem header, CancellationToken cancellationToken)

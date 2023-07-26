@@ -18,15 +18,16 @@ public static class PostProcessingExtensions
             .AddScoped<PostProcessActionBase, ComputeApiDateCountsAction>()
             .AddScoped<PostProcessActionBase, ComputeApiResultCountsAction>()
             .AddScoped<PostProcessActionBase, ComputeApiRequestStatsAction>()
-            .AddScoped<PostProcessActionBase, ComputeAvgTimesAction>()
             .AddScoped<PostProcessActionBase, ComputeApiUserStatisticsAction>()
             .AddScoped<PostProcessActionBase, ComputeInteractionUserStatisticsAction>()
+            .AddScoped<PostProcessActionBase, ComputeInteractionStatisticsAction>()
+            .AddScoped<PostProcessActionBase, ComputeAvgTimesAction>()
             .AddScoped<PostProcessActionBase, ComputeTypeStatitistics>()
             .AddScoped<PostProcessActionBase, ComputeDateStatisticsAction>()
-            .AddScoped<PostProcessActionBase, ComputeFileExtensionStatisticsAction>()
-            .AddScoped<PostProcessActionBase, ComputeInteractionStatisticsAction>();
+            .AddScoped<PostProcessActionBase, ComputeFileExtensionStatisticsAction>();
 
         services
-            .AddScoped<PostProcessActionBase, DeleteInvalidStatisticsAction>();
+            .AddScoped<PostProcessActionBase, DeleteInvalidStatisticsAction>()
+            .AddScoped<PostProcessActionBase, HardDeleteAction>();
     }
 }
