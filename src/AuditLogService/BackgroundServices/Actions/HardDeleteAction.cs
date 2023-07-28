@@ -12,7 +12,7 @@ public class HardDeleteAction : PostProcessActionBase
     }
 
     public override bool CanProcess(LogItem logItem)
-        => logItem.IsDeleted;
+        => logItem.IsDeleted || logItem.MergedItems.Any(o => o.IsDeleted);
 
     public override async Task ProcessAsync(LogItem logItem)
     {
