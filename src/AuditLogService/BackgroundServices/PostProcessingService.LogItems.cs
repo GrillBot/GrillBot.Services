@@ -1,6 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
-using Discord;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.BackgroundServices;
@@ -9,7 +8,7 @@ public partial class PostProcessingService
 {
     private async Task<List<LogItem>> ReadItemsToProcessAsync(CancellationToken cancellationToken)
     {
-        using (CounterManager.Create("BackgroundServices.ReadItems"))
+        using (CounterManager.Create("BackgroundService.LogItems.Load"))
         {
             using var scope = ServiceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
@@ -128,19 +127,22 @@ public partial class PostProcessingService
 
     private async Task ResetProcessFlagAsync(LogItem item)
     {
-        using var scope = ServiceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
-
-        await ResetProcessFlagAsync(context, new[] { item.Id });
-        if (item.MergedItems.Count == 0)
+        using (CounterManager.Create("BackgroundService.LogItems.FlagReset"))
         {
-            await context.SaveChangesAsync();
-            return;
-        }
+            using var scope = ServiceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AuditLogServiceContext>();
 
-        var mergedItemIds = item.MergedItems.Select(o => o.Id).ToArray();
-        await ResetProcessFlagAsync(context, mergedItemIds);
-        await context.SaveChangesAsync();
+            await ResetProcessFlagAsync(context, new[] { item.Id });
+            if (item.MergedItems.Count == 0)
+            {
+                await context.SaveChangesAsync();
+                return;
+            }
+
+            var mergedItemIds = item.MergedItems.Select(o => o.Id).ToArray();
+            await ResetProcessFlagAsync(context, mergedItemIds);
+            await context.SaveChangesAsync();
+        }
     }
 
     private static async Task ResetProcessFlagAsync(AuditLogServiceContext context, Guid[] ids)
