@@ -18,7 +18,6 @@ public static class ActionExtensions
             .AddScoped<InvalidateCacheAction>();
 
         return services
-            .AddScoped<SendDirectApiAction>()
             .AddScoped<StoreKarmaAction>()
             .AddScoped<GetKarmaPageAction>();
     }
