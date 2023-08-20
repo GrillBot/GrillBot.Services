@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using Discord;
-using RubbergodService.Core.Helpers;
+using GrillBot.Core.Helpers;
 using RubbergodService.DirectApi.Models;
 
 namespace RubbergodService.DirectApi;
