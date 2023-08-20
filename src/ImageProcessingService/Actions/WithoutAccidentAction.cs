@@ -1,8 +1,8 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.Services.Graphics;
+using GrillBot.Core.Services.Graphics.Models.Images;
 using ImageMagick;
 using ImageProcessingService.Caching;
-using ImageProcessingService.Core.GraphicsService;
-using ImageProcessingService.Core.GraphicsService.Models.Images;
 using ImageProcessingService.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,7 +36,7 @@ public class WithoutAccidentAction : ApiActionBase
             ProfilePicture = profilePicture.ToBase64()
         };
 
-        var image = await GraphicsClient.CreateWithoutAccidentImageAsync(imageRequest);
+        var image = await GraphicsClient.CreateWithoutAccidentImage(imageRequest);
 
         await Cache.WriteByRequestAsync(request, image);
         return CreateResult(image);

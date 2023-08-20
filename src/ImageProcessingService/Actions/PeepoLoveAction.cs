@@ -1,7 +1,7 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.Services.Graphics;
 using ImageMagick;
 using ImageProcessingService.Caching;
-using ImageProcessingService.Core.GraphicsService;
 using ImageProcessingService.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -56,8 +56,10 @@ public class PeepoLoveAction : ApiActionBase
         {
             var framesQuery = createdFrames.Select(frameData =>
             {
-                var frame = new MagickImage(frameData, MagickFormat.Png);
-                frame.GifDisposeMethod = GifDisposeMethod.Background;
+                var frame = new MagickImage(frameData, MagickFormat.Png)
+                {
+                    GifDisposeMethod = GifDisposeMethod.Background
+                };
 
                 return frame;
             });

@@ -1,8 +1,7 @@
 ﻿using GrillBot.Core;
-using GrillBot.Core.Extensions;
+using GrillBot.Core.Services;
 using ImageProcessingService.Actions;
 using ImageProcessingService.Caching;
-using ImageProcessingService.Core.GraphicsService;
 using ImageProcessingService.Core.Options;
 using Microsoft.AspNetCore.HttpOverrides;
 
@@ -37,12 +36,6 @@ public static class CoreExtensions
         services.AddActions();
 
         // Graphics service
-        services
-            .AddScoped<IGraphicsClient, GraphicsClient>()
-            .AddHttpClient("Graphics", client =>
-            {
-                client.BaseAddress = new Uri(configuration["GraphicsService:Api"]!);
-                client.Timeout = TimeSpan.FromMilliseconds(configuration["GraphicsService:Timeout"].ToInt());
-            });
+        services.AddExternalServices(configuration);
     }
 }

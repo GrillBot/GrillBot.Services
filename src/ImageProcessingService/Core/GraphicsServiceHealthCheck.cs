@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
+﻿using GrillBot.Core.Services.Graphics;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace ImageProcessingService.Core.GraphicsService;
+namespace ImageProcessingService.Core;
 
 public class GraphicsServiceHealthCheck : IHealthCheck
 {

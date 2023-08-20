@@ -1,9 +1,10 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using ImageMagick;
-using ImageProcessingService.Core.GraphicsService;
-using ImageProcessingService.Core.GraphicsService.Models.Chart;
+using GrillBot.Core.Services.Graphics.Models;
+using GrillBot.Core.Services.Graphics;
 using ImageProcessingService.Models;
 using Microsoft.AspNetCore.Mvc;
+using GrillBot.Core.Services.Graphics.Models.Chart;
 
 namespace ImageProcessingService.Actions;
 
