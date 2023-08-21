@@ -147,7 +147,7 @@ public class LogRequestValidator : ModelValidator<LogRequest>
     }
 
     private static bool IsAllowedDmInteraction(InteractionCommandRequest interaction)
-        => interaction is { ModuleName: "RemindModule", MethodName: "HandleRemindPostpone" };
+        => interaction is { ModuleName: "RemindModule" };
 
     private static IEnumerable<ValidationResult> ValidateInteractionCommandProperties(LogRequest request, ValidationContext context)
     {
