@@ -114,7 +114,10 @@ public partial class PostProcessingService
         else if (item.Type == LogType.JobCompleted)
         {
             var job = item.Job!;
-            query = query.Where(o => o.Job!.EndAt.Date == job.EndAt.Date);
+            query = query.Where(o =>
+                o.Job!.EndAt.Date == job.EndAt.Date &&
+                o.Job.JobName == job.JobName
+            );
         }
         else if (item.Type == LogType.MessageDeleted)
         {
