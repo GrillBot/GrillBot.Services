@@ -8,10 +8,6 @@ public static class PostProcessingExtensions
 {
     public static void AddPostProcessing(this IServiceCollection services)
     {
-        var channelOptions = new BoundedChannelOptions(int.MaxValue) { FullMode = BoundedChannelFullMode.Wait };
-        var channel = Channel.CreateBounded<LogItem>(channelOptions);
-        services.AddSingleton(channel);
-
         services.AddHostedService<PostProcessingService>();
 
         services
@@ -24,7 +20,8 @@ public static class PostProcessingExtensions
             .AddScoped<PostProcessActionBase, ComputeAvgTimesAction>()
             .AddScoped<PostProcessActionBase, ComputeTypeStatitistics>()
             .AddScoped<PostProcessActionBase, ComputeDateStatisticsAction>()
-            .AddScoped<PostProcessActionBase, ComputeFileExtensionStatisticsAction>();
+            .AddScoped<PostProcessActionBase, ComputeFileExtensionStatisticsAction>()
+            .AddScoped<PostProcessActionBase, ComputeJobInfoAction>();
 
         services
             .AddScoped<PostProcessActionBase, DeleteInvalidStatisticsAction>()

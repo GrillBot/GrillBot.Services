@@ -1,5 +1,4 @@
-﻿using AuditLogService.Core.Entity;
-using AuditLogService.Models.Response.Info;
+﻿using AuditLogService.Core.Entity.Statistics;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,40 +6,28 @@ namespace AuditLogService.Actions.Info;
 
 public class GetJobsInfoAction : ApiActionBase
 {
-    private AuditLogServiceContext Context { get; }
+    private AuditLogStatisticsContext StatisticsContext { get; }
 
-    public GetJobsInfoAction(AuditLogServiceContext context)
+    public GetJobsInfoAction(AuditLogStatisticsContext statisticsContext)
     {
-        Context = context;
+        StatisticsContext = statisticsContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var result = await Context.JobExecutions.AsNoTracking()
-            .Where(o => !Context.LogItems.Any(x => o.LogItemId == x.Id && x.IsDeleted))
-            .GroupBy(o => o.JobName)
-            .Select(o => new JobInfo
+        var result = await StatisticsContext.JobInfos.AsNoTracking()
+            .Select(o => new Models.Response.Info.JobInfo
             {
-                Name = o.Key,
-                AvgTime = (int)Math.Round(o.Average(x => (x.EndAt - x.StartAt).TotalMilliseconds)),
-                FailedCount = o.Count(x => x.WasError),
-                MaxTime = (int)Math.Round(o.Max(x => (x.EndAt - x.StartAt).TotalMilliseconds)),
-                MinTime = (int)Math.Round(o.Min(x => (x.EndAt - x.StartAt).TotalMilliseconds)),
-                StartCount = o.Count(),
-                TotalDuration = (int)Math.Round(o.Sum(x => (x.EndAt - x.StartAt).TotalMilliseconds)),
-                LastStartAt = o.Max(x => x.StartAt)
-            })
-            .ToListAsync();
-
-        foreach (var job in result)
-        {
-            var lastItem = await Context.JobExecutions.AsNoTracking()
-                .Where(o => o.JobName == job.Name && !Context.LogItems.Any(x => o.LogItemId == x.Id && x.IsDeleted))
-                .OrderByDescending(o => o.StartAt)
-                .Select(o => new { o.EndAt, o.StartAt })
-                .FirstOrDefaultAsync();
-            job.LastRunDuration = lastItem is null ? null : (int)Math.Round((lastItem.EndAt - lastItem.StartAt).TotalMilliseconds);
-        }
+                AvgTime = o.AvgTime,
+                FailedCount = o.FailedCount,
+                LastRunDuration = o.LastRunDuration,
+                LastStartAt = o.LastStartAt,
+                MaxTime = o.MaxTime,
+                MinTime = o.MinTime,
+                Name = o.Name,
+                StartCount = o.StartCount,
+                TotalDuration = o.TotalDuration
+            }).ToListAsync();
 
         return ApiResult.FromSuccess(result);
     }

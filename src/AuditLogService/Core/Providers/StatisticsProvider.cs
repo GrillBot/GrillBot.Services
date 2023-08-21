@@ -60,7 +60,8 @@ public class StatisticsProvider : IStatisticsProvider
             { $"Statistics.{nameof(StatisticsContext.TypeStatistics)}", await StatisticsContext.TypeStatistics.LongCountAsync() },
             { $"Statistics.{nameof(StatisticsContext.DateStatistics)}", await StatisticsContext.DateStatistics.LongCountAsync() },
             { $"Statistics.{nameof(StatisticsContext.FileExtensionStatistics)}", await StatisticsContext.FileExtensionStatistics.LongCountAsync() },
-            { $"Statistics.{nameof(StatisticsContext.InteractionStatistics)}", await StatisticsContext.InteractionStatistics.LongCountAsync() }
+            { $"Statistics.{nameof(StatisticsContext.InteractionStatistics)}", await StatisticsContext.InteractionStatistics.LongCountAsync() },
+            { $"Statistics.{nameof(StatisticsContext.JobInfos)}", await StatisticsContext.JobInfos.LongCountAsync() }
         };
     }
 }
