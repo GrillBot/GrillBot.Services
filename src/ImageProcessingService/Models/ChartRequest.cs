@@ -1,16 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GrillBot.Core.Services.Graphics.Models.Chart;
+using GrillBot.Core.Validation;
 
 namespace ImageProcessingService.Models;
 
-public class ChartRequest : IValidatableObject
+public class ChartRequest
 {
     [Required]
+    [RequireSomeItemInCollection(ErrorMessage = "Some request is required.")]
     public List<ChartRequestData> Requests { get; set; } = new();
-
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        if (Requests.Count == 0)
-            yield return new ValidationResult("Some request is required.");
-    }
 }

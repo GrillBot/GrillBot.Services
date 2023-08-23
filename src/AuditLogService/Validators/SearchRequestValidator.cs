@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AuditLogService.Models.Request.Search;
+using GrillBot.Core.Validation;
 
 namespace AuditLogService.Validators;
 

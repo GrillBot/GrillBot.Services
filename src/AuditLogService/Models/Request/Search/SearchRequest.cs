@@ -33,10 +33,7 @@ public class SearchRequest : IValidatableObject
     public PaginatedParams Pagination { get; set; } = new();
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        var validator = new SearchRequestValidator();
-        return validator.Validate(this, validationContext);
-    }
+        => new SearchRequestValidator().Validate(this, validationContext);
 
     public bool IsAdvancedFilterSet(LogType type)
     {

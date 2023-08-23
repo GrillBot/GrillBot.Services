@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AuditLogService.Core.Enums;
 using AuditLogService.Models.Request.CreateItems;
+using GrillBot.Core.Validation;
 
 namespace AuditLogService.Validators;
 
@@ -104,7 +105,7 @@ public class LogRequestValidator : ModelValidator<LogRequest>
         {
             if (TypesWithRequiredGuildId.Contains(request.Type))
                 yield return new ValidationResult($"Missing required property GuildId for type {request.Type}.", new[] { nameof(request.GuildId) });
-            else if (request.MemberUpdated is not null && !request.MemberUpdated.IsApiUpdate())
+            else if (request.MemberUpdated?.IsApiUpdate() == false)
                 yield return new ValidationResult("Missing required property GuildId for type MemberUpdated.", new[] { nameof(request.GuildId) });
             else if (request.Type is LogType.InteractionCommand && !IsAllowedDmInteraction(request.InteractionCommand!))
                 yield return new ValidationResult("Missing required property GuildId for type InteractionCommand.", new[] { nameof(request.GuildId) });
@@ -151,7 +152,7 @@ public class LogRequestValidator : ModelValidator<LogRequest>
 
     private static IEnumerable<ValidationResult> ValidateInteractionCommandProperties(LogRequest request, ValidationContext context)
     {
-        if (request.Type != LogType.InteractionCommand || request.InteractionCommand is null || request.InteractionCommand.IsSuccess)
+        if (request.Type != LogType.InteractionCommand || request.InteractionCommand?.IsSuccess != false)
             yield break;
 
         if (request.InteractionCommand.CommandError is null)

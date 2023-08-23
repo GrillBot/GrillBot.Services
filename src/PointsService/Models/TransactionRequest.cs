@@ -22,5 +22,5 @@ public class TransactionRequest : IValidatableObject
     public ReactionInfo? ReactionInfo { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        => validationContext.GetRequiredService<TransactionRequestValidator>().Validate(this);
+        => validationContext.GetRequiredService<TransactionRequestValidator>().Validate(this, validationContext);
 }
