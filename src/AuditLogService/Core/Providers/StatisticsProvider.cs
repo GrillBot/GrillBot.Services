@@ -50,6 +50,8 @@ public class StatisticsProvider : IStatisticsProvider
             { nameof(Context.UserLeftItems), await Context.UserLeftItems.LongCountAsync() },
             { nameof(Context.MemberUpdatedItems), await Context.MemberUpdatedItems.LongCountAsync() },
             { nameof(Context.MemberInfos), await Context.MemberInfos.LongCountAsync() },
+            { nameof(Context.RoleDeleted), await Context.RoleDeleted.LongCountAsync() },
+            { nameof(Context.RoleInfos), await Context.RoleInfos.LongCountAsync() },
 
             { $"Statistics.{nameof(StatisticsContext.DateCountStatistics)}", await StatisticsContext.DateCountStatistics.LongCountAsync() },
             { $"Statistics.{nameof(StatisticsContext.ResultCountStatistic)}", await StatisticsContext.ResultCountStatistic.LongCountAsync() },

@@ -117,5 +117,10 @@ public enum LogType
     /// <summary>
     /// Thread was modified.
     /// </summary>
-    ThreadUpdated = 24
+    ThreadUpdated = 24,
+
+    /// <summary>
+    /// Role was deleted.
+    /// </summary>
+    RoleDeleted = 25
 }
