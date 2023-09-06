@@ -63,6 +63,9 @@ public partial class ReadDetailAction : ApiActionBase
             case LogType.ThreadUpdated:
                 result.Data = await CreateThreaduUpdatedDetailAsync(logHeader);
                 break;
+            case LogType.RoleDeleted:
+                result.Data = await CreateRoleDeletedDetailAsync(logHeader);
+                break;
         }
 
         return ApiResult.FromSuccess(result);

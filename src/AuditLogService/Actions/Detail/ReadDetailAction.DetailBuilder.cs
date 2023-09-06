@@ -263,4 +263,18 @@ public partial class ReadDetailAction
 
         return ModelHelper.IsModelEmpty(result) ? null : result;
     }
+
+    private async Task<RoleDeletedDetail?> CreateRoleDeletedDetailAsync(LogItem header)
+    {
+        return await GetBaseQuery<RoleDeleted>(header).Select(o => o.RoleInfo).Select(o => new RoleDeletedDetail
+        {
+            Color = o.Color,
+            IconId = o.IconId,
+            IsHoisted = o.IsHoisted,
+            IsMentionable = o.IsMentionable,
+            Name = o.Name,
+            Permissions = o.Permissions,
+            RoleId = o.RoleId
+        }).FirstOrDefaultAsync();
+    }
 }
