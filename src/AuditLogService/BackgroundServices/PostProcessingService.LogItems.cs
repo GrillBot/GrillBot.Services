@@ -81,6 +81,7 @@ public partial class PostProcessingService
                 header.ApiRequest = await WithCommonFilter(context.ApiRequests).FirstOrDefaultAsync(cancellationToken);
                 break;
             case LogType.ThreadUpdated:
+            case LogType.RoleDeleted:
                 break;
         }
     }
