@@ -33,6 +33,7 @@ public partial class ArchiveOldLogsAction
             LogType.JobCompleted => CreateJobCompletedItem(item, result),
             LogType.Api => CreateApiRequestItem(item),
             LogType.ThreadUpdated => CreateThreadUpdatedItem(item),
+            LogType.RoleDeleted => CreateRoleDeletedItem(item),
             _ => null
         };
     }
@@ -522,5 +523,40 @@ public partial class ArchiveOldLogsAction
             new XElement("Before", CreateThreadInfoItems(item.ThreadUpdated.Before).ToArray()),
             new XElement("After", CreateThreadInfoItems(item.ThreadUpdated.After).ToArray())
         );
+    }
+
+    private static XElement? CreateRoleDeletedItem(LogItem item)
+    {
+        if (item.RoleDeleted?.RoleInfo is null)
+            return null;
+
+        return new XElement(
+            "RoleDeleted",
+            new XElement("Role", CreateRoleInfoItems(item.RoleDeleted.RoleInfo).ToArray())
+        );
+    }
+
+    private static IEnumerable<object> CreateRoleInfoItems(RoleInfo info)
+    {
+        yield return new XAttribute("InfoId", info.Id);
+        yield return new XAttribute("RoleId", info.RoleId);
+        yield return new XAttribute("Name", info.Name);
+
+        if (!string.IsNullOrEmpty(info.Color))
+            yield return new XAttribute("Color", info.Color);
+
+        yield return new XAttribute("IsMentionable", info.IsMentionable.ToString());
+        yield return new XAttribute("IsHoisted", info.IsHoisted.ToString());
+
+        if (info.Permissions.Count > 0)
+        {
+            yield return new XElement(
+                "Permissions",
+                new XAttribute("Value", string.Join(", ", info.Permissions))
+            );
+        }
+
+        if (!string.IsNullOrEmpty(info.IconId))
+            yield return new XAttribute("IconId", info.IconId);
     }
 }

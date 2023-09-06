@@ -134,6 +134,12 @@ public class HardDeleteAction : PostProcessActionBase
                         Context.RemoveRange(childItems.Where(o => o.After is not null).Select(o => o.After));
                     }
                     break;
+                case LogType.RoleDeleted:
+                    {
+                        var childItems = await RemoveChildDataAsync<RoleDeleted>(item, q => q.Include(o => o.RoleInfo));
+                        Context.RemoveRange(childItems.Where(o => o.RoleInfo is not null).Select(o => o.RoleInfo));
+                    }
+                    break;
             }
         }
 

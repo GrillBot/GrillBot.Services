@@ -60,6 +60,7 @@ public class LogItem
     public ThreadDeleted? ThreadDeleted { get; set; }
     public ThreadUpdated? ThreadUpdated { get; set; }
     public MemberUpdated? MemberUpdated { get; set; }
+    public RoleDeleted? RoleDeleted { get; set; }
 
     #endregion
 

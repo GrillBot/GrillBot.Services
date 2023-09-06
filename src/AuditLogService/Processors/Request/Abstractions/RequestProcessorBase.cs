@@ -37,6 +37,7 @@ public abstract class RequestProcessorBase
             LogType.MessageDeleted => ActionType.MessageDeleted,
             LogType.ThreadDeleted => ActionType.ThreadDelete,
             LogType.ThreadUpdated => ActionType.ThreadUpdate,
+            LogType.RoleDeleted => ActionType.RoleDeleted,
             _ => throw new ArgumentException($"Unsupported type ({type})", nameof(type))
         };
     }

@@ -34,6 +34,7 @@ public class AuditLogServiceContext : DbContext
             b.HasOne(o => o.InteractionCommand).WithOne(o => o.LogItem).HasForeignKey<InteractionCommand>(o => o.LogItemId);
             b.HasOne(o => o.ThreadDeleted).WithOne(o => o.LogItem).HasForeignKey<ThreadDeleted>(o => o.LogItemId);
             b.HasOne(o => o.MemberUpdated).WithOne(o => o.LogItem).HasForeignKey<MemberUpdated>(o => o.LogItemId);
+            b.HasOne(o => o.RoleDeleted).WithOne(o => o.LogItem).HasForeignKey<RoleDeleted>(o => o.LogItemId);
         });
 
         modelBuilder.Entity<ChannelCreated>(b => b.HasOne(o => o.ChannelInfo).WithMany().HasForeignKey(o => o.ChannelInfoId));
@@ -75,6 +76,7 @@ public class AuditLogServiceContext : DbContext
         });
 
         modelBuilder.Entity<ApiRequest>(b => b.HasIndex(x => x.Role).HasFilter("\"Role\" IS NOT NULL"));
+        modelBuilder.Entity<RoleDeleted>(b => b.HasOne(o => o.RoleInfo).WithMany().HasForeignKey(o => o.RoleInfoId));
     }
 
     public DbSet<ApiRequest> ApiRequests => Set<ApiRequest>();
@@ -107,4 +109,6 @@ public class AuditLogServiceContext : DbContext
     public DbSet<UserLeft> UserLeftItems => Set<UserLeft>();
     public DbSet<MemberInfo> MemberInfos => Set<MemberInfo>();
     public DbSet<MemberUpdated> MemberUpdatedItems => Set<MemberUpdated>();
+    public DbSet<RoleInfo> RoleInfos => Set<RoleInfo>();
+    public DbSet<RoleDeleted> RoleDeleted => Set<RoleDeleted>();
 }

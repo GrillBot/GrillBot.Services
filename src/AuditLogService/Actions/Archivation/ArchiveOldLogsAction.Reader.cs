@@ -89,6 +89,9 @@ public partial class ArchiveOldLogsAction
                 case LogType.ThreadUpdated:
                     item.ThreadUpdated = await WithCommonFilter(Context.ThreadUpdatedItems, item).Include(o => o.Before).Include(o => o.After).FirstOrDefaultAsync();
                     break;
+                case LogType.RoleDeleted:
+                    item.RoleDeleted = await WithCommonFilter(Context.RoleDeleted, item).Include(o => o.RoleInfo).FirstOrDefaultAsync();
+                    break;
             }
         }
 
