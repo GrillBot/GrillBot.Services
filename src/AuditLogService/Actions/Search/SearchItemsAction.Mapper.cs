@@ -89,6 +89,9 @@ public partial class SearchItemsAction
             case LogType.ThreadUpdated:
                 await SetThreadUpdatedPreviewAsync(result);
                 break;
+            case LogType.RoleDeleted:
+                await SetRoleDeletedPreviewAsync(result);
+                break;
         }
 
         return result;
@@ -432,5 +435,19 @@ public partial class SearchItemsAction
         {
             TagsChanged = !tagsBefore.OrderBy(o => o).SequenceEqual(tagsAfter.OrderBy(o => o))
         };
+    }
+
+    private async Task SetRoleDeletedPreviewAsync(LogListItem result)
+    {
+        var query = Context.RoleDeleted.AsNoTracking()
+            .Where(o => o.LogItemId == result.Id)
+            .Select(o => new RoleDeletedPreview
+            {
+                Name = o.RoleInfo.Name,
+                RoleId = o.RoleInfo.RoleId
+            });
+
+        result.IsDetailAvailable = true;
+        result.Preview = await query.FirstOrDefaultAsync();
     }
 }
