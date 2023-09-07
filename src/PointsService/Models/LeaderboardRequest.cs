@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GrillBot.Core.Validation;
 using Microsoft.AspNetCore.Mvc;
+using PointsService.Enums;
 
 namespace PointsService.Models;
 
@@ -17,7 +18,10 @@ public class LeaderboardRequest
 
     [FromQuery]
     public int Count { get; set; }
-    
+
     [FromQuery]
-    public bool Simple { get; set; }
+    public LeaderboardColumnFlag Columns { get; set; } = LeaderboardColumnFlag.YearBack;
+
+    [FromQuery]
+    public LeaderboardSortOptions Sort { get; set; }
 }
