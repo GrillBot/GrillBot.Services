@@ -15,13 +15,13 @@ public class ComputeFileExtensionStatisticsAction : PostProcessActionBase
 
     public override async Task ProcessAsync(LogItem logItem)
     {
-        foreach (var file in logItem.Files.GroupBy(o => o.Extension).Select(o => o.Key))
+        foreach (var file in logItem.Files.GroupBy(o => o.Extension?.ToLower()).Select(o => o.Key))
         {
-            var extension = file ?? ".NoExtension";
+            var extension = (file ?? ".NoExtension").ToLower();
             var stats = await GetOrCreateStatisticEntity<FileExtensionStatistic>(o => o.Extension == extension, extension);
             var baseQuery = Context.Files.AsNoTracking()
                 .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
-                .Where(o => o.Extension == file);
+                .Where(o => (o.Extension != null && o.Extension.ToLower() == file) || (o.Extension == null && file == null));
 
             stats.Extension = extension;
             stats.Count = await baseQuery.LongCountAsync();
