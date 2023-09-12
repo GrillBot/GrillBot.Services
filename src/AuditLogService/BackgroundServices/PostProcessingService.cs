@@ -42,7 +42,10 @@ public partial class PostProcessingService : BackgroundService
 
     private async Task ProcessActionAsync(PostProcessActionBase action, LogItem logItem, IServiceScope scope)
     {
+        const string actionSuffix = "Action";
         var actionName = action.GetType().Name;
+        if(actionName.EndsWith(actionSuffix))
+            actionName = actionName[..^actionSuffix.Length];
 
         try
         {
