@@ -26,6 +26,7 @@ public partial class ArchiveOldLogsAction
         result.Files = result.Files.Distinct().ToList();
         result.ItemsCount = items.Count;
         result.TotalFilesSize = items.SelectMany(o => o.Files).Sum(o => o.Size);
+        result.PerType = result.PerType.OrderBy(o => o.Key).ToDictionary(o => o.Key, o => o.Value);
 
         return result;
     }
@@ -68,10 +69,8 @@ public partial class ArchiveOldLogsAction
         var dataXml = ProcessData(item, result);
         if (dataXml is not null) xml.Add(dataXml);
 
-        var typeStr = item.Type.ToString();
-        if (!result.PerType.ContainsKey(typeStr))
-            result.PerType.Add(typeStr, 0);
-        result.PerType[typeStr]++;
+        UpdateTypeStats(item, result);
+        UpdateMonthStats(item, result);
 
         return xml;
     }
@@ -90,5 +89,18 @@ public partial class ArchiveOldLogsAction
         if (!string.IsNullOrEmpty(file.Extension))
             xml.Add(new XAttribute("Extension", file.Extension));
         return xml;
+    }
+
+    private static void UpdateTypeStats(LogItem item, ArchivationResult result)
+        => IncrementStats(item.Type.ToString(), result.PerType);
+
+    private static void UpdateMonthStats(LogItem item, ArchivationResult result)
+        => IncrementStats(item.CreatedAt.ToString("MM-yyyy"), result.PerMonths);
+
+    private static void IncrementStats(string key, Dictionary<string, long> stats)
+    {
+        if (!stats.ContainsKey(key))
+            stats.Add(key, 0);
+        stats[key]++;
     }
 }

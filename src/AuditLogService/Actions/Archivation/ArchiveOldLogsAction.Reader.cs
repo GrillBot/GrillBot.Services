@@ -20,6 +20,7 @@ public partial class ArchiveOldLogsAction
         var items = await Context.LogItems.AsNoTracking()
             .Include(o => o.Files)
             .Where(o => !o.IsDeleted && o.CreatedAt <= expirationDate)
+            .OrderBy(o => o.CreatedAt)
             .ToListAsync();
 
         foreach (var item in items)

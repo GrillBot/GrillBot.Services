@@ -11,4 +11,5 @@ public class ArchivationResult
     public int ItemsCount { get; set; }
     public long TotalFilesSize { get; set; }
     public Dictionary<string, long> PerType { get; set; } = new();
+    public Dictionary<string, long> PerMonths { get; set; } = new();
 }
