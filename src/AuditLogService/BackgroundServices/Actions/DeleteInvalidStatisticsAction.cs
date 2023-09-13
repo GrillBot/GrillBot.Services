@@ -21,7 +21,6 @@ public class DeleteInvalidStatisticsAction : PostProcessActionBase
             if (logItem.Type is LogType.Api)
             {
                 await ClearStatisticsAsync<ApiDateCountStatistic>(o => o.Count == 0);
-                await ClearStatisticsAsync<ApiResultCountStatistic>(o => o.Count == 0);
                 await ClearStatisticsAsync<ApiRequestStat>(o => o.FailedCount == 0 && o.SuccessCount == 0);
                 await ClearStatisticsAsync<ApiUserActionStatistic>(o => o.Count == 0);
             }

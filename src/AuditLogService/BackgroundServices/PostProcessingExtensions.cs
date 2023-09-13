@@ -12,7 +12,6 @@ public static class PostProcessingExtensions
 
         services
             .AddScoped<PostProcessActionBase, ComputeApiDateCountsAction>()
-            .AddScoped<PostProcessActionBase, ComputeApiResultCountsAction>()
             .AddScoped<PostProcessActionBase, ComputeApiRequestStatsAction>()
             .AddScoped<PostProcessActionBase, ComputeApiUserStatisticsAction>()
             .AddScoped<PostProcessActionBase, ComputeInteractionUserStatisticsAction>()

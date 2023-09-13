@@ -20,8 +20,6 @@ public class GetApiStatisticsAction : ApiActionBase
         {
             ByDateInternalApi = await GetApiStatisticsByDateForApiGroupAsync("V1"),
             ByDatePublicApi = await GetApiStatisticsByDateForApiGroupAsync("V2"),
-            ByStatusCodeInternalApi = await GetApiStatisticsByResultForApiGroupAsync("V1"),
-            ByStatusCodePublicApi = await GetApiStatisticsByResultForApiGroupAsync("V2"),
             Endpoints = await GetEndpointStatisticsAsync()
         };
 
@@ -36,15 +34,6 @@ public class GetApiStatisticsAction : ApiActionBase
             .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
             .Select(o => new { Key = $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", Count = o.Sum(x => x.Count) })
             .ToDictionaryAsync(o => o.Key, o => o.Count);
-    }
-
-    private async Task<Dictionary<string, long>> GetApiStatisticsByResultForApiGroupAsync(string apiGroupName)
-    {
-        return await StatisticsContext.ResultCountStatistic.AsNoTracking()
-            .Where(o => o.ApiGroup == apiGroupName)
-            .OrderBy(o => o.Result)
-            .Select(o => new { o.Result, o.Count })
-            .ToDictionaryAsync(o => o.Result, o => o.Count);
     }
 
     private async Task<List<StatisticItem>> GetEndpointStatisticsAsync()

@@ -54,7 +54,6 @@ public class StatisticsProvider : IStatisticsProvider
             { nameof(Context.RoleInfos), await Context.RoleInfos.LongCountAsync() },
 
             { $"Statistics.{nameof(StatisticsContext.DateCountStatistics)}", await StatisticsContext.DateCountStatistics.LongCountAsync() },
-            { $"Statistics.{nameof(StatisticsContext.ResultCountStatistic)}", await StatisticsContext.ResultCountStatistic.LongCountAsync() },
             { $"Statistics.{nameof(StatisticsContext.RequestStats)}", await StatisticsContext.RequestStats.LongCountAsync() },
             { $"Statistics.{nameof(StatisticsContext.DailyAvgTimes)}", await StatisticsContext.DailyAvgTimes.LongCountAsync() },
             { $"Statistics.{nameof(StatisticsContext.ApiUserActionStatistics)}", await StatisticsContext.ApiUserActionStatistics.LongCountAsync() },

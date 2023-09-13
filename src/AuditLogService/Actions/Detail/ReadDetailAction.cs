@@ -14,7 +14,6 @@ public partial class ReadDetailAction : ApiActionBase
         Context = context;
     }
 
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var id = (Guid)Parameters[0]!;
