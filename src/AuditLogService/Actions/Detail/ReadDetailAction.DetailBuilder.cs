@@ -168,7 +168,23 @@ public partial class ReadDetailAction
 
     private async Task<InteractionCommandDetail?> CreateInteractionCommandDetailAsync(LogItem header)
     {
-        var command = await GetBaseQuery<InteractionCommand>(header).FirstOrDefaultAsync();
+        var command = await GetBaseQuery<InteractionCommand>(header)
+            .Select(o => new
+            {
+                o.CommandError,
+                o.Duration,
+                o.Exception,
+                o.Locale,
+                o.ErrorReason,
+                o.Parameters,
+                o.Name,
+                o.ModuleName,
+                o.MethodName,
+                o.HasResponded,
+                o.IsSuccess,
+                o.IsValidToken
+            })
+            .FirstOrDefaultAsync();
         if (command is null)
             return null;
 
