@@ -52,7 +52,8 @@ public class ComputeAvgTimesAction : PostProcessActionBase
         if (logItem.Type is not LogType.InteractionCommand) return;
 
         var query = Context.InteractionCommands.AsNoTracking()
-            .Where(o => !o.LogItem.IsDeleted && o.LogItem.CreatedAt >= startOfDay && o.LogItem.CreatedAt < endOfday);
+            .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
+            .Where(o => o.EndAt >= startOfDay && o.EndAt < endOfday);
         stats.Interactions = await query.AverageAsync(o => (long?)o.Duration) ?? -1;
     }
 

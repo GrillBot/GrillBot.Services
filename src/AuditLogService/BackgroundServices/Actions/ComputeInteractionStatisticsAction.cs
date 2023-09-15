@@ -20,18 +20,18 @@ public class ComputeInteractionStatisticsAction : PostProcessActionBase
         var action = $"{interaction.Name} ({interaction.ModuleName}/{interaction.MethodName})";
         var stats = await GetOrCreateStatisticEntity<InteractionStatistic>(o => o.Action == action, action);
         var data = await Context.InteractionCommands.AsNoTracking()
-            .Where(o => !o.LogItem.IsDeleted)
+            .Where(o => !Context.LogItems.Any(x => x.IsDeleted && x.Id == o.LogItemId))
             .Where(o => o.Name == interaction.Name && o.ModuleName == interaction.ModuleName && o.MethodName == interaction.MethodName)
             .GroupBy(_ => 1)
             .Select(o => new
             {
-                LastRun = o.Max(x => x.LogItem.CreatedAt),
+                LastRun = o.Max(x => x.EndAt),
                 FailedCount = o.LongCount(x => !x.IsSuccess),
                 MaxDuration = o.Max(x => x.Duration),
                 MinDuration = o.Min(x => x.Duration),
                 SuccessCount = o.LongCount(x => x.IsSuccess),
                 TotalDuration = o.Sum(x => x.Duration),
-                LastRunDuration = o.OrderByDescending(x => x.LogItem.CreatedAt).First().Duration
+                LastRunDuration = o.OrderByDescending(x => x.EndAt).First().Duration
             }).FirstOrDefaultAsync();
 
         stats.Action = action;

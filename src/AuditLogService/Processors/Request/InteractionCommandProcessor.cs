@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Models.Request;
 using AuditLogService.Models.Request.CreateItems;
 using AuditLogService.Processors.Request.Abstractions;
 
@@ -31,7 +30,8 @@ public class InteractionCommandProcessor : RequestProcessorBase
             IsSuccess = request.InteractionCommand.IsSuccess,
             MethodName = request.InteractionCommand.MethodName,
             ModuleName = request.InteractionCommand.ModuleName,
-            IsValidToken = request.InteractionCommand.IsValidToken
+            IsValidToken = request.InteractionCommand.IsValidToken,
+            EndAt = entity.CreatedAt
         };
 
         return Task.CompletedTask;

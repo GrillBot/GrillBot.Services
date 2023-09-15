@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuditLogService.Core.Entity;
 
@@ -20,4 +19,5 @@ public class InteractionCommand : ChildEntityBase
     public int Duration { get; set; }
     public string? Exception { get; set; }
     public string Locale { get; set; } = "cs";
+    public DateTime EndAt { get; set; }
 }

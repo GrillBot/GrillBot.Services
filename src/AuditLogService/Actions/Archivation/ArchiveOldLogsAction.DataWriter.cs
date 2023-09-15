@@ -388,7 +388,8 @@ public partial class ArchiveOldLogsAction
             new XAttribute("IsValidToken", item.InteractionCommand.IsValidToken),
             new XAttribute("IsSuccess", item.InteractionCommand.IsSuccess),
             new XAttribute("Duration", item.InteractionCommand.Duration),
-            new XAttribute("Locale", item.InteractionCommand.Locale)
+            new XAttribute("Locale", item.InteractionCommand.Locale),
+            new XAttribute("EndAt", item.InteractionCommand.EndAt.ToString("o"))
         );
 
         foreach (var parameter in item.InteractionCommand.Parameters)

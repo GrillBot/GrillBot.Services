@@ -11,7 +11,7 @@ public class GetInteractionsDashboardAction : DashboardListBaseAction<Interactio
     }
 
     protected override Expression<Func<InteractionCommand, DateTime>> CreateSorting()
-        => entity => entity.LogItem.CreatedAt;
+        => entity => entity.EndAt;
 
     protected override Expression<Func<InteractionCommand, DashboardInfoRow>> CreateProjection()
     {

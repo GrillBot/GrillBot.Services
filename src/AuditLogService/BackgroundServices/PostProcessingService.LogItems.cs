@@ -99,7 +99,7 @@ public partial class PostProcessingService
                 o.InteractionCommand.ModuleName == interaction.ModuleName &&
                 o.InteractionCommand.MethodName == interaction.MethodName &&
                 o.InteractionCommand.IsSuccess == interaction.IsSuccess &&
-                o.CreatedAt.Date == item.CreatedAt.Date &&
+                o.InteractionCommand.EndAt.Date == interaction.EndAt.Date &&
                 o.UserId == item.UserId
             );
         }
