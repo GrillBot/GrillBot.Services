@@ -46,7 +46,7 @@ public class ThreadUpdatedProcessor : RequestProcessorBase
         }
         catch (NullReferenceException)
         {
-            return new List<IAuditLogEntry>(); // TODO Remove this catch hack after fix in the discord.net lib.
+            return new List<IAuditLogEntry>();
         }
     }
 
@@ -65,7 +65,6 @@ public class ThreadUpdatedProcessor : RequestProcessorBase
         };
     }
 
-    // TODO Limit filter only on audit logs with applied tags.
     protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
         => ((ThreadUpdateAuditLogData)entry.Data).Thread.Id == request.ChannelId!.ToUlong();
 }
