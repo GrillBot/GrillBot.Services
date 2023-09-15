@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Models.Request;
 using AuditLogService.Models.Request.CreateItems;
 using Discord;
 using GrillBot.Core.Extensions;
@@ -25,11 +24,7 @@ public abstract class BatchRequestProcessorBase : RequestProcessorBase
             .Select(o => o.DiscordId!)
             .ToListAsync();
 
-        return items
-            .SelectMany(o => o.Split(','))
-            .Select(o => o.Trim().ToUlong())
-            .Distinct()
-            .ToHashSet();
+        return items.Select(o => o.ToUlong()).Distinct().ToHashSet();
     }
 
     protected async Task<IAuditLogEntry?> FindAuditLogAsync(LogRequest logRequest)
@@ -37,8 +32,7 @@ public abstract class BatchRequestProcessorBase : RequestProcessorBase
         var ignoredLogIds = await GetIgnoredDiscordIdsAsync(logRequest);
         var auditLogs = await base.FindAuditLogsAsync(logRequest);
 
-        return auditLogs
-            .FirstOrDefault(o => !ignoredLogIds.Contains(o.Id));
+        return auditLogs.Find(o => !ignoredLogIds.Contains(o.Id));
     }
 
     protected async Task<List<IAuditLogEntry>> FindAuditLogsAsync(LogRequest logRequest)
@@ -46,8 +40,6 @@ public abstract class BatchRequestProcessorBase : RequestProcessorBase
         var ignoredLogIds = await GetIgnoredDiscordIdsAsync(logRequest);
         var auditLogs = await base.FindAuditLogsAsync(logRequest);
 
-        return auditLogs
-            .Where(o => !ignoredLogIds.Contains(o.Id))
-            .ToList();
+        return auditLogs.FindAll(o => !ignoredLogIds.Contains(o.Id));
     }
 }

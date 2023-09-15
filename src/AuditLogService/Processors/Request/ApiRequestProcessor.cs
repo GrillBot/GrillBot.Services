@@ -37,32 +37,12 @@ public class ApiRequestProcessor : RequestProcessorBase
             Result = apiRequest.Result,
             IsSuccess = successStatusCodes.Contains(apiRequest.Result),
             RequestDate = DateOnly.FromDateTime(apiRequest.EndAt),
+            Role = apiRequest.Role
         };
 
-        SetUserRole(apiRequest, entity.ApiRequest);
-        SetForwardedIp(apiRequest, entity.ApiRequest);
+        if (apiRequest.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor))
+            entity.ApiRequest.ForwardedIp = forwardedFor;
 
         return Task.CompletedTask;
-    }
-
-    private static void SetUserRole(ApiRequestRequest request, ApiRequest entity)
-    {
-        if (!string.IsNullOrEmpty(request.Role))
-        {
-            entity.Role = request.Role;
-        }
-        else if (request.ApiGroupName == "V1")
-        {
-            if (request.Identification.StartsWith("ApiV1(Private/"))
-                entity.Role = "Admin";
-            else if (request.Identification.StartsWith("ApiV1(Public/"))
-                entity.Role = "User";
-        }
-    }
-
-    private static void SetForwardedIp(ApiRequestRequest request, ApiRequest entity)
-    {
-        if (request.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor))
-            entity.ForwardedIp = forwardedFor;
     }
 }
