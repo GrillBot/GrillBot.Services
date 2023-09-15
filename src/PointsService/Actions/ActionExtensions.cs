@@ -4,6 +4,10 @@ public static class ActionExtensions
 {
     public static void AddActions(this IServiceCollection services)
     {
+        // Users
+        services
+            .AddScoped<Users.UserListAction>();
+
         services
             .AddScoped<CreateTransactionAction>()
             .AddScoped<DeleteTransactionsAction>()

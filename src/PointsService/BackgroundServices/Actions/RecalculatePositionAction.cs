@@ -5,7 +5,7 @@ namespace PointsService.BackgroundServices.Actions;
 
 public class RecalculatePositionAction : PostProcessActionBase
 {
-    public RecalculatePositionAction(PointsServiceRepository repository) : base(repository)
+    public RecalculatePositionAction(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }
 

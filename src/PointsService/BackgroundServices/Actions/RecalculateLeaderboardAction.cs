@@ -5,7 +5,7 @@ namespace PointsService.BackgroundServices.Actions;
 
 public class RecalculateLeaderboardAction : PostProcessActionBase
 {
-    public RecalculateLeaderboardAction(PointsServiceRepository repository) : base(repository)
+    public RecalculateLeaderboardAction(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }
 

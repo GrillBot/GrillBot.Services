@@ -1,11 +1,10 @@
 ﻿using PointsService.Core.Entity;
-using PointsService.Core.Repository;
 
 namespace PointsService.BackgroundServices.Actions;
 
 public class CalculateDailyStatsAction : PostProcessActionBase
 {
-    public CalculateDailyStatsAction(PointsServiceRepository repository) : base(repository)
+    public CalculateDailyStatsAction(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }
 

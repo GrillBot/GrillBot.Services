@@ -9,7 +9,8 @@ public static class PostProcessingExtensions
         services
             .AddScoped<PostProcessActionBase, RecalculateLeaderboardAction>()
             .AddScoped<PostProcessActionBase, RecalculatePositionAction>()
-            .AddScoped<PostProcessActionBase, CalculateDailyStatsAction>();
+            .AddScoped<PostProcessActionBase, CalculateDailyStatsAction>()
+            .AddScoped<PostProcessActionBase, CalculateUserValueInfoAction>();
 
         services
             .AddHostedService<PostProcessingService>();

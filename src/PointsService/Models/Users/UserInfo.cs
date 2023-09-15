@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GrillBot.Core.Validation;
 
-namespace PointsService.Models;
+namespace PointsService.Models.Users;
 
 public class UserInfo
 {

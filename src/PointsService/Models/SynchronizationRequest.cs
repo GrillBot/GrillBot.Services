@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GrillBot.Core.Validation;
+using PointsService.Models.Users;
 
 namespace PointsService.Models;
 
