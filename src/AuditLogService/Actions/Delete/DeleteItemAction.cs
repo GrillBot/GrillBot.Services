@@ -1,10 +1,11 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Models.Response;
+using AuditLogService.Models.Response.Delete;
 using AuditLogService.Processors;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuditLogService.Actions;
+namespace AuditLogService.Actions.Delete;
 
 public class DeleteItemAction : ApiActionBase
 {

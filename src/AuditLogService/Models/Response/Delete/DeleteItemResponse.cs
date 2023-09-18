@@ -1,4 +1,4 @@
-﻿namespace AuditLogService.Models.Response;
+﻿namespace AuditLogService.Models.Response.Delete;
 
 public class DeleteItemResponse
 {
