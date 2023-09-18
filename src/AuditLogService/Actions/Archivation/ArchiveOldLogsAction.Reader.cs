@@ -9,7 +9,7 @@ public partial class ArchiveOldLogsAction
     private async Task<bool> ExistsItemsToArchiveAsync(DateTime expirationDate)
     {
         var countToArchive = await Context.LogItems.AsNoTracking().CountAsync(o => !o.IsDeleted && o.CreatedAt <= expirationDate);
-        return countToArchive >= AppOptions.ItemsToArchive;
+        return countToArchive >= AppOptions.MinimalItemsToArchive;
     }
 
     private async Task<List<LogItem>> ReadItemsToArchiveAsync(DateTime expirationDate)
@@ -21,6 +21,7 @@ public partial class ArchiveOldLogsAction
             .Include(o => o.Files)
             .Where(o => !o.IsDeleted && o.CreatedAt <= expirationDate)
             .OrderBy(o => o.CreatedAt)
+            .Take(AppOptions.MaxItemsToArchivePerRun)
             .ToListAsync();
 
         foreach (var item in items)
