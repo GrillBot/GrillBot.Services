@@ -31,7 +31,7 @@ public partial class PostProcessingService : BackgroundService
             var logItems = await ReadItemsToProcessAsync(stoppingToken);
             foreach (var item in logItems)
             {
-                await ResetProcessFlagAsync(item);
+                await Synchronization.RunSynchronizedActionAsync(async () => await ResetProcessFlagAsync(item));
 
                 using var scope = ServiceProvider.CreateScope();
                 var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>();
