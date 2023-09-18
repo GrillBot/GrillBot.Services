@@ -3,6 +3,7 @@ using AuditLogService.BackgroundServices.Actions;
 using AuditLogService.Core.Entity;
 using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Models.Request.CreateItems;
+using AuditLogService.Processors;
 using GrillBot.Core.Managers.Performance;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,10 +13,12 @@ public partial class PostProcessingService : BackgroundService
 {
     private IServiceProvider ServiceProvider { get; }
     private ICounterManager CounterManager { get; }
+    private SynchronizationProcessor Synchronization { get; }
 
     public PostProcessingService(IServiceProvider serviceProvider)
     {
         CounterManager = serviceProvider.GetRequiredService<ICounterManager>();
+        Synchronization = serviceProvider.GetRequiredService<SynchronizationProcessor>();
         ServiceProvider = serviceProvider;
     }
 
@@ -44,18 +47,21 @@ public partial class PostProcessingService : BackgroundService
     {
         const string actionSuffix = "Action";
         var actionName = action.GetType().Name;
-        if(actionName.EndsWith(actionSuffix))
+        if (actionName.EndsWith(actionSuffix))
             actionName = actionName[..^actionSuffix.Length];
 
         try
         {
-            if (!action.CanProcess(logItem))
-                return;
-
-            using (CounterManager.Create($"BackgroundService.{actionName}"))
+            await Synchronization.RunSynchronizedActionAsync(async () =>
             {
-                await action.ProcessAsync(logItem);
-            }
+                if (!action.CanProcess(logItem))
+                    return;
+
+                using (CounterManager.Create($"BackgroundService.{actionName}"))
+                {
+                    await action.ProcessAsync(logItem);
+                }
+            });
         }
         catch (Exception ex)
         {

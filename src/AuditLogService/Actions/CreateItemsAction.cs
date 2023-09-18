@@ -10,11 +10,13 @@ public class CreateItemsAction : ApiActionBase
 {
     private AuditLogServiceContext Context { get; }
     private RequestProcessorFactory RequestProcessorFactory { get; }
+    private SynchronizationProcessor Synchronization { get; }
 
-    public CreateItemsAction(AuditLogServiceContext context, RequestProcessorFactory requestProcessorFactory)
+    public CreateItemsAction(AuditLogServiceContext context, RequestProcessorFactory requestProcessorFactory, SynchronizationProcessor synchronization)
     {
         Context = context;
         RequestProcessorFactory = requestProcessorFactory;
+        Synchronization = synchronization;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -26,8 +28,11 @@ public class CreateItemsAction : ApiActionBase
             var entity = await CreateEntityAsync(request);
             if (!entity.CanCreate) continue;
 
-            await Context.AddAsync(entity);
-            await Context.SaveChangesAsync();
+            await Synchronization.RunSynchronizedActionAsync(async () =>
+            {
+                await Context.AddAsync(entity);
+                await Context.SaveChangesAsync();
+            });
         }
 
         return ApiResult.FromSuccess();

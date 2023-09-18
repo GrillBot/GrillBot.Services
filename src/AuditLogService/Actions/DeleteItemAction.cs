@@ -1,6 +1,6 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Core.Enums;
 using AuditLogService.Models.Response;
+using AuditLogService.Processors;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,10 +9,12 @@ namespace AuditLogService.Actions;
 public class DeleteItemAction : ApiActionBase
 {
     private AuditLogServiceContext Context { get; }
+    private SynchronizationProcessor Synchronization { get; }
 
-    public DeleteItemAction(AuditLogServiceContext context)
+    public DeleteItemAction(AuditLogServiceContext context, SynchronizationProcessor synchronization)
     {
         Context = context;
+        Synchronization = synchronization;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -30,7 +32,7 @@ public class DeleteItemAction : ApiActionBase
         logItem.IsDeleted = true;
         logItem.IsPendingProcess = true;
 
-        await Context.SaveChangesAsync();
+        await Synchronization.RunSynchronizedActionAsync(async () => await Context.SaveChangesAsync());
         return ApiResult.FromSuccess(response);
     }
 
