@@ -24,6 +24,7 @@ public static class PostProcessingExtensions
 
         services
             .AddScoped<PostProcessActionBase, DeleteInvalidStatisticsAction>()
-            .AddScoped<PostProcessActionBase, HardDeleteAction>();
+            .AddScoped<PostProcessActionBase, HardDeleteAction>()
+            .AddScoped<PostProcessActionBase, ComputeDatabaseStatisticsAction>();
     }
 }
