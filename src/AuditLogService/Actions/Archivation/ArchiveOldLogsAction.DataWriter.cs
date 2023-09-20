@@ -454,7 +454,8 @@ public partial class ArchiveOldLogsAction
             new XElement("Result", item.Job.Result),
             new XAttribute("StartAt", item.Job.StartAt.ToString("o")),
             new XAttribute("EndAt", item.Job.EndAt.ToString("o")),
-            new XAttribute("WasError", item.Job.WasError.ToString())
+            new XAttribute("WasError", item.Job.WasError.ToString()),
+            new XAttribute("Duration", item.Job.Duration)
         );
 
         if (string.IsNullOrEmpty(item.Job.StartUserId))
@@ -484,7 +485,8 @@ public partial class ArchiveOldLogsAction
             new XAttribute("Identification", item.ApiRequest.Identification),
             new XAttribute("Ip", item.ApiRequest.Ip),
             new XAttribute("Result", item.ApiRequest.Result),
-            new XAttribute("IsSuccess", item.ApiRequest.IsSuccess)
+            new XAttribute("IsSuccess", item.ApiRequest.IsSuccess),
+            new XAttribute("Duration", item.ApiRequest.Duration)
         );
 
         foreach (var param in item.ApiRequest.Parameters)

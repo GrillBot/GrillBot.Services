@@ -37,7 +37,8 @@ public class ApiRequestProcessor : RequestProcessorBase
             Result = apiRequest.Result,
             IsSuccess = successStatusCodes.Contains(apiRequest.Result),
             RequestDate = DateOnly.FromDateTime(apiRequest.EndAt),
-            Role = apiRequest.Role
+            Role = apiRequest.Role,
+            Duration = (long)Math.Round((apiRequest.EndAt - apiRequest.StartAt).TotalMilliseconds)
         };
 
         if (apiRequest.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor))

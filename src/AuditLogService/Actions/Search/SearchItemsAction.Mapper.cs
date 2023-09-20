@@ -408,7 +408,7 @@ public partial class SearchItemsAction
             .Select(o => new ApiPreview
             {
                 Action = $"{o.ControllerName}.{o.ActionName}",
-                Duration = Convert.ToInt32((o.EndAt - o.StartAt).TotalMilliseconds),
+                Duration = (int)o.Duration,
                 Path = $"{o.Method} {o.TemplatePath} (API {o.ApiGroupName})",
                 Result = o.Result
             });

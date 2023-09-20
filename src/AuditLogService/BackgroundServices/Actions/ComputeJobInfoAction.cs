@@ -25,12 +25,12 @@ public class ComputeJobInfoAction : PostProcessActionBase
             .GroupBy(_ => 1)
             .Select(g => new
             {
-                AvgTime = (int)Math.Round(g.Average(x => (x.EndAt - x.StartAt).TotalMilliseconds)),
+                AvgTime = (int)Math.Round(g.Average(x => x.Duration)),
                 FailedCount = g.Count(x => x.WasError),
-                MaxTime = (int)Math.Round(g.Max(x => (x.EndAt - x.StartAt).TotalMilliseconds)),
-                MinTime = (int)Math.Round(g.Min(x => (x.EndAt - x.StartAt).TotalMilliseconds)),
+                MaxTime = (int)g.Max(x => x.Duration),
+                MinTime = (int)g.Min(x => x.Duration),
                 StartCount = g.Count(),
-                TotalDuration = (int)Math.Round(g.Sum(x => (x.EndAt - x.StartAt).TotalMilliseconds)),
+                TotalDuration = (int)g.Sum(x => x.Duration),
                 LastStartAt = g.Max(x => x.StartAt)
             }).FirstOrDefaultAsync();
 
@@ -49,8 +49,8 @@ public class ComputeJobInfoAction : PostProcessActionBase
             stats.TotalDuration = data.TotalDuration;
 
             stats.LastRunDuration = await baseQuery
-                .OrderByDescending(o => o.StartAt)
-                .Select(o => (int)Math.Round((o.EndAt - o.StartAt).TotalMilliseconds))
+                .OrderByDescending(o => o.EndAt)
+                .Select(o => (int)o.Duration)
                 .FirstOrDefaultAsync();
         }
 

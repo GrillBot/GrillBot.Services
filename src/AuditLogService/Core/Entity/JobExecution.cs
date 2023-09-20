@@ -20,4 +20,6 @@ public class JobExecution : ChildEntityBase
 
     [StringLength(32)]
     public string? StartUserId { get; set; }
+
+    public long Duration { get; set; }
 }

@@ -83,9 +83,9 @@ public partial class SearchItemsAction
             if (searchReq.Success is not null)
                 baseQuery = baseQuery.Where(o => o.WasError != searchReq.Success);
             if (searchReq.DurationFrom is not null)
-                baseQuery = baseQuery.Where(o => (o.EndAt - o.StartAt).TotalMilliseconds >= searchReq.DurationFrom.Value);
+                baseQuery = baseQuery.Where(o => o.Duration >= searchReq.DurationFrom.Value);
             if (searchReq.DurationTo is not null)
-                baseQuery = baseQuery.Where(o => (o.EndAt - o.StartAt).TotalMilliseconds <= searchReq.DurationTo.Value);
+                baseQuery = baseQuery.Where(o => o.Duration <= searchReq.DurationTo.Value);
 
             result.AddRange(await baseQuery.Select(o => o.LogItemId).ToListAsync());
         }
@@ -102,9 +102,9 @@ public partial class SearchItemsAction
             if (!string.IsNullOrEmpty(searchReq.PathTemplate))
                 baseQuery = baseQuery.Where(o => o.TemplatePath.Contains(searchReq.PathTemplate));
             if (searchReq.DurationFrom is not null)
-                baseQuery = baseQuery.Where(o => (o.EndAt - o.StartAt).TotalMilliseconds >= searchReq.DurationFrom.Value);
+                baseQuery = baseQuery.Where(o => o.Duration >= searchReq.DurationFrom.Value);
             if (searchReq.DurationTo is not null)
-                baseQuery = baseQuery.Where(o => (o.EndAt - o.StartAt).TotalMilliseconds <= searchReq.DurationTo.Value);
+                baseQuery = baseQuery.Where(o => o.Duration <= searchReq.DurationTo.Value);
             if (!string.IsNullOrEmpty(searchReq.Method))
                 baseQuery = baseQuery.Where(o => o.Method == searchReq.Method);
             if (!string.IsNullOrEmpty(searchReq.ApiGroupName))

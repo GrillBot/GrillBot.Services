@@ -17,7 +17,7 @@ public class GetApiDashboardAction : DashboardListBaseAction<ApiRequest>
     {
         return entity => new DashboardInfoRow
         {
-            Duration = (int)Math.Round((entity.EndAt - entity.StartAt).TotalMilliseconds),
+            Duration = (int)entity.Duration,
             Name = $"{entity.Method} {entity.TemplatePath}",
             Result = entity.Result
         };

@@ -40,7 +40,7 @@ public class ComputeAvgTimesAction : PostProcessActionBase
             .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
             .Where(o => o.ApiGroupName == expectedApiGroup && o.RequestDate == requestDate);
         if (await query.AnyAsync())
-            avgTime = await query.AverageAsync(o => (long)Math.Round((o.EndAt - o.StartAt).TotalMilliseconds));
+            avgTime = await query.AverageAsync(o => o.Duration);
 
         if (expectedApiGroup == "V2")
             stats.ExternalApi = avgTime;
@@ -71,7 +71,7 @@ public class ComputeAvgTimesAction : PostProcessActionBase
             .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
             .Where(o => o.EndAt >= startOfDay && o.EndAt < endOfDay);
         if (await query.AnyAsync())
-            avgTime = await query.AverageAsync(o => (long)Math.Round((o.EndAt - o.StartAt).TotalMilliseconds));
+            avgTime = await query.AverageAsync(o => o.Duration);
 
         stats.Jobs = avgTime;
     }

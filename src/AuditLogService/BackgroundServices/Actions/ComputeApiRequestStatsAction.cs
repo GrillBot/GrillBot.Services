@@ -27,11 +27,11 @@ public class ComputeApiRequestStatsAction : PostProcessActionBase
             {
                 LastRequest = g.Max(x => x.EndAt),
                 FailedCount = g.LongCount(x => !x.IsSuccess),
-                MaxDuration = g.Max(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)),
-                MinDuration = g.Min(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)),
+                MaxDuration = (int)g.Max(x => x.Duration),
+                MinDuration = (int)g.Min(x => x.Duration),
                 SuccessCount = g.LongCount(x => x.IsSuccess),
-                TotalDuration = g.Sum(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)),
-                LastRunDuration = g.OrderByDescending(x => x.EndAt).Select(x => (int)Math.Round((x.EndAt - x.StartAt).TotalMilliseconds)).First()
+                TotalDuration = (int)g.Sum(x => x.Duration),
+                LastRunDuration = g.OrderByDescending(x => x.EndAt).Select(x => (int)x.Duration).First()
             }).FirstOrDefaultAsync();
 
         stats.Endpoint = endpoint;

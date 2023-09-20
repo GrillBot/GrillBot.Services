@@ -58,4 +58,6 @@ public class ApiRequest : ChildEntityBase
 
     [StringLength(128)]
     public string? ForwardedIp { get; set; }
+
+    public long Duration { get; set; }
 }

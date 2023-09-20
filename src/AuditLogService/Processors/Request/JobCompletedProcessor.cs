@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Models.Request;
 using AuditLogService.Models.Request.CreateItems;
 using AuditLogService.Processors.Request.Abstractions;
 
@@ -13,14 +12,16 @@ public class JobCompletedProcessor : RequestProcessorBase
 
     public override Task ProcessAsync(LogItem entity, LogRequest request)
     {
+        var job = request.JobExecution!;
         entity.Job = new JobExecution
         {
-            Result = request.JobExecution!.Result,
-            EndAt = request.JobExecution.EndAt,
-            JobName = request.JobExecution.JobName,
-            StartAt = request.JobExecution.StartAt,
-            WasError = request.JobExecution.WasError,
-            StartUserId = request.JobExecution.StartUserId
+            Result = job.Result,
+            EndAt = job.EndAt,
+            JobName = job.JobName,
+            StartAt = job.StartAt,
+            WasError = job.WasError,
+            StartUserId = job.StartUserId,
+            Duration = (long)Math.Round((job.EndAt - job.StartAt).TotalMilliseconds)
         };
 
         return Task.CompletedTask;

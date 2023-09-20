@@ -17,7 +17,7 @@ public class GetJobsDashboardListAction : DashboardListBaseAction<JobExecution>
     {
         return entity => new DashboardInfoRow
         {
-            Duration = (int)Math.Round((entity.EndAt - entity.StartAt).TotalMilliseconds),
+            Duration = (int)entity.Duration,
             Name = entity.JobName,
             Success = !entity.WasError
         };
