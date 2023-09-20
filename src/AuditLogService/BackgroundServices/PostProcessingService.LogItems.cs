@@ -16,7 +16,7 @@ public partial class PostProcessingService
             var headers = await context.LogItems.AsNoTracking()
                 .Where(o => o.IsPendingProcess)
                 .OrderByDescending(o => o.CreatedAt)
-                .Take(100)
+                .Take(1000)
                 .ToListAsync(cancellationToken);
             if (headers.Count == 0)
                 return headers;
