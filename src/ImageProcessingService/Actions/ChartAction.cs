@@ -28,7 +28,7 @@ public class ChartAction : ApiActionBase
         try
         {
             var mergedChart = MergeChartsAndGetData(images, request.Requests);
-            return ApiResult.FromSuccess(new FileContentResult(mergedChart, "image/jpeg"));
+            return ApiResult.Ok(new FileContentResult(mergedChart, "image/jpeg"));
         }
         finally
         {

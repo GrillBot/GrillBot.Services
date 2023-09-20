@@ -43,5 +43,5 @@ public class WithoutAccidentAction : ApiActionBase
     }
 
     private static ApiResult CreateResult(byte[] image)
-        => ApiResult.FromSuccess(new FileContentResult(image, "image/png"));
+        => ApiResult.Ok(new FileContentResult(image, "image/png"));
 }

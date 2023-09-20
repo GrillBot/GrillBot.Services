@@ -75,5 +75,5 @@ public class PeepoLoveAction : ApiActionBase
     }
 
     private static ApiResult CreateResult(byte[] image, string contentType)
-        => ApiResult.FromSuccess(new FileContentResult(image, contentType));
+        => ApiResult.Ok(new FileContentResult(image, contentType));
 }
