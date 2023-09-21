@@ -25,7 +25,7 @@ public class MemberRoleUpdatedProcessor : BatchRequestProcessorBase
         }
 
         var logData = (MemberRoleAuditLogData)auditLog.Data;
-        var guild = await DiscordManager.GetGuildAsync(entity.GuildId!.ToUlong());
+        var guild = await DiscordManager.GetGuildAsync(entity.GuildId!.ToUlong(), true);
         if (guild is null)
         {
             entity.CanCreate = false;

@@ -1,11 +1,11 @@
-﻿using AuditLogService.Core.Discord.Cache;
+﻿using AuditLogService.Cache;
 using Discord;
 using Discord.Rest;
 using GrillBot.Core.Managers.Performance;
 
 namespace AuditLogService.Core.Discord;
 
-public sealed class DiscordManager : IDisposable
+public class DiscordManager
 {
     private DiscordRestClient DiscordClient { get; }
     private IConfiguration Configuration { get; }
@@ -14,14 +14,13 @@ public sealed class DiscordManager : IDisposable
     private AuditLogCache AuditLogCache { get; }
     private GuildCache GuildCache { get; }
 
-    public DiscordManager(IDiscordClient discordClient, IConfiguration configuration, ICounterManager counterManager)
+    public DiscordManager(IDiscordClient discordClient, IConfiguration configuration, ICounterManager counterManager, GuildCache guildCache, AuditLogCache auditLogCache)
     {
         Configuration = configuration;
         CounterManager = counterManager;
         DiscordClient = (DiscordRestClient)discordClient;
-
-        AuditLogCache = new AuditLogCache(counterManager);
-        GuildCache = new GuildCache(counterManager);
+        GuildCache = guildCache;
+        AuditLogCache = auditLogCache;
     }
 
     public async Task LoginAsync()
@@ -34,11 +33,14 @@ public sealed class DiscordManager : IDisposable
         }
     }
 
-    public async Task<IGuild?> GetGuildAsync(ulong guildId)
+    public async Task<IGuild?> GetGuildAsync(ulong guildId, bool forceApi = false)
     {
-        var cachedGuild = GuildCache.GetGuild(guildId);
-        if (cachedGuild is not null)
-            return cachedGuild;
+        if (!forceApi)
+        {
+            var cachedGuild = GuildCache.GetGuild(guildId);
+            if (cachedGuild is not null)
+                return cachedGuild;
+        }
 
         using (CounterManager.Create("Discord.API.Guild"))
         {
@@ -46,7 +48,7 @@ public sealed class DiscordManager : IDisposable
             if (guild is null)
                 return null;
 
-            GuildCache.StoreGuild(guildId, guild);
+            GuildCache.StoreGuild(guild);
             return guild;
         }
     }
@@ -68,7 +70,7 @@ public sealed class DiscordManager : IDisposable
         {
             var logs = await guild.GetAuditLogsAsync(limit, actionType: actionType);
 
-            if (actionType is not null)
+            if (actionType is not null && logs.Count > 0)
                 AuditLogCache.StoreLogs(guildId, actionType.Value, logs);
             return logs;
         }
@@ -84,11 +86,5 @@ public sealed class DiscordManager : IDisposable
         {
             return await guild.GetBanAsync(userId);
         }
-    }
-
-    public void Dispose()
-    {
-        AuditLogCache.Dispose();
-        GuildCache.Dispose();
     }
 }
