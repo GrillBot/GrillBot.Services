@@ -10,12 +10,10 @@ namespace AuditLogService.Actions.Delete;
 public class DeleteItemAction : ApiActionBase
 {
     private AuditLogServiceContext Context { get; }
-    private SynchronizationProcessor Synchronization { get; }
 
-    public DeleteItemAction(AuditLogServiceContext context, SynchronizationProcessor synchronization)
+    public DeleteItemAction(AuditLogServiceContext context)
     {
         Context = context;
-        Synchronization = synchronization;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -33,7 +31,7 @@ public class DeleteItemAction : ApiActionBase
         logItem.IsDeleted = true;
         logItem.IsPendingProcess = true;
 
-        await Synchronization.RunSynchronizedActionAsync(async () => await Context.SaveChangesAsync());
+        await Context.SaveChangesAsync();
         return ApiResult.FromSuccess(response);
     }
 

@@ -13,12 +13,10 @@ public partial class PostProcessingService : BackgroundService
 {
     private IServiceProvider ServiceProvider { get; }
     private ICounterManager CounterManager { get; }
-    private SynchronizationProcessor Synchronization { get; }
 
     public PostProcessingService(IServiceProvider serviceProvider)
     {
         CounterManager = serviceProvider.GetRequiredService<ICounterManager>();
-        Synchronization = serviceProvider.GetRequiredService<SynchronizationProcessor>();
         ServiceProvider = serviceProvider;
     }
 
@@ -59,13 +57,10 @@ public partial class PostProcessingService : BackgroundService
             if (!action.CanProcess(logItem))
                 return;
 
-            await Synchronization.RunSynchronizedActionAsync(async () =>
+            using (CounterManager.Create($"BackgroundService.{actionName}"))
             {
-                using (CounterManager.Create($"BackgroundService.{actionName}"))
-                {
-                    await action.ProcessAsync(logItem);
-                }
-            });
+                await action.ProcessAsync(logItem);
+            }
         }
         catch (Exception ex)
         {

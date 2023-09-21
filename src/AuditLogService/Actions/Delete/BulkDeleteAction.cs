@@ -1,6 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Models.Response.Delete;
-using AuditLogService.Processors;
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,12 +8,10 @@ namespace AuditLogService.Actions.Delete;
 public class BulkDeleteAction : ApiActionBase
 {
     private AuditLogServiceContext Context { get; }
-    private SynchronizationProcessor Synchronization { get; }
 
-    public BulkDeleteAction(AuditLogServiceContext context, SynchronizationProcessor synchronization)
+    public BulkDeleteAction(AuditLogServiceContext context)
     {
         Context = context;
-        Synchronization = synchronization;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -38,7 +35,7 @@ public class BulkDeleteAction : ApiActionBase
             logItem.IsPendingProcess = true;
         }
 
-        await Synchronization.RunSynchronizedActionAsync(async () => await Context.SaveChangesAsync());
+        await Context.SaveChangesAsync();
         return ApiResult.FromSuccess(response);
     }
 
