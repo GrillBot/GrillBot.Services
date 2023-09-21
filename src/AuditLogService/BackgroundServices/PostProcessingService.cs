@@ -31,12 +31,16 @@ public partial class PostProcessingService : BackgroundService
             var logItems = await ReadItemsToProcessAsync(stoppingToken);
             foreach (var item in logItems)
             {
-                await Synchronization.RunSynchronizedActionAsync(async () => await ResetProcessFlagAsync(item));
+                await ResetProcessFlagAsync(item);
 
-                using var scope = ServiceProvider.CreateScope();
-                var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>();
-                foreach (var action in actions)
-                    await ProcessActionAsync(action, item, scope);
+                using (CounterManager.Create("BackgroundService.LogItems.Process"))
+                {
+                    using var scope = ServiceProvider.CreateScope();
+                    var actions = scope.ServiceProvider.GetServices<PostProcessActionBase>();
+
+                    foreach (var action in actions)
+                        await ProcessActionAsync(action, item, scope);
+                }
             }
 
             await Task.Delay(10000, stoppingToken);
@@ -52,11 +56,11 @@ public partial class PostProcessingService : BackgroundService
 
         try
         {
+            if (!action.CanProcess(logItem))
+                return;
+
             await Synchronization.RunSynchronizedActionAsync(async () =>
             {
-                if (!action.CanProcess(logItem))
-                    return;
-
                 using (CounterManager.Create($"BackgroundService.{actionName}"))
                 {
                     await action.ProcessAsync(logItem);
