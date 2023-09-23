@@ -95,6 +95,7 @@ public partial class PostProcessingService
         {
             var interaction = item.InteractionCommand!;
             query = query.Where(o =>
+                o.InteractionCommand is not null && interaction is not null &&
                 o.InteractionCommand!.Name == interaction.Name &&
                 o.InteractionCommand.ModuleName == interaction.ModuleName &&
                 o.InteractionCommand.MethodName == interaction.MethodName &&
@@ -107,6 +108,7 @@ public partial class PostProcessingService
         {
             var request = item.ApiRequest!;
             query = query.Where(o =>
+                o.ApiRequest is not null && request is not null &&
                 o.ApiRequest!.RequestDate == request.RequestDate &&
                 o.ApiRequest.Method == request.Method &&
                 o.ApiRequest.TemplatePath == request.TemplatePath
@@ -116,6 +118,7 @@ public partial class PostProcessingService
         {
             var job = item.Job!;
             query = query.Where(o =>
+                o.Job is not null && job is not null &&
                 o.Job!.EndAt.Date == job.EndAt.Date &&
                 o.Job.JobName == job.JobName
             );
