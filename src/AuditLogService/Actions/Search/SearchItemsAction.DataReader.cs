@@ -19,7 +19,7 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.Info) || request.IsAdvancedFilterSet(LogType.Warning) || request.IsAdvancedFilterSet(LogType.Error))
         {
-            var query = Context.LogMessages.AsNoTracking();
+            var query = CreateCommonFilterForAdvancedSearch(Context.LogMessages, request);
             TextSearchRequest? searchReq = null;
 
             if (request.IsAdvancedFilterSet(LogType.Info))
@@ -53,7 +53,7 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.InteractionCommand))
         {
-            var baseQuery = Context.InteractionCommands.AsNoTracking();
+            var baseQuery = CreateCommonFilterForAdvancedSearch(Context.InteractionCommands, request);
             var searchReq = advancedSearch.Interaction!;
 
             if (!string.IsNullOrEmpty(searchReq.ActionName))
@@ -75,7 +75,7 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.JobCompleted))
         {
-            var baseQuery = Context.JobExecutions.AsNoTracking();
+            var baseQuery = CreateCommonFilterForAdvancedSearch(Context.JobExecutions, request);
             var searchReq = advancedSearch.Job!;
 
             if (!string.IsNullOrEmpty(searchReq.ActionName))
@@ -92,7 +92,7 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.Api))
         {
-            var baseQuery = Context.ApiRequests.AsNoTracking();
+            var baseQuery = CreateCommonFilterForAdvancedSearch(Context.ApiRequests, request);
             var searchReq = advancedSearch.Api!;
 
             if (!string.IsNullOrEmpty(searchReq.ControllerName))
@@ -116,7 +116,7 @@ public partial class SearchItemsAction
         if (request.IsAdvancedFilterSet(LogType.OverwriteCreated))
         {
             result.AddRange(
-                await Context.OverwriteCreatedItems.AsNoTracking()
+                await CreateCommonFilterForAdvancedSearch(Context.OverwriteCreatedItems, request)
                     .Where(o => o.OverwriteInfo.TargetId == advancedSearch.OverwriteCreated!.UserId)
                     .Select(o => o.LogItemId)
                     .ToListAsync()
@@ -126,7 +126,7 @@ public partial class SearchItemsAction
         if (request.IsAdvancedFilterSet(LogType.OverwriteDeleted))
         {
             result.AddRange(
-                await Context.OverwriteDeletedItems.AsNoTracking()
+                await CreateCommonFilterForAdvancedSearch(Context.OverwriteDeletedItems, request)
                     .Where(o => o.OverwriteInfo.TargetId == advancedSearch.OverwriteDeleted!.UserId)
                     .Select(o => o.LogItemId)
                     .ToListAsync()
@@ -136,7 +136,7 @@ public partial class SearchItemsAction
         if (request.IsAdvancedFilterSet(LogType.OverwriteUpdated))
         {
             result.AddRange(
-                await Context.OverwriteUpdatedItems.AsNoTracking()
+                await CreateCommonFilterForAdvancedSearch(Context.OverwriteUpdatedItems, request)
                     .Where(o => o.Before.TargetId == advancedSearch.OverwriteUpdated!.UserId || o.After.TargetId == advancedSearch.OverwriteUpdated!.UserId)
                     .Select(o => o.LogItemId)
                     .ToListAsync()
@@ -156,7 +156,7 @@ public partial class SearchItemsAction
         if (request.IsAdvancedFilterSet(LogType.MemberUpdated))
         {
             result.AddRange(
-                await Context.MemberUpdatedItems.AsNoTracking()
+                await CreateCommonFilterForAdvancedSearch(Context.MemberUpdatedItems, request)
                     .Where(o => o.Before.UserId == advancedSearch.MemberUpdated!.UserId || o.After.UserId == advancedSearch.MemberUpdated!.UserId)
                     .Select(o => o.LogItemId)
                     .ToListAsync()
@@ -165,7 +165,7 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.MessageDeleted))
         {
-            var baseQuery = Context.MessageDeletedItems.AsNoTracking();
+            var baseQuery = CreateCommonFilterForAdvancedSearch(Context.MessageDeletedItems, request);
             var searchReq = advancedSearch.MessageDeleted!;
 
             if (searchReq.ContainsEmbed is not null)
@@ -179,6 +179,26 @@ public partial class SearchItemsAction
         }
 
         return result.Distinct().ToList();
+    }
+
+    private static IQueryable<TChildEntity> CreateCommonFilterForAdvancedSearch<TChildEntity>(IQueryable<TChildEntity> baseQuery, SearchRequest request) where TChildEntity : ChildEntityBase
+    {
+        var query = baseQuery.AsNoTracking();
+
+        if (!string.IsNullOrEmpty(request.GuildId))
+            query = query.Where(o => o.LogItem.GuildId == request.GuildId);
+        if (request.UserIds.Count > 0)
+            query = query.Where(o => !string.IsNullOrEmpty(o.LogItem.UserId) && request.UserIds.Contains(o.LogItem.UserId));
+        if (!string.IsNullOrEmpty(request.ChannelId))
+            query = query.Where(o => o.LogItem.ChannelId == request.ChannelId);
+        if (request.CreatedFrom is not null)
+            query = query.Where(o => o.LogItem.CreatedAt >= request.CreatedFrom.Value);
+        if (request.CreatedTo is not null)
+            query = query.Where(o => o.LogItem.CreatedAt <= request.CreatedTo.Value);
+        if (request.OnlyWithFiles)
+            query = query.Where(o => o.LogItem.Files.Count > 0);
+
+        return query;
     }
 
     private async Task<PaginatedResponse<LogItem>> ReadLogHeaders(SearchRequest request)
