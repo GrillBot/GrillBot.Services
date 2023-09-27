@@ -20,19 +20,28 @@ public class ComputeApiRequestStatsAction : PostProcessActionBase
         var templatePath = logItem.ApiRequest!.TemplatePath;
         var endpoint = $"{method} {templatePath}";
         var stats = await GetOrCreateStatisticEntity<ApiRequestStat>(o => o.Endpoint == endpoint, endpoint);
-        var data = await Context.ApiRequests.AsNoTracking()
-            .Where(o => o.Method == method && o.TemplatePath == templatePath && !Context.LogItems.Any(x => x.IsDeleted && x.Id == o.LogItemId))
-            .GroupBy(_ => 1)
-            .Select(g => new
-            {
-                LastRequest = g.Max(x => x.EndAt),
-                FailedCount = g.LongCount(x => !x.IsSuccess),
-                MaxDuration = (int)g.Max(x => x.Duration),
-                MinDuration = (int)g.Min(x => x.Duration),
-                SuccessCount = g.LongCount(x => x.IsSuccess),
-                TotalDuration = (int)g.Sum(x => x.Duration),
-                LastRunDuration = g.OrderByDescending(x => x.EndAt).Select(x => (int)x.Duration).First()
-            }).FirstOrDefaultAsync();
+
+        var deletedItems = await Context.LogItems.AsNoTracking()
+            .Where(o => o.Type == LogType.Api && o.IsDeleted)
+            .Select(o => o.Id)
+            .ToListAsync();
+
+        var dataQuery = Context.ApiRequests.AsNoTracking()
+            .Where(o => o.Method == method && o.TemplatePath == templatePath);
+
+        if (deletedItems.Count > 0)
+            dataQuery = dataQuery.Where(o => deletedItems.Contains(o.LogItemId));
+
+        var data = await dataQuery.GroupBy(_ => 1).Select(g => new
+        {
+            LastRequest = g.Max(x => x.EndAt),
+            FailedCount = g.LongCount(x => !x.IsSuccess),
+            MaxDuration = (int)g.Max(x => x.Duration),
+            MinDuration = (int)g.Min(x => x.Duration),
+            SuccessCount = g.LongCount(x => x.IsSuccess),
+            TotalDuration = (int)g.Sum(x => x.Duration),
+            LastRunDuration = g.OrderByDescending(x => x.EndAt).Select(x => (int)x.Duration).First()
+        }).FirstOrDefaultAsync();
 
         stats.Endpoint = endpoint;
         if (data is null)
