@@ -30,7 +30,7 @@ public class ComputeApiRequestStatsAction : PostProcessActionBase
             .Where(o => o.Method == method && o.TemplatePath == templatePath);
 
         if (deletedItems.Count > 0)
-            dataQuery = dataQuery.Where(o => deletedItems.Contains(o.LogItemId));
+            dataQuery = dataQuery.Where(o => !deletedItems.Contains(o.LogItemId));
 
         var data = await dataQuery.GroupBy(_ => 1).Select(g => new
         {
