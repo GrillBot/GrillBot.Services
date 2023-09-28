@@ -111,7 +111,9 @@ public partial class PostProcessingService
                 o.ApiRequest is not null && request is not null &&
                 o.ApiRequest!.RequestDate == request.RequestDate &&
                 o.ApiRequest.Method == request.Method &&
-                o.ApiRequest.TemplatePath == request.TemplatePath
+                o.ApiRequest.TemplatePath == request.TemplatePath &&
+                o.ApiRequest.ApiGroupName == request.ApiGroupName &&
+                o.ApiRequest.Identification == request.Identification
             );
         }
         else if (item.Type == LogType.JobCompleted)
