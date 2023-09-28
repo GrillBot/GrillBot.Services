@@ -9,6 +9,8 @@ namespace AuditLogService.Core.Entity;
 [Index(nameof(EndAt))]
 [Index(nameof(RequestDate))]
 [Index(nameof(LogItemId), nameof(Method), nameof(TemplatePath), nameof(ApiGroupName), nameof(Identification))]
+[Index(nameof(Duration))]
+[Index(nameof(Method), nameof(TemplatePath), nameof(IsSuccess))]
 public class ApiRequest : ChildEntityBase
 {
     [StringLength(128)]

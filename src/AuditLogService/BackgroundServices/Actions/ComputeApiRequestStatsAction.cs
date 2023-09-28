@@ -32,32 +32,24 @@ public class ComputeApiRequestStatsAction : PostProcessActionBase
         if (deletedItems.Count > 0)
             dataQuery = dataQuery.Where(o => !deletedItems.Contains(o.LogItemId));
 
-        var data = await dataQuery.GroupBy(_ => 1).Select(g => new
+        if (await dataQuery.AnyAsync())
         {
-            LastRequest = g.Max(x => x.EndAt),
-            FailedCount = g.LongCount(x => !x.IsSuccess),
-            MaxDuration = (int)g.Max(x => x.Duration),
-            MinDuration = (int)g.Min(x => x.Duration),
-            SuccessCount = g.LongCount(x => x.IsSuccess),
-            TotalDuration = (int)g.Sum(x => x.Duration),
-            LastRunDuration = g.OrderByDescending(x => x.EndAt).Select(x => (int)x.Duration).First()
-        }).FirstOrDefaultAsync();
+            stats.LastRequest = await dataQuery.MaxAsync(o => o.EndAt);
+            stats.FailedCount = await dataQuery.CountAsync(o => !o.IsSuccess);
+            stats.MaxDuration = await dataQuery.MaxAsync(o => o.Duration);
+            stats.MinDuration = await dataQuery.MinAsync(o => o.Duration);
+            stats.SuccessCount = await dataQuery.CountAsync(o => o.IsSuccess);
+            stats.TotalDuration = await dataQuery.SumAsync(o => o.Duration);
 
-        stats.Endpoint = endpoint;
-        if (data is null)
-        {
-            stats.FailedCount = 0;
-            stats.SuccessCount = 0;
+            stats.LastRunDuration = await dataQuery
+                .OrderByDescending(o => o.EndAt)
+                .Select(o => o.Duration)
+                .FirstOrDefaultAsync();
         }
         else
         {
-            stats.LastRequest = data.LastRequest;
-            stats.FailedCount = data.FailedCount;
-            stats.MaxDuration = data.MaxDuration;
-            stats.MinDuration = data.MinDuration;
-            stats.SuccessCount = data.SuccessCount;
-            stats.TotalDuration = data.TotalDuration;
-            stats.LastRunDuration = data.LastRunDuration;
+            stats.FailedCount = 0;
+            stats.SuccessCount = 0;
         }
 
         await StatisticsContext.SaveChangesAsync();
