@@ -1,7 +1,6 @@
 ﻿using AuditLogService.Core.Discord;
 using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
-using AuditLogService.Models.Request;
 using AuditLogService.Models.Request.CreateItems;
 using Discord;
 using GrillBot.Core.Extensions;
@@ -10,6 +9,8 @@ namespace AuditLogService.Processors.Request.Abstractions;
 
 public abstract class RequestProcessorBase
 {
+    public Dictionary<LogSeverity, List<string>> ProcessingMessages { get; } = new();
+
     protected DiscordManager DiscordManager { get; }
 
     protected RequestProcessorBase(IServiceProvider serviceProvider)
@@ -59,4 +60,14 @@ public abstract class RequestProcessorBase
     }
 
     protected virtual bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request) => false;
+
+    protected void AddWarning(string message)
+        => AddProcessingMessage(LogSeverity.Warning, message);
+
+    private void AddProcessingMessage(LogSeverity severity, string message)
+    {
+        if (!ProcessingMessages.ContainsKey(severity))
+            ProcessingMessages.Add(severity, new List<string>());
+        ProcessingMessages[severity].Add(message);
+    }
 }

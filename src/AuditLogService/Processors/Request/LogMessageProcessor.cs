@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Models.Request;
 using AuditLogService.Models.Request.CreateItems;
 using AuditLogService.Processors.Request.Abstractions;
 

@@ -24,7 +24,6 @@ public class MemberRoleUpdatedProcessor : BatchRequestProcessorBase
             return;
         }
 
-        var logData = (MemberRoleAuditLogData)auditLog.Data;
         var guild = await DiscordManager.GetGuildAsync(entity.GuildId!.ToUlong(), true);
         if (guild is null)
         {
@@ -32,18 +31,43 @@ public class MemberRoleUpdatedProcessor : BatchRequestProcessorBase
             return;
         }
 
+        var logData = (MemberRoleAuditLogData)auditLog.Data;
+        if (logData.Target is null)
+        {
+            AddWarning($"AuditLogItem with ID {auditLog.Id} from guild {guild.Name} contains unknown target user.");
+            entity.CanCreate = false;
+            return;
+        }
+
         entity.DiscordId = auditLog.Id.ToString();
         entity.CreatedAt = auditLog.CreatedAt.UtcDateTime;
         entity.UserId = auditLog.User.Id.ToString();
-        entity.MemberRolesUpdated = logData.Roles.Select(o => new MemberRoleUpdated
+        entity.MemberRolesUpdated = CreateLogData(logData, guild);
+    }
+
+    private ISet<MemberRoleUpdated> CreateLogData(MemberRoleAuditLogData logData, IGuild guild)
+    {
+        var result = new HashSet<MemberRoleUpdated>();
+
+        foreach (var item in logData.Roles)
         {
-            Id = Guid.NewGuid(),
-            UserId = logData.Target.Id.ToString(),
-            IsAdded = o.Added,
-            RoleColor = guild.GetRole(o.RoleId).Color.ToString(),
-            RoleId = o.RoleId.ToString(),
-            RoleName = o.Name
-        }).ToHashSet();
+            var id = Guid.NewGuid();
+            var role = guild.GetRole(item.RoleId);
+            if (role is null)
+                AddWarning($"MemberRoleUpdated data entity [Id: {id}] will contain default role color. Role not found.");
+
+            result.Add(new MemberRoleUpdated
+            {
+                Id = id,
+                IsAdded = item.Added,
+                RoleColor = (role is null ? Color.Default : role.Color).ToString(),
+                RoleId = item.RoleId.ToString(),
+                RoleName = item.Name,
+                UserId = logData.Target.Id.ToString()
+            });
+        }
+
+        return result;
     }
 
     protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
