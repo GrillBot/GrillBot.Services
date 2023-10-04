@@ -3,7 +3,9 @@ using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
 using AuditLogService.Models.Request.CreateItems;
 using Discord;
+using Discord.Net;
 using GrillBot.Core.Extensions;
+using System.Net;
 
 namespace AuditLogService.Processors.Request.Abstractions;
 
@@ -45,12 +47,19 @@ public abstract class RequestProcessorBase
 
     protected virtual async Task<List<IAuditLogEntry>> FindAuditLogsAsync(LogRequest request, ActionType? type = null)
     {
-        var actionType = type ?? ConvertActionType(request.Type);
-        var auditLogs = await DiscordManager.GetAuditLogsAsync(request.GuildId!.ToUlong(), actionType: actionType);
+        try
+        {
+            var actionType = type ?? ConvertActionType(request.Type);
+            var auditLogs = await DiscordManager.GetAuditLogsAsync(request.GuildId!.ToUlong(), actionType: actionType);
 
-        return auditLogs
-            .Where(o => IsValidAuditLogItem(o, request))
-            .ToList();
+            return auditLogs
+                .Where(o => IsValidAuditLogItem(o, request))
+                .ToList();
+        }
+        catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.GatewayTimeout)
+        {
+            return new List<IAuditLogEntry>();
+        }
     }
 
     protected virtual async Task<IAuditLogEntry?> FindAuditLogAsync(LogRequest request, ActionType? type = null)
