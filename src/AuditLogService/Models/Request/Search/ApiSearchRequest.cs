@@ -9,10 +9,11 @@ public class ApiSearchRequest : IAdvancedSearchRequest
     public int? DurationTo { get; set; }
     public string? Method { get; set; }
     public string? ApiGroupName { get; set; }
+    public string? Identification { get; set; }
 
     public bool IsSet()
     {
         return !string.IsNullOrEmpty(ControllerName) || !string.IsNullOrEmpty(ActionName) || !string.IsNullOrEmpty(PathTemplate) || DurationFrom is not null || DurationTo is not null ||
-               !string.IsNullOrEmpty(Method) || !string.IsNullOrEmpty(ApiGroupName);
+               !string.IsNullOrEmpty(Method) || !string.IsNullOrEmpty(ApiGroupName) || !string.IsNullOrEmpty(Identification);
     }
 }

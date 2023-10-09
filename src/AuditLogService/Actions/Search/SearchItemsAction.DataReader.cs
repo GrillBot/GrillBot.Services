@@ -47,7 +47,7 @@ public partial class SearchItemsAction
                 if (!string.IsNullOrEmpty(searchReq.Text))
                     query = query.Where(o => EF.Functions.ILike(o.Message, $"%{searchReq.Text}%"));
 
-                result.AddRange(await query.Select(o => o.LogItemId).ToListAsync());
+                result.AddRange(await SelectIdsAsync(query));
             }
         }
 
@@ -70,7 +70,7 @@ public partial class SearchItemsAction
             if (searchReq.DurationTo is not null)
                 baseQuery = baseQuery.Where(o => o.Duration <= searchReq.DurationTo.Value);
 
-            result.AddRange(await baseQuery.Select(o => o.LogItemId).ToListAsync());
+            result.AddRange(await SelectIdsAsync(baseQuery));
         }
 
         if (request.IsAdvancedFilterSet(LogType.JobCompleted))
@@ -87,7 +87,7 @@ public partial class SearchItemsAction
             if (searchReq.DurationTo is not null)
                 baseQuery = baseQuery.Where(o => o.Duration <= searchReq.DurationTo.Value);
 
-            result.AddRange(await baseQuery.Select(o => o.LogItemId).ToListAsync());
+            result.AddRange(await SelectIdsAsync(baseQuery));
         }
 
         if (request.IsAdvancedFilterSet(LogType.Api))
@@ -109,38 +109,34 @@ public partial class SearchItemsAction
                 baseQuery = baseQuery.Where(o => o.Method == searchReq.Method);
             if (!string.IsNullOrEmpty(searchReq.ApiGroupName))
                 baseQuery = baseQuery.Where(o => o.ApiGroupName == searchReq.ApiGroupName);
+            if (!string.IsNullOrEmpty(searchReq.Identification))
+                baseQuery = baseQuery.Where(o => EF.Functions.ILike(o.Identification, $"%{searchReq.Identification}%"));
 
-            result.AddRange(await baseQuery.Select(o => o.LogItemId).ToListAsync());
+            result.AddRange(await SelectIdsAsync(baseQuery));
         }
 
         if (request.IsAdvancedFilterSet(LogType.OverwriteCreated))
         {
-            result.AddRange(
-                await CreateCommonFilterForAdvancedSearch(Context.OverwriteCreatedItems, request)
-                    .Where(o => o.OverwriteInfo.TargetId == advancedSearch.OverwriteCreated!.UserId)
-                    .Select(o => o.LogItemId)
-                    .ToListAsync()
-            );
+            var query = CreateCommonFilterForAdvancedSearch(Context.OverwriteCreatedItems, request)
+                .Where(o => o.OverwriteInfo.TargetId == advancedSearch.OverwriteCreated!.UserId);
+
+            result.AddRange(await SelectIdsAsync(query));
         }
 
         if (request.IsAdvancedFilterSet(LogType.OverwriteDeleted))
         {
-            result.AddRange(
-                await CreateCommonFilterForAdvancedSearch(Context.OverwriteDeletedItems, request)
-                    .Where(o => o.OverwriteInfo.TargetId == advancedSearch.OverwriteDeleted!.UserId)
-                    .Select(o => o.LogItemId)
-                    .ToListAsync()
-            );
+            var query = CreateCommonFilterForAdvancedSearch(Context.OverwriteDeletedItems, request)
+                .Where(o => o.OverwriteInfo.TargetId == advancedSearch.OverwriteDeleted!.UserId);
+
+            result.AddRange(await SelectIdsAsync(query));
         }
 
         if (request.IsAdvancedFilterSet(LogType.OverwriteUpdated))
         {
-            result.AddRange(
-                await CreateCommonFilterForAdvancedSearch(Context.OverwriteUpdatedItems, request)
-                    .Where(o => o.Before.TargetId == advancedSearch.OverwriteUpdated!.UserId || o.After.TargetId == advancedSearch.OverwriteUpdated!.UserId)
-                    .Select(o => o.LogItemId)
-                    .ToListAsync()
-            );
+            var query = CreateCommonFilterForAdvancedSearch(Context.OverwriteUpdatedItems, request)
+                .Where(o => o.Before.TargetId == advancedSearch.OverwriteUpdated!.UserId || o.After.TargetId == advancedSearch.OverwriteUpdated!.UserId);
+
+            result.AddRange(await SelectIdsAsync(query));
         }
 
         if (request.IsAdvancedFilterSet(LogType.MemberRoleUpdated))
@@ -155,12 +151,10 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.MemberUpdated))
         {
-            result.AddRange(
-                await CreateCommonFilterForAdvancedSearch(Context.MemberUpdatedItems, request)
-                    .Where(o => o.Before.UserId == advancedSearch.MemberUpdated!.UserId || o.After.UserId == advancedSearch.MemberUpdated!.UserId)
-                    .Select(o => o.LogItemId)
-                    .ToListAsync()
-            );
+            var query = CreateCommonFilterForAdvancedSearch(Context.MemberUpdatedItems, request)
+                .Where(o => o.Before.UserId == advancedSearch.MemberUpdated!.UserId || o.After.UserId == advancedSearch.MemberUpdated!.UserId);
+
+            result.AddRange(await SelectIdsAsync(query));
         }
 
         if (request.IsAdvancedFilterSet(LogType.MessageDeleted))
@@ -175,7 +169,7 @@ public partial class SearchItemsAction
             if (!string.IsNullOrEmpty(searchReq.AuthorId))
                 baseQuery = baseQuery.Where(o => o.AuthorId == searchReq.AuthorId);
 
-            result.AddRange(await baseQuery.Select(o => o.LogItemId).ToListAsync());
+            result.AddRange(await SelectIdsAsync(baseQuery));
         }
 
         return result.Distinct().ToList();
@@ -200,6 +194,9 @@ public partial class SearchItemsAction
 
         return query;
     }
+
+    private static async Task<List<Guid>> SelectIdsAsync<TChildEntity>(IQueryable<TChildEntity> query) where TChildEntity : ChildEntityBase
+        => await query.Select(o => o.LogItemId).ToListAsync();
 
     private async Task<PaginatedResponse<LogItem>> ReadLogHeaders(SearchRequest request)
     {
