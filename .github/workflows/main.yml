@@ -31,22 +31,16 @@ jobs:
         with:
           filters: |
             FileService:
-              - .github/workflows/**
               - 'src/FileService/**'
             RubbergodService:
-              - .github/workflows/**
               - 'src/RubbergodService/**'
             Graphics:
-              - .github/workflows/**
               - 'src/Graphics/**'
             PointsService:
-              - .github/workflows/**
               - 'src/PointsService/**'
             ImageProcessingService:
-              - .github/workflows/**
               - 'src/ImageProcessingService/**'
             AuditLogService:
-              - .github/workflows/**
               - 'src/AuditLogService/**'
   FileService_Build:
     runs-on: ubuntu-latest
@@ -63,13 +57,12 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Install dependencies
-        run: |
-          dotnet restore -r linux-x64 src/FileService/FileService/
+        run: dotnet restore -r linux-x64 src/FileService/FileService/
       - name: Build (DEBUG)
         run: dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/FileService/FileService/
       - name: Build (RELEASE)
         run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/FileService/FileService/
-  FileService_BuildContainer:
+  FileService_CreateDockerImage:
     runs-on: ubuntu-latest
     needs: FileService_Build
     if: github.ref == 'refs/heads/master'
@@ -96,7 +89,7 @@ jobs:
   FileService_Deploy_Development:
     runs-on: ubuntu-latest
     environment: "Development"
-    needs: FileService_BuildContainer
+    needs: FileService_CreateDockerImage
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Deploy via SSH
@@ -110,7 +103,7 @@ jobs:
   FileService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_FileService"
-    needs: FileService_BuildContainer
+    needs: FileService_CreateDockerImage
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Execute deployment on SSH
@@ -136,13 +129,12 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Install dependencies
-        run: |
-          dotnet restore -r linux-x64 src/RubbergodService/RubbergodService/
+        run: dotnet restore -r linux-x64 src/RubbergodService/RubbergodService/
       - name: Build (DEBUG)
         run: dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/RubbergodService/RubbergodService/
       - name: Build (RELEASE)
         run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/RubbergodService/RubbergodService/
-  RubbergodService_BuildContainer:
+  RubbergodService_CreateDockerImage:
     runs-on: ubuntu-latest
     needs: RubbergodService_Build
     if: github.ref == 'refs/heads/master'
@@ -169,7 +161,7 @@ jobs:
   RubbergodService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_RubbergodService"
-    needs: RubbergodService_BuildContainer
+    needs: RubbergodService_CreateDockerImage
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Execute deployment on SSH
@@ -183,7 +175,7 @@ jobs:
   RubbergodService_Deploy_Development:
     runs-on: ubuntu-latest
     environment: "Development"
-    needs: RubbergodService_BuildContainer
+    needs: RubbergodService_CreateDockerImage
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Deploy via SSH
@@ -212,7 +204,7 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-  Graphics_BuildContainer:
+  Graphics_CreateDockerImage:
     runs-on: ubuntu-latest
     needs: Graphics_Build
     if: github.ref == 'refs/heads/master'
@@ -237,7 +229,7 @@ jobs:
   Graphics_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_Graphics"
-    needs: Graphics_BuildContainer
+    needs: Graphics_CreateDockerImage
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Execute deployment on SSH
@@ -251,7 +243,7 @@ jobs:
   Graphics_Deploy_Development:
     runs-on: ubuntu-latest
     environment: "Development"
-    needs: Graphics_BuildContainer
+    needs: Graphics_CreateDockerImage
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Deploy via SSH
@@ -277,13 +269,12 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Install dependencies
-        run: |
-          dotnet restore -r linux-x64 src/PointsService/
+        run: dotnet restore -r linux-x64 src/PointsService/
       - name: Build (DEBUG)
         run: dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/PointsService/
       - name: Build (RELEASE)
         run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/PointsService/
-  PointsService_BuildContainer:
+  PointsService_CreateDockerImage:
     runs-on: ubuntu-latest
     needs: PointsService_Build
     if: github.ref == 'refs/heads/master'
@@ -310,7 +301,7 @@ jobs:
   PointsService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_PointsService"
-    needs: PointsService_BuildContainer
+    needs: PointsService_CreateDockerImage
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Execute deployment on SSH
@@ -324,7 +315,7 @@ jobs:
   PointsService_Deploy_Development:
     runs-on: ubuntu-latest
     environment: "Development"
-    needs: PointsService_BuildContainer
+    needs: PointsService_CreateDockerImage
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Deploy via SSH
@@ -350,13 +341,12 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Install dependencies
-        run: |
-          dotnet restore -r linux-x64 src/ImageProcessingService/
+        run: dotnet restore -r linux-x64 src/ImageProcessingService/
       - name: Build (DEBUG)
         run: dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/ImageProcessingService/
       - name: Build (RELEASE)
         run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/ImageProcessingService/
-  ImageProcessingService_BuildContainer:
+  ImageProcessingService_CreateDockerImage:
     runs-on: ubuntu-latest
     needs: ImageProcessingService_Build
     if: github.ref == 'refs/heads/master'
@@ -383,7 +373,7 @@ jobs:
   ImageProcessingService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_ImageProcessingService"
-    needs: ImageProcessingService_BuildContainer
+    needs: ImageProcessingService_CreateDockerImage
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Execute deployment on SSH
@@ -397,7 +387,7 @@ jobs:
   ImageProcessingService_Deploy_Development:
     runs-on: ubuntu-latest
     environment: "Development"
-    needs: ImageProcessingService_BuildContainer
+    needs: ImageProcessingService_CreateDockerImage
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Deploy via SSH
@@ -428,7 +418,7 @@ jobs:
         run: dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/AuditLogService/
       - name: Build (RELEASE)
         run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/AuditLogService/
-  AuditLogService_BuildContainer:
+  AuditLogService_CreateDockerImage:
     runs-on: ubuntu-latest
     needs: AuditLogService_Build
     if: github.ref == 'refs/heads/master'
@@ -455,7 +445,7 @@ jobs:
   AuditLogService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_AuditLogService"
-    needs: AuditLogService_BuildContainer
+    needs: AuditLogService_CreateDockerImage
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Execute deployment on SSH
@@ -469,7 +459,7 @@ jobs:
   AuditLogService_Deploy_Development:
     runs-on: ubuntu-latest
     environment: "Development"
-    needs: AuditLogService_BuildContainer
+    needs: AuditLogService_CreateDockerImage
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Deploy via SSH
