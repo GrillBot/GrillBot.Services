@@ -12,15 +12,6 @@ public class KarmaRepository : SubRepositoryBase<RubbergodServiceContext>
     {
     }
 
-    public async Task<Karma?> FindKarmaByMemberIdAsync(string memberId)
-    {
-        using (CreateCounter())
-        {
-            return await Context.Karma
-                .FirstOrDefaultAsync(o => o.MemberId == memberId);
-        }
-    }
-
     public async Task<PaginatedResponse<Karma>> GetKarmaPageAsync(PaginatedParams parameters)
     {
         using (CreateCounter())
@@ -29,6 +20,16 @@ public class KarmaRepository : SubRepositoryBase<RubbergodServiceContext>
                 .OrderByDescending(o => o.KarmaValue);
 
             return await PaginatedResponse<Karma>.CreateWithEntityAsync(query, parameters);
+        }
+    }
+
+    public async Task<List<Karma>> GetItemsByMemberIdsAsync(IEnumerable<string> memberIds)
+    {
+        using (CreateCounter())
+        {
+            return await Context.Karma
+                .Where(o => memberIds.Contains(o.MemberId))
+                .ToListAsync();
         }
     }
 }

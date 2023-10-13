@@ -1,5 +1,4 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
-using RubbergodService.Core.Entity;
 using RubbergodService.Core.Repository;
 
 namespace RubbergodService.Actions.Karma;
@@ -15,18 +14,16 @@ public class StoreKarmaAction : ApiActionBase
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var items = (List<Karma>)Parameters[0]!;
+        var items = (List<Core.Entity.Karma>)Parameters[0]!;
+        var karmaItems = await Repository.Karma.GetItemsByMemberIdsAsync(items.Select(o => o.MemberId));
+        var karmaItemsDict = karmaItems.ToDictionary(o => o.MemberId, o => o);
 
         foreach (var item in items)
         {
-            var karma = await Repository.Karma.FindKarmaByMemberIdAsync(item.MemberId);
-            if (karma is null)
-                await Repository.AddAsync(item);
+            if (karmaItemsDict.TryGetValue(item.MemberId, out var entity))
+                entity.Update(item);
             else
-            {
-                if (!karma.IsEqual(item))
-                    karma.Update(item);
-            }
+                await Repository.AddAsync(item);
         }
 
         await Repository.CommitAsync();
