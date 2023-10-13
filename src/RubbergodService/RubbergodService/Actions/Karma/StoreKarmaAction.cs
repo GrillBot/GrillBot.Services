@@ -2,7 +2,7 @@
 using RubbergodService.Core.Entity;
 using RubbergodService.Core.Repository;
 
-namespace RubbergodService.Actions;
+namespace RubbergodService.Actions.Karma;
 
 public class StoreKarmaAction : ApiActionBase
 {

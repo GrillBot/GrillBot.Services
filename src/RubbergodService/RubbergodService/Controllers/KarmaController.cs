@@ -1,6 +1,6 @@
 ﻿using GrillBot.Core.Models.Pagination;
 using Microsoft.AspNetCore.Mvc;
-using RubbergodService.Actions;
+using RubbergodService.Actions.Karma;
 using RubbergodService.Core.Entity;
 using RubbergodService.Core.Models;
 using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;

@@ -3,7 +3,7 @@ using GrillBot.Core.Models.Pagination;
 using RubbergodService.Core.Models;
 using RubbergodService.Core.Repository;
 
-namespace RubbergodService.Actions;
+namespace RubbergodService.Actions.Karma;
 
 public class GetKarmaPageAction : ApiActionBase
 {
