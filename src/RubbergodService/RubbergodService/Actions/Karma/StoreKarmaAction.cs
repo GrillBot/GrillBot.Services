@@ -15,15 +15,14 @@ public class StoreKarmaAction : ApiActionBase
     public override async Task<ApiResult> ProcessAsync()
     {
         var items = (List<Core.Entity.Karma>)Parameters[0]!;
-        var karmaItems = await Repository.Karma.GetItemsByMemberIdsAsync(items.Select(o => o.MemberId));
-        var karmaItemsDict = karmaItems.ToDictionary(o => o.MemberId, o => o);
 
-        foreach (var item in items)
+        foreach (var item in items.DistinctBy(o => o.MemberId))
         {
-            if (karmaItemsDict.TryGetValue(item.MemberId, out var entity))
-                entity.Update(item);
-            else
+            var entity = await Repository.Karma.FindKarmaByMemberIdAsync(item.MemberId);
+            if (entity is null)
                 await Repository.AddAsync(item);
+            else
+                entity.Update(item);
         }
 
         await Repository.CommitAsync();

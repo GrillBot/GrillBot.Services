@@ -23,13 +23,9 @@ public class KarmaRepository : SubRepositoryBase<RubbergodServiceContext>
         }
     }
 
-    public async Task<List<Karma>> GetItemsByMemberIdsAsync(IEnumerable<string> memberIds)
+    public async Task<Karma?> FindKarmaByMemberIdAsync(string memberId)
     {
         using (CreateCounter())
-        {
-            return await Context.Karma
-                .Where(o => memberIds.Contains(o.MemberId))
-                .ToListAsync();
-        }
+            return await Context.Karma.FirstOrDefaultAsync(o => o.MemberId == memberId);
     }
 }
