@@ -11,7 +11,7 @@ public class PointsRequest
     public string UserId { get; set; } = null!;
 
     [Required]
-    [StringLength(32, MinimumLength = 2)]
+    [StringLength(32)]
     public string Username { get; set; } = null!;
 
     [Required]
