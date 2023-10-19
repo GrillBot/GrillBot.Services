@@ -20,8 +20,6 @@ public class ComputeApiDateCountsAction : PostProcessActionBase
         var apiGroup = logItem.ApiRequest!.ApiGroupName;
         var stats = await GetOrCreateStatisticEntity<ApiDateCountStatistic>(o => o.Date == date && o.ApiGroup == apiGroup, date, apiGroup);
 
-        stats.ApiGroup = apiGroup;
-        stats.Date = date;
         stats.Count = await Context.ApiRequests.AsNoTracking()
             .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
             .LongCountAsync(o => o.RequestDate == date && o.ApiGroupName == apiGroup);

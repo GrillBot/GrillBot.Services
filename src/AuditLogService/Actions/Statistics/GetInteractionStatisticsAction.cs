@@ -5,16 +5,40 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Statistics;
 
-public class GetInteractionStatisticsListAction : ApiActionBase
+public class GetInteractionStatisticsAction : ApiActionBase
 {
     private AuditLogStatisticsContext StatisticsContext { get; }
 
-    public GetInteractionStatisticsListAction(AuditLogStatisticsContext statisticsContext)
+    public GetInteractionStatisticsAction(AuditLogStatisticsContext statisticsContext)
     {
         StatisticsContext = statisticsContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
+    {
+        var statistics = new InteractionStatistics
+        {
+            ByDate = await GetStatisticsByDateAsync(),
+            Commands = await GetCommandStatisticsAsync()
+        };
+
+        return ApiResult.FromSuccess(statistics);
+    }
+
+    private async Task<Dictionary<string, long>> GetStatisticsByDateAsync()
+    {
+        return await StatisticsContext.InteractionDateCountStatistics.AsNoTracking()
+            .GroupBy(o => new { o.Date.Year, o.Date.Month })
+            .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
+            .Select(o => new
+            {
+                Key = $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}",
+                Count = o.Sum(x => x.Count)
+            })
+            .ToDictionaryAsync(o => o.Key, o => o.Count);
+    }
+
+    private async Task<List<StatisticItem>> GetCommandStatisticsAsync()
     {
         var result = await StatisticsContext.InteractionStatistics.AsNoTracking()
             .Select(o => new StatisticItem
@@ -30,12 +54,10 @@ public class GetInteractionStatisticsListAction : ApiActionBase
             })
             .ToListAsync();
 
-        result = result
+        return result
             .OrderByDescending(o => o.AvgDuration)
             .ThenByDescending(o => o.SuccessCount + o.FailedCount)
             .ThenBy(o => o.Key)
             .ToList();
-
-        return ApiResult.FromSuccess(result);
     }
 }

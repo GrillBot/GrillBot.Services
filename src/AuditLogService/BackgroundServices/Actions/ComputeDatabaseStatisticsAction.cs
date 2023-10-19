@@ -122,6 +122,7 @@ public class ComputeDatabaseStatisticsAction : PostProcessActionBase
                 await UpdateStatisticsRecord<DailyAvgTimes>($"Statistics.{nameof(StatisticsContext.DailyAvgTimes)}", true);
                 await UpdateStatisticsRecord<InteractionUserActionStatistic>($"Statistics.{nameof(StatisticsContext.InteractionUserActionStatistics)}", true);
                 await UpdateStatisticsRecord<InteractionStatistic>($"Statistics.{nameof(StatisticsContext.InteractionStatistics)}", true);
+                await UpdateStatisticsRecord<InteractionDateCountStatistic>($"Statistics.{nameof(StatisticsContext.InteractionDateCountStatistics)}", true);
                 break;
             case LogType.MessageDeleted:
                 await UpdateStatisticsRecord<FileExtensionStatistic>($"Statistics.{nameof(StatisticsContext.FileExtensionStatistics)}", true);

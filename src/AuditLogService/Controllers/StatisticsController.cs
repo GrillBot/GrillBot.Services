@@ -16,10 +16,10 @@ public class StatisticsController : ControllerBase
     public async Task<IActionResult> GetAuditLogStatisticsAsync()
         => await ProcessAsync<GetAuditLogStatisticsAction>();
 
-    [HttpGet("interactions/list")]
-    [ProducesResponseType(typeof(List<StatisticItem>), StatusCodes.Status200OK)]
+    [HttpGet("interactions/stats")]
+    [ProducesResponseType(typeof(InteractionStatistics), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInteractionStatisticsListAsync()
-        => await ProcessAsync<GetInteractionStatisticsListAction>();
+        => await ProcessAsync<GetInteractionStatisticsAction>();
 
     [HttpGet("interactions/userStats")]
     [ProducesResponseType(typeof(List<UserActionCountItem>), StatusCodes.Status200OK)]

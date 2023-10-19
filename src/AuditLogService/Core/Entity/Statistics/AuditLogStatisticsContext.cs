@@ -13,6 +13,9 @@ public class AuditLogStatisticsContext : DbContext
         modelBuilder.HasDefaultSchema("statistics");
 
         modelBuilder.Entity<ApiDateCountStatistic>(builder => builder.HasKey(o => new { o.ApiGroup, o.Date }));
+        modelBuilder.Entity<AuditLogDateStatistic>(builder => builder.HasKey(o => o.Date));
+        modelBuilder.Entity<InteractionDateCountStatistic>(builder => builder.HasKey(o => o.Date));
+
         modelBuilder.Entity<ApiUserActionStatistic>(builder => builder.HasKey(o => new { o.Action, o.ApiGroup, o.IsPublic, o.UserId }));
         modelBuilder.Entity<InteractionUserActionStatistic>(builder => builder.HasKey(o => new { o.Action, o.UserId }));
     }
@@ -28,4 +31,5 @@ public class AuditLogStatisticsContext : DbContext
     public DbSet<InteractionStatistic> InteractionStatistics => Set<InteractionStatistic>();
     public DbSet<JobInfo> JobInfos => Set<JobInfo>();
     public DbSet<DatabaseStatistic> DatabaseStatistics => Set<DatabaseStatistic>();
+    public DbSet<InteractionDateCountStatistic> InteractionDateCountStatistics => Set<InteractionDateCountStatistic>();
 }

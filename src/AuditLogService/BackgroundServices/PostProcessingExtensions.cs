@@ -1,6 +1,4 @@
 ﻿using AuditLogService.BackgroundServices.Actions;
-using AuditLogService.Core.Entity;
-using System.Threading.Channels;
 
 namespace AuditLogService.BackgroundServices;
 
@@ -16,6 +14,7 @@ public static class PostProcessingExtensions
             .AddScoped<PostProcessActionBase, ComputeApiUserStatisticsAction>()
             .AddScoped<PostProcessActionBase, ComputeInteractionUserStatisticsAction>()
             .AddScoped<PostProcessActionBase, ComputeInteractionStatisticsAction>()
+            .AddScoped<PostProcessActionBase, ComputeInteractionDateStatistics>()
             .AddScoped<PostProcessActionBase, ComputeAvgTimesAction>()
             .AddScoped<PostProcessActionBase, ComputeTypeStatitistics>()
             .AddScoped<PostProcessActionBase, ComputeDateStatisticsAction>()

@@ -2,11 +2,8 @@
 
 namespace AuditLogService.Core.Entity.Statistics;
 
-public class ApiDateCountStatistic
+public class ApiDateCountStatistic : DateCountStatistic
 {
-    public DateOnly Date { get; set; }
-    public long Count { get; set; }
-
     [StringLength(5)]
     public string ApiGroup { get; set; } = null!;
 
@@ -14,9 +11,8 @@ public class ApiDateCountStatistic
     {
     }
 
-    public ApiDateCountStatistic(DateOnly date, string apiGroup)
+    public ApiDateCountStatistic(DateOnly date, string apiGroup) : base(date)
     {
-        Date = date;
         ApiGroup = apiGroup;
     }
 }

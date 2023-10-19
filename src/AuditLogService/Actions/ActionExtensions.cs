@@ -12,7 +12,7 @@ public static class ActionExtensions
             .AddScoped<Detail.ReadDetailAction>()
             .AddScoped<Archivation.ArchiveOldLogsAction>()
             .AddScoped<Statistics.GetAuditLogStatisticsAction>()
-            .AddScoped<Statistics.GetInteractionStatisticsListAction>()
+            .AddScoped<Statistics.GetInteractionStatisticsAction>()
             .AddScoped<Statistics.GetUserCommandStatisticsAction>()
             .AddScoped<Statistics.GetApiStatisticsAction>()
             .AddScoped<Statistics.GetUserApiStatisticsAction>()
