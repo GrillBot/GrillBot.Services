@@ -140,6 +140,6 @@ public class ComputeDatabaseStatisticsAction : PostProcessActionBase
         var stats = await GetOrCreateStatisticEntity<DatabaseStatistic>(o => o.TableName == tableName, tableName);
         DbContext context = useStatisticsContext ? StatisticsContext : Context;
 
-        stats.RecordsCount = await context.Set<TEntity>().LongCountAsync();
+        stats.RecordsCount = await context.Set<TEntity>().AsNoTracking().CountAsync();
     }
 }

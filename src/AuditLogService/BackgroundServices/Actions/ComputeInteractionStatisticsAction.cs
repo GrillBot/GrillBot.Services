@@ -34,7 +34,6 @@ public class ComputeInteractionStatisticsAction : PostProcessActionBase
                 LastRunDuration = o.OrderByDescending(x => x.EndAt).First().Duration
             }).FirstOrDefaultAsync();
 
-        stats.Action = action;
         if (data is null)
         {
             stats.FailedCount = 0;

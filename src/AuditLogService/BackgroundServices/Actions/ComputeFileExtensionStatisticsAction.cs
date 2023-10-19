@@ -23,8 +23,7 @@ public class ComputeFileExtensionStatisticsAction : PostProcessActionBase
                 .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
                 .Where(o => (o.Extension != null && o.Extension.ToLower() == file) || (o.Extension == null && file == null));
 
-            stats.Extension = extension;
-            stats.Count = await baseQuery.LongCountAsync();
+            stats.Count = await baseQuery.CountAsync();
             stats.Size = await baseQuery.SumAsync(o => o.Size);
         }
 

@@ -7,6 +7,9 @@ namespace AuditLogService.BackgroundServices.Actions;
 
 public class ComputeAvgTimesAction : PostProcessActionBase
 {
+    private static readonly TimeOnly _endOfDay = new(23, 59, 59, 999);
+    private static readonly TimeOnly _startOfDay = TimeOnly.MinValue;
+
     public ComputeAvgTimesAction(AuditLogServiceContext context, AuditLogStatisticsContext statisticsContext) : base(context, statisticsContext)
     {
     }
@@ -16,18 +19,16 @@ public class ComputeAvgTimesAction : PostProcessActionBase
 
     public override async Task ProcessAsync(LogItem logItem)
     {
-        var date = DateOnly.FromDateTime(logItem.CreatedAt);
+        var date = logItem.LogDate;
         var stats = await GetOrCreateStatisticEntity<DailyAvgTimes>(o => o.Date == date, date);
 
-        var startOfday = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
-        var endOfDay = date.ToDateTime(new TimeOnly(23, 59, 59, 999), DateTimeKind.Utc);
+        var startOfday = date.ToDateTime(_startOfDay, DateTimeKind.Utc);
+        var endOfDay = date.ToDateTime(_endOfDay, DateTimeKind.Utc);
 
         await ProcessApiTimesAsync("V1", logItem, stats, date);
         await ProcessApiTimesAsync("V2", logItem, stats, date);
         await ProcessInteractionsAsync(logItem, stats, startOfday, endOfDay);
         await ProcessJobsAsync(logItem, stats, startOfday, endOfDay);
-
-        stats.Date = date;
         await StatisticsContext.SaveChangesAsync();
     }
 

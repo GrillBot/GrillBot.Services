@@ -14,12 +14,11 @@ public class ComputeDateStatisticsAction : PostProcessActionBase
 
     public override async Task ProcessAsync(LogItem logItem)
     {
-        var date = DateOnly.FromDateTime(logItem.CreatedAt);
+        var date = logItem.LogDate;
         var stats = await GetOrCreateStatisticEntity<AuditLogDateStatistic>(o => o.Date == date, date);
 
-        stats.Date = date;
         stats.Count = await Context.LogItems.AsNoTracking()
-            .LongCountAsync(o => o.LogDate == date && !o.IsDeleted);
+            .CountAsync(o => o.LogDate == date && !o.IsDeleted);
         await StatisticsContext.SaveChangesAsync();
     }
 }

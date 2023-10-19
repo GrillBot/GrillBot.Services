@@ -21,8 +21,6 @@ public class ComputeInteractionUserStatisticsAction : PostProcessActionBase
         var userId = logItem.UserId!;
         var stats = await GetOrCreateStatisticEntity<InteractionUserActionStatistic>(o => o.Action == action && o.UserId == userId, action, userId);
 
-        stats.UserId = userId;
-        stats.Action = action;
         stats.Count = await Context.InteractionCommands.AsNoTracking()
             .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
             .CountAsync(o => o.LogItem.UserId == userId && o.Name == interaction.Name && o.ModuleName == interaction.ModuleName && o.MethodName == interaction.MethodName);

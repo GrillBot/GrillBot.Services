@@ -17,9 +17,8 @@ public class ComputeTypeStatitistics : PostProcessActionBase
     {
         var stats = await GetOrCreateStatisticEntity<AuditLogTypeStatistic>(o => o.Type == logItem.Type, logItem.Type);
 
-        stats.Type = logItem.Type;
         stats.Count = await Context.LogItems.AsNoTracking()
-            .LongCountAsync(o => o.Type == logItem.Type && !o.IsDeleted);
+            .CountAsync(o => o.Type == logItem.Type && !o.IsDeleted);
         await StatisticsContext.SaveChangesAsync();
     }
 }

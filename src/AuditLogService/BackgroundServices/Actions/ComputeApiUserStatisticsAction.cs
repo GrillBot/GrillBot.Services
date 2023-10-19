@@ -50,10 +50,6 @@ public class ComputeApiUserStatisticsAction : PostProcessActionBase
                 countQuery = countQuery.Where(o => o.Role == "Admin");
         }
 
-        stats.UserId = userId;
-        stats.IsPublic = isPublic;
-        stats.Action = action;
-        stats.ApiGroup = apiGroup;
         stats.Count = await countQuery.CountAsync();
         await StatisticsContext.SaveChangesAsync();
     }
