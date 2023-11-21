@@ -16,6 +16,14 @@ public class ReactionInfo
     [Required]
     public string Emote { get; set; } = null!;
 
+    /// <summary>
+    /// Is super reaction?
+    /// </summary>
+    public bool IsBurst { get; set; }
+
     public string GetReactionId()
-        => $"{UserId}_{Emote}";
+    {
+        var id = $"{UserId}_{Emote}";
+        return IsBurst ? id + "_Burst" : id;
+    }
 }

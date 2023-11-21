@@ -24,7 +24,7 @@ public class CreateTransactionAction : ApiActionBase
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var request = (TransactionRequest)Parameters.First()!;
+        var request = (TransactionRequest)Parameters[0]!;
         var author = (await Repository.User.FindUserAsync(request.GuildId, request.MessageInfo.AuthorId))!;
         var reactionUser = request.ReactionInfo is null ? null : await Repository.User.FindUserAsync(request.GuildId, request.ReactionInfo.UserId);
         var channel = (await Repository.Channel.FindChannelAsync(request.GuildId, request.ChannelId))!;
@@ -35,7 +35,7 @@ public class CreateTransactionAction : ApiActionBase
         var transaction = new Transaction
         {
             UserId = (reactionUser ?? author).Id,
-            Value = ComputeValue(reactionUser != null),
+            Value = ComputeValue(request),
             GuildId = request.GuildId,
             MessageId = request.MessageInfo.Id,
             ReactionId = request.ReactionInfo?.GetReactionId() ?? ""
@@ -45,7 +45,11 @@ public class CreateTransactionAction : ApiActionBase
 
         if (reactionUser != null)
         {
-            reactionUser.LastReactionIncrement = transaction.CreatedAt;
+            if (request.ReactionInfo?.IsBurst == true)
+                reactionUser.LastSuperReactionIncrement = transaction.CreatedAt;
+            else
+                reactionUser.LastReactionIncrement = transaction.CreatedAt;
+
             reactionUser.PendingRecalculation = true;
         }
         else
@@ -64,28 +68,49 @@ public class CreateTransactionAction : ApiActionBase
 
         if (!user.IsUser || user.PointsDisabled) return false;
         if (channel.IsDeleted || channel.PointsDisabled) return false;
-        if (request.MessageInfo.ContentLength < Options.MinimalMessageLength) return false;
         if (request.MessageInfo.MessageType is MessageType.ApplicationCommand or MessageType.ContextMenuCommand) return false;
         if (author.Id == reactionUser?.Id) return false;
-        if (!CheckCooldown(user, reactionUser != null)) return false;
+        if (!CheckCooldown(user, request)) return false;
+
+        var minLength = Options.Message.GetConfigurationValue<int>("MinLength");
+        if (request.MessageInfo.ContentLength < minLength) return false;
 
         return await IsUniqueRequestAsync(request);
     }
 
-    private bool CheckCooldown(User user, bool isReaction)
+    private bool CheckCooldown(User user, TransactionRequest request)
     {
-        var cooldown = isReaction ? Options.ReactionCooldown : Options.MessageCooldown;
-        var lastIncrement = isReaction ? user.LastReactionIncrement : user.LastMessageIncrement;
+        var incrementType = request.GetIncrementType();
+
+        var cooldown = incrementType switch
+        {
+            Enums.IncrementType.Reaction => Options.Reactions.Cooldown,
+            Enums.IncrementType.SuperReaction => Options.SuperReactions.Cooldown,
+            _ => Options.Message.Cooldown
+        };
+
+        var lastIncrement = incrementType switch
+        {
+            Enums.IncrementType.Reaction => user.LastReactionIncrement,
+            Enums.IncrementType.SuperReaction => user.LastSuperReactionIncrement,
+            _ => user.LastMessageIncrement
+        };
 
         return lastIncrement == null || lastIncrement.Value.AddSeconds(cooldown) <= DateTime.UtcNow;
     }
 
-    private int ComputeValue(bool isReaction)
+    private int ComputeValue(TransactionRequest request)
     {
-        var min = isReaction ? Options.ReactionPointsMin : Options.MessagePointsMin;
-        var max = isReaction ? Options.ReactionPointsMax : Options.MessagePointsMax;
+        var incrementType = request.GetIncrementType();
 
-        return RandomManager.GetNext("Points", min, max);
+        var config = incrementType switch
+        {
+            Enums.IncrementType.Reaction => Options.Reactions,
+            Enums.IncrementType.SuperReaction => Options.SuperReactions,
+            _ => Options.Message
+        };
+
+        return RandomManager.GetNext("Points", config.Min, config.Max);
     }
 
     private async Task<bool> IsUniqueRequestAsync(TransactionRequest request)

@@ -16,6 +16,7 @@ public class User
 
     public DateTime? LastReactionIncrement { get; set; }
     public DateTime? LastMessageIncrement { get; set; }
+    public DateTime? LastSuperReactionIncrement { get; set; }
 
     public bool IsUser { get; set; }
     public int PointsPosition { get; set; }

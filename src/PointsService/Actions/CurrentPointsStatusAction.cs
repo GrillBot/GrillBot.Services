@@ -24,7 +24,10 @@ public class CurrentPointsStatusAction : ApiActionBase
 
     private async Task<ApiResult> ProcessAsync(string guildId, string userId, bool expired)
     {
-        var result = expired ? await ComputeStatusOfExpiredPoints(guildId, userId) : await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired);
+        var result = expired ?
+            await ComputeStatusOfExpiredPoints(guildId, userId) :
+            await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired);
+
         return ApiResult.FromSuccess(result);
     }
 
