@@ -8,5 +8,9 @@ public class IncrementOptions
     public Dictionary<string, object> Config { get; set; } = new();
 
     public TValue? GetConfigurationValue<TValue>(string key)
-        => !Config.TryGetValue(key, out var value) || value is not TValue val ? default : val;
+    {
+        if (!Config.TryGetValue(key, out var value))
+            return default;
+        return (TValue)Convert.ChangeType(value, typeof(TValue));
+    }
 }
