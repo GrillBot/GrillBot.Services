@@ -16,7 +16,7 @@ public class SynchronizationAction : ApiActionBase
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var request = (SynchronizationRequest)Parameters.First()!;
+        var request = (SynchronizationRequest)Parameters[0]!;
 
         await ProcessUsersAsync(request);
         await ProcessChannelsAsync(request);
@@ -43,6 +43,7 @@ public class SynchronizationAction : ApiActionBase
 
             user.IsUser = userInfo.IsUser;
             user.PointsDisabled = userInfo.PointsDisabled;
+            user.PendingRecalculation = true;
         }
     }
 

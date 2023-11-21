@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GrillBot.Core.Validation;
+using PointsService.Enums;
 using PointsService.Validation;
 
 namespace PointsService.Models;
@@ -23,4 +24,11 @@ public class TransactionRequest : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         => validationContext.GetRequiredService<TransactionRequestValidator>().Validate(this, validationContext);
+
+    public IncrementType GetIncrementType()
+    {
+        if (ReactionInfo is not null)
+            return ReactionInfo.IsBurst ? IncrementType.SuperReaction : IncrementType.Reaction;
+        return IncrementType.Message;
+    }
 }
