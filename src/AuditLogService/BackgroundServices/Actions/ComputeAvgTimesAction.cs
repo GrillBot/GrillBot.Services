@@ -7,9 +7,6 @@ namespace AuditLogService.BackgroundServices.Actions;
 
 public class ComputeAvgTimesAction : PostProcessActionBase
 {
-    private static readonly TimeOnly _endOfDay = new(23, 59, 59, 999);
-    private static readonly TimeOnly _startOfDay = TimeOnly.MinValue;
-
     public ComputeAvgTimesAction(AuditLogServiceContext context, AuditLogStatisticsContext statisticsContext) : base(context, statisticsContext)
     {
     }
@@ -22,13 +19,10 @@ public class ComputeAvgTimesAction : PostProcessActionBase
         var date = logItem.LogDate;
         var stats = await GetOrCreateStatisticEntity<DailyAvgTimes>(o => o.Date == date, date);
 
-        var startOfday = date.ToDateTime(_startOfDay, DateTimeKind.Utc);
-        var endOfDay = date.ToDateTime(_endOfDay, DateTimeKind.Utc);
-
         await ProcessApiTimesAsync("V1", logItem, stats, date);
         await ProcessApiTimesAsync("V2", logItem, stats, date);
-        await ProcessInteractionsAsync(logItem, stats, startOfday, endOfDay);
-        await ProcessJobsAsync(logItem, stats, startOfday, endOfDay);
+        await ProcessInteractionsAsync(logItem, stats, date);
+        await ProcessJobsAsync(logItem, stats, date);
         await StatisticsContext.SaveChangesAsync();
     }
 
@@ -49,28 +43,26 @@ public class ComputeAvgTimesAction : PostProcessActionBase
             stats.InternalApi = avgTime;
     }
 
-    private async Task ProcessInteractionsAsync(LogItem logItem, DailyAvgTimes stats, DateTime startOfDay, DateTime endOfday)
+    private async Task ProcessInteractionsAsync(LogItem logItem, DailyAvgTimes stats, DateOnly interactionDate)
     {
         if (logItem.Type is not LogType.InteractionCommand) return;
 
         var avgTime = -1D;
         var query = Context.InteractionCommands.AsNoTracking()
-            .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
-            .Where(o => o.EndAt >= startOfDay && o.EndAt < endOfday);
+            .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id) && o.InteractionDate == interactionDate);
         if (await query.AnyAsync())
             avgTime = await query.AverageAsync(o => o.Duration);
 
         stats.Interactions = avgTime;
     }
 
-    private async Task ProcessJobsAsync(LogItem logItem, DailyAvgTimes stats, DateTime startOfDay, DateTime endOfDay)
+    private async Task ProcessJobsAsync(LogItem logItem, DailyAvgTimes stats, DateOnly jobDate)
     {
         if (logItem.Type is not LogType.JobCompleted) return;
 
         var avgTime = -1D;
         var query = Context.JobExecutions.AsNoTracking()
-            .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id))
-            .Where(o => o.EndAt >= startOfDay && o.EndAt < endOfDay);
+            .Where(o => !Context.LogItems.Any(x => x.IsDeleted && o.LogItemId == x.Id) && o.JobDate == jobDate);
         if (await query.AnyAsync())
             avgTime = await query.AverageAsync(o => o.Duration);
 

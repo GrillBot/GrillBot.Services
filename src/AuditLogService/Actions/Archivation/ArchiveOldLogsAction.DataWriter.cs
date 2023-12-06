@@ -389,7 +389,8 @@ public partial class ArchiveOldLogsAction
             new XAttribute("IsSuccess", item.InteractionCommand.IsSuccess),
             new XAttribute("Duration", item.InteractionCommand.Duration),
             new XAttribute("Locale", item.InteractionCommand.Locale),
-            new XAttribute("EndAt", item.InteractionCommand.EndAt.ToString("o"))
+            new XAttribute("EndAt", item.InteractionCommand.EndAt.ToString("o")),
+            new XAttribute("InteractionDate", item.InteractionCommand.InteractionDate)
         );
 
         foreach (var parameter in item.InteractionCommand.Parameters)
@@ -455,7 +456,8 @@ public partial class ArchiveOldLogsAction
             new XAttribute("StartAt", item.Job.StartAt.ToString("o")),
             new XAttribute("EndAt", item.Job.EndAt.ToString("o")),
             new XAttribute("WasError", item.Job.WasError.ToString()),
-            new XAttribute("Duration", item.Job.Duration)
+            new XAttribute("Duration", item.Job.Duration),
+            new XAttribute("JobDate", item.Job.JobDate)
         );
 
         if (string.IsNullOrEmpty(item.Job.StartUserId))

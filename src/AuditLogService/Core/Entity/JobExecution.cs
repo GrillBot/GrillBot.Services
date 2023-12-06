@@ -5,6 +5,7 @@ namespace AuditLogService.Core.Entity;
 
 [Index(nameof(JobName))]
 [Index(nameof(EndAt))]
+[Index(nameof(JobDate))]
 public class JobExecution : ChildEntityBase
 {
     [StringLength(128)]
@@ -22,4 +23,6 @@ public class JobExecution : ChildEntityBase
     public string? StartUserId { get; set; }
 
     public long Duration { get; set; }
+
+    public DateOnly JobDate { get; set; }
 }

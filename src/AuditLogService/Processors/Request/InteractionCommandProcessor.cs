@@ -31,7 +31,8 @@ public class InteractionCommandProcessor : RequestProcessorBase
             MethodName = request.InteractionCommand.MethodName,
             ModuleName = request.InteractionCommand.ModuleName,
             IsValidToken = request.InteractionCommand.IsValidToken,
-            EndAt = entity.CreatedAt
+            EndAt = entity.CreatedAt,
+            InteractionDate = entity.LogDate
         };
 
         return Task.CompletedTask;

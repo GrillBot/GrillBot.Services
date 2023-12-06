@@ -21,7 +21,8 @@ public class JobCompletedProcessor : RequestProcessorBase
             StartAt = job.StartAt,
             WasError = job.WasError,
             StartUserId = job.StartUserId,
-            Duration = (long)Math.Round((job.EndAt - job.StartAt).TotalMilliseconds)
+            Duration = (long)Math.Round((job.EndAt - job.StartAt).TotalMilliseconds),
+            JobDate = DateOnly.FromDateTime(job.EndAt)
         };
 
         return Task.CompletedTask;
