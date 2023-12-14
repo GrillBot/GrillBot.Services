@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Linq.Expressions;
 
 namespace AuditLogService.Core.Entity;
 
@@ -10,31 +12,36 @@ public class AuditLogServiceContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        static void WithForeignKeyReference<TEntity>(EntityTypeBuilder<LogItem> builder, Expression<Func<LogItem, TEntity?>> hasOneExpression) where TEntity : ChildEntityBase
+            => builder.HasOne(hasOneExpression).WithOne(o => o.LogItem).HasForeignKey<TEntity>(o => o.LogItemId);
+
         modelBuilder.Entity<LogItem>(b =>
         {
             b.HasMany(o => o.Files).WithOne(o => o.LogItem).HasForeignKey(o => o.LogItemId);
 
-            b.HasOne(o => o.ApiRequest).WithOne(o => o.LogItem).HasForeignKey<ApiRequest>(o => o.LogItemId);
-            b.HasOne(o => o.LogMessage).WithOne(o => o.LogItem).HasForeignKey<LogMessage>(o => o.LogItemId);
-            b.HasOne(o => o.DeletedEmote).WithOne(o => o.LogItem).HasForeignKey<DeletedEmote>(o => o.LogItemId);
-            b.HasOne(o => o.Unban).WithOne(o => o.LogItem).HasForeignKey<Unban>(o => o.LogItemId);
-            b.HasOne(o => o.Job).WithOne(o => o.LogItem).HasForeignKey<JobExecution>(o => o.LogItemId);
-            b.HasOne(o => o.ChannelCreated).WithOne(o => o.LogItem).HasForeignKey<ChannelCreated>(o => o.LogItemId);
-            b.HasOne(o => o.ChannelDeleted).WithOne(o => o.LogItem).HasForeignKey<ChannelDeleted>(o => o.LogItemId);
-            b.HasOne(o => o.ChannelUpdated).WithOne(o => o.LogItem).HasForeignKey<ChannelUpdated>(o => o.LogItemId);
-            b.HasOne(o => o.GuildUpdated).WithOne(o => o.LogItem).HasForeignKey<GuildUpdated>(o => o.LogItemId);
+            WithForeignKeyReference(b, o => o.ApiRequest);
+            WithForeignKeyReference(b, o => o.LogMessage);
+            WithForeignKeyReference(b, o => o.DeletedEmote);
+            WithForeignKeyReference(b, o => o.Unban);
+            WithForeignKeyReference(b, o => o.Job);
+            WithForeignKeyReference(b, o => o.ChannelCreated);
+            WithForeignKeyReference(b, o => o.ChannelDeleted);
+            WithForeignKeyReference(b, o => o.ChannelUpdated);
+            WithForeignKeyReference(b, o => o.GuildUpdated);
+            WithForeignKeyReference(b, o => o.MessageDeleted);
+            WithForeignKeyReference(b, o => o.MessageEdited);
+            WithForeignKeyReference(b, o => o.OverwriteCreated);
+            WithForeignKeyReference(b, o => o.OverwriteUpdated);
+            WithForeignKeyReference(b, o => o.OverwriteDeleted);
+            WithForeignKeyReference(b, o => o.UserJoined);
+            WithForeignKeyReference(b, o => o.UserLeft);
+            WithForeignKeyReference(b, o => o.InteractionCommand);
+            WithForeignKeyReference(b, o => o.ThreadDeleted);
+            WithForeignKeyReference(b, o => o.MemberUpdated);
+            WithForeignKeyReference(b, o => o.RoleDeleted);
+            WithForeignKeyReference(b, o => o.MemberWarning);
+
             b.HasMany(o => o.MemberRolesUpdated).WithOne(o => o.LogItem).HasForeignKey(o => o.LogItemId);
-            b.HasOne(o => o.MessageDeleted).WithOne(o => o.LogItem).HasForeignKey<MessageDeleted>(o => o.LogItemId);
-            b.HasOne(o => o.MessageEdited).WithOne(o => o.LogItem).HasForeignKey<MessageEdited>(o => o.LogItemId);
-            b.HasOne(o => o.OverwriteCreated).WithOne(o => o.LogItem).HasForeignKey<OverwriteCreated>(o => o.LogItemId);
-            b.HasOne(o => o.OverwriteUpdated).WithOne(o => o.LogItem).HasForeignKey<OverwriteUpdated>(o => o.LogItemId);
-            b.HasOne(o => o.OverwriteDeleted).WithOne(o => o.LogItem).HasForeignKey<OverwriteDeleted>(o => o.LogItemId);
-            b.HasOne(o => o.UserJoined).WithOne(o => o.LogItem).HasForeignKey<UserJoined>(o => o.LogItemId);
-            b.HasOne(o => o.UserLeft).WithOne(o => o.LogItem).HasForeignKey<UserLeft>(o => o.LogItemId);
-            b.HasOne(o => o.InteractionCommand).WithOne(o => o.LogItem).HasForeignKey<InteractionCommand>(o => o.LogItemId);
-            b.HasOne(o => o.ThreadDeleted).WithOne(o => o.LogItem).HasForeignKey<ThreadDeleted>(o => o.LogItemId);
-            b.HasOne(o => o.MemberUpdated).WithOne(o => o.LogItem).HasForeignKey<MemberUpdated>(o => o.LogItemId);
-            b.HasOne(o => o.RoleDeleted).WithOne(o => o.LogItem).HasForeignKey<RoleDeleted>(o => o.LogItemId);
         });
 
         modelBuilder.Entity<ChannelCreated>(b => b.HasOne(o => o.ChannelInfo).WithMany().HasForeignKey(o => o.ChannelInfoId));
@@ -111,4 +118,5 @@ public class AuditLogServiceContext : DbContext
     public DbSet<MemberUpdated> MemberUpdatedItems => Set<MemberUpdated>();
     public DbSet<RoleInfo> RoleInfos => Set<RoleInfo>();
     public DbSet<RoleDeleted> RoleDeleted => Set<RoleDeleted>();
+    public DbSet<MemberWarning> MemberWarnings => Set<MemberWarning>();
 }

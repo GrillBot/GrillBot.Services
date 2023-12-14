@@ -10,12 +10,12 @@ public class LogRequestValidator : ModelValidator<LogRequest>
     private static readonly HashSet<LogType> TypesWithRequiredGuildId = new()
     {
         LogType.ThreadUpdated, LogType.GuildUpdated, LogType.EmoteDeleted, LogType.ChannelCreated, LogType.ChannelDeleted, LogType.ThreadDeleted, LogType.ChannelUpdated, LogType.UserLeft,
-        LogType.MessageDeleted, LogType.OverwriteUpdated, LogType.MemberRoleUpdated, LogType.OverwriteCreated, LogType.OverwriteDeleted, LogType.RoleDeleted
+        LogType.MessageDeleted, LogType.OverwriteUpdated, LogType.MemberRoleUpdated, LogType.OverwriteCreated, LogType.OverwriteDeleted, LogType.RoleDeleted, LogType.MemberWarning
     };
 
     private static readonly HashSet<LogType> TypesWithRequiredUserId = new()
     {
-        LogType.InteractionCommand
+        LogType.InteractionCommand, LogType.MemberWarning
     };
 
     private static readonly HashSet<LogType> TypesWithRequriedChannelId = new()
@@ -90,7 +90,8 @@ public class LogRequestValidator : ModelValidator<LogRequest>
             { LogType.JobCompleted, request.JobExecution },
             { LogType.Api, request.ApiRequest },
             { LogType.ThreadUpdated, request.ThreadUpdated },
-            { LogType.RoleDeleted, request.RoleDeleted }
+            { LogType.RoleDeleted, request.RoleDeleted },
+            { LogType.MemberWarning, request.MemberWarning }
         };
 
         if (requiredBindings.TryGetValue(request.Type, out var requestData) && requestData is null)

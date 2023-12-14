@@ -54,6 +54,7 @@ public class SearchRequest : IValidatableObject
             LogType.MemberUpdated => AdvancedSearch.MemberUpdated,
             LogType.MemberRoleUpdated => AdvancedSearch.MemberRolesUpdated,
             LogType.MessageDeleted => AdvancedSearch.MessageDeleted,
+            LogType.MemberWarning => AdvancedSearch.MemberWarning,
             _ => null
         };
 
@@ -61,5 +62,5 @@ public class SearchRequest : IValidatableObject
     }
 
     public bool IsAnyAdvancedFilterSet()
-        => ShowTypes.Count > 0 && AdvancedSearch is not null && Enum.GetValues<LogType>().Any(IsAdvancedFilterSet);
+        => ShowTypes.Count > 0 && AdvancedSearch is not null && Array.Exists(Enum.GetValues<LogType>(), IsAdvancedFilterSet);
 }

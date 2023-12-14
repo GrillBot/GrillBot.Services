@@ -99,6 +99,9 @@ public class ComputeDatabaseStatisticsAction : PostProcessActionBase
                 await UpdateStatisticsRecord<RoleDeleted>(nameof(Context.RoleDeleted));
                 await UpdateStatisticsRecord<RoleInfo>(nameof(Context.RoleInfos));
                 break;
+            case LogType.MemberWarning:
+                await UpdateStatisticsRecord<MemberWarning>(nameof(Context.MemberWarnings));
+                break;
         }
 
         await StatisticsContext.SaveChangesAsync();

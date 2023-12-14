@@ -47,6 +47,7 @@ public class LogRequest : IValidatableObject
     public DiffRequest<ThreadInfoRequest>? ThreadUpdated { get; set; }
     public MemberUpdatedRequest? MemberUpdated { get; set; }
     public RoleDeletedRequest? RoleDeleted { get; set; }
+    public MemberWarningRequest? MemberWarning { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         => new LogRequestValidator().Validate(this, validationContext);

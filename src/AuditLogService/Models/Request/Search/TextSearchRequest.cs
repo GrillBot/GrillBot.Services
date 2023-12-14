@@ -4,7 +4,7 @@ namespace AuditLogService.Models.Request.Search;
 
 public class TextSearchRequest : IAdvancedSearchRequest
 {
-    public string? Text { get; set; } = null!;
+    public string? Text { get; set; }
 
     [StringLength(100)]
     public string? SourceAppName { get; set; }

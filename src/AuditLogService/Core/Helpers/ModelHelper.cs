@@ -3,7 +3,7 @@ using GrillBot.Core.Models;
 
 namespace AuditLogService.Core.Helpers;
 
-public class ModelHelper
+public static class ModelHelper
 {
     public static bool IsModelEmpty<TModel>(TModel model, bool ignoreNonDiffTypes = true)
     {

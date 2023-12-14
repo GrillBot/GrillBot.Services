@@ -30,4 +30,9 @@ public class DashboardController : ControllerBase
     [ProducesResponseType(typeof(List<DashboardInfoRow>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetTodayAvgTimesAsync()
         => await ProcessAsync<GetTodayAvgTimesDashboard>();
+
+    [HttpGet("memberWarning")]
+    [ProducesResponseType(typeof(List<DashboardInfoRow>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMemberWarningDashboardAsync()
+        => await ProcessAsync<GetMemberWarningDashboardAction>();
 }

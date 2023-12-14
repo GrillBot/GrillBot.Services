@@ -62,6 +62,7 @@ public class LogItem
     public ThreadUpdated? ThreadUpdated { get; set; }
     public MemberUpdated? MemberUpdated { get; set; }
     public RoleDeleted? RoleDeleted { get; set; }
+    public MemberWarning? MemberWarning { get; set; }
 
     #endregion
 
@@ -72,7 +73,7 @@ public class LogItem
 
     [NotMapped]
     public List<LogItem> MergedItems { get; set; } = new();
-    
+
     #endregion
 
     public LogItem()

@@ -92,6 +92,9 @@ public partial class SearchItemsAction
             case LogType.RoleDeleted:
                 await SetRoleDeletedPreviewAsync(result);
                 break;
+            case LogType.MemberWarning:
+                await SetMemberWarningPreviewAsync(result);
+                break;
         }
 
         return result;
@@ -448,6 +451,20 @@ public partial class SearchItemsAction
             });
 
         result.IsDetailAvailable = true;
+        result.Preview = await query.FirstOrDefaultAsync();
+    }
+
+    private async Task SetMemberWarningPreviewAsync(LogListItem result)
+    {
+        var query = Context.MemberWarnings.AsNoTracking()
+            .Where(o => o.LogItemId == result.Id)
+            .Select(o => new MemberWarningPreview
+            {
+                Reason = o.Reason,
+                TargetId = o.TargetId
+            });
+
+        result.IsDetailAvailable = false;
         result.Preview = await query.FirstOrDefaultAsync();
     }
 }
