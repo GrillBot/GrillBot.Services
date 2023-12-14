@@ -26,6 +26,6 @@ public partial class ArchiveOldLogsAction : ApiActionBase
         var items = await ReadItemsToArchiveAsync(expirationDate);
         var result = CreateArchive(items);
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 }

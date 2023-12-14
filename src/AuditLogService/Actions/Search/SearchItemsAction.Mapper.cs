@@ -255,7 +255,7 @@ public partial class SearchItemsAction
 
         result.Preview = new MemberRoleUpdatedPreview
         {
-            UserId = roles.First().UserId,
+            UserId = roles[0].UserId,
             ModifiedRoles = roles.DistinctBy(o => o.RoleName).ToDictionary(o => o.RoleName, o => o.IsAdded)
         };
     }

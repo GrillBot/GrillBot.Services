@@ -32,6 +32,6 @@ public class GetStatusInfoAction : ApiActionBase
                 .CountAsync(o => o.IsPendingProcess)
         };
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 }

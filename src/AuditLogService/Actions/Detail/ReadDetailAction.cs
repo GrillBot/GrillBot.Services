@@ -67,6 +67,6 @@ public partial class ReadDetailAction : ApiActionBase
                 break;
         }
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 }

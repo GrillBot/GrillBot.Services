@@ -29,6 +29,6 @@ public class GetJobsInfoAction : ApiActionBase
                 TotalDuration = o.TotalDuration
             }).ToListAsync();
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 }

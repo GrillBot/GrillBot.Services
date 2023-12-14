@@ -3,29 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileService", "src\FileService\FileService\FileService.csproj", "{541A94F3-851B-43E2-901E-3C69816CA6AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RubbergodService", "src\RubbergodService\RubbergodService\RubbergodService.csproj", "{AE130712-829F-4E38-8178-EBD978B58A7A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RubbergodService", "src\RubbergodService\RubbergodService\RubbergodService.csproj", "{AE130712-829F-4E38-8178-EBD978B58A7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PointsService", "src\PointsService\PointsService.csproj", "{7AECD35F-D27B-4153-ADE3-E6813F368468}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PointsService", "src\PointsService\PointsService.csproj", "{7AECD35F-D27B-4153-ADE3-E6813F368468}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageProcessingService", "src\ImageProcessingService\ImageProcessingService.csproj", "{2F8ADA3C-DE0B-4227-BD4E-2F4B7E74B586}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessingService", "src\ImageProcessingService\ImageProcessingService.csproj", "{2F8ADA3C-DE0B-4227-BD4E-2F4B7E74B586}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuditLogService", "src\AuditLogService\AuditLogService.csproj", "{D857B0A3-5D82-43DA-BC7B-ACE3CFB33999}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuditLogService", "src\AuditLogService\AuditLogService.csproj", "{D857B0A3-5D82-43DA-BC7B-ACE3CFB33999}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{541A94F3-851B-43E2-901E-3C69816CA6AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{541A94F3-851B-43E2-901E-3C69816CA6AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{541A94F3-851B-43E2-901E-3C69816CA6AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{541A94F3-851B-43E2-901E-3C69816CA6AA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AE130712-829F-4E38-8178-EBD978B58A7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AE130712-829F-4E38-8178-EBD978B58A7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE130712-829F-4E38-8178-EBD978B58A7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -42,5 +33,8 @@ Global
 		{D857B0A3-5D82-43DA-BC7B-ACE3CFB33999}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D857B0A3-5D82-43DA-BC7B-ACE3CFB33999}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D857B0A3-5D82-43DA-BC7B-ACE3CFB33999}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

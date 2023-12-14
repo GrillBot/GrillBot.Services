@@ -32,7 +32,7 @@ public class DeleteItemAction : ApiActionBase
         logItem.IsPendingProcess = true;
 
         await Context.SaveChangesAsync();
-        return ApiResult.FromSuccess(response);
+        return ApiResult.Ok(response);
     }
 
     private async Task<LogItem?> ReadLogItemAsync(Guid id)

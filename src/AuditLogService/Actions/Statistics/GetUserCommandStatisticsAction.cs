@@ -24,6 +24,6 @@ public class GetUserCommandStatisticsAction : ApiActionBase
             UserId = o.UserId!
         });
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 }

@@ -24,7 +24,7 @@ public class GetAuditLogStatisticsAction : ApiActionBase
             FileSizes = await GetFileStatisticsWithSizeAsync()
         };
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 
     private async Task<Dictionary<string, long>> GetStatisticsByTypeAsync()

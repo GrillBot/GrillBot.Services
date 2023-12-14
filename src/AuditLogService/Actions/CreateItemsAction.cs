@@ -32,7 +32,7 @@ public class CreateItemsAction : ApiActionBase
             await Context.SaveChangesAsync();
         }
 
-        return ApiResult.FromSuccess();
+        return ApiResult.Ok();
     }
 
     private async Task<LogItem> CreateEntityAsync(LogRequest request)

@@ -29,6 +29,6 @@ public class GetTodayAvgTimesDashboard : ApiActionBase
             PrivateApi = (long)Math.Round(data.InternalApi)
         };
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 }

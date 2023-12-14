@@ -36,7 +36,7 @@ public class BulkDeleteAction : ApiActionBase
         }
 
         await Context.SaveChangesAsync();
-        return ApiResult.FromSuccess(response);
+        return ApiResult.Ok(response);
     }
 
     private async Task<Dictionary<Guid, LogItem>> ReadLogItemsAsync(List<Guid> ids)

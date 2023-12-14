@@ -22,7 +22,7 @@ public class GetInteractionStatisticsAction : ApiActionBase
             Commands = await GetCommandStatisticsAsync()
         };
 
-        return ApiResult.FromSuccess(statistics);
+        return ApiResult.Ok(statistics);
     }
 
     private async Task<Dictionary<string, long>> GetStatisticsByDateAsync()

@@ -29,7 +29,7 @@ public abstract class DashboardListBaseAction<TEntity> : ApiActionBase where TEn
             .Take(10);
 
         var result = await mappedQuery.ToListAsync();
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 
     protected abstract Expression<Func<TEntity, DateTime>> CreateSorting();

@@ -23,7 +23,7 @@ public class GetApiStatisticsAction : ApiActionBase
             Endpoints = await GetEndpointStatisticsAsync()
         };
 
-        return ApiResult.FromSuccess(statistics);
+        return ApiResult.Ok(statistics);
     }
 
     private async Task<Dictionary<string, long>> GetApiStatisticsByDateForApiGroupAsync(string apiGroupName)

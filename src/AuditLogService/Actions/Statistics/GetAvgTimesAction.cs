@@ -24,7 +24,7 @@ public class GetAvgTimesAction : ApiActionBase
             InternalApi = await GetAvgTimesOfApiAsync("V1")
         };
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 
     private async Task<Dictionary<string, double>> GetAvgTimesOfApiAsync(string apiGroupName)

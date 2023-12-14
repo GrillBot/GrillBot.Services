@@ -19,6 +19,6 @@ public class GetItemsCountOfGuildAction : ApiActionBase
         var count = await Context.LogItems.AsNoTracking()
             .CountAsync(o => !o.IsDeleted && o.GuildId == guildId);
 
-        return ApiResult.FromSuccess(count);
+        return ApiResult.Ok(count);
     }
 }

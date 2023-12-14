@@ -29,7 +29,7 @@ public class GetUserApiStatisticsAction : ApiActionBase
             UserId = o.UserId
         });
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 
     private static IQueryable<ApiUserActionStatistic> Filter(IQueryable<ApiUserActionStatistic> query, string criteria)
