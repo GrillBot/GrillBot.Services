@@ -127,9 +127,6 @@ public class ComputeDatabaseStatisticsAction : PostProcessActionBase
                 await UpdateStatisticsRecord<InteractionStatistic>($"Statistics.{nameof(StatisticsContext.InteractionStatistics)}", true);
                 await UpdateStatisticsRecord<InteractionDateCountStatistic>($"Statistics.{nameof(StatisticsContext.InteractionDateCountStatistics)}", true);
                 break;
-            case LogType.MessageDeleted:
-                await UpdateStatisticsRecord<FileExtensionStatistic>($"Statistics.{nameof(StatisticsContext.FileExtensionStatistics)}", true);
-                break;
         }
 
         await StatisticsContext.SaveChangesAsync();

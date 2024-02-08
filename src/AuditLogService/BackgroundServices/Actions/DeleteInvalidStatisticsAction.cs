@@ -43,9 +43,6 @@ public class DeleteInvalidStatisticsAction : PostProcessActionBase
         if (logItem.Type != LogType.MemberWarning)
             await ClearStatisticsAsync<AuditLogDateStatistic>(o => o.Count == 0);
 
-        if (logItem.Files.Count > 0)
-            await ClearStatisticsAsync<FileExtensionStatistic>(o => o.Count == 0);
-
         await StatisticsContext.SaveChangesAsync();
     }
 

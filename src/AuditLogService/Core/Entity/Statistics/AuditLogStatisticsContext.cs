@@ -27,7 +27,6 @@ public class AuditLogStatisticsContext : DbContext
     public DbSet<InteractionUserActionStatistic> InteractionUserActionStatistics => Set<InteractionUserActionStatistic>();
     public DbSet<AuditLogTypeStatistic> TypeStatistics => Set<AuditLogTypeStatistic>();
     public DbSet<AuditLogDateStatistic> DateStatistics => Set<AuditLogDateStatistic>();
-    public DbSet<FileExtensionStatistic> FileExtensionStatistics => Set<FileExtensionStatistic>();
     public DbSet<InteractionStatistic> InteractionStatistics => Set<InteractionStatistic>();
     public DbSet<JobInfo> JobInfos => Set<JobInfo>();
     public DbSet<DatabaseStatistic> DatabaseStatistics => Set<DatabaseStatistic>();

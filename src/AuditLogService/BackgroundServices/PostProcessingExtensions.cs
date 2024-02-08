@@ -18,7 +18,6 @@ public static class PostProcessingExtensions
             .AddScoped<PostProcessActionBase, ComputeAvgTimesAction>()
             .AddScoped<PostProcessActionBase, ComputeTypeStatitistics>()
             .AddScoped<PostProcessActionBase, ComputeDateStatisticsAction>()
-            .AddScoped<PostProcessActionBase, ComputeFileExtensionStatisticsAction>()
             .AddScoped<PostProcessActionBase, ComputeJobInfoAction>();
 
         services

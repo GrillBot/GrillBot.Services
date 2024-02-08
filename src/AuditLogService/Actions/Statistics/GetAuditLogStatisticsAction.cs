@@ -1,6 +1,8 @@
-﻿using AuditLogService.Core.Entity.Statistics;
+﻿using AuditLogService.Core.Entity;
+using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Models.Response.Statistics;
 using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.Managers.Performance;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Statistics;
@@ -8,20 +10,23 @@ namespace AuditLogService.Actions.Statistics;
 public class GetAuditLogStatisticsAction : ApiActionBase
 {
     private AuditLogStatisticsContext StatisticsContext { get; }
+    private AuditLogServiceContext AuditLogServiceContext { get; }
+    private ICounterManager CounterManager { get; }
 
-    public GetAuditLogStatisticsAction(AuditLogStatisticsContext statisticsContext)
+    public GetAuditLogStatisticsAction(AuditLogStatisticsContext statisticsContext, AuditLogServiceContext auditLogServiceContext, ICounterManager counterManager)
     {
         StatisticsContext = statisticsContext;
+        AuditLogServiceContext = auditLogServiceContext;
+        CounterManager = counterManager;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
         var result = new AuditLogStatistics
         {
-            FileCounts = await GetFileStatisticsWithCountAsync(),
             ByDate = await GetStatisticsByDateAsync(),
             ByType = await GetStatisticsByTypeAsync(),
-            FileSizes = await GetFileStatisticsWithSizeAsync()
+            FileExtensionStatistics = await GetFileExtensionStatisticsAsync()
         };
 
         return ApiResult.Ok(result);
@@ -46,19 +51,20 @@ public class GetAuditLogStatisticsAction : ApiActionBase
             .ToDictionaryAsync(o => o.Date, o => o.Count);
     }
 
-    private async Task<Dictionary<string, long>> GetFileStatisticsWithCountAsync()
+    private async Task<List<FileExtensionStatistic>> GetFileExtensionStatisticsAsync()
     {
-        return await StatisticsContext.FileExtensionStatistics.AsNoTracking()
-            .Select(o => new { o.Extension, o.Count })
-            .OrderBy(o => o.Extension)
-            .ToDictionaryAsync(o => o.Extension, o => o.Count);
-    }
+        var query = AuditLogServiceContext.Files.AsNoTracking()
+            .Where(o => !AuditLogServiceContext.LogItems.Any(x => x.IsDeleted && x.Id == o.LogItemId))
+            .GroupBy(o => o.Extension ?? ".NoExtension")
+            .Select(o => new FileExtensionStatistic
+            {
+                Extension = o.Key,
+                Count = o.Count(),
+                Size = o.Sum(x => x.Size)
+            })
+            .OrderBy(o => o.Extension);
 
-    private async Task<Dictionary<string, long>> GetFileStatisticsWithSizeAsync()
-    {
-        return await StatisticsContext.FileExtensionStatistics.AsNoTracking()
-            .Select(o => new { o.Extension, o.Size })
-            .OrderBy(o => o.Extension)
-            .ToDictionaryAsync(o => o.Extension, o => o.Size);
+        using (CounterManager.Create("Api.Statistics.GetAuditLogStatistics.GetFileExtensionStatistics"))
+            return await query.ToListAsync();
     }
 }

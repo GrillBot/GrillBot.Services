@@ -126,7 +126,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("LogItemId", "Method", "TemplatePath", "ApiGroupName", "Identification");
 
-                    b.ToTable("ApiRequests");
+                    b.ToTable("ApiRequests", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.ChannelCreated", b =>
@@ -141,7 +141,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("ChannelInfoId");
 
-                    b.ToTable("ChannelCreatedItems");
+                    b.ToTable("ChannelCreatedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.ChannelDeleted", b =>
@@ -156,7 +156,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("ChannelInfoId");
 
-                    b.ToTable("ChannelDeletedItems");
+                    b.ToTable("ChannelDeletedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.ChannelInfo", b =>
@@ -190,7 +190,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ChannelInfoItems");
+                    b.ToTable("ChannelInfoItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.ChannelUpdated", b =>
@@ -210,7 +210,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("BeforeId");
 
-                    b.ToTable("ChannelUpdatedItems");
+                    b.ToTable("ChannelUpdatedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.DeletedEmote", b =>
@@ -229,7 +229,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("LogItemId");
 
-                    b.ToTable("DeletedEmotes");
+                    b.ToTable("DeletedEmotes", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.EmbedField", b =>
@@ -257,7 +257,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("EmbedInfoId");
 
-                    b.ToTable("EmbedFields");
+                    b.ToTable("EmbedFields", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.EmbedInfo", b =>
@@ -299,7 +299,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("MessageDeletedId");
 
-                    b.ToTable("EmbedInfoItems");
+                    b.ToTable("EmbedInfoItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.File", b =>
@@ -326,7 +326,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("LogItemId");
 
-                    b.ToTable("Files");
+                    b.ToTable("Files", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.GuildInfo", b =>
@@ -405,7 +405,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GuildInfoItems");
+                    b.ToTable("GuildInfoItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.GuildUpdated", b =>
@@ -425,7 +425,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("BeforeId");
 
-                    b.ToTable("GuildUpdatedItems");
+                    b.ToTable("GuildUpdatedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.InteractionCommand", b =>
@@ -484,7 +484,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("InteractionDate");
 
-                    b.ToTable("InteractionCommands");
+                    b.ToTable("InteractionCommands", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.JobExecution", b =>
@@ -528,7 +528,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("JobName");
 
-                    b.ToTable("JobExecutions");
+                    b.ToTable("JobExecutions", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.LogItem", b =>
@@ -577,7 +577,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("Type", "IsDeleted");
 
-                    b.ToTable("LogItems");
+                    b.ToTable("LogItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.LogMessage", b =>
@@ -604,7 +604,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("LogItemId");
 
-                    b.ToTable("LogMessages");
+                    b.ToTable("LogMessages", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.MemberInfo", b =>
@@ -635,7 +635,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MemberInfos");
+                    b.ToTable("MemberInfos", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.MemberRoleUpdated", b =>
@@ -672,7 +672,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("LogItemId");
 
-                    b.ToTable("MemberRoleUpdatedItems");
+                    b.ToTable("MemberRoleUpdatedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.MemberUpdated", b =>
@@ -692,7 +692,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("BeforeId");
 
-                    b.ToTable("MemberUpdatedItems");
+                    b.ToTable("MemberUpdatedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.MemberWarning", b =>
@@ -711,7 +711,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("LogItemId");
 
-                    b.ToTable("MemberWarnings");
+                    b.ToTable("MemberWarnings", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.MessageDeleted", b =>
@@ -732,7 +732,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("LogItemId");
 
-                    b.ToTable("MessageDeletedItems");
+                    b.ToTable("MessageDeletedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.MessageEdited", b =>
@@ -754,7 +754,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("LogItemId");
 
-                    b.ToTable("MessageEditedItems");
+                    b.ToTable("MessageEditedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.OverwriteCreated", b =>
@@ -769,7 +769,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("OverwriteInfoId");
 
-                    b.ToTable("OverwriteCreatedItems");
+                    b.ToTable("OverwriteCreatedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.OverwriteDeleted", b =>
@@ -784,7 +784,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("OverwriteInfoId");
 
-                    b.ToTable("OverwriteDeletedItems");
+                    b.ToTable("OverwriteDeletedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.OverwriteInfo", b =>
@@ -810,7 +810,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OverwriteInfoItems");
+                    b.ToTable("OverwriteInfoItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.OverwriteUpdated", b =>
@@ -830,7 +830,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("BeforeId");
 
-                    b.ToTable("OverwriteUpdatedItems");
+                    b.ToTable("OverwriteUpdatedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.RoleDeleted", b =>
@@ -845,7 +845,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("RoleInfoId");
 
-                    b.ToTable("RoleDeleted");
+                    b.ToTable("RoleDeleted", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.RoleInfo", b =>
@@ -883,7 +883,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RoleInfos");
+                    b.ToTable("RoleInfos", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.ThreadDeleted", b =>
@@ -898,7 +898,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("ThreadInfoId");
 
-                    b.ToTable("ThreadDeletedItems");
+                    b.ToTable("ThreadDeletedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.ThreadInfo", b =>
@@ -931,7 +931,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ThreadInfoItems");
+                    b.ToTable("ThreadInfoItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.ThreadUpdated", b =>
@@ -951,7 +951,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasIndex("BeforeId");
 
-                    b.ToTable("ThreadUpdatedItems");
+                    b.ToTable("ThreadUpdatedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.Unban", b =>
@@ -966,7 +966,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("LogItemId");
 
-                    b.ToTable("Unbans");
+                    b.ToTable("Unbans", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.UserJoined", b =>
@@ -979,7 +979,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("LogItemId");
 
-                    b.ToTable("UserJoinedItems");
+                    b.ToTable("UserJoinedItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.UserLeft", b =>
@@ -1003,7 +1003,7 @@ namespace AuditLogService.Core.Migrations
 
                     b.HasKey("LogItemId");
 
-                    b.ToTable("UserLeftItems");
+                    b.ToTable("UserLeftItems", (string)null);
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.ApiRequest", b =>
