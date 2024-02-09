@@ -1,4 +1,4 @@
-﻿using System.Xml.Linq;
+﻿using System.Text.Json.Nodes;
 using AuditLogService.Core.Entity;
 using AuditLogService.Models.Response;
 using File = AuditLogService.Core.Entity.File;
@@ -10,16 +10,19 @@ public partial class ArchiveOldLogsAction
     private static ArchivationResult CreateArchive(List<LogItem> items)
     {
         var result = new ArchivationResult();
-        var xml = new XElement(
-            "AuditLogBackup",
-            new XAttribute("CreatedAt", DateTime.UtcNow.ToString("o")),
-            new XAttribute("Count", items.Count)
-        );
+        var jsonItems = new JsonArray();
 
         foreach (var item in items)
-            xml.Add(ProcessLogItem(item, result));
+            jsonItems.Add(ProcessLogItem(item, result));
 
-        result.Xml = xml.ToString(SaveOptions.DisableFormatting | SaveOptions.OmitDuplicateNamespaces);
+        var json = new JsonObject
+        {
+            ["CreatedAt"] = DateTime.UtcNow.ToString("o"),
+            ["Count"] = items.Count,
+            ["Items"] = jsonItems
+        };
+
+        result.Content = json.ToJsonString();
         result.ChannelIds = result.ChannelIds.Distinct().ToList();
         result.GuildIds = result.GuildIds.Distinct().ToList();
         result.UserIds = result.UserIds.Distinct().ToList();
@@ -31,64 +34,65 @@ public partial class ArchiveOldLogsAction
         return result;
     }
 
-    private static XElement ProcessLogItem(LogItem item, ArchivationResult result)
+    private static JsonNode ProcessLogItem(LogItem item, ArchivationResult result)
     {
         result.Ids.Add(item.Id);
 
-        var xml = new XElement(
-            "Item",
-            new XAttribute("Id", item.Id.ToString()),
-            new XAttribute("CreatedAt", item.CreatedAt.ToString("o")),
-            new XAttribute("Type", item.Type.ToString())
-        );
+        var json = new JsonObject
+        {
+            ["Id"] = item.Id.ToString(),
+            ["CreatedAt"] = item.CreatedAt.ToString("o"),
+            ["Type"] = item.Type.ToString()
+        };
 
         if (!string.IsNullOrEmpty(item.GuildId))
         {
             result.GuildIds.Add(item.GuildId);
-            xml.Add(new XAttribute("GuildId", item.GuildId));
+            json["GuildId"] = item.GuildId;
         }
 
         if (!string.IsNullOrEmpty(item.UserId))
         {
             result.UserIds.Add(item.UserId);
-            xml.Add(new XAttribute("UserId", item.UserId));
+            json["UserId"] = item.UserId;
         }
 
         if (!string.IsNullOrEmpty(item.ChannelId))
         {
             result.ChannelIds.Add(item.ChannelId);
-            xml.Add(new XAttribute("ChannelId", item.ChannelId));
+            json["ChannelId"] = item.ChannelId;
         }
 
         if (!string.IsNullOrEmpty(item.DiscordId))
-            xml.Add(new XAttribute("DiscordId", item.DiscordId));
+            json["DiscordId"] = item.DiscordId;
 
-        foreach (var file in item.Files)
-            xml.Add(ProcessFile(file, result));
+        if (item.Files.Count > 0)
+            json["Files"] = new JsonArray(item.Files.Select(o => ProcessFile(o, result)).ToArray());
 
-        var dataXml = ProcessData(item, result);
-        if (dataXml is not null) xml.Add(dataXml);
+        var dataJson = ProcessData(item, result);
+        if (dataJson is not null)
+            json["Data"] = dataJson;
 
         UpdateTypeStats(item, result);
         UpdateMonthStats(item, result);
 
-        return xml;
+        return json;
     }
 
-    private static XElement ProcessFile(File file, ArchivationResult result)
+    private static JsonNode ProcessFile(File file, ArchivationResult result)
     {
         result.Files.Add(file.Filename);
 
-        var xml = new XElement(
-            "File",
-            new XAttribute("Id", file.Id),
-            new XAttribute("Filename", file.Filename),
-            new XAttribute("Size", file.Size)
-        );
+        var json = new JsonObject
+        {
+            ["Id"] = file.Id.ToString(),
+            ["Filename"] = file.Filename,
+            ["Size"] = file.Size
+        };
 
         if (!string.IsNullOrEmpty(file.Extension))
-            xml.Add(new XAttribute("Extension", file.Extension));
-        return xml;
+            json["Extension"] = file.Extension;
+        return json;
     }
 
     private static void UpdateTypeStats(LogItem item, ArchivationResult result)

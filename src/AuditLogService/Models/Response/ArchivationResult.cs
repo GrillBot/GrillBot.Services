@@ -2,7 +2,7 @@
 
 public class ArchivationResult
 {
-    public string Xml { get; set; } = null!;
+    public string Content { get; set; } = null!;
     public List<string> Files { get; set; } = new();
     public List<string> UserIds { get; set; } = new();
     public List<string> GuildIds { get; set; } = new();

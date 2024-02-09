@@ -1,4 +1,4 @@
-﻿using System.Xml.Linq;
+﻿using System.Text.Json.Nodes;
 using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
 using AuditLogService.Models.Response;
@@ -8,7 +8,7 @@ namespace AuditLogService.Actions.Archivation;
 
 public partial class ArchiveOldLogsAction
 {
-    private static XElement? ProcessData(LogItem item, ArchivationResult result)
+    private static JsonNode? ProcessData(LogItem item, ArchivationResult result)
     {
         return item.Type switch
         {
@@ -38,530 +38,569 @@ public partial class ArchiveOldLogsAction
         };
     }
 
-    private static XElement? CreateLogMessageItem(LogItem item)
+    private static JsonNode? CreateLogMessageItem(LogItem item)
     {
         if (item.LogMessage is null)
             return null;
 
-        return new XElement(
-            item.Type.ToString(),
-            new XAttribute("SourceAppName", item.LogMessage.SourceAppName),
-            new XAttribute("Source", item.LogMessage.Source),
-            new XAttribute("Severity", item.LogMessage.Severity.ToString()),
-            new XElement("Message", item.LogMessage.Message)
-        );
+        return new JsonObject
+        {
+            ["SourceAppName"] = item.LogMessage.SourceAppName,
+            ["Source"] = item.LogMessage.Source,
+            ["Severity"] = item.LogMessage.Severity.ToString(),
+            ["Message"] = item.LogMessage.Message
+        };
     }
 
-    private static XElement? CreateChannelCreatedItem(LogItem item)
-        => item.ChannelCreated is null ? null : new XElement("ChannelCreated", CreateChannelInfoItems(item.ChannelCreated.ChannelInfo).ToArray());
+    private static JsonNode? CreateChannelCreatedItem(LogItem item)
+        => item.ChannelCreated is null ? null : (JsonNode)new JsonObject { ["ChannelInfo"] = CreateChannelInfoItems(item.ChannelCreated.ChannelInfo) };
 
-    private static XElement? CreateChannelUpdatedItem(LogItem item)
+    private static JsonNode? CreateChannelUpdatedItem(LogItem item)
     {
         if (item.ChannelUpdated is null)
             return null;
 
-        return new XElement(
-            "ChannelUpdated",
-            new XElement("Before", CreateChannelInfoItems(item.ChannelUpdated.Before).ToArray()),
-            new XElement("After", CreateChannelInfoItems(item.ChannelUpdated.After).ToArray())
-        );
+        return new JsonObject
+        {
+            ["Before"] = CreateChannelInfoItems(item.ChannelUpdated.Before),
+            ["After"] = CreateChannelInfoItems(item.ChannelUpdated.After)
+        };
     }
 
-    private static XElement? CreateChannelDeletedItem(LogItem item)
-        => item.ChannelDeleted is null ? null : new XElement("ChannelDeleted", CreateChannelInfoItems(item.ChannelDeleted.ChannelInfo).ToArray());
+    private static JsonNode? CreateChannelDeletedItem(LogItem item)
+        => item.ChannelDeleted is null ? null : new JsonObject { ["ChannelInfo"] = CreateChannelInfoItems(item.ChannelDeleted.ChannelInfo) };
 
-    private static IEnumerable<object?> CreateChannelInfoItems(ChannelInfo info)
+    private static JsonNode CreateChannelInfoItems(ChannelInfo info)
     {
-        yield return new XAttribute("InfoId", info.Id.ToString());
+        var json = new JsonObject
+        {
+            ["InfoId"] = info.Id.ToString(),
+            ["Position"] = info.Position,
+            ["Flags"] = info.Flags
+        };
 
         if (!string.IsNullOrEmpty(info.ChannelName))
-            yield return new XAttribute("Name", info.ChannelName);
+            json["Name"] = info.ChannelName;
 
         if (info.SlowMode is not null)
-            yield return new XAttribute("SlowMode", info.SlowMode.Value);
+            json["Slowmode"] = info.SlowMode.Value;
 
         if (info.ChannelType is not null)
-            yield return new XAttribute("Type", info.ChannelType.Value);
+            json["Type"] = info.ChannelType.Value.ToString();
 
         if (info.IsNsfw is not null)
-            yield return new XAttribute("IsNsfw", info.IsNsfw.Value);
+            json["IsNsfw"] = info.IsNsfw.Value;
 
         if (info.Bitrate is not null)
-            yield return new XAttribute("Bitrate", info.Bitrate.Value);
+            json["Bitrate"] = info.Bitrate.Value;
 
-        yield return new XAttribute("Position", info.Position);
-        yield return new XAttribute("Flags", info.Flags);
+        return json;
     }
 
-    private static XElement? CreateDeletedEmoteItem(LogItem item)
+    private static JsonNode? CreateDeletedEmoteItem(LogItem item)
     {
         if (item.DeletedEmote is null)
             return null;
 
-        return new XElement(
-            "EmoteDeleted",
-            new XAttribute("Id", item.DeletedEmote.EmoteId),
-            new XAttribute("Name", item.DeletedEmote.EmoteName)
-        );
+        return new JsonObject
+        {
+            ["Id"] = item.DeletedEmote.EmoteId,
+            ["Name"] = item.DeletedEmote.EmoteName
+        };
     }
 
-    private static XElement? CreateOverwriteCreatedItem(LogItem item, ArchivationResult result)
-        => item.OverwriteCreated is null ? null : new XElement("OverwriteCreated", CreateOverwriteInfoItems(item.OverwriteCreated.OverwriteInfo, result).ToArray());
+    private static JsonNode? CreateOverwriteCreatedItem(LogItem item, ArchivationResult result)
+        => item.OverwriteCreated is null ? null : new JsonObject { ["OverwriteInfo"] = CreateOverwriteInfoItems(item.OverwriteCreated.OverwriteInfo, result) };
 
-    private static XElement? CreateOverwriteDeletedItem(LogItem item, ArchivationResult result)
-        => item.OverwriteDeleted is null ? null : new XElement("OverwriteDeleted", CreateOverwriteInfoItems(item.OverwriteDeleted.OverwriteInfo, result).ToArray());
+    private static JsonNode? CreateOverwriteDeletedItem(LogItem item, ArchivationResult result)
+        => item.OverwriteDeleted is null ? null : new JsonObject { ["OverwriteInfo"] = CreateOverwriteInfoItems(item.OverwriteDeleted.OverwriteInfo, result) };
 
-    private static XElement? CreateOverwriteUpdatedItem(LogItem item, ArchivationResult result)
+    private static JsonNode? CreateOverwriteUpdatedItem(LogItem item, ArchivationResult result)
     {
         if (item.OverwriteUpdated is null)
             return null;
 
-        return new XElement(
-            "OverwriteUpdated",
-            new XElement("Before", CreateOverwriteInfoItems(item.OverwriteUpdated.Before, result).ToArray()),
-            new XElement("After", CreateOverwriteInfoItems(item.OverwriteUpdated.After, result).ToArray())
-        );
+        return new JsonObject
+        {
+            ["Before"] = CreateOverwriteInfoItems(item.OverwriteUpdated.Before, result),
+            ["After"] = CreateOverwriteInfoItems(item.OverwriteUpdated.After, result)
+        };
     }
 
-    private static IEnumerable<object?> CreateOverwriteInfoItems(OverwriteInfo info, ArchivationResult result)
+    private static JsonNode CreateOverwriteInfoItems(OverwriteInfo info, ArchivationResult result)
     {
-        yield return new XAttribute("InfoId", info.Id.ToString());
-        yield return new XAttribute("TargetType", info.Target.ToString());
-        yield return new XAttribute("TargetId", info.TargetId);
+        var json = new JsonObject
+        {
+            ["InfoId"] = info.Id.ToString(),
+            ["TargetType"] = info.Target.ToString(),
+            ["TargetId"] = info.TargetId
+        };
 
         if (info.Target == PermissionTarget.User)
             result.UserIds.Add(info.TargetId);
 
         var perms = new OverwritePermissions(info.AllowValue, info.DenyValue);
         if (perms.AllowValue > 0)
-            yield return new XAttribute("Allow", string.Join(", ", perms.ToAllowList()));
+            json["AllowList"] = new JsonArray(perms.ToAllowList().Select(o => JsonValue.Create(o.ToString())).ToArray());
         if (perms.DenyValue > 0)
-            yield return new XAttribute("Deny", string.Join(", ", perms.ToDenyList()));
+            json["DenyList"] = new JsonArray(perms.ToDenyList().Select(o => JsonValue.Create(o.ToString())).ToArray());
+
+        return json;
     }
 
-    private static XElement? CreateUnbanItem(LogItem item, ArchivationResult result)
+    private static JsonNode? CreateUnbanItem(LogItem item, ArchivationResult result)
     {
         if (item.Unban is null)
             return null;
 
         result.UserIds.Add(item.Unban.UserId);
-        return new XElement(
-            "Unban",
-            new XAttribute("UserId", item.Unban.UserId)
-        );
+        return new JsonObject
+        {
+            ["UserId"] = item.Unban.UserId
+        };
     }
 
-    private static XElement? CreateMemberUpdatedItem(LogItem item, ArchivationResult result)
+    private static JsonNode? CreateMemberUpdatedItem(LogItem item, ArchivationResult result)
     {
         if (item.MemberUpdated is null)
             return null;
 
-        return new XElement(
-            "MemberUpdated",
-            new XElement("Before", CreateMemberInfoItems(item.MemberUpdated.Before, result).ToArray()),
-            new XElement("After", CreateMemberInfoItems(item.MemberUpdated.After, result).ToArray())
-        );
+        return new JsonObject
+        {
+            ["Before"] = CreateMemberInfoItems(item.MemberUpdated.Before, result),
+            ["After"] = CreateMemberInfoItems(item.MemberUpdated.After, result)
+        };
     }
 
-    private static IEnumerable<object> CreateMemberInfoItems(MemberInfo info, ArchivationResult result)
+    private static JsonNode CreateMemberInfoItems(MemberInfo info, ArchivationResult result)
     {
-        yield return new XAttribute("InfoId", info.Id.ToString());
-        yield return new XAttribute("UserId", info.UserId);
+        var json = new JsonObject
+        {
+            ["InfoId"] = info.Id.ToString(),
+            ["UserId"] = info.UserId
+        };
 
         result.UserIds.Add(info.UserId);
         if (!string.IsNullOrEmpty(info.Nickname))
-            yield return new XAttribute("Nickname", info.Nickname);
+            json["Nickname"] = info.Nickname;
         if (info.IsMuted is not null)
-            yield return new XAttribute("IsMuted", info.IsMuted.Value);
+            json["IsMuted"] = info.IsMuted.Value;
         if (info.IsDeaf is not null)
-            yield return new XAttribute("IsDeaf", info.IsDeaf.Value);
+            json["IsDeaf"] = info.IsDeaf.Value;
         if (!string.IsNullOrEmpty(info.SelfUnverifyMinimalTime))
-            yield return new XAttribute("SelfUnverifyMinimalTime", info.SelfUnverifyMinimalTime);
+            json["SelfUnverifyMinimalTime"] = info.SelfUnverifyMinimalTime;
         if (info.Flags is not null)
-            yield return new XAttribute("Flags", info.Flags.Value);
+            json["Flags"] = info.Flags.Value;
+
+        return json;
     }
 
-    private static XElement? CreateMemberRoleUpdatedItems(LogItem item, ArchivationResult result)
+    private static JsonNode? CreateMemberRoleUpdatedItems(LogItem item, ArchivationResult result)
     {
         if (item.MemberRolesUpdated is null || item.MemberRolesUpdated.Count == 0)
             return null;
 
-        var xml = new XElement("MemberRoleUpdated");
+        var roles = new JsonArray();
         foreach (var role in item.MemberRolesUpdated)
         {
             result.UserIds.Add(role.UserId);
 
-            xml.Add(new XElement(
-                "Role",
-                new XAttribute("InfoId", role.Id.ToString()),
-                new XAttribute("UserId", role.UserId),
-                new XAttribute("RoleId", role.RoleId),
-                new XAttribute("RoleName", role.RoleName),
-                new XAttribute("RoleColor", role.RoleColor),
-                new XAttribute("IsAdded", role.IsAdded)
-            ));
+            roles.Add(new JsonObject
+            {
+                ["InfoId"] = role.Id.ToString(),
+                ["UserId"] = role.UserId,
+                ["RoleId"] = role.RoleId,
+                ["RoleName"] = role.RoleName,
+                ["RoleColor"] = role.RoleColor,
+                ["IsAdded"] = role.IsAdded
+            });
         }
 
-        return xml;
+        return new JsonObject
+        {
+            ["Roles"] = roles
+        };
     }
 
-    private static XElement? CreateGuildUpdatedItems(LogItem item, ArchivationResult result)
+    private static JsonNode? CreateGuildUpdatedItems(LogItem item, ArchivationResult result)
     {
         if (item.GuildUpdated is null)
             return null;
 
-        return new XElement(
-            "GuildUpdated",
-            new XElement("Before", CreateGuildUpdatedItems(item.GuildUpdated.Before, result)),
-            new XElement("After", CreateGuildUpdatedItems(item.GuildUpdated.Before, result))
-        );
+        return new JsonObject
+        {
+            ["Before"] = CreateGuildUpdatedItems(item.GuildUpdated.Before, result),
+            ["After"] = CreateGuildUpdatedItems(item.GuildUpdated.Before, result)
+        };
     }
 
-    private static IEnumerable<object> CreateGuildUpdatedItems(GuildInfo info, ArchivationResult result)
+    private static JsonNode CreateGuildUpdatedItems(GuildInfo info, ArchivationResult result)
     {
-        yield return new XAttribute("InfoId", info.Id.ToString());
-        yield return new XAttribute("DefaultMessageNotifications", info.DefaultMessageNotifications.ToString());
+        var json = new JsonObject
+        {
+            ["InfoId"] = info.Id.ToString(),
+            ["DefaultMessageNotifications"] = info.DefaultMessageNotifications.ToString(),
+            ["AfkTimeout"] = info.AfkTimeout,
+            ["Name"] = info.Name,
+            ["MfaLevel"] = info.MfaLevel.ToString(),
+            ["VerificationLevel"] = info.VerificationLevel.ToString(),
+            ["ExplicitContentFilter"] = info.ExplicitContentFilter.ToString(),
+            ["PremiumTier"] = info.PremiumTier.ToString(),
+            ["SystemChannelFlags"] = info.SystemChannelFlags.ToString(),
+            ["NsfwLevel"] = info.NsfwLevel.ToString()
+        };
 
         if (!string.IsNullOrEmpty(info.Description))
-            yield return new XAttribute("Description", info.Description);
+            json["Description"] = info.Description;
         if (!string.IsNullOrEmpty(info.VanityUrl))
-            yield return new XAttribute("VanityUrl", info.VanityUrl);
+            json["VanityUrl"] = info.VanityUrl;
         if (!string.IsNullOrEmpty(info.BannerId))
-            yield return new XAttribute("BannerId", info.BannerId);
+            json["BannerId"] = info.BannerId;
         if (!string.IsNullOrEmpty(info.DiscoverySplashId))
-            yield return new XAttribute("DiscoverySplashId", info.DiscoverySplashId);
+            json["DiscoverySplashId"] = info.DiscoverySplashId;
         if (!string.IsNullOrEmpty(info.SplashId))
-            yield return new XAttribute("SplashId", info.SplashId);
+            json["SplashId"] = info.SplashId;
         if (!string.IsNullOrEmpty(info.IconId))
-            yield return new XAttribute("IconId", info.IconId);
+            json["IconId"] = info.IconId;
         if (info.IconData is not null)
-            yield return new XElement("IconData", Convert.ToBase64String(info.IconData));
+            json["IconData"] = Convert.ToBase64String(info.IconData);
 
         if (!string.IsNullOrEmpty(info.PublicUpdatesChannelId))
         {
             result.ChannelIds.Add(info.PublicUpdatesChannelId);
-            yield return new XAttribute("PublicUpdatesChannelId", info.PublicUpdatesChannelId);
+            json["PublicUpdatesChannelId"] = info.PublicUpdatesChannelId;
         }
 
         if (!string.IsNullOrEmpty(info.RulesChannelId))
         {
             result.ChannelIds.Add(info.RulesChannelId);
-            yield return new XAttribute("RulesChannelId", info.RulesChannelId);
+            json["RulesChannelId"] = info.RulesChannelId;
         }
 
         if (!string.IsNullOrEmpty(info.SystemChannelId))
         {
             result.ChannelIds.Add(info.SystemChannelId);
-            yield return new XAttribute("SystemChannelId", info.SystemChannelId);
+            json["SystemChannelId"] = info.SystemChannelId;
         }
 
         if (!string.IsNullOrEmpty(info.AfkChannelId))
         {
             result.ChannelIds.Add(info.AfkChannelId);
-            yield return new XAttribute("AfkChannelId", info.AfkChannelId);
+            json["AfkChannelId"] = info.AfkChannelId;
         }
-
-        yield return new XAttribute("AfkTimeout", info.AfkTimeout);
-        yield return new XAttribute("Name", info.Name);
-        yield return new XAttribute("MfaLevel", info.MfaLevel.ToString());
-        yield return new XAttribute("VerificationLevel", info.VerificationLevel.ToString());
-        yield return new XAttribute("ExplicitContentFilter", info.ExplicitContentFilter.ToString());
 
         var features = Enum.GetValues<GuildFeature>()
             .Where(f => (info.Features & f) != GuildFeature.None)
             .Select(value => value.ToString())
             .ToList();
         if (features.Count > 0)
-            yield return new XAttribute("Features", string.Join(", ", features));
+            json["Features"] = string.Join(", ", features);
 
-        yield return new XAttribute("PremiumTier", info.PremiumTier.ToString());
-        yield return new XAttribute("SystemChannelFlags", info.SystemChannelFlags.ToString());
-        yield return new XAttribute("NsfwLevel", info.NsfwLevel.ToString());
+        return json;
     }
 
-    private static XElement? CreateUserLeftItem(LogItem item, ArchivationResult result)
+    private static JsonNode? CreateUserLeftItem(LogItem item, ArchivationResult result)
     {
         if (item.UserLeft is null)
             return null;
 
         result.UserIds.Add(item.UserLeft.UserId);
-        var xml = new XElement(
-            "UserLeft",
-            new XAttribute("UserId", item.UserLeft.UserId),
-            new XAttribute("MemberCount", item.UserLeft.MemberCount),
-            new XAttribute("IsBan", item.UserLeft.IsBan.ToString())
-        );
+        var json = new JsonObject
+        {
+            ["UserId"] = item.UserLeft.UserId,
+            ["MemberCount"] = item.UserLeft.MemberCount,
+            ["IsBan"] = item.UserLeft.IsBan.ToString()
+        };
 
         if (!string.IsNullOrEmpty(item.UserLeft.BanReason))
-            xml.Add(new XAttribute("BanReason", item.UserLeft.BanReason));
-        return xml;
+            json["BanReason"] = item.UserLeft.BanReason;
+        return json;
     }
 
-    private static XElement? CreateUserJoinedItem(LogItem item)
+    private static JsonNode? CreateUserJoinedItem(LogItem item)
     {
         if (item.UserJoined is null)
             return null;
 
-        return new XElement(
-            "UserJoined",
-            new XAttribute("MemberCount", item.UserJoined.MemberCount)
-        );
+        return new JsonObject
+        {
+            ["MemberCount"] = item.UserJoined.MemberCount
+        };
     }
 
-    private static XElement? CreateMessageEditedItem(LogItem item)
+    private static JsonNode? CreateMessageEditedItem(LogItem item)
     {
         if (item.MessageEdited is null)
             return null;
 
-        return new XElement(
-            "MessageEdited",
-            new XAttribute("JumpUrl", item.MessageEdited.JumpUrl),
-            new XElement("ContentBefore", item.MessageEdited.ContentBefore),
-            new XElement("ContentAfter", item.MessageEdited.ContentAfter)
-        );
+        return new JsonObject
+        {
+            ["JumpUrl"] = item.MessageEdited.JumpUrl,
+            ["ContentBefore"] = item.MessageEdited.ContentBefore,
+            ["ContentAfter"] = item.MessageEdited.ContentAfter
+        };
     }
 
-    private static XElement? CreateMessageDeletedItem(LogItem item, ArchivationResult result)
+    private static JsonNode? CreateMessageDeletedItem(LogItem item, ArchivationResult result)
     {
         if (item.MessageDeleted is null)
             return null;
 
         result.UserIds.Add(item.MessageDeleted.AuthorId);
-        var xml = new XElement(
-            "MessageDeleted",
-            new XAttribute("AuthorId", item.MessageDeleted.AuthorId),
-            new XAttribute("MessageCreatedAt", item.MessageDeleted.MessageCreatedAt.ToString("o"))
-        );
+        var json = new JsonObject
+        {
+            ["AuthorId"] = item.MessageDeleted.AuthorId,
+            ["MessageCreatedAt"] = item.MessageDeleted.MessageCreatedAt.ToString("o")
+        };
 
         if (!string.IsNullOrEmpty(item.MessageDeleted.Content))
-            xml.Add(new XElement("Content", item.MessageDeleted.Content));
+            json["Content"] = item.MessageDeleted.Content;
 
+        var embeds = new JsonArray();
         foreach (var embed in item.MessageDeleted.Embeds)
         {
-            var element = new XElement(
-                "Embed",
-                new XAttribute("EmbedId", embed.Id.ToString()),
-                new XAttribute("Type", embed.Type),
-                new XAttribute("ContainsFooter", embed.ContainsFooter.ToString())
-            );
+            var embedJson = new JsonObject
+            {
+                ["EmbedId"] = embed.Id.ToString(),
+                ["Type"] = embed.Type,
+                ["ContainsFooter"] = embed.ContainsFooter.ToString()
+            };
 
             if (!string.IsNullOrEmpty(embed.Title))
-                element.Add(new XAttribute("Title", embed.Title));
+                embedJson["Title"] = embed.Title;
             if (!string.IsNullOrEmpty(embed.ImageInfo))
-                element.Add(new XAttribute("ImageInfo", embed.ImageInfo));
+                embedJson["ImageInfo"] = embed.ImageInfo;
             if (!string.IsNullOrEmpty(embed.VideoInfo))
-                element.Add(new XAttribute("VideoInfo", embed.VideoInfo));
+                embedJson["VideoInfo"] = embed.VideoInfo;
             if (!string.IsNullOrEmpty(embed.AuthorName))
-                element.Add(new XAttribute("AuthorName", embed.AuthorName));
+                embedJson["AuthorName"] = embed.AuthorName;
             if (!string.IsNullOrEmpty(embed.ProviderName))
-                element.Add(new XAttribute("ProviderName", embed.ProviderName));
+                embedJson["ProviderName"] = embed.ProviderName;
             if (!string.IsNullOrEmpty(embed.ThumbnailInfo))
-                element.Add(new XAttribute("ThumbnailInfo", embed.ThumbnailInfo));
+                embedJson["ThumbnailInfo"] = embed.ThumbnailInfo;
 
-            foreach (var field in embed.Fields)
+            if (embed.Fields.Count > 0)
             {
-                element.Add(new XElement(
-                    "Field",
-                    new XAttribute("Name", field.Name),
-                    new XAttribute("Value", field.Value),
-                    new XAttribute("Inline", field.Inline)
-                ));
+                embedJson["Fields"] = new JsonArray(
+                    embed.Fields.Select(f => new JsonObject
+                    {
+                        ["Name"] = f.Name,
+                        ["Value"] = f.Value,
+                        ["Inline"] = f.Inline
+                    }).ToArray()
+                );
             }
 
-            xml.Add(element);
+            embeds.Add(embedJson);
         }
 
-        return xml;
+        json["Embeds"] = embeds;
+        return json;
     }
 
-    private static XElement? CreateInteractionItem(LogItem item)
+    private static JsonNode? CreateInteractionItem(LogItem item)
     {
         if (item.InteractionCommand is null)
             return null;
 
-        var xml = new XElement(
-            "Interaction",
-            new XAttribute("Name", item.InteractionCommand.Name),
-            new XAttribute("ModuleName", item.InteractionCommand.ModuleName),
-            new XAttribute("MethodName", item.InteractionCommand.MethodName),
-            new XAttribute("HasResponded", item.InteractionCommand.HasResponded),
-            new XAttribute("IsValidToken", item.InteractionCommand.IsValidToken),
-            new XAttribute("IsSuccess", item.InteractionCommand.IsSuccess),
-            new XAttribute("Duration", item.InteractionCommand.Duration),
-            new XAttribute("Locale", item.InteractionCommand.Locale),
-            new XAttribute("EndAt", item.InteractionCommand.EndAt.ToString("o")),
-            new XAttribute("InteractionDate", item.InteractionCommand.InteractionDate)
-        );
-
-        foreach (var parameter in item.InteractionCommand.Parameters)
+        var json = new JsonObject
         {
-            var element = new XElement(
-                "Parameter",
-                new XAttribute("Name", parameter.Name),
-                new XAttribute("Type", parameter.Type)
-            );
+            ["Name"] = item.InteractionCommand.Name,
+            ["ModuleName"] = item.InteractionCommand.ModuleName,
+            ["MethodName"] = item.InteractionCommand.MethodName,
+            ["HasResponded"] = item.InteractionCommand.HasResponded,
+            ["IsValidToken"] = item.InteractionCommand.IsValidToken,
+            ["IsSuccess"] = item.InteractionCommand.IsSuccess,
+            ["Duration"] = item.InteractionCommand.Duration,
+            ["Locale"] = item.InteractionCommand.Locale,
+            ["EndAt"] = item.InteractionCommand.EndAt.ToString("o"),
+            ["InteractionDate"] = item.InteractionCommand.InteractionDate.ToString("yyyy-MM-dd")
+        };
 
-            if (!string.IsNullOrEmpty(parameter.Value))
-                element.Add(new XAttribute("Value", parameter.Value));
+        if (item.InteractionCommand.Parameters.Count > 0)
+        {
+            var parameters = new JsonArray();
+            foreach (var parameter in item.InteractionCommand.Parameters)
+            {
+                var parametersJson = new JsonObject
+                {
+                    ["Name"] = parameter.Name,
+                    ["Type"] = parameter.Type
+                };
 
-            xml.Add(element);
+                if (!string.IsNullOrEmpty(parameter.Value))
+                    parametersJson["Value"] = parameter.Value;
+
+                parameters.Add(parametersJson);
+            }
+
+            json["Parameters"] = parameters;
         }
 
         if (item.InteractionCommand.CommandError is not null)
-            xml.Add(new XAttribute("CommandError", item.InteractionCommand.CommandError.Value));
+            json["CommandError"] = item.InteractionCommand.CommandError.Value;
         if (!string.IsNullOrEmpty(item.InteractionCommand.ErrorReason))
-            xml.Add(new XAttribute("ErrorReason", item.InteractionCommand.ErrorReason));
+            json["ErrorReason"] = item.InteractionCommand.ErrorReason;
         if (!string.IsNullOrEmpty(item.InteractionCommand.Exception))
-            xml.Add(new XAttribute("Exception", item.InteractionCommand.Exception));
-        return xml;
+            json["Exception"] = item.InteractionCommand.Exception;
+        return json;
     }
 
-    private static XElement? CreateThreadDeletedItem(LogItem item)
+    private static JsonNode? CreateThreadDeletedItem(LogItem item)
     {
         if (item.ThreadDeleted is null)
             return null;
 
-        return new XElement(
-            "ThreadDeleted",
-            CreateThreadInfoItems(item.ThreadDeleted.ThreadInfo).ToArray()
-        );
+        return new JsonObject
+        {
+            ["ThreadInfo"] = CreateThreadInfoItems(item.ThreadDeleted.ThreadInfo)
+        };
     }
 
-    private static IEnumerable<object> CreateThreadInfoItems(ThreadInfo info)
+    private static JsonNode CreateThreadInfoItems(ThreadInfo info)
     {
-        yield return new XAttribute("InfoId", info.Id.ToString());
-        yield return new XAttribute("Name", info.ThreadName);
+        var json = new JsonObject
+        {
+            ["InfoId"] = info.Id.ToString(),
+            ["Name"] = info.ThreadName,
+            ["Type"] = info.Type.ToString(),
+            ["IsArchived"] = info.IsArchived.ToString(),
+            ["ArchiveDuration"] = info.ArchiveDuration.ToString(),
+            ["IsLocked"] = info.IsLocked.ToString()
+        };
 
         if (info.SlowMode is not null)
-            yield return new XAttribute("SlowMode", info.SlowMode.Value);
-
-        yield return new XAttribute("Type", info.Type.ToString());
-        yield return new XAttribute("IsArchived", info.IsArchived.ToString());
-        yield return new XAttribute("ArchiveDuration", info.ArchiveDuration.ToString());
-        yield return new XAttribute("IsLocked", info.IsLocked.ToString());
+            json["SlowMode"] = info.SlowMode.Value;
 
         if (info.Tags.Count > 0)
-            yield return new XAttribute("Tags", string.Join(", ", info.Tags));
+            json["Tags"] = new JsonArray(info.Tags.Select(t => JsonValue.Create(t)).ToArray());
+        return json;
     }
 
-    private static XElement? CreateJobCompletedItem(LogItem item, ArchivationResult result)
+    private static JsonNode? CreateJobCompletedItem(LogItem item, ArchivationResult result)
     {
         if (item.Job is null)
             return null;
 
-        var xml = new XElement(
-            "JobCompleted",
-            new XAttribute("JobName", item.Job.JobName),
-            new XElement("Result", item.Job.Result),
-            new XAttribute("StartAt", item.Job.StartAt.ToString("o")),
-            new XAttribute("EndAt", item.Job.EndAt.ToString("o")),
-            new XAttribute("WasError", item.Job.WasError.ToString()),
-            new XAttribute("Duration", item.Job.Duration),
-            new XAttribute("JobDate", item.Job.JobDate)
-        );
+        var json = new JsonObject
+        {
+            ["JobName"] = item.Job.JobName,
+            ["Result"] = item.Job.Result,
+            ["StartAt"] = item.Job.StartAt.ToString("o"),
+            ["EndAt"] = item.Job.EndAt.ToString("o"),
+            ["WasError"] = item.Job.WasError.ToString(),
+            ["Duration"] = item.Job.Duration,
+            ["JobDate"] = item.Job.JobDate.ToString("yyyy-MM-dd")
+        };
 
         if (string.IsNullOrEmpty(item.Job.StartUserId))
-            return xml;
+            return json;
 
         result.UserIds.Add(item.Job.StartUserId);
-        xml.Add(new XAttribute("StartUserId", item.Job.StartUserId));
-        return xml;
+        json["StartUserId"] = item.Job.StartUserId;
+        return json;
     }
 
-    private static XElement? CreateApiRequestItem(LogItem item)
+    private static JsonNode? CreateApiRequestItem(LogItem item)
     {
         if (item.ApiRequest is null)
             return null;
 
-        var xml = new XElement(
-            "Api",
-            new XAttribute("ControllerName", item.ApiRequest.ControllerName),
-            new XAttribute("ActionName", item.ApiRequest.ActionName),
-            new XAttribute("StartAt", item.ApiRequest.StartAt.ToString("o")),
-            new XAttribute("EndAt", item.ApiRequest.EndAt.ToString("o")),
-            new XAttribute("Method", item.ApiRequest.Method),
-            new XAttribute("TemplatePath", item.ApiRequest.TemplatePath),
-            new XAttribute("Path", item.ApiRequest.Path),
-            new XAttribute("Language", item.ApiRequest.Language),
-            new XAttribute("ApiGroupName", item.ApiRequest.ApiGroupName),
-            new XAttribute("Identification", item.ApiRequest.Identification),
-            new XAttribute("Ip", item.ApiRequest.Ip),
-            new XAttribute("Result", item.ApiRequest.Result),
-            new XAttribute("IsSuccess", item.ApiRequest.IsSuccess),
-            new XAttribute("Duration", item.ApiRequest.Duration)
-        );
-
-        foreach (var param in item.ApiRequest.Parameters)
+        var json = new JsonObject
         {
-            xml.Add(new XElement(
-                "Parameter",
-                new XAttribute("Name", param.Key),
-                new XAttribute("Value", param.Value)
-            ));
+            ["ControllerName"] = item.ApiRequest.ControllerName,
+            ["ActionName"] = item.ApiRequest.ActionName,
+            ["StartAt"] = item.ApiRequest.StartAt.ToString("o"),
+            ["EndAt"] = item.ApiRequest.EndAt.ToString("o"),
+            ["Method"] = item.ApiRequest.Method,
+            ["TemplatePath"] = item.ApiRequest.TemplatePath,
+            ["Path"] = item.ApiRequest.Path,
+            ["Language"] = item.ApiRequest.Language,
+            ["ApiGroupName"] = item.ApiRequest.ApiGroupName,
+            ["Identification"] = item.ApiRequest.Identification,
+            ["Ip"] = item.ApiRequest.Ip,
+            ["Result"] = item.ApiRequest.Result,
+            ["IsSuccess"] = item.ApiRequest.IsSuccess,
+            ["Duration"] = item.ApiRequest.Duration
+        };
+
+        if (item.ApiRequest.Parameters.Count > 0)
+        {
+            json["Parameters"] = new JsonArray(
+                item.ApiRequest.Parameters.Select(p => new JsonObject
+                {
+                    ["Name"] = p.Key,
+                    ["Value"] = p.Value
+                }).ToArray()
+            );
         }
 
-        foreach (var param in item.ApiRequest.Headers)
+        if (item.ApiRequest.Headers.Count > 0)
         {
-            xml.Add(new XElement(
-                "Header",
-                new XAttribute("Name", param.Key),
-                new XAttribute("Value", param.Value)
-            ));
+            json["Headers"] = new JsonArray(
+                item.ApiRequest.Headers.Select(h => new JsonObject
+                {
+                    ["Name"] = h.Key,
+                    ["Value"] = h.Value
+                }).ToArray()
+            );
         }
 
         if (!string.IsNullOrEmpty(item.ApiRequest.Role))
-            xml.Add(new XAttribute("Role", item.ApiRequest.Role));
+            json["Role"] = item.ApiRequest.Role;
 
         if (!string.IsNullOrEmpty(item.ApiRequest.ForwardedIp))
-            xml.Add(new XAttribute("ForwardedIp", item.ApiRequest.ForwardedIp));
+            json["ForwardedIp"] = item.ApiRequest.ForwardedIp;
 
-        return xml;
+        return json;
     }
 
-    private static XElement? CreateThreadUpdatedItem(LogItem item)
+    private static JsonNode? CreateThreadUpdatedItem(LogItem item)
     {
         if (item.ThreadUpdated is null)
             return null;
 
-        return new XElement(
-            "ThreadUpdated",
-            new XElement("Before", CreateThreadInfoItems(item.ThreadUpdated.Before).ToArray()),
-            new XElement("After", CreateThreadInfoItems(item.ThreadUpdated.After).ToArray())
-        );
+        return new JsonObject
+        {
+            ["Before"] = CreateThreadInfoItems(item.ThreadUpdated.Before),
+            ["After"] = CreateThreadInfoItems(item.ThreadUpdated.After)
+        };
     }
 
-    private static XElement? CreateRoleDeletedItem(LogItem item)
+    private static JsonNode? CreateRoleDeletedItem(LogItem item)
     {
         if (item.RoleDeleted?.RoleInfo is null)
             return null;
 
-        return new XElement(
-            "RoleDeleted",
-            new XElement("Role", CreateRoleInfoItems(item.RoleDeleted.RoleInfo).ToArray())
-        );
+        return new JsonObject
+        {
+            ["Role"] = CreateRoleInfoItems(item.RoleDeleted.RoleInfo)
+        };
     }
 
-    private static IEnumerable<object> CreateRoleInfoItems(RoleInfo info)
+    private static JsonNode CreateRoleInfoItems(RoleInfo info)
     {
-        yield return new XAttribute("InfoId", info.Id);
-        yield return new XAttribute("RoleId", info.RoleId);
-        yield return new XAttribute("Name", info.Name);
+        var json = new JsonObject
+        {
+            ["InfoId"] = info.Id.ToString(),
+            ["RoleId"] = info.RoleId,
+            ["Name"] = info.Name,
+            ["IsMentionable"] = info.IsMentionable.ToString(),
+            ["IsHoisted"] = info.IsHoisted.ToString()
+        };
 
         if (!string.IsNullOrEmpty(info.Color))
-            yield return new XAttribute("Color", info.Color);
-
-        yield return new XAttribute("IsMentionable", info.IsMentionable.ToString());
-        yield return new XAttribute("IsHoisted", info.IsHoisted.ToString());
+            json["Color"] = info.Color;
 
         if (info.Permissions.Count > 0)
         {
-            yield return new XElement(
-                "Permissions",
-                new XAttribute("Value", string.Join(", ", info.Permissions))
+            json["Permissions"] = new JsonArray(
+                info.Permissions.Select(p => JsonValue.Create(p)).ToArray()
             );
         }
 
         if (!string.IsNullOrEmpty(info.IconId))
-            yield return new XAttribute("IconId", info.IconId);
+            json["IconId"] = info.IconId;
+        return json;
     }
 }
