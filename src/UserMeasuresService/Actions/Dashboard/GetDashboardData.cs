@@ -58,7 +58,7 @@ public class GetDashboardData : ApiActionBase
 
     private async Task<List<InternalDashboardRow>> ReadDashboardRowsAsync(IQueryable<InternalDashboardRow> query)
     {
-        using (CounterManager.Create("Api.GetDashboardData"))
+        using (CounterManager.Create("Api.Dashboard.GetDashboardData.Database"))
         {
             return await query
                 .AsNoTracking()
