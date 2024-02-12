@@ -455,7 +455,7 @@ jobs:
           username: ${{ secrets.SSH_Username }}
           password: ${{ secrets.SSH_Password }}
           port: 22
-          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S docker compose -f /scripts/update-grillbot-services-prod.sh user_measures
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S /scripts/update-grillbot-services-prod.sh user_measures
   UserMeasuresService_Deploy_Development:
     runs-on: ubuntu-latest
     environment: "Development"
@@ -469,4 +469,4 @@ jobs:
           username: ${{ secrets.SSH_DEV_USERNAME }}
           password: ${{ secrets.SSH_DEV_PASSWORD }}
           port: 22
-          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S docker compose -f /scripts/update-grillbot-services-dev.sh user_measures
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S /scripts/update-grillbot-services-dev.sh user_measures
