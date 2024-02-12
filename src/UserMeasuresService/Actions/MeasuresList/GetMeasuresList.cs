@@ -101,7 +101,8 @@ public class GetMeasuresList : ApiActionBase
             ModeratorId = baseEntity.ModeratorId,
             GuildId = baseEntity.GuildId,
             CreatedAtUtc = baseEntity.CreatedAtUtc,
-            UserId = baseEntity.UserId
+            UserId = baseEntity.UserId,
+            Reason = baseEntity.Reason
         };
     }
 }

@@ -8,4 +8,5 @@ public class MeasuresItem
     public string UserId { get; set; } = null!;
     public string GuildId { get; set; } = null!;
     public DateTime? ValidTo { get; set; }
+    public string Reason { get; set; } = null!;
 }
