@@ -18,7 +18,6 @@ public class UnverifyEventHandler : BaseEventHandlerWithDb<UnverifyEvent>
         {
             CreatedAtUtc = payload.CreatedAt.ToUniversalTime(),
             GuildId = payload.GuildId,
-            Id = Guid.NewGuid(),
             ModeratorId = payload.ModeratorId,
             Reason = payload.Reason,
             UserId = payload.TargetUserId,

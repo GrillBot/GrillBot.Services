@@ -12,12 +12,17 @@ public abstract class BaseEventHandlerWithDb<TPayload> : BaseRabbitMQHandler<TPa
         DbContext = dbContext;
     }
 
-    protected async Task SaveEntityAsync<TEntity>(TEntity entity) where TEntity : class
+    protected async Task SaveEntityAsync<TEntity>(TEntity entity) where TEntity : BaseEntity
     {
         if (entity is null)
             return;
 
-        await DbContext.AddAsync(entity);
+        if (entity.IsNew)
+        {
+            entity.Id = Guid.NewGuid();
+            await DbContext.AddAsync(entity);
+        }
+
         await DbContext.SaveChangesAsync();
     }
 }

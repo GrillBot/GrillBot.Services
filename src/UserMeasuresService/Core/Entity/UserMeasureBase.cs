@@ -1,13 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UserMeasuresService.Core.Entity;
 
-public abstract class UserMeasureBase
+public abstract class UserMeasureBase : BaseEntity
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public Guid Id { get; set; }
     public DateTime CreatedAtUtc { get; set; }
 
     [StringLength(32)]
