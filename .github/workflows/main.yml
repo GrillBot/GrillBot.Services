@@ -446,7 +446,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: "Production_UserMeasuresService"
     needs: UserMeasuresService_CreateDockerImage
-    if: false && github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Execute deployment on SSH
         uses: appleboy/ssh-action@v0.1.8

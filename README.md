@@ -7,6 +7,7 @@ Repository for all services that GrillBot depends.
 - [ImageProcessingService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/ImageProcessingService)
 - [PointsService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/PointsService)
 - [RubbergodService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/RubbergodService)
+- [UserMeasuresService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/UserMeasuresService)
 
 ## Docker
 
@@ -17,3 +18,4 @@ Exists only one name of image `ghcr.io/grillbot/grillbot.services` and service a
 - ImageProcessingService - `ghcr.io/grillbot/grillbot.services:image_processing_service`
 - PointsService - `ghcr.io/grillbot/grillbot.services:points_service`
 - RubbergodService - `ghcr.io/grillbot/grillbot.services:rubbergod`
+- UserMeasuresService - `ghcr.io/grillbot/grillbot.services:user_measures_service`
