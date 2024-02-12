@@ -21,6 +21,7 @@ jobs:
       PointsService: ${{ steps.filter.outputs.PointsService }}
       ImageProcessingService: ${{ steps.filter.outputs.ImageProcessingService }}
       AuditLogService: ${{ steps.filter.outputs.AuditLogService }}
+      UserMeasuresService: ${{ steps.filter.outputs.UserMeasuresService }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -39,6 +40,8 @@ jobs:
               - 'src/ImageProcessingService/**'
             AuditLogService:
               - 'src/AuditLogService/**'
+            UserMeasuresService:
+              - 'src/UserMeasuresService/**'
   RubbergodService_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -395,3 +398,75 @@ jobs:
           password: ${{ secrets.SSH_DEV_PASSWORD }}
           port: 22
           script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-audit-log-service
+  UserMeasuresService_Build:
+    runs-on: ubuntu-latest
+    needs: PathsFilter
+    if: needs.PathsFilter.outputs.UserMeasuresService == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+          source-url: https://nuget.pkg.github.com/GrillBot/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Install dependencies
+        run: dotnet restore -r linux-x64 src/UserMeasuresService/
+      - name: Build (DEBUG)
+        run: dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/UserMeasuresService/
+      - name: Build (RELEASE)
+        run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/UserMeasuresService/
+  UserMeasuresService_CreateDockerImage:
+    runs-on: ubuntu-latest
+    needs: UserMeasuresService_Build
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Login to the container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: src/UserMeasuresService
+          push: true
+          tags: ghcr.io/grillbot/grillbot.services:user_measures_service
+          build-args: |
+            github_actions_token=${{ secrets.GITHUB_TOKEN }}
+  UserMeasuresService_Deploy_Production:
+    runs-on: ubuntu-latest
+    environment: "Production_UserMeasuresService"
+    needs: UserMeasuresService_CreateDockerImage
+    if: false && github.ref == 'refs/heads/master'
+    steps:
+      - name: Execute deployment on SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_Username }}
+          password: ${{ secrets.SSH_Password }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S docker compose -f /scripts/update-grillbot-services-prod.sh user_measures
+  UserMeasuresService_Deploy_Development:
+    runs-on: ubuntu-latest
+    environment: "Development"
+    needs: UserMeasuresService_CreateDockerImage
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          password: ${{ secrets.SSH_DEV_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S docker compose -f /scripts/update-grillbot-services-dev.sh user_measures
