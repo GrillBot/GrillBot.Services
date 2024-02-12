@@ -4,15 +4,15 @@ using UserMeasuresService.Models.Events;
 
 namespace UserMeasuresService.Handlers;
 
-public class UnverifyEventHandler : BaseEventHandlerWithDb<UnverifyEvent>
+public class UnverifyEventHandler : BaseEventHandlerWithDb<UnverifyPayload>
 {
-    public override string QueueName => UnverifyEvent.QueueName;
+    public override string QueueName => UnverifyPayload.QueueName;
 
     public UnverifyEventHandler(UserMeasuresContext dbContext, ILoggerFactory loggerFactory) : base(loggerFactory, dbContext)
     {
     }
 
-    protected override async Task HandleInternalAsync(UnverifyEvent payload)
+    protected override async Task HandleInternalAsync(UnverifyPayload payload)
     {
         var entity = new UnverifyItem
         {
@@ -21,7 +21,8 @@ public class UnverifyEventHandler : BaseEventHandlerWithDb<UnverifyEvent>
             ModeratorId = payload.ModeratorId,
             Reason = payload.Reason,
             UserId = payload.TargetUserId,
-            ValidTo = payload.EndAt.ToUniversalTime()
+            ValidTo = payload.EndAt.ToUniversalTime(),
+            LogSetId = payload.LogSetId
         };
 
         await SaveEntityAsync(entity);

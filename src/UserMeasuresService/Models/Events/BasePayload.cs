@@ -1,6 +1,6 @@
 ﻿namespace UserMeasuresService.Models.Events;
 
-public class BaseEvent
+public class BasePayload
 {
     public DateTime CreatedAt { get; set; }
     public string Reason { get; set; } = null!;

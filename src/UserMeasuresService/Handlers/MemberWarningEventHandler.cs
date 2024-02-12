@@ -4,15 +4,15 @@ using UserMeasuresService.Models.Events;
 
 namespace UserMeasuresService.Handlers;
 
-public class MemberWarningEventHandler : BaseEventHandlerWithDb<MemberWarningEvent>
+public class MemberWarningEventHandler : BaseEventHandlerWithDb<MemberWarningPayload>
 {
-    public override string QueueName => MemberWarningEvent.QueueName;
+    public override string QueueName => MemberWarningPayload.QueueName;
 
     public MemberWarningEventHandler(ILoggerFactory loggerFactory, UserMeasuresContext dbContext) : base(loggerFactory, dbContext)
     {
     }
 
-    protected override async Task HandleInternalAsync(MemberWarningEvent payload)
+    protected override async Task HandleInternalAsync(MemberWarningPayload payload)
     {
         var entity = new MemberWarningItem
         {

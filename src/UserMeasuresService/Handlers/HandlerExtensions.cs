@@ -9,6 +9,8 @@ public static class HandlerExtensions
         return services
             .AddRabbitMQ()
             .AddRabbitConsumerHandler<UnverifyEventHandler>()
-            .AddRabbitConsumerHandler<MemberWarningEventHandler>();
+            .AddRabbitConsumerHandler<MemberWarningEventHandler>()
+            .AddRabbitConsumerHandler<UnverifyModifyEventHandler>()
+            .AddRabbitConsumerHandler<DeleteEventHandler>();
     }
 }
