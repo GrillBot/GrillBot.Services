@@ -17,7 +17,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:7.0 as FinalImage
 LABEL org.opencontainers.image.source https://github.com/grillbot/grillbot.services
 
 WORKDIR /app
-EXPOSE 5031
+EXPOSE 5134
 
 ENV TZ=Europe/Prague
 ENV ASPNETCORE_URLS 'http://+:5134'
