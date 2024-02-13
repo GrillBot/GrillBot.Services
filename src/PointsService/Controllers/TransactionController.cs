@@ -13,10 +13,6 @@ public class TransactionController : ControllerBase
     {
     }
 
-    [HttpPost]
-    public Task<IActionResult> CreateTransactionAsync([FromBody] TransactionRequest request)
-        => ProcessAsync<CreateTransactionAction>(request);
-
     [HttpPost("transfer")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

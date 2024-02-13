@@ -21,23 +21,23 @@ public class CreateTransactionViaAdminEventHandler : CreateTransactionBaseEventH
         if (!await CanCreateTransactionAsync(payload))
             return;
 
-        var transaction = CreateTransaction(payload);
+        var transaction = new Transaction
+        {
+            GuildId = payload.GuildId,
+            UserId = payload.UserId,
+            CreatedAt = DateTime.UtcNow,
+            Value = payload.Amount
+        };
 
         transaction.MessageId = SnowflakeUtils.ToSnowflake(transaction.CreatedAt).ToString();
-        transaction.Value = payload.Amount;
 
-        using (CreateCounter("Database"))
-        {
-            await DbContext.AddAsync(transaction);
-            await DbContext.SaveChangesAsync();
-        }
-
-        await EnqueueUserForRecalculationAsync(payload);
+        await CommitTransactionAsync(transaction);
+        await EnqueueUserForRecalculationAsync(payload.GuildId, payload.UserId);
     }
 
     private async Task<bool> CanCreateTransactionAsync(CreateTransactionAdminPayload payload)
     {
-        var user = await FindUserAsync(payload);
+        var user = await FindUserAsync(payload.GuildId, payload.UserId);
 
         if (user is null)
             return ValidationFailed($"Unable to give points to the unknown user. ({payload.GuildId}/{payload.UserId})");

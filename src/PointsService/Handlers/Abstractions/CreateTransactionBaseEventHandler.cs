@@ -16,36 +16,39 @@ public abstract class CreateTransactionBaseEventHandler<TPayload> : BaseEventWit
         Logger = loggerFactory.CreateLogger(GetType());
     }
 
-    protected async Task<User?> FindUserAsync(TPayload payload)
+    protected async Task<User?> FindUserAsync(string guildId, string userId)
     {
         using (CreateCounter("Database"))
-            return await DbContext.Users.AsNoTracking().FirstOrDefaultAsync(o => o.GuildId == payload.GuildId && o.Id == payload.UserId);
+            return await DbContext.Users.FirstOrDefaultAsync(o => o.GuildId == guildId && o.Id == userId);
     }
 
-    protected static Transaction CreateTransaction(TPayload payload)
+    protected bool ValidationFailed(string message, bool suppressAudit = false)
     {
-        return new Transaction
-        {
-            GuildId = payload.GuildId,
-            CreatedAt = DateTime.UtcNow,
-            UserId = payload.UserId
-        };
-    }
+        var eventId = suppressAudit ?
+            new EventId(1, "ValidationFailed_SuppressAudit") :
+            new EventId(2, "ValidationFailed_PublishAudit");
 
-    protected bool ValidationFailed(string message)
-    {
-        Logger.LogWarning("{message}", message);
+        Logger.LogWarning(eventId, "{message}", message);
         return false;
     }
 
-    protected Task EnqueueUserForRecalculationAsync(TPayload payload)
+    protected Task EnqueueUserForRecalculationAsync(string guildId, string userId)
     {
         var recalcPayload = new UserRecalculationPayload
         {
-            GuildId = payload.GuildId,
-            UserId = payload.UserId
+            GuildId = guildId,
+            UserId = userId
         };
 
         return Publisher.PublishAsync(UserRecalculationPayload.QueueName, recalcPayload);
+    }
+
+    protected async Task CommitTransactionAsync(Transaction transaction)
+    {
+        using (CreateCounter("Database"))
+        {
+            await DbContext.AddAsync(transaction);
+            await DbContext.SaveChangesAsync();
+        }
     }
 }

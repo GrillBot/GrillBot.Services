@@ -9,7 +9,6 @@ public static class ActionExtensions
             .AddScoped<Users.UserListAction>();
 
         services
-            .AddScoped<CreateTransactionAction>()
             .AddScoped<SynchronizationAction>()
             .AddScoped<CurrentPointsStatusAction>()
             .AddScoped<LeaderboardAction>()

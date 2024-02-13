@@ -10,6 +10,7 @@ public static class HandlerExtensions
 
         return services
             .AddRabbitConsumerHandler<CreateTransactionViaAdminEventHandler>()
-            .AddRabbitConsumerHandler<DeleteTransactionsEventHandler>();
+            .AddRabbitConsumerHandler<DeleteTransactionsEventHandler>()
+            .AddRabbitConsumerHandler<CreateTransactionEventHandler>();
     }
 }

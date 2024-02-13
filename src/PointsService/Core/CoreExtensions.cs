@@ -8,7 +8,6 @@ using PointsService.Core.Options;
 using PointsService.Core.Providers;
 using PointsService.Core.Repository;
 using PointsService.Handlers;
-using PointsService.Validation;
 
 namespace PointsService.Core;
 
@@ -45,7 +44,6 @@ public static class CoreExtensions
 
         // Actions
         services.AddActions();
-        services.AddValidations();
         services.AddPostProcessing();
         services.AddRabbitMQ();
     }

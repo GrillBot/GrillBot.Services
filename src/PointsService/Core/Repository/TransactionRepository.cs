@@ -22,15 +22,6 @@ public class TransactionRepository : SubRepositoryBase<PointsServiceContext>
         return query;
     }
 
-    public async Task<bool> ExistsTransactionAsync(string guildId, string messageId, string userId, string reactionId = "")
-    {
-        using (CreateCounter())
-        {
-            return await GetBaseQuery(guildId, true)
-                .AnyAsync(o => o.ReactionId == reactionId && o.MessageId == messageId && o.UserId == userId);
-        }
-    }
-
     public async Task<bool> ExistsAnyTransactionAsync(string guildId, string userId)
     {
         using (CreateCounter())

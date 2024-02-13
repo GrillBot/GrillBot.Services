@@ -19,14 +19,6 @@ public class ChannelRepository : SubRepositoryBase<PointsServiceContext>
         return query;
     }
 
-    public bool ExistsChannel(string guildId, string channelId)
-    {
-        using (CreateCounter())
-        {
-            return GetQueryBase(guildId, channelId, true).Any();
-        }
-    }
-
     public async Task<Channel?> FindChannelAsync(string guildId, string channelId, bool disableTracking = false)
     {
         using (CreateCounter())
