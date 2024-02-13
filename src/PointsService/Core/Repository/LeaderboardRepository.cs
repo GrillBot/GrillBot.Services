@@ -2,7 +2,6 @@
 using GrillBot.Core.Managers.Performance;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
-using PointsService.Models;
 
 namespace PointsService.Core.Repository;
 
@@ -45,7 +44,7 @@ public class LeaderboardRepository : SubRepositoryBase<PointsServiceContext>
                 .OrderByDescending(o => o.YearBack)
                 .Select(o => o.UserId)
                 .ToListAsync();
-            
+
             return data.FindIndex(o => o == userId) + 1;
         }
     }

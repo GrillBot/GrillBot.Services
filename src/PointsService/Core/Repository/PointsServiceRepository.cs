@@ -6,7 +6,6 @@ namespace PointsService.Core.Repository;
 
 public class PointsServiceRepository : RepositoryBase<PointsServiceContext>
 {
-    public ChannelRepository Channel { get; }
     public UserRepository User { get; }
     public TransactionRepository Transaction { get; }
     public StatisticsRepository Statistics { get; }
@@ -15,7 +14,6 @@ public class PointsServiceRepository : RepositoryBase<PointsServiceContext>
 
     public PointsServiceRepository(PointsServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {
-        Channel = new ChannelRepository(context, counterManager);
         User = new UserRepository(context, counterManager);
         Transaction = new TransactionRepository(context, counterManager);
         Statistics = new StatisticsRepository(context, counterManager);
