@@ -1,7 +1,9 @@
 ﻿using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Consumer;
 using GrillBot.Core.RabbitMQ.Publisher;
+using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
+using PointsService.Models.Events;
 
 namespace PointsService.Handlers.Abstractions;
 
@@ -21,4 +23,21 @@ public abstract class BaseEventWithDb<TPayload> : BaseRabbitMQHandler<TPayload>
 
     protected CounterItem CreateCounter(string operation)
         => CounterManager.Create($"RabbitMQ.{QueueName}.{operation}");
+
+    protected async Task<User?> FindUserAsync(string guildId, string userId)
+    {
+        using (CreateCounter("Database"))
+            return await DbContext.Users.FirstOrDefaultAsync(o => o.GuildId == guildId && o.Id == userId);
+    }
+
+    protected Task EnqueueUserForRecalculationAsync(string guildId, string userId)
+    {
+        var recalcPayload = new UserRecalculationPayload
+        {
+            GuildId = guildId,
+            UserId = userId
+        };
+
+        return Publisher.PublishAsync(UserRecalculationPayload.QueueName, recalcPayload);
+    }
 }

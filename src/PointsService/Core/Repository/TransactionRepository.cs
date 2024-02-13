@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core.Database.Repository;
+using GrillBot.Core.Helpers;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Models.Pagination;
 using Microsoft.EntityFrameworkCore;
@@ -49,26 +50,23 @@ public class TransactionRepository : SubRepositoryBase<PointsServiceContext>
 
     public async Task<PointsStatus> ComputePointsStatusAsync(string guildId, string userId, bool expired)
     {
-        using (CreateCounter())
-        {
-            var endOfDay = new TimeSpan(0, 23, 59, 59, 999);
-            var now = DateTime.UtcNow;
-            var endOfToday = now.Date.Add(endOfDay);
+        var now = DateTime.UtcNow;
+        var endOfToday = DateHelper.EndOfDayUtc;
 
-            var query = GetBaseQuery(guildId, true).Where(o => o.UserId == userId);
+        var query = GetBaseQuery(guildId, true)
+            .Where(o => o.UserId == userId);
 
-            var dtoQuery = query.GroupBy(o => 1)
-                .Select(transactions => new PointsStatus
-                {
-                    Today = transactions.Where(expired ? t => t.MergedCount > 0 : t => t.MergedCount == 0).Where(o => o.CreatedAt >= now.Date && o.CreatedAt <= endOfToday).Sum(o => o.Value),
-                    Total = transactions.Sum(o => o.Value),
-                    MonthBack = transactions.Where(expired ? t => t.MergedCount > 0 : t => t.MergedCount == 0).Where(x => x.CreatedAt >= now.AddMonths(-1)).Sum(x => x.Value),
-                    YearBack = transactions.Where(expired ? t => t.MergedCount > 0 : t => t.MergedCount == 0).Where(x => x.CreatedAt >= now.AddYears(-1)).Sum(x => x.Value)
-                });
+        var dtoQuery = query
+            .GroupBy(_ => 1)
+            .Select(transactions => new PointsStatus
+            {
+                Today = transactions.Where(expired ? t => t.MergedCount > 0 : t => t.MergedCount == 0).Where(o => o.CreatedAt >= now.Date && o.CreatedAt <= endOfToday).Sum(o => o.Value),
+                Total = transactions.Sum(o => o.Value),
+                MonthBack = transactions.Where(expired ? t => t.MergedCount > 0 : t => t.MergedCount == 0).Where(x => x.CreatedAt >= now.AddMonths(-1)).Sum(x => x.Value),
+                YearBack = transactions.Where(expired ? t => t.MergedCount > 0 : t => t.MergedCount == 0).Where(x => x.CreatedAt >= now.AddYears(-1)).Sum(x => x.Value)
+            });
 
-            var result = await dtoQuery.FirstOrDefaultAsync();
-            return result ?? new PointsStatus();
-        }
+        return (await dtoQuery.FirstOrDefaultAsync()) ?? new PointsStatus();
     }
 
     public async Task<PaginatedResponse<Transaction>> GetAdminListAsync(AdminListRequest request)
@@ -99,26 +97,6 @@ public class TransactionRepository : SubRepositoryBase<PointsServiceContext>
         using (CreateCounter())
         {
             return await GetTransactionsForMergeQuery(expirationDate).ToListAsync();
-        }
-    }
-
-    public async Task<List<(DateOnly day, long messagePoints, long reactionPoints)>> ComputeAllDaysStatsAsync(string guildId, string userId)
-    {
-        using (CreateCounter())
-        {
-            var query = GetBaseQuery(guildId, true)
-                .Where(o => o.UserId == userId)
-                .GroupBy(o => o.CreatedAt.Date)
-                .Select(o => new
-                {
-                    Day = new DateOnly(o.Key.Year, o.Key.Month, o.Key.Day),
-                    MessagePoints = o.Where(x => x.ReactionId == "").Sum(x => x.Value),
-                    ReactionPoints = o.Where(x => x.ReactionId != "").Sum(x => x.Value)
-                });
-
-            var result = await query.ToListAsync();
-            return result
-                .ConvertAll(o => (o.Day, (long)o.MessagePoints, (long)o.ReactionPoints));
         }
     }
 

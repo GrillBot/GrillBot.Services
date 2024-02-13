@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Actions;
-using PointsService.BackgroundServices;
 using PointsService.Core.Entity;
 using PointsService.Core.Options;
 using PointsService.Core.Providers;
@@ -44,7 +43,6 @@ public static class CoreExtensions
 
         // Actions
         services.AddActions();
-        services.AddPostProcessing();
         services.AddRabbitMQ();
     }
 }

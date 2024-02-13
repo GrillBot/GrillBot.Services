@@ -2,7 +2,6 @@
 using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using PointsService.BackgroundServices;
 using PointsService.Core.Entity;
 using PointsService.Core.Repository;
 using PointsService.Models;

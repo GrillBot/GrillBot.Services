@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core.RabbitMQ;
+using PointsService.Handlers.UserRecalculation;
 
 namespace PointsService.Handlers;
 
@@ -12,6 +13,7 @@ public static class HandlerExtensions
             .AddRabbitConsumerHandler<CreateTransactionViaAdminEventHandler>()
             .AddRabbitConsumerHandler<DeleteTransactionsEventHandler>()
             .AddRabbitConsumerHandler<CreateTransactionEventHandler>()
-            .AddRabbitConsumerHandler<SynchronizationEventHandler>();
+            .AddRabbitConsumerHandler<SynchronizationEventHandler>()
+            .AddRabbitConsumerHandler<UserRecalculationHandler>();
     }
 }

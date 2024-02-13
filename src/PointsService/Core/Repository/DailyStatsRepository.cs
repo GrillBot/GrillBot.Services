@@ -12,25 +12,6 @@ public class DailyStatsRepository : SubRepositoryBase<PointsServiceContext>
     {
     }
 
-    private IQueryable<DailyStat> GetBaseQuery(string guildId, bool disableTracking = false)
-    {
-        var query = Context.DailyStats
-            .Where(o => o.GuildId == guildId);
-        if (disableTracking)
-            query = query.AsNoTracking();
-        return query;
-    }
-
-    public async Task<List<DailyStat>> FindAllStatsForUserAsync(string guildId, string userId)
-    {
-        using (CreateCounter())
-        {
-            return await GetBaseQuery(guildId)
-                .Where(o => o.UserId == userId)
-                .ToListAsync();
-        }
-    }
-
     public async Task<List<PointsChartItem>> ComputeChartAsync(DateOnly dayFrom, DateOnly dayTo, string? guildId, string? userId)
     {
         using (CreateCounter())
