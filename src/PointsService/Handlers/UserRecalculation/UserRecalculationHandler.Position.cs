@@ -10,7 +10,7 @@ public partial class UserRecalculationHandler
         var position = await ComputeActualPositionAsync(user);
         if (position == 0)
         {
-            using (CreateCounter("Database"))
+            using (CreateCounter("ComputePosition.Database"))
                 position = await DbContext.Leaderboard.AsNoTracking().CountAsync(o => o.GuildId == user.GuildId);
         }
 
@@ -29,7 +29,7 @@ public partial class UserRecalculationHandler
             .Select(o => o.UserId);
 
         List<string> userIds;
-        using (CreateCounter("Database"))
+        using (CreateCounter("ComputePosition.Database"))
             userIds = await userIdsQuery.ToListAsync();
 
         return userIds.FindIndex(o => o == user.Id) + 1;
@@ -37,7 +37,7 @@ public partial class UserRecalculationHandler
 
     private async Task<List<User>> FindUsersWithSamePositionAsync(User user, int position)
     {
-        using (CreateCounter("Database"))
+        using (CreateCounter("ComputePosition.Database"))
         {
             return await DbContext.Users
                 .Where(o =>

@@ -25,7 +25,7 @@ public partial class UserRecalculationHandler
         List<DailyStat> allStats;
         Dictionary<DateOnly, DailyStat> currentStats;
 
-        using (CreateCounter("Database"))
+        using (CreateCounter("ComputeDailyStats.Database"))
         {
             allStats = await fullStatsQuery.ToListAsync();
 

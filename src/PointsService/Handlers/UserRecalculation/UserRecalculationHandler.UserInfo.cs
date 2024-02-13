@@ -11,7 +11,7 @@ public partial class UserRecalculationHandler
         var transactionsQuery = DbContext.Transactions.AsNoTracking()
             .Where(o => o.GuildId == user.GuildId && o.UserId == user.Id);
 
-        using (CreateCounter("Database"))
+        using (CreateCounter("ComputeUserInfo.Database"))
         {
             user.ActivePoints = await transactionsQuery.Where(o => o.CreatedAt >= yearBack && o.MergedCount == 0).SumAsync(o => o.Value);
             user.MergedPoints = await transactionsQuery.Where(o => o.MergedCount > 0).SumAsync(o => o.Value);

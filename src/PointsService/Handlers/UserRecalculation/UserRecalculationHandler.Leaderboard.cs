@@ -13,7 +13,7 @@ public partial class UserRecalculationHandler
             .Where(o => o.GuildId == user.GuildId && o.UserId == user.Id);
 
         LeaderboardItem? leaderboardItem;
-        using (CreateCounter("Database"))
+        using (CreateCounter("ComputeLeaderboard.Database"))
             leaderboardItem = await leaderboardItemQuery.FirstOrDefaultAsync();
 
         var currentStatus = await ComputePointsStatusAsync(user);
@@ -53,7 +53,7 @@ public partial class UserRecalculationHandler
             YearBack = transactions.Where(t => t.MergedCount == 0 && t.CreatedAt >= now.AddYears(-1)).Sum(t => t.Value)
         });
 
-        using (CreateCounter("Database"))
+        using (CreateCounter("ComputeLeaderboard.Database"))
             return await dtoQuery.FirstOrDefaultAsync() ?? new PointsStatus();
     }
 }
