@@ -38,7 +38,7 @@ public abstract class CreateTransactionBaseEventHandler<TPayload> : BaseEventWit
         return false;
     }
 
-    protected Task EnqueUserForRecalculationAsync(TPayload payload)
+    protected Task EnqueueUserForRecalculationAsync(TPayload payload)
     {
         var recalcPayload = new UserRecalculationPayload
         {

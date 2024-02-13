@@ -17,14 +17,6 @@ public class TransactionController : ControllerBase
     public Task<IActionResult> CreateTransactionAsync([FromBody] TransactionRequest request)
         => ProcessAsync<CreateTransactionAction>(request);
 
-    [HttpDelete("{guildId}/{messageId}")]
-    public Task<IActionResult> DeleteTransactionAsync([DiscordId, StringLength(30)] string guildId, [DiscordId, StringLength(30)] string messageId)
-        => ProcessAsync<DeleteTransactionsAction>(guildId, messageId);
-
-    [HttpDelete("{guildId}/{messageId}/{reactionId}")]
-    public Task<IActionResult> DeleteTransactionAsync([DiscordId, StringLength(30)] string guildId, [DiscordId, StringLength(30)] string messageId, [StringLength(100)] string reactionId)
-        => ProcessAsync<DeleteTransactionsAction>(guildId, messageId, reactionId);
-
     [HttpPost("transfer")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

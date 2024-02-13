@@ -9,6 +9,7 @@ public static class HandlerExtensions
         RabbitMQExtensions.AddRabbitMQ(services);
 
         return services
-            .AddRabbitConsumerHandler<CreateTransactionViaAdminEventHandler>();
+            .AddRabbitConsumerHandler<CreateTransactionViaAdminEventHandler>()
+            .AddRabbitConsumerHandler<DeleteTransactionsEventHandler>();
     }
 }

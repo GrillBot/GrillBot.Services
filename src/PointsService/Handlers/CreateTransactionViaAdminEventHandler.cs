@@ -32,7 +32,7 @@ public class CreateTransactionViaAdminEventHandler : CreateTransactionBaseEventH
             await DbContext.SaveChangesAsync();
         }
 
-        await EnqueUserForRecalculationAsync(payload);
+        await EnqueueUserForRecalculationAsync(payload);
     }
 
     private async Task<bool> CanCreateTransactionAsync(CreateTransactionAdminPayload payload)

@@ -10,7 +10,6 @@ public static class ActionExtensions
 
         services
             .AddScoped<CreateTransactionAction>()
-            .AddScoped<DeleteTransactionsAction>()
             .AddScoped<SynchronizationAction>()
             .AddScoped<CurrentPointsStatusAction>()
             .AddScoped<LeaderboardAction>()

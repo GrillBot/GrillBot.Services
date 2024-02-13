@@ -40,18 +40,6 @@ public class TransactionRepository : SubRepositoryBase<PointsServiceContext>
         }
     }
 
-    public async Task<List<Transaction>> FindTransactionsAsync(string guildId, string messageId, string? reactionId = null)
-    {
-        using (CreateCounter())
-        {
-            var query = GetBaseQuery(guildId)
-                .Where(o => o.MergedCount == 0 && o.MessageId == messageId);
-            if (!string.IsNullOrEmpty(reactionId))
-                query = query.Where(o => o.ReactionId == reactionId);
-            return await query.ToListAsync();
-        }
-    }
-
     public async Task<int> ComputePointsStatusAsync(string guildId, string userId, bool expired, DateTime dateFrom, DateTime dateTo)
     {
         using (CreateCounter())
