@@ -16,10 +16,4 @@ public class AdminController : ControllerBase
     [ProducesResponseType(typeof(PaginatedResponse<TransactionItem>), StatusCodes.Status200OK)]
     public Task<IActionResult> GetTransactionListAsync([FromBody] AdminListRequest request)
         => ProcessAsync<AdminListAction>(request);
-
-    [HttpPost("create")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    public Task<IActionResult> CreateTransactionAsync([FromBody] AdminTransactionRequest request)
-        => ProcessAsync<AdminCreateTransactionAction>(request);
 }

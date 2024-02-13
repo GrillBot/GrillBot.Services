@@ -18,7 +18,6 @@ public static class ActionExtensions
             .AddScoped<AdminListAction>()
             .AddScoped<MergeTransactionsAction>()
             .AddScoped<TransferPointsAction>()
-            .AddScoped<AdminCreateTransactionAction>()
             .AddScoped<TransactionExistsAction>()
             .AddScoped<ImagePointsStatusAction>()
             .AddScoped<LeaderboardCountAction>()
