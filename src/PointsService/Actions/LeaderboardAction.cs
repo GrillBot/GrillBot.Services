@@ -37,7 +37,7 @@ public class LeaderboardAction : ApiActionBase
             YearBack = o.YearBack
         });
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 
     private static IQueryable<LeaderboardItem> WithSortInQuery(IQueryable<LeaderboardItem> query, LeaderboardSortOptions sortOptions)

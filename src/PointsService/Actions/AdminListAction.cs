@@ -31,6 +31,6 @@ public class AdminListAction : ApiActionBase
             UserId = entity.UserId
         }));
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 }

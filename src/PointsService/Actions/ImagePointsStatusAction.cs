@@ -37,6 +37,6 @@ public class ImagePointsStatusAction : ApiActionBase
             Position = user!.PointsPosition
         };
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 }

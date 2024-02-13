@@ -24,7 +24,7 @@ public class UserListAction : ApiActionBase
         var query = CreateQuery(request);
         var result = await ReadDataFromQueryAsync(query, request.Pagination);
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 
     private IQueryable<UserListItem> CreateQuery(UserListRequest request)

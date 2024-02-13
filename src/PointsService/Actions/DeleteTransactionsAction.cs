@@ -32,7 +32,7 @@ public class DeleteTransactionsAction : ApiActionBase
         await SetPendingStatusAsync(transactions);
         await Repository.CommitAsync();
 
-        return ApiResult.FromSuccess();
+        return ApiResult.Ok();
     }
 
     private async Task SetPendingStatusAsync(IEnumerable<Transaction> transactions)

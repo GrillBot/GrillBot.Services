@@ -41,6 +41,6 @@ public class ChartAction : ApiActionBase
                 item.MessagePoints = 0;
         }
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 }

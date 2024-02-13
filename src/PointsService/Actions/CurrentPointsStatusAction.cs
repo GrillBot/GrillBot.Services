@@ -28,7 +28,7 @@ public class CurrentPointsStatusAction : ApiActionBase
             await ComputeStatusOfExpiredPoints(guildId, userId) :
             await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired);
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 
     private async Task<PointsStatus> ComputeStatusOfExpiredPoints(string guildId, string userId)
