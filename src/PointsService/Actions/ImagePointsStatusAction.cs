@@ -1,16 +1,17 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
-using PointsService.Core.Repository;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.Publisher;
+using PointsService.Core;
+using PointsService.Core.Entity;
 using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class ImagePointsStatusAction : ApiActionBase
+public class ImagePointsStatusAction : ApiAction
 {
-    private PointsServiceRepository Repository { get; }
-
-    public ImagePointsStatusAction(PointsServiceRepository repository)
+    public ImagePointsStatusAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
+        : base(counterManager, dbContext, publisher)
     {
-        Repository = repository;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -18,23 +19,14 @@ public class ImagePointsStatusAction : ApiActionBase
         var guildId = (string)Parameters[0]!;
         var userId = (string)Parameters[1]!;
 
-        return await ProcessAsync(guildId, userId);
-    }
-
-    private async Task<ApiResult> ProcessAsync(string guildId, string userId)
-    {
-        var now = DateTime.UtcNow;
-        var yearBack = now.AddYears(-1);
-
-        var user = await Repository.User.FindUserAsync(guildId, userId, true);
+        var user = await FindUserAsync(guildId, userId);
         if (user is null)
-            return new ApiResult(StatusCodes.Status404NotFound);
+            return ApiResult.NotFound();
 
-        var points = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, false, yearBack, DateTime.MaxValue);
         var result = new ImagePointsStatus
         {
-            Points = points,
-            Position = user!.PointsPosition
+            Position = user.PointsPosition,
+            Points = Convert.ToInt32(user.ActivePoints)
         };
 
         return ApiResult.Ok(result);

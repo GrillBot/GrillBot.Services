@@ -1,41 +1,43 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
-using PointsService.Core.Repository;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.Publisher;
+using Microsoft.EntityFrameworkCore;
+using PointsService.Core;
+using PointsService.Core.Entity;
 using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class CurrentPointsStatusAction : ApiActionBase
+public class CurrentPointsStatusAction : ApiAction
 {
-    private PointsServiceRepository Repository { get; }
-
-    public CurrentPointsStatusAction(PointsServiceRepository repository)
+    public CurrentPointsStatusAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
+        : base(counterManager, dbContext, publisher)
     {
-        Repository = repository;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;
         var userId = (string)Parameters[1]!;
-        var expired = (bool)Parameters[2]!;
 
-        return await ProcessAsync(guildId, userId, expired);
-    }
-
-    private async Task<ApiResult> ProcessAsync(string guildId, string userId, bool expired)
-    {
-        var result = expired ?
-            await ComputeStatusOfExpiredPoints(guildId, userId) :
-            await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, expired);
+        var leaderboardItem = await FindLeaderboardItemAsync(guildId, userId);
+        var result = new PointsStatus
+        {
+            MonthBack = leaderboardItem.MonthBack,
+            Today = leaderboardItem.Today,
+            Total = leaderboardItem.Total,
+            YearBack = leaderboardItem.YearBack
+        };
 
         return ApiResult.Ok(result);
     }
 
-    private async Task<PointsStatus> ComputeStatusOfExpiredPoints(string guildId, string userId)
+    private async Task<LeaderboardItem> FindLeaderboardItemAsync(string guildId, string userId)
     {
-        return new PointsStatus
-        {
-            Total = await Repository.Transaction.ComputePointsStatusAsync(guildId, userId, true, DateTime.MinValue, DateTime.MaxValue)
-        };
+        var query = DbContext.Leaderboard.AsNoTracking()
+            .Where(o => o.GuildId == guildId && o.UserId == userId);
+
+        using (CreateCounter("Database"))
+            return (await query.FirstOrDefaultAsync()) ?? new LeaderboardItem();
     }
 }

@@ -9,7 +9,7 @@ public class LeaderboardItem
 
     [StringLength(30)]
     public string UserId { get; set; } = null!;
-    
+
     public int YearBack { get; set; }
     public int MonthBack { get; set; }
     public int Today { get; set; }

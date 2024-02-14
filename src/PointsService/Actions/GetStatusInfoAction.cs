@@ -1,32 +1,43 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.Publisher;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using PointsService.Core;
+using PointsService.Core.Entity;
 using PointsService.Core.Options;
-using PointsService.Core.Repository;
 using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class GetStatusInfoAction : ApiActionBase
+public class GetStatusInfoAction : ApiAction
 {
-    private PointsServiceRepository Repository { get; }
     private AppOptions Options { get; }
 
-    public GetStatusInfoAction(PointsServiceRepository repository, IOptions<AppOptions> options)
+    public GetStatusInfoAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher,
+        IOptions<AppOptions> options) : base(counterManager, dbContext, publisher)
     {
-        Repository = repository;
         Options = options.Value;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var expirationDate = DateTime.UtcNow.AddMonths(-Options.ExpirationMonths);
-
         var result = new StatusInfo
         {
-            PendingUsersToProcess = await Repository.User.CountUsersToProcessAsync(),
-            TransactionsToMerge = await Repository.Transaction.GetCountOfTransactionsForMergeAsync(expirationDate)
+            TransactionsToMerge = await ComputeTransactionsToMergeAsync()
         };
 
         return ApiResult.Ok(result);
+    }
+
+    private async Task<int> ComputeTransactionsToMergeAsync()
+    {
+        var expirationDate = DateTime.UtcNow.AddMonths(-Options.ExpirationMonths);
+
+        var query = DbContext.Transactions.AsNoTracking()
+            .Where(o => o.CreatedAt < expirationDate && o.MergedCount == 0);
+
+        using (CreateCounter("Database"))
+            return await query.CountAsync();
     }
 }

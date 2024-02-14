@@ -1,15 +1,17 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
-using PointsService.Core.Repository;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.Publisher;
+using Microsoft.EntityFrameworkCore;
+using PointsService.Core;
+using PointsService.Core.Entity;
 
 namespace PointsService.Actions;
 
-public class TransactionExistsAction : ApiActionBase
+public class TransactionExistsAction : ApiAction
 {
-    private PointsServiceRepository Repository { get; }
-
-    public TransactionExistsAction(PointsServiceRepository repository)
+    public TransactionExistsAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
+        : base(counterManager, dbContext, publisher)
     {
-        Repository = repository;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -17,7 +19,12 @@ public class TransactionExistsAction : ApiActionBase
         var guildId = (string)Parameters[0]!;
         var userId = (string)Parameters[1]!;
 
-        var result = await Repository.Transaction.ExistsAnyTransactionAsync(guildId, userId);
-        return ApiResult.Ok(result);
+        using (CreateCounter("Database"))
+        {
+            var exists = await DbContext.Leaderboard.AsNoTracking()
+                .AnyAsync(o => o.GuildId == guildId && o.UserId == userId && o.Total > 0);
+
+            return ApiResult.Ok(exists);
+        }
     }
 }

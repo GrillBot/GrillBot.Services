@@ -1,22 +1,29 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
-using PointsService.Core.Repository;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.Publisher;
+using Microsoft.EntityFrameworkCore;
+using PointsService.Core;
+using PointsService.Core.Entity;
 
 namespace PointsService.Actions;
 
-public class LeaderboardCountAction : ApiActionBase
+public class LeaderboardCountAction : ApiAction
 {
-    private PointsServiceRepository Repository { get; }
-
-    public LeaderboardCountAction(PointsServiceRepository repository)
+    public LeaderboardCountAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
+        : base(counterManager, dbContext, publisher)
     {
-        Repository = repository;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;
-        var result = await Repository.Leaderboard.ComputeLeaderboardCountAsync(guildId);
 
-        return ApiResult.Ok(result);
+        using (CreateCounter("Database"))
+        {
+            var count = await DbContext.Leaderboard.AsNoTracking()
+                .CountAsync(o => o.GuildId == guildId);
+
+            return ApiResult.Ok(count);
+        }
     }
 }

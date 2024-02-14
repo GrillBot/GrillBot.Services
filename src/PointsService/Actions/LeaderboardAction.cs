@@ -1,28 +1,26 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.Publisher;
 using Microsoft.EntityFrameworkCore;
+using PointsService.Core;
 using PointsService.Core.Entity;
 using PointsService.Enums;
 using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class LeaderboardAction : ApiActionBase
+public class LeaderboardAction : ApiAction
 {
-    private PointsServiceContext Context { get; }
-    private ICounterManager CounterManager { get; }
-
-    public LeaderboardAction(PointsServiceContext context, ICounterManager counterManager)
+    public LeaderboardAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
+        : base(counterManager, dbContext, publisher)
     {
-        Context = context;
-        CounterManager = counterManager;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = (LeaderboardRequest)Parameters[0]!;
 
-        var query = Context.Leaderboard.Where(o => o.GuildId == request.GuildId);
+        var query = DbContext.Leaderboard.Where(o => o.GuildId == request.GuildId);
         query = WithSortInQuery(query, request.Sort);
         query = WithQueryMapping(query, request.Columns);
         query = WithQueryPagination(query, request.Skip, request.Count);
@@ -72,9 +70,7 @@ public class LeaderboardAction : ApiActionBase
 
     private async Task<List<LeaderboardItem>> ReadLeaderboardFromQueryAsync(IQueryable<LeaderboardItem> query)
     {
-        using (CounterManager.Create("Api.Database.ReadLeaderboard"))
-        {
+        using (CreateCounter("Database"))
             return await query.AsNoTracking().ToListAsync();
-        }
     }
 }
