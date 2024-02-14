@@ -1,9 +1,7 @@
 ﻿using GrillBot.Core.Database.Repository;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.Models.Pagination;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
-using PointsService.Models;
 
 namespace PointsService.Core.Repository;
 
@@ -11,15 +9,6 @@ public class TransactionRepository : SubRepositoryBase<PointsServiceContext>
 {
     public TransactionRepository(PointsServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {
-    }
-
-    public async Task<PaginatedResponse<Transaction>> GetAdminListAsync(AdminListRequest request)
-    {
-        using (CreateCounter())
-        {
-            var query = CreateQuery(request, true);
-            return await PaginatedResponse<Transaction>.CreateWithEntityAsync(query, request.Pagination);
-        }
     }
 
     private IQueryable<Transaction> GetTransactionsForMergeQuery(DateTime expirationDate)
