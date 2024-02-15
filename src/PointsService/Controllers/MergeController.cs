@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PointsService.Actions;
+using PointsService.Actions.Merge;
 using PointsService.Models;
 using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
@@ -14,5 +14,5 @@ public class MergeController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(MergeResult), StatusCodes.Status200OK)]
     public Task<IActionResult> MergeTransctionsAsync()
-        => ProcessAsync<MergeTransactionsAction>();
+        => ProcessAsync<MergeValidTransactionsAction>();
 }

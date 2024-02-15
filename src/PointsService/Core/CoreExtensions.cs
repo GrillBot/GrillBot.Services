@@ -5,7 +5,6 @@ using PointsService.Actions;
 using PointsService.Core.Entity;
 using PointsService.Core.Options;
 using PointsService.Core.Providers;
-using PointsService.Core.Repository;
 using PointsService.Handlers;
 
 namespace PointsService.Core;
@@ -17,8 +16,7 @@ public static class CoreExtensions
         var connectionString = configuration.GetConnectionString("Default")!;
 
         services
-            .AddDatabaseContext<PointsServiceContext>(builder => builder.UseNpgsql(connectionString))
-            .AddScoped<PointsServiceRepository>();
+            .AddDatabaseContext<PointsServiceContext>(builder => builder.UseNpgsql(connectionString));
 
         services
             .AddDiagnostic()

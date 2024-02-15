@@ -8,4 +8,5 @@ public class MergeResult
     public int GuildCount { get; set; }
     public int UserCount { get; set; }
     public int TotalPoints { get; set; }
+    public int DeletedDailyStatsCount { get; set; }
 }

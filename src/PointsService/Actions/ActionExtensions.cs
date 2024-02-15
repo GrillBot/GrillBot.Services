@@ -4,6 +4,10 @@ public static class ActionExtensions
 {
     public static void AddActions(this IServiceCollection services)
     {
+        // Merge
+        services
+            .AddScoped<Merge.MergeValidTransactionsAction>();
+
         // Users
         services
             .AddScoped<Users.UserListAction>();
@@ -13,7 +17,6 @@ public static class ActionExtensions
             .AddScoped<LeaderboardAction>()
             .AddScoped<ChartAction>()
             .AddScoped<AdminListAction>()
-            .AddScoped<MergeTransactionsAction>()
             .AddScoped<TransferPointsAction>()
             .AddScoped<TransactionExistsAction>()
             .AddScoped<ImagePointsStatusAction>()

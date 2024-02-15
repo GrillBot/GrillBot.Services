@@ -1,35 +1,36 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Models.Pagination;
+using GrillBot.Core.RabbitMQ.Publisher;
 using Microsoft.EntityFrameworkCore;
+using PointsService.Core;
 using PointsService.Core.Entity;
 using PointsService.Models.Users;
 
 namespace PointsService.Actions.Users;
 
-public class UserListAction : ApiActionBase
+public class UserListAction : ApiAction
 {
-    private PointsServiceContext Context { get; }
-    private ICounterManager CounterManager { get; }
-
-    public UserListAction(PointsServiceContext context, ICounterManager counterManager)
+    public UserListAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
+        : base(counterManager, dbContext, publisher)
     {
-        Context = context;
-        CounterManager = counterManager;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = (UserListRequest)Parameters[0]!;
         var query = CreateQuery(request);
-        var result = await ReadDataFromQueryAsync(query, request.Pagination);
 
-        return ApiResult.Ok(result);
+        using (CreateCounter("Database"))
+        {
+            var result = await PaginatedResponse<UserListItem>.CreateWithEntityAsync(query, request.Pagination);
+            return ApiResult.Ok(result);
+        }
     }
 
     private IQueryable<UserListItem> CreateQuery(UserListRequest request)
     {
-        var query = Context.Users.AsNoTracking();
+        var query = DbContext.Users.AsNoTracking();
 
         if (!string.IsNullOrEmpty(request.GuildId))
             query = query.Where(o => o.GuildId == request.GuildId);
@@ -45,13 +46,5 @@ public class UserListAction : ApiActionBase
                 PointsDeactivated = o.PointsDisabled,
                 UserId = o.Id
             });
-    }
-
-    private async Task<PaginatedResponse<UserListItem>> ReadDataFromQueryAsync(IQueryable<UserListItem> query, PaginatedParams pagination)
-    {
-        using (CounterManager.Create("Api.Database.ReadUsers"))
-        {
-            return await PaginatedResponse<UserListItem>.CreateWithEntityAsync(query, pagination);
-        }
     }
 }
