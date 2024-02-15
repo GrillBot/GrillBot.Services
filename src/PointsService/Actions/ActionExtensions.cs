@@ -10,17 +10,17 @@ public static class ActionExtensions
 
         // Users
         services
-            .AddScoped<Users.UserListAction>();
+            .AddScoped<Users.GetUserListAction>();
 
         services
-            .AddScoped<CurrentPointsStatusAction>()
-            .AddScoped<LeaderboardAction>()
-            .AddScoped<ChartAction>()
-            .AddScoped<AdminListAction>()
-            .AddScoped<TransferPointsAction>()
-            .AddScoped<TransactionExistsAction>()
-            .AddScoped<ImagePointsStatusAction>()
-            .AddScoped<LeaderboardCountAction>()
+            .AddScoped<GetCurrentPointsStatusAction>()
+            .AddScoped<GetLeaderboardAction>()
+            .AddScoped<GetChartAction>()
+            .AddScoped<GetAdminListAction>()
+            .AddScoped<ProcessTransferPointsAction>()
+            .AddScoped<CheckTransactionExistsAction>()
+            .AddScoped<GetImagePointsStatusAction>()
+            .AddScoped<GetLeaderboardCountAction>()
             .AddScoped<GetStatusInfoAction>();
     }
 }

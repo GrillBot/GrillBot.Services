@@ -8,9 +8,9 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class ChartAction : ApiAction
+public class GetChartAction : ApiAction
 {
-    public ChartAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
+    public GetChartAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
         : base(counterManager, dbContext, publisher)
     {
     }

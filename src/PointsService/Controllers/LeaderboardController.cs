@@ -16,11 +16,11 @@ public class LeaderboardController : ControllerBase
     [HttpGet("{guildId}")]
     [ProducesResponseType(typeof(List<BoardItem>), StatusCodes.Status200OK)]
     public Task<IActionResult> GetLeaderboardAsync([FromRoute] LeaderboardRequest request)
-        => ProcessAsync<LeaderboardAction>(request);
+        => ProcessAsync<GetLeaderboardAction>(request);
 
     [HttpGet("{guildId}/count")]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> GetLeaderboardCountAsync([Required, StringLength(30), DiscordId] string guildId)
-        => ProcessAsync<LeaderboardCountAction>(guildId);
+        => ProcessAsync<GetLeaderboardCountAction>(guildId);
 }

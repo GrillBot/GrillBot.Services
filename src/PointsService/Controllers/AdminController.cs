@@ -15,5 +15,5 @@ public class AdminController : ControllerBase
     [HttpPost("list")]
     [ProducesResponseType(typeof(PaginatedResponse<TransactionItem>), StatusCodes.Status200OK)]
     public Task<IActionResult> GetTransactionListAsync([FromBody] AdminListRequest request)
-        => ProcessAsync<AdminListAction>(request);
+        => ProcessAsync<GetAdminListAction>(request);
 }

@@ -14,5 +14,5 @@ public class ChartController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(List<PointsChartItem>), StatusCodes.Status200OK)]
     public Task<IActionResult> GetChartDataAsync([FromBody] AdminListRequest request)
-        => ProcessAsync<ChartAction>(request);
+        => ProcessAsync<GetChartAction>(request);
 }

@@ -15,5 +15,5 @@ public class UserController : GrillBot.Core.Infrastructure.Actions.ControllerBas
     [ProducesResponseType(typeof(PaginatedResponse<UserListItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetUserListAsync([FromBody] UserListRequest request)
-        => await ProcessAsync<UserListAction>(request);
+        => await ProcessAsync<GetUserListAction>(request);
 }

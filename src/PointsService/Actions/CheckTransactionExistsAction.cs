@@ -7,9 +7,9 @@ using PointsService.Core.Entity;
 
 namespace PointsService.Actions;
 
-public class LeaderboardCountAction : ApiAction
+public class CheckTransactionExistsAction : ApiAction
 {
-    public LeaderboardCountAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
+    public CheckTransactionExistsAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
         : base(counterManager, dbContext, publisher)
     {
     }
@@ -17,13 +17,14 @@ public class LeaderboardCountAction : ApiAction
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;
+        var userId = (string)Parameters[1]!;
 
         using (CreateCounter("Database"))
         {
-            var count = await DbContext.Leaderboard.AsNoTracking()
-                .CountAsync(o => o.GuildId == guildId);
+            var exists = await DbContext.Leaderboard.AsNoTracking()
+                .AnyAsync(o => o.GuildId == guildId && o.UserId == userId && o.Total > 0);
 
-            return ApiResult.Ok(count);
+            return ApiResult.Ok(exists);
         }
     }
 }

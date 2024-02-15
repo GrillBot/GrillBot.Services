@@ -9,9 +9,9 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class AdminListAction : ApiAction
+public class GetAdminListAction : ApiAction
 {
-    public AdminListAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
+    public GetAdminListAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
         : base(counterManager, dbContext, publisher)
     {
     }

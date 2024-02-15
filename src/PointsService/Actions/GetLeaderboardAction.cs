@@ -9,9 +9,9 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class LeaderboardAction : ApiAction
+public class GetLeaderboardAction : ApiAction
 {
-    public LeaderboardAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
+    public GetLeaderboardAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
         : base(counterManager, dbContext, publisher)
     {
     }

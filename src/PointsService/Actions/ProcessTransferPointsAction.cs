@@ -11,9 +11,10 @@ using PointsService.Models.Events;
 
 namespace PointsService.Actions;
 
-public class TransferPointsAction : ApiAction
+public class ProcessTransferPointsAction : ApiAction
 {
-    public TransferPointsAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher) : base(counterManager, dbContext, publisher)
+    public ProcessTransferPointsAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
+        : base(counterManager, dbContext, publisher)
     {
     }
 

@@ -7,9 +7,9 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class ImagePointsStatusAction : ApiAction
+public class GetImagePointsStatusAction : ApiAction
 {
-    public ImagePointsStatusAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
+    public GetImagePointsStatusAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
         : base(counterManager, dbContext, publisher)
     {
     }

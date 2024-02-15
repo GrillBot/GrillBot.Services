@@ -8,9 +8,9 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class CurrentPointsStatusAction : ApiAction
+public class GetCurrentPointsStatusAction : ApiAction
 {
-    public CurrentPointsStatusAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
+    public GetCurrentPointsStatusAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
         : base(counterManager, dbContext, publisher)
     {
     }
