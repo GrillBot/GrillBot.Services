@@ -9,4 +9,15 @@ public class SynchronizationPayload
     public string GuildId { get; set; } = null!;
     public List<ChannelInfo> Channels { get; set; } = new();
     public List<UserInfo> Users { get; set; } = new();
+
+    public SynchronizationPayload()
+    {
+    }
+
+    public SynchronizationPayload(string guildId, List<ChannelInfo> channels, List<UserInfo> users)
+    {
+        GuildId = guildId;
+        Channels = channels;
+        Users = users;
+    }
 }

@@ -37,12 +37,7 @@ public abstract class ApiAction : ApiActionBase
 
     protected Task EnqueueUserForRecalculationAsync(string guildId, string userId)
     {
-        var recalcPayload = new UserRecalculationPayload
-        {
-            GuildId = guildId,
-            UserId = userId
-        };
-
+        var recalcPayload = new UserRecalculationPayload(guildId, userId);
         return Publisher.PublishAsync(UserRecalculationPayload.QueueName, recalcPayload);
     }
 }

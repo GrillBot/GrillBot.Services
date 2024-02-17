@@ -53,12 +53,7 @@ public class DeleteTransactionsEventHandler : BaseEventWithDb<DeleteTransactions
 
         foreach (var userTransaction in users)
         {
-            var payload = new UserRecalculationPayload
-            {
-                UserId = userTransaction.UserId,
-                GuildId = userTransaction.GuildId
-            };
-
+            var payload = new UserRecalculationPayload(userTransaction.GuildId, userTransaction.UserId);
             await Publisher.PublishAsync(UserRecalculationPayload.QueueName, payload);
         }
     }

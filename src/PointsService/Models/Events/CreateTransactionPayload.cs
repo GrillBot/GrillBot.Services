@@ -17,4 +17,17 @@ public class CreateTransactionPayload : CreateTransactionBasePayload
             return Reaction.IsBurst ? IncrementType.SuperReaction : IncrementType.Reaction;
         return IncrementType.Message;
     }
+
+    public CreateTransactionPayload()
+    {
+    }
+
+    public CreateTransactionPayload(string guildId, DateTime createdAtUtc, string channelId, MessageInfo message, ReactionInfo? reaction = null)
+        : base(guildId)
+    {
+        CreatedAtUtc = createdAtUtc;
+        ChannelId = channelId;
+        Message = message;
+        Reaction = reaction;
+    }
 }
