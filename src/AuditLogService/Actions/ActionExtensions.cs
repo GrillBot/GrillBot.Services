@@ -23,7 +23,6 @@ public static class ActionExtensions
             .AddScoped<Dashboard.GetInteractionsDashboardAction>()
             .AddScoped<Dashboard.GetJobsDashboardListAction>()
             .AddScoped<Dashboard.GetTodayAvgTimesDashboard>()
-            .AddScoped<Dashboard.GetMemberWarningDashboardAction>()
             .AddScoped<Info.GetStatusInfoAction>();
     }
 }

@@ -20,19 +20,14 @@ public class DashboardController : ControllerBase
     [ProducesResponseType(typeof(List<DashboardInfoRow>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInteractionsDashboardAsync()
         => await ProcessAsync<GetInteractionsDashboardAction>();
-    
+
     [HttpGet("jobs")]
     [ProducesResponseType(typeof(List<DashboardInfoRow>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetJobsDashboardAsync()
         => await ProcessAsync<GetJobsDashboardListAction>();
-    
+
     [HttpGet("todayAvgTimes")]
     [ProducesResponseType(typeof(List<DashboardInfoRow>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetTodayAvgTimesAsync()
         => await ProcessAsync<GetTodayAvgTimesDashboard>();
-
-    [HttpGet("memberWarning")]
-    [ProducesResponseType(typeof(List<DashboardInfoRow>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetMemberWarningDashboardAsync()
-        => await ProcessAsync<GetMemberWarningDashboardAction>();
 }

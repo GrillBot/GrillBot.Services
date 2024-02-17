@@ -44,7 +44,6 @@ public sealed class RequestProcessorFactory : IDisposable
             LogType.Api => new ApiRequestProcessor(ServiceProvider),
             LogType.ThreadUpdated => new ThreadUpdatedProcessor(ServiceProvider),
             LogType.RoleDeleted => new RoleDeletedProcessor(ServiceProvider),
-            LogType.MemberWarning => new MemberWarningProcessor(ServiceProvider),
             _ => throw new NotSupportedException($"Unsupported type {type}")
         };
 

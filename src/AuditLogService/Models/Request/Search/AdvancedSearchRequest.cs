@@ -14,7 +14,6 @@ public class AdvancedSearchRequest
     public UserIdSearchRequest? MemberRolesUpdated { get; set; }
     public UserIdSearchRequest? MemberUpdated { get; set; }
     public MessageDeletedSearchRequest? MessageDeleted { get; set; }
-    public UserIdSearchRequest? MemberWarning { get; set; }
 
     public bool IsAnySet()
     {
@@ -22,8 +21,7 @@ public class AdvancedSearchRequest
         {
             Info, Warning, Error, Interaction, Job, Api,
             OverwriteCreated, OverwriteDeleted, OverwriteUpdated,
-            MemberRolesUpdated, MemberUpdated, MessageDeleted,
-            MemberWarning
+            MemberRolesUpdated, MemberUpdated, MessageDeleted
         };
 
         return Array.Exists(items, o => o?.IsSet() == true);

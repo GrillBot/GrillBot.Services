@@ -54,7 +54,6 @@ public class SearchRequest : IValidatableObject
             LogType.MemberUpdated => AdvancedSearch.MemberUpdated,
             LogType.MemberRoleUpdated => AdvancedSearch.MemberRolesUpdated,
             LogType.MessageDeleted => AdvancedSearch.MessageDeleted,
-            LogType.MemberWarning => AdvancedSearch.MemberWarning,
             _ => null
         };
 

@@ -122,10 +122,5 @@ public enum LogType
     /// <summary>
     /// Role was deleted.
     /// </summary>
-    RoleDeleted = 25,
-
-    /// <summary>
-    /// User alerts for suspicious activity.
-    /// </summary>
-    MemberWarning = 26
+    RoleDeleted = 25
 }

@@ -140,9 +140,6 @@ public class HardDeleteAction : PostProcessActionBase
                         Context.RemoveRange(childItems.Where(o => o.RoleInfo is not null).Select(o => o.RoleInfo));
                     }
                     break;
-                case LogType.MemberWarning:
-                    await RemoveChildDataAsync<MemberWarning>(item);
-                    break;
             }
         }
 

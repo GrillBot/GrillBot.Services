@@ -172,14 +172,6 @@ public partial class SearchItemsAction
             result.AddRange(await SelectIdsAsync(baseQuery));
         }
 
-        if (request.IsAdvancedFilterSet(LogType.MemberWarning))
-        {
-            var query = CreateCommonFilterForAdvancedSearch(Context.MemberWarnings, request)
-                .Where(o => o.TargetId == request.AdvancedSearch!.MemberWarning!.UserId);
-
-            result.AddRange(await SelectIdsAsync(query));
-        }
-
         return result.Distinct().ToList();
     }
 
@@ -214,9 +206,7 @@ public partial class SearchItemsAction
         if (request.ShowTypes.Count > 0)
             query = query.Where(o => request.ShowTypes.Contains(o.Type));
         else if (request.IgnoreTypes.Count > 0)
-            query = query.Where(o => !request.IgnoreTypes.Contains(o.Type) && o.Type != LogType.MemberWarning);
-        else
-            query = query.Where(o => o.Type != LogType.MemberWarning);
+            query = query.Where(o => !request.IgnoreTypes.Contains(o.Type));
 
         if (!string.IsNullOrEmpty(request.GuildId))
             query = query.Where(o => o.GuildId == request.GuildId);
