@@ -50,7 +50,7 @@ public class GetAdminListAction : ApiAction
             query = query.Where(o => o.GuildId == request.GuildId);
 
         if (!string.IsNullOrEmpty(request.UserId))
-            query = query.Where(o => o.GuildId == request.GuildId);
+            query = query.Where(o => o.UserId == request.UserId);
 
         if (request.CreatedFrom.HasValue)
             query = query.Where(o => o.CreatedAt >= request.CreatedFrom.Value.ToUniversalTime());
