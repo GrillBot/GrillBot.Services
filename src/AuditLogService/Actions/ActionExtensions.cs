@@ -6,8 +6,6 @@ public static class ActionExtensions
     {
         services
             .AddScoped<CreateItemsAction>()
-            .AddScoped<Delete.DeleteItemAction>()
-            .AddScoped<Delete.BulkDeleteAction>()
             .AddScoped<Search.SearchItemsAction>()
             .AddScoped<Detail.ReadDetailAction>()
             .AddScoped<Archivation.CreateArchivationDataAction>()

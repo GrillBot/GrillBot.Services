@@ -6,6 +6,7 @@ using AuditLogService.Core.Entity;
 using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Core.Options;
 using AuditLogService.Core.Providers;
+using AuditLogService.Handlers;
 using AuditLogService.Processors;
 using GrillBot.Core;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -49,5 +50,6 @@ public static class CoreExtensions
         services.AddDiscord();
         services.AddPostProcessing();
         services.AddCaching();
+        services.AddRabbitMQ();
     }
 }
