@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Actions;
-using AuditLogService.BackgroundServices;
 using AuditLogService.Cache;
 using AuditLogService.Core.Discord;
 using AuditLogService.Core.Entity;
@@ -48,7 +47,6 @@ public static class CoreExtensions
         services.AddActions();
         services.AddProcessors();
         services.AddDiscord();
-        services.AddPostProcessing();
         services.AddCaching();
         services.AddRabbitMQ();
         services.AddManagers();

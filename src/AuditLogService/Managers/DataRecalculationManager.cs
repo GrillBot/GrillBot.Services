@@ -47,7 +47,7 @@ public class DataRecalculationManager
                 request.Method == payload.Api.Method &&
                 request.TemplatePath == payload.Api.TemplatePath &&
                 request.ApiGroupName == payload.Api.ApiGroupName &&
-                request.Identification == payload.Api.Identification;
+                (item.UserId ?? request.Identification) == payload.Api.Identification;
         }
 
         if (payload.Interaction is not null)
@@ -84,7 +84,7 @@ public class DataRecalculationManager
                 payload.Api = new ApiRecalculationData
                 {
                     ApiGroupName = request.ApiGroupName,
-                    Identification = request.Identification,
+                    Identification = item.UserId ?? request.Identification,
                     Method = request.Method,
                     RequestDate = request.RequestDate,
                     TemplatePath = request.TemplatePath

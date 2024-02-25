@@ -1,4 +1,5 @@
-﻿using GrillBot.Core.RabbitMQ;
+﻿using AuditLogService.Handlers.Recalculation;
+using GrillBot.Core.RabbitMQ;
 
 namespace AuditLogService.Handlers;
 
@@ -10,6 +11,7 @@ public static class HandlerExtensions
 
         services
             .AddRabbitConsumerHandler<BulkDeleteEventHandler>()
-            .AddRabbitConsumerHandler<CreateItemsEventHandler>();
+            .AddRabbitConsumerHandler<CreateItemsEventHandler>()
+            .AddRabbitConsumerHandler<RecalculationHandler>();
     }
 }
