@@ -5,7 +5,6 @@ public static class ActionExtensions
     public static void AddActions(this IServiceCollection services)
     {
         services
-            .AddScoped<CreateItemsAction>()
             .AddScoped<Search.SearchItemsAction>()
             .AddScoped<Detail.ReadDetailAction>()
             .AddScoped<Archivation.CreateArchivationDataAction>()

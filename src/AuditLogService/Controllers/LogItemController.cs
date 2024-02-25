@@ -1,7 +1,5 @@
-﻿using AuditLogService.Actions;
-using AuditLogService.Actions.Detail;
+﻿using AuditLogService.Actions.Detail;
 using AuditLogService.Actions.Search;
-using AuditLogService.Models.Request.CreateItems;
 using AuditLogService.Models.Request.Search;
 using AuditLogService.Models.Response.Search;
 using GrillBot.Core.Models.Pagination;
@@ -15,12 +13,6 @@ public class LogItemController : ControllerBase
     public LogItemController(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }
-
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateItemsAsync(List<LogRequest> requests)
-        => await ProcessAsync<CreateItemsAction>(requests);
 
     [HttpPost("search")]
     [ProducesResponseType(typeof(PaginatedResponse<LogListItem>), StatusCodes.Status200OK)]

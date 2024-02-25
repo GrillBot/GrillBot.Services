@@ -1,16 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Discord;
+﻿using Discord;
 
-namespace AuditLogService.Models.Request.CreateItems;
+namespace AuditLogService.Models.Events.Create;
 
 public class EmbedRequest
 {
     public string? Title { get; set; }
-
-    [Required]
-    [StringLength(16)]
     public string Type { get; set; } = null!;
-
     public string? ImageInfo { get; set; }
     public string? VideoInfo { get; set; }
     public string? AuthorName { get; set; }

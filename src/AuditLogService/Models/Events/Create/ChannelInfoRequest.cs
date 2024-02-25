@@ -1,4 +1,4 @@
-﻿namespace AuditLogService.Models.Request.CreateItems;
+﻿namespace AuditLogService.Models.Events.Create;
 
 public class ChannelInfoRequest
 {

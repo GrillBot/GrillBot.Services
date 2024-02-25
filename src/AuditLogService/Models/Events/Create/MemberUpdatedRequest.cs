@@ -1,11 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace AuditLogService.Models.Request.CreateItems;
+﻿namespace AuditLogService.Models.Events.Create;
 
 public class MemberUpdatedRequest
 {
-    [Required]
-    [StringLength(32)]
     public string UserId { get; set; } = null!;
 
     public DiffRequest<string?>? SelfUnverifyMinimalTime { get; set; }

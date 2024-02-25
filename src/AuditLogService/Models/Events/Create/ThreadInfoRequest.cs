@@ -1,6 +1,6 @@
 ﻿using Discord;
 
-namespace AuditLogService.Models.Request.CreateItems;
+namespace AuditLogService.Models.Events.Create;
 
 public class ThreadInfoRequest
 {

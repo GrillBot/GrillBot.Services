@@ -1,9 +1,6 @@
-﻿using AuditLogService.Actions;
-using AuditLogService.BackgroundServices.Actions;
+﻿using AuditLogService.BackgroundServices.Actions;
 using AuditLogService.Core.Entity;
 using AuditLogService.Core.Entity.Statistics;
-using AuditLogService.Models.Request.CreateItems;
-using AuditLogService.Processors;
 using GrillBot.Core.Managers.Performance;
 using Microsoft.EntityFrameworkCore;
 
@@ -62,34 +59,9 @@ public partial class PostProcessingService : BackgroundService
                 await action.ProcessAsync(logItem);
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            await WriteExceptionAsync(ex, logItem, scope, actionName);
         }
-    }
-
-    private async Task WriteExceptionAsync(Exception exception, LogItem logItem, IServiceScope scope, string actionName)
-    {
-        var source = $"{nameof(PostProcessingService)}/{actionName}";
-        var logMessage = new Discord.LogMessage(Discord.LogSeverity.Error, source, $"An error occured while processing log item ID {logItem.Id}", exception)
-            .ToString(prependTimestamp: false, padSource: 50);
-
-        var request = new LogRequest
-        {
-            CreatedAt = DateTime.UtcNow,
-            LogMessage = new LogMessageRequest
-            {
-                Message = logMessage,
-                Severity = Discord.LogSeverity.Error,
-                Source = source,
-                SourceAppName = "AuditLogService"
-            },
-            Type = Core.Enums.LogType.Error
-        };
-
-        var createAction = scope.ServiceProvider.GetRequiredService<CreateItemsAction>();
-        createAction.Init(new DefaultHttpContext(), new object[] { new List<LogRequest> { request } });
-        await createAction.ProcessAsync();
     }
 
     private async Task CheckMigrationsAsync()
