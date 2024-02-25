@@ -5,8 +5,10 @@ using PointsService.Models.Events;
 
 namespace PointsService.Handlers.Abstractions;
 
-public abstract class CreateTransactionBaseEventHandler<TPayload> : BaseEventWithDb<TPayload> where TPayload : CreateTransactionBasePayload
+public abstract class CreateTransactionBaseEventHandler<TPayload> : BaseEventWithDb<TPayload> where TPayload : CreateTransactionBasePayload, new()
 {
+    public override string QueueName => new TPayload().QueueName;
+
     protected ILogger Logger { get; }
 
     protected CreateTransactionBaseEventHandler(ILoggerFactory loggerFactory, PointsServiceContext dbContext, ICounterManager counterManager,

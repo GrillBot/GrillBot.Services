@@ -31,8 +31,5 @@ public abstract class BaseEventWithDb<TPayload> : BaseRabbitMQHandler<TPayload>
     }
 
     protected Task EnqueueUserForRecalculationAsync(string guildId, string userId)
-    {
-        var recalcPayload = new UserRecalculationPayload(guildId, userId);
-        return Publisher.PublishAsync(UserRecalculationPayload.QueueName, recalcPayload);
-    }
+        => Publisher.PublishAsync(new UserRecalculationPayload(guildId, userId));
 }

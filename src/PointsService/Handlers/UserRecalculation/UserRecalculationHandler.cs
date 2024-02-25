@@ -8,7 +8,7 @@ namespace PointsService.Handlers.UserRecalculation;
 
 public partial class UserRecalculationHandler : BaseEventWithDb<UserRecalculationPayload>
 {
-    public override string QueueName => UserRecalculationPayload.QueueName;
+    public override string QueueName => new UserRecalculationPayload().QueueName;
 
     public UserRecalculationHandler(ILoggerFactory loggerFactory, PointsServiceContext dbContext, ICounterManager counterManager, IRabbitMQPublisher publisher)
         : base(loggerFactory, dbContext, counterManager, publisher)

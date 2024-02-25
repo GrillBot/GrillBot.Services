@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GrillBot.Core.Managers.Performance;
+using Microsoft.EntityFrameworkCore;
 using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Handlers.Abstractions;
 using UserMeasuresService.Models.Events;
@@ -7,11 +8,12 @@ namespace UserMeasuresService.Handlers;
 
 public class UnverifyModifyEventHandler : BaseEventHandlerWithDb<UnverifyModifyPayload>
 {
-    public UnverifyModifyEventHandler(ILoggerFactory loggerFactory, UserMeasuresContext dbContext) : base(loggerFactory, dbContext)
+    public override string QueueName => new UnverifyModifyPayload().QueueName;
+
+    public UnverifyModifyEventHandler(ILoggerFactory loggerFactory, UserMeasuresContext dbContext, ICounterManager counterManager)
+        : base(loggerFactory, dbContext, counterManager)
     {
     }
-
-    public override string QueueName => UnverifyModifyPayload.QueueName;
 
     protected override async Task HandleInternalAsync(UnverifyModifyPayload payload)
     {

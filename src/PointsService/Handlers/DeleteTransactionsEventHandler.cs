@@ -9,7 +9,7 @@ namespace PointsService.Handlers;
 
 public class DeleteTransactionsEventHandler : BaseEventWithDb<DeleteTransactionsPayload>
 {
-    public override string QueueName => DeleteTransactionsPayload.QueueName;
+    public override string QueueName => new DeleteTransactionsPayload().QueueName;
 
     public DeleteTransactionsEventHandler(ILoggerFactory loggerFactory, PointsServiceContext dbContext, ICounterManager counterManager, IRabbitMQPublisher publisher)
         : base(loggerFactory, dbContext, counterManager, publisher)
@@ -52,9 +52,6 @@ public class DeleteTransactionsEventHandler : BaseEventWithDb<DeleteTransactions
             .Select(o => o.First());
 
         foreach (var userTransaction in users)
-        {
-            var payload = new UserRecalculationPayload(userTransaction.GuildId, userTransaction.UserId);
-            await Publisher.PublishAsync(UserRecalculationPayload.QueueName, payload);
-        }
+            await Publisher.PublishAsync(new UserRecalculationPayload(userTransaction.GuildId, userTransaction.UserId));
     }
 }

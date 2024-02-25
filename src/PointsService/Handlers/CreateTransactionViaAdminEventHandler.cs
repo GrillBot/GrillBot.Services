@@ -9,8 +9,6 @@ namespace PointsService.Handlers;
 
 public class CreateTransactionViaAdminEventHandler : CreateTransactionBaseEventHandler<CreateTransactionAdminPayload>
 {
-    public override string QueueName => CreateTransactionAdminPayload.QueueName;
-
     public CreateTransactionViaAdminEventHandler(ILoggerFactory loggerFactory, PointsServiceContext dbContext, ICounterManager counterManager,
         IRabbitMQPublisher publisher) : base(loggerFactory, dbContext, counterManager, publisher)
     {

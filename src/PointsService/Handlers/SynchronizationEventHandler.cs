@@ -11,7 +11,7 @@ namespace PointsService.Handlers;
 
 public class SynchronizationEventHandler : BaseEventWithDb<SynchronizationPayload>
 {
-    public override string QueueName => SynchronizationPayload.QueueName;
+    public override string QueueName => new SynchronizationPayload().QueueName;
 
     public SynchronizationEventHandler(ILoggerFactory loggerFactory, PointsServiceContext dbContext, ICounterManager counterManager, IRabbitMQPublisher publisher)
         : base(loggerFactory, dbContext, counterManager, publisher)

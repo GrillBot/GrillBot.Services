@@ -13,8 +13,6 @@ namespace PointsService.Handlers;
 
 public class CreateTransactionEventHandler : CreateTransactionBaseEventHandler<CreateTransactionPayload>
 {
-    public override string QueueName => CreateTransactionPayload.QueueName;
-
     private AppOptions Options { get; }
     private IRandomManager RandomManager { get; }
 

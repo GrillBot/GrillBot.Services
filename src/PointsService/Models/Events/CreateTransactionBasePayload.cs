@@ -1,7 +1,11 @@
-﻿namespace PointsService.Models.Events;
+﻿using GrillBot.Core.RabbitMQ;
 
-public abstract class CreateTransactionBasePayload
+namespace PointsService.Models.Events;
+
+public abstract class CreateTransactionBasePayload : IPayload
 {
+    public abstract string QueueName { get; }
+
     public string GuildId { get; set; } = null!;
 
     protected CreateTransactionBasePayload()

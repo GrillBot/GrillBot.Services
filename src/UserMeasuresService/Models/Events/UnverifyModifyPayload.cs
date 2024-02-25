@@ -1,8 +1,10 @@
-﻿namespace UserMeasuresService.Models.Events;
+﻿using GrillBot.Core.RabbitMQ;
 
-public class UnverifyModifyPayload
+namespace UserMeasuresService.Models.Events;
+
+public class UnverifyModifyPayload : IPayload
 {
-    public const string QueueName = "user_measures:unverify_modify";
+    public string QueueName => "user_measures:unverify_modify";
 
     public long LogSetId { get; set; }
     public DateTime? NewEnd { get; set; }

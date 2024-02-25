@@ -1,4 +1,5 @@
-﻿using UserMeasuresService.Core.Entity;
+﻿using GrillBot.Core.Managers.Performance;
+using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Handlers.Abstractions;
 using UserMeasuresService.Models.Events;
 
@@ -6,9 +7,10 @@ namespace UserMeasuresService.Handlers;
 
 public class MemberWarningEventHandler : BaseEventHandlerWithDb<MemberWarningPayload>
 {
-    public override string QueueName => MemberWarningPayload.QueueName;
+    public override string QueueName => new MemberWarningPayload().QueueName;
 
-    public MemberWarningEventHandler(ILoggerFactory loggerFactory, UserMeasuresContext dbContext) : base(loggerFactory, dbContext)
+    public MemberWarningEventHandler(ILoggerFactory loggerFactory, UserMeasuresContext dbContext, ICounterManager counterManager)
+        : base(loggerFactory, dbContext, counterManager)
     {
     }
 

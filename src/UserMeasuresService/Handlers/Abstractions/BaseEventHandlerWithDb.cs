@@ -1,4 +1,5 @@
-﻿using GrillBot.Core.RabbitMQ.Consumer;
+﻿using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.Consumer;
 using UserMeasuresService.Core.Entity;
 
 namespace UserMeasuresService.Handlers.Abstractions;
@@ -6,10 +7,12 @@ namespace UserMeasuresService.Handlers.Abstractions;
 public abstract class BaseEventHandlerWithDb<TPayload> : BaseRabbitMQHandler<TPayload>
 {
     protected UserMeasuresContext DbContext { get; }
+    private ICounterManager CounterManager { get; }
 
-    protected BaseEventHandlerWithDb(ILoggerFactory loggerFactory, UserMeasuresContext dbContext) : base(loggerFactory)
+    protected BaseEventHandlerWithDb(ILoggerFactory loggerFactory, UserMeasuresContext dbContext, ICounterManager counterManager) : base(loggerFactory)
     {
         DbContext = dbContext;
+        CounterManager = counterManager;
     }
 
     protected async Task SaveEntityAsync<TEntity>(TEntity entity) where TEntity : BaseEntity
@@ -17,12 +20,18 @@ public abstract class BaseEventHandlerWithDb<TPayload> : BaseRabbitMQHandler<TPa
         if (entity is null)
             return;
 
-        if (entity.IsNew)
+        using (CreateCounter("Database"))
         {
-            entity.Id = Guid.NewGuid();
-            await DbContext.AddAsync(entity);
-        }
+            if (entity.IsNew)
+            {
+                entity.Id = Guid.NewGuid();
+                await DbContext.AddAsync(entity);
+            }
 
-        await DbContext.SaveChangesAsync();
+            await DbContext.SaveChangesAsync();
+        }
     }
+
+    protected CounterItem CreateCounter(string operation)
+        => CounterManager.Create($"RabbitMQ.{QueueName}.Consumer.{operation}");
 }
