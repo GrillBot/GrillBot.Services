@@ -5,7 +5,7 @@ using File = AuditLogService.Core.Entity.File;
 
 namespace AuditLogService.Actions.Archivation;
 
-public partial class ArchiveOldLogsAction
+public partial class CreateArchivationDataAction
 {
     private static ArchivationResult CreateArchive(List<LogItem> items)
     {

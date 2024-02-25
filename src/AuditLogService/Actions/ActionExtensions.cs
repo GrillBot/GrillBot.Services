@@ -10,7 +10,7 @@ public static class ActionExtensions
             .AddScoped<Delete.BulkDeleteAction>()
             .AddScoped<Search.SearchItemsAction>()
             .AddScoped<Detail.ReadDetailAction>()
-            .AddScoped<Archivation.ArchiveOldLogsAction>()
+            .AddScoped<Archivation.CreateArchivationDataAction>()
             .AddScoped<Statistics.GetAuditLogStatisticsAction>()
             .AddScoped<Statistics.GetInteractionStatisticsAction>()
             .AddScoped<Statistics.GetUserCommandStatisticsAction>()

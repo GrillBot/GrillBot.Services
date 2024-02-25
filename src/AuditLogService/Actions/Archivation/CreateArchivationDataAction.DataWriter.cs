@@ -6,7 +6,7 @@ using Discord;
 
 namespace AuditLogService.Actions.Archivation;
 
-public partial class ArchiveOldLogsAction
+public partial class CreateArchivationDataAction
 {
     private static JsonNode? ProcessData(LogItem item, ArchivationResult result)
     {

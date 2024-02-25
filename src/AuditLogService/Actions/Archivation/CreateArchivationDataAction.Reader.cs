@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Archivation;
 
-public partial class ArchiveOldLogsAction
+public partial class CreateArchivationDataAction
 {
     private async Task<bool> ExistsItemsToArchiveAsync(DateTime expirationDate)
     {

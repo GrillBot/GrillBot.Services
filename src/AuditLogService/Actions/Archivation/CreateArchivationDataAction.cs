@@ -5,12 +5,12 @@ using Microsoft.Extensions.Options;
 
 namespace AuditLogService.Actions.Archivation;
 
-public partial class ArchiveOldLogsAction : ApiActionBase
+public partial class CreateArchivationDataAction : ApiActionBase
 {
     private AppOptions AppOptions { get; }
     private AuditLogServiceContext Context { get; }
 
-    public ArchiveOldLogsAction(IOptionsSnapshot<AppOptions> options, AuditLogServiceContext context)
+    public CreateArchivationDataAction(IOptionsSnapshot<AppOptions> options, AuditLogServiceContext context)
     {
         Context = context;
         AppOptions = options.Get(null);
