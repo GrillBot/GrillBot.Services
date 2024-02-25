@@ -1,5 +1,6 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
+using AuditLogService.Managers;
 using AuditLogService.Models.Events;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
@@ -10,9 +11,12 @@ namespace AuditLogService.Handlers;
 
 public class BulkDeleteEventHandler : BaseEventHandlerWithDb<BulkDeletePayload, AuditLogServiceContext>
 {
+    private DataRecalculationManager DataRecalculation { get; }
+
     public BulkDeleteEventHandler(ILoggerFactory loggerFactory, AuditLogServiceContext dbContext, ICounterManager counterManager,
-        IRabbitMQPublisher publisher) : base(loggerFactory, dbContext, counterManager, publisher)
+        IRabbitMQPublisher publisher, DataRecalculationManager dataRecalculation) : base(loggerFactory, dbContext, counterManager, publisher)
     {
+        DataRecalculation = dataRecalculation;
     }
 
     protected override async Task HandleInternalAsync(BulkDeletePayload payload)
@@ -29,6 +33,8 @@ public class BulkDeleteEventHandler : BaseEventHandlerWithDb<BulkDeletePayload, 
 
         using (CreateCounter("Database"))
             await DbContext.SaveChangesAsync();
+
+        await DataRecalculation.EnqueueRecalculationAsync(logItems);
     }
 
     private async Task<List<LogItem>> ReadLogItemsAsync(List<Guid> ids)
@@ -36,7 +42,7 @@ public class BulkDeleteEventHandler : BaseEventHandlerWithDb<BulkDeletePayload, 
         var result = new List<LogItem>();
         var baseQuery = DbContext.LogItems.Include(o => o.Files);
 
-        foreach (var chunk in ids.Chunk(100))
+        foreach (var chunk in ids.Distinct().Chunk(100))
         {
             var query = baseQuery.Where(o => chunk.Contains(o.Id));
 
