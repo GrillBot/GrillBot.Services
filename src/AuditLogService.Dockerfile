@@ -8,6 +8,7 @@ RUN dotnet nuget add source https://nuget.pkg.github.com/GrillBot/index.json -n 
 RUN mkdir -p /src/GrillBot.Services.Common
 COPY "GrillBot.Services.Common/GrillBot.Services.Common.csproj" /src/GrillBot.Services.Common
 RUN dotnet restore "src/GrillBot.Services.Common/GrillBot.Services.Common.csproj" -r linux-x64
+COPY "GrillBot.Services.Common/" /src/GrillBot.Services.Common
 
 # App
 RUN mkdir -p /src/AuditLogService
