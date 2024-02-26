@@ -6,7 +6,7 @@ using AuditLogService.Processors;
 using AuditLogService.Processors.Request.Abstractions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
-using GrillBot.Services.Common.Handlers.Abstractions;
+using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
 namespace AuditLogService.Handlers;
 

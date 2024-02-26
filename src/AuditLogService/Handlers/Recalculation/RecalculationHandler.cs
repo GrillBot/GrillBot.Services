@@ -4,7 +4,7 @@ using AuditLogService.Handlers.Recalculation.Actions;
 using AuditLogService.Models.Events.Recalculation;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
-using GrillBot.Services.Common.Handlers.Abstractions;
+using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
 namespace AuditLogService.Handlers.Recalculation;
 

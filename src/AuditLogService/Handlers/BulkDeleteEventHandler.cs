@@ -4,7 +4,7 @@ using AuditLogService.Managers;
 using AuditLogService.Models.Events;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
-using GrillBot.Services.Common.Handlers.Abstractions;
+using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Handlers;

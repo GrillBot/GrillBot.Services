@@ -4,7 +4,7 @@ using GrillBot.Core.RabbitMQ.Publisher;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace GrillBot.Services.Common.Handlers.Abstractions;
+namespace GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
 public abstract class BaseEventHandlerWithDb<TPayload, TDbContext>
     : BaseEventHandler<TPayload>
