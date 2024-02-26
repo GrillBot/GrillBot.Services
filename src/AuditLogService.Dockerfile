@@ -4,9 +4,14 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS Build
 ARG github_actions_token
 RUN dotnet nuget add source https://nuget.pkg.github.com/GrillBot/index.json -n GrillBot -u Misha12 -p "${github_actions_token}" --store-password-in-clear-text
 
+# Common lib
+RUN mkdir -p /src/GrillBot.Services.Common
+COPY "GrillBot.Services.Common/GrillBot.Services.Common.csproj" /src/GrillBot.Services.Common
+RUN dotnet restore "src/GrillBot.Services.Common/GrillBot.Services.Common.csproj" -r linux-x64
+
 # App
 RUN mkdir -p /src/AuditLogService
-COPY "AuditLogService.csproj" /src/AuditLogService
+COPY "AuditLogService/AuditLogService.csproj" /src/AuditLogService
 RUN dotnet restore "src/AuditLogService/AuditLogService.csproj" -r linux-x64
 
 COPY . /src/AuditLogService

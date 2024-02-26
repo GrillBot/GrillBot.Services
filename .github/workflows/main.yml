@@ -365,7 +365,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: src/AuditLogService
+          context: src/
+          file: src/AuditLogService.Dockerfile
           push: true
           tags: ghcr.io/grillbot/grillbot.services:audit_log_service
           build-args: |
