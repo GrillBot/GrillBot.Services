@@ -1,16 +1,19 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Options;
 using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.Extensions.Options;
 
 namespace AuditLogService.Actions.Archivation;
 
-public partial class CreateArchivationDataAction : ApiActionBase
+public partial class CreateArchivationDataAction : ApiAction
 {
     private AppOptions AppOptions { get; }
     private AuditLogServiceContext Context { get; }
 
-    public CreateArchivationDataAction(IOptionsSnapshot<AppOptions> options, AuditLogServiceContext context)
+    public CreateArchivationDataAction(IOptionsSnapshot<AppOptions> options, AuditLogServiceContext context, ICounterManager counterManager)
+        : base(counterManager)
     {
         Context = context;
         AppOptions = options.Get(null);

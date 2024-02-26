@@ -1,14 +1,16 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Models.Request.Search;
 using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Services.Common.Infrastructure.Api;
 
 namespace AuditLogService.Actions.Search;
 
-public partial class SearchItemsAction : ApiActionBase
+public partial class SearchItemsAction : ApiAction
 {
     private AuditLogServiceContext Context { get; }
 
-    public SearchItemsAction(AuditLogServiceContext context)
+    public SearchItemsAction(AuditLogServiceContext context, ICounterManager counterManager) : base(counterManager)
     {
         Context = context;
     }
@@ -25,7 +27,7 @@ public partial class SearchItemsAction : ApiActionBase
         if (request.Ids is null || request.Ids.Count == 0)
             request.Ids = await SearchIdsFromAdvancedFilterAsync(request);
 
-        var headers = await ReadLogHeaders(request);
+        var headers = await ReadLogHeadersAsync(request);
         var mapped = await MapAsync(headers);
         return ApiResult.Ok(mapped);
     }

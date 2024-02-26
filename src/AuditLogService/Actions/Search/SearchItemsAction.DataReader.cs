@@ -141,12 +141,12 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.MemberRoleUpdated))
         {
-            result.AddRange(
-                await Context.MemberRoleUpdatedItems.AsNoTracking()
-                    .Where(o => o.UserId == advancedSearch.MemberRolesUpdated!.UserId)
-                    .Select(o => o.LogItemId)
-                    .ToListAsync()
-            );
+            var query = Context.MemberRoleUpdatedItems.AsNoTracking()
+                .Where(o => o.UserId == advancedSearch.MemberRolesUpdated!.UserId)
+                .Select(o => o.LogItemId);
+
+            using (CreateCounter("Database"))
+                result.AddRange(await query.ToListAsync());
         }
 
         if (request.IsAdvancedFilterSet(LogType.MemberUpdated))
@@ -195,13 +195,15 @@ public partial class SearchItemsAction
         return query;
     }
 
-    private static async Task<List<Guid>> SelectIdsAsync<TChildEntity>(IQueryable<TChildEntity> query) where TChildEntity : ChildEntityBase
-        => await query.Select(o => o.LogItemId).ToListAsync();
-
-    private async Task<PaginatedResponse<LogItem>> ReadLogHeaders(SearchRequest request)
+    private async Task<List<Guid>> SelectIdsAsync<TChildEntity>(IQueryable<TChildEntity> query) where TChildEntity : ChildEntityBase
     {
-        var query = Context.LogItems.Include(o => o.Files).AsNoTracking()
-            .Where(o => !o.IsDeleted);
+        using (CreateCounter("Database"))
+            return await query.Select(o => o.LogItemId).ToListAsync();
+    }
+
+    private async Task<PaginatedResponse<LogItem>> ReadLogHeadersAsync(SearchRequest request)
+    {
+        var query = Context.LogItems.Include(o => o.Files).AsNoTracking();
 
         if (request.ShowTypes.Count > 0)
             query = query.Where(o => request.ShowTypes.Contains(o.Type));
@@ -224,6 +226,8 @@ public partial class SearchItemsAction
             query = query.Where(o => request.Ids.Contains(o.Id));
 
         query = request.Sort.Descending ? query.OrderByDescending(o => o.CreatedAt) : query.OrderBy(o => o.CreatedAt);
-        return await PaginatedResponse<LogItem>.CreateWithEntityAsync(query, request.Pagination);
+
+        using (CreateCounter("Database"))
+            return await PaginatedResponse<LogItem>.CreateWithEntityAsync(query, request.Pagination);
     }
 }

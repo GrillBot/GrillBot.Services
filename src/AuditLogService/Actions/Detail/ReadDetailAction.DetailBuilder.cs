@@ -5,6 +5,7 @@ using AuditLogService.Models.Response.Detail;
 using Discord;
 using GrillBot.Core.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using EmbedField = AuditLogService.Models.Response.Detail.EmbedField;
 using InteractionCommandParameter = AuditLogService.Models.Response.Detail.InteractionCommandParameter;
 
@@ -12,31 +13,35 @@ namespace AuditLogService.Actions.Detail;
 
 public partial class ReadDetailAction
 {
-    private IQueryable<TData> GetBaseQuery<TData>(LogItem header) where TData : ChildEntityBase
-        => Context.Set<TData>().Where(o => o.LogItemId == header.Id).AsNoTracking();
-
-    private async Task<MessageDetail?> CreateMessageDetailAsync(LogItem header)
+    private async Task<TData?> CreateDetailAsync<TEntity, TData>(LogItem header, Expression<Func<TEntity, TData>> projection) where TEntity : ChildEntityBase
     {
-        return await GetBaseQuery<Core.Entity.LogMessage>(header)
-            .Select(o => new MessageDetail
-            {
-                Text = o.Message,
-                Source = o.Source,
-                SourceAppName = o.SourceAppName
-            })
-            .FirstOrDefaultAsync();
+        var query = DbContext.Set<TEntity>()
+            .Where(o => o.LogItemId == header.Id)
+            .AsNoTracking()
+            .Select(projection);
+
+        using (CreateCounter("Database"))
+            return await query.FirstOrDefaultAsync();
+    }
+
+    private Task<MessageDetail?> CreateMessageDetailAsync(LogItem header)
+    {
+        return CreateDetailAsync<Core.Entity.LogMessage, MessageDetail>(header, entity => new MessageDetail
+        {
+            Source = entity.Source,
+            SourceAppName = entity.SourceAppName,
+            Text = entity.Message
+        });
     }
 
     private async Task<ChannelUpdatedDetail?> CreateChannelUpdatedDetailAsync(LogItem header)
     {
-        var channelInfos = await GetBaseQuery<ChannelUpdated>(header)
-            .Select(o => new { o.Before, o.After })
-            .FirstOrDefaultAsync();
+        var channelInfos = await CreateDetailAsync<ChannelUpdated, Tuple<ChannelInfo, ChannelInfo>>(header, entity => Tuple.Create(entity.Before, entity.After));
         if (channelInfos is null)
             return null;
 
-        var before = channelInfos.Before;
-        var after = channelInfos.After;
+        var before = channelInfos.Item1;
+        var after = channelInfos.Item2;
 
         var result = new ChannelUpdatedDetail
         {
@@ -54,14 +59,12 @@ public partial class ReadDetailAction
 
     private async Task<OverwriteUpdatedDetail?> CreateOverwriteUpdatedDetailAsync(LogItem header)
     {
-        var overwriteInfos = await GetBaseQuery<OverwriteUpdated>(header)
-            .Select(o => new { o.Before, o.After })
-            .FirstOrDefaultAsync();
+        var overwriteInfos = await CreateDetailAsync<OverwriteUpdated, Tuple<OverwriteInfo, OverwriteInfo>>(header, entity => Tuple.Create(entity.Before, entity.After));
         if (overwriteInfos is null)
             return null;
 
-        var before = overwriteInfos.Before;
-        var after = overwriteInfos.After;
+        var before = overwriteInfos.Item1;
+        var after = overwriteInfos.Item2;
 
         var permsBefore = new OverwritePermissions(before.AllowValue, before.DenyValue);
         var permsAfter = new OverwritePermissions(after.AllowValue, after.DenyValue);
@@ -77,14 +80,12 @@ public partial class ReadDetailAction
 
     private async Task<MemberUpdatedDetail?> CreateMemberUpdatedDetailAsync(LogItem header)
     {
-        var memberInfos = await GetBaseQuery<MemberUpdated>(header)
-            .Select(o => new { o.Before, o.After })
-            .FirstOrDefaultAsync();
+        var memberInfos = await CreateDetailAsync<MemberUpdated, Tuple<MemberInfo, MemberInfo>>(header, entity => Tuple.Create(entity.Before, entity.After));
         if (memberInfos is null)
             return null;
 
-        var before = memberInfos.Before;
-        var after = memberInfos.After;
+        var before = memberInfos.Item1;
+        var after = memberInfos.Item2;
 
         var result = new MemberUpdatedDetail
         {
@@ -101,14 +102,12 @@ public partial class ReadDetailAction
 
     private async Task<GuildUpdatedDetail?> CreateGuildUpdatedDetailAsync(LogItem header)
     {
-        var guildInfos = await GetBaseQuery<GuildUpdated>(header)
-            .Select(o => new { o.Before, o.After })
-            .FirstOrDefaultAsync();
+        var guildInfos = await CreateDetailAsync<GuildUpdated, Tuple<GuildInfo, GuildInfo>>(header, entity => Tuple.Create(entity.Before, entity.After));
         if (guildInfos is null)
             return null;
 
-        var before = guildInfos.Before;
-        var after = guildInfos.After;
+        var before = guildInfos.Item1;
+        var after = guildInfos.Item2;
 
         var result = new GuildUpdatedDetail
         {
@@ -138,143 +137,121 @@ public partial class ReadDetailAction
         return ModelHelper.IsModelEmpty(result) ? null : result;
     }
 
-    private async Task<MessageDeletedDetail?> CreateMessageDeletedDetailAsync(LogItem header)
+    private Task<MessageDeletedDetail?> CreateMessageDeletedDetailAsync(LogItem header)
     {
-        return await GetBaseQuery<MessageDeleted>(header)
-            .Select(o => new MessageDeletedDetail
+        return CreateDetailAsync<MessageDeleted, MessageDeletedDetail>(header, entity => new MessageDeletedDetail
+        {
+            AuthorId = entity.AuthorId,
+            Content = entity.Content,
+            Embeds = entity.Embeds.Select(e => new EmbedDetail
             {
-                MessageCreatedAt = o.MessageCreatedAt,
-                AuthorId = o.AuthorId,
-                Content = o.Content,
-                Embeds = o.Embeds.Select(e => new EmbedDetail
+                AuthorName = e.AuthorName,
+                ContainsFooter = e.ContainsFooter,
+                Fields = e.Fields.Select(f => new EmbedField
                 {
-                    Fields = e.Fields.Select(f => new EmbedField
-                    {
-                        Name = f.Name,
-                        Value = f.Value,
-                        Inline = f.Inline
-                    }).ToList(),
-                    Title = e.Title,
-                    Type = e.Type,
-                    AuthorName = e.AuthorName,
-                    ContainsFooter = e.ContainsFooter,
-                    ImageInfo = e.ImageInfo,
-                    ProviderName = e.ProviderName,
-                    ThumbnailInfo = e.ThumbnailInfo,
-                    VideoInfo = e.VideoInfo
-                }).ToList()
-            }).FirstOrDefaultAsync();
+                    Inline = f.Inline,
+                    Name = f.Name,
+                    Value = f.Value
+                }).ToList(),
+                ImageInfo = e.ImageInfo,
+                ProviderName = e.ProviderName,
+                ThumbnailInfo = e.ThumbnailInfo,
+                Title = e.Title,
+                Type = e.Type,
+                VideoInfo = e.VideoInfo
+            }).ToList(),
+            MessageCreatedAt = entity.MessageCreatedAt
+        });
     }
 
     private async Task<InteractionCommandDetail?> CreateInteractionCommandDetailAsync(LogItem header)
     {
-        var command = await GetBaseQuery<InteractionCommand>(header)
-            .Select(o => new
-            {
-                o.CommandError,
-                o.Duration,
-                o.Exception,
-                o.Locale,
-                o.ErrorReason,
-                o.Parameters,
-                o.Name,
-                o.ModuleName,
-                o.MethodName,
-                o.HasResponded,
-                o.IsSuccess,
-                o.IsValidToken
-            })
-            .FirstOrDefaultAsync();
-        if (command is null)
+        var detail = await CreateDetailAsync<InteractionCommand, InteractionCommandDetail>(header, entity => new InteractionCommandDetail
+        {
+            CommandError = entity.CommandError,
+            Duration = entity.Duration,
+            ErrorReason = entity.ErrorReason,
+            Exception = entity.Exception,
+            FullName = $"{entity.Name} ({entity.ModuleName}/{entity.MethodName})",
+            HasResponded = entity.HasResponded,
+            IsSuccess = entity.IsSuccess,
+            IsValidToken = entity.IsValidToken,
+            Locale = entity.Locale
+        });
+        if (detail is null)
             return null;
 
-        return new InteractionCommandDetail
+        List<Core.Entity.InteractionCommandParameter> parameters;
+        using (CreateCounter("Database"))
+            parameters = await DbContext.InteractionCommands.AsNoTracking().Where(o => o.LogItemId == header.Id).Select(o => o.Parameters).FirstAsync();
+
+        detail.Parameters = parameters.ConvertAll(o => new InteractionCommandParameter
         {
-            CommandError = command.CommandError,
-            Duration = command.Duration,
-            Exception = command.Exception,
-            Locale = command.Locale,
-            Parameters = command.Parameters.ConvertAll(p => new InteractionCommandParameter
-            {
-                Name = p.Name,
-                Value = p.Value,
-                Type = p.Type
-            }),
-            ErrorReason = command.ErrorReason,
-            FullName = $"{command.Name} ({command.ModuleName}/{command.MethodName})",
-            HasResponded = command.HasResponded,
-            IsSuccess = command.IsSuccess,
-            IsValidToken = command.IsValidToken
-        };
+            Name = o.Name,
+            Type = o.Type,
+            Value = o.Value
+        });
+
+        return detail;
     }
 
-    private async Task<ThreadDeletedDetail?> CreateThreadDeletedDetailAsync(LogItem header)
+    private Task<ThreadDeletedDetail?> CreateThreadDeletedDetailAsync(LogItem header)
     {
-        return await GetBaseQuery<ThreadDeleted>(header)
-            .Select(o => new ThreadDeletedDetail
-            {
-                Name = o.ThreadInfo.ThreadName,
-                Type = o.ThreadInfo.Type,
-                SlowMode = o.ThreadInfo.SlowMode,
-                ArchivedDuration = o.ThreadInfo.ArchiveDuration,
-                IsArchived = o.ThreadInfo.IsArchived,
-                IsLocked = o.ThreadInfo.IsLocked
-            })
-            .FirstOrDefaultAsync();
+        return CreateDetailAsync<ThreadDeleted, ThreadDeletedDetail>(header, entity => new ThreadDeletedDetail
+        {
+            ArchivedDuration = entity.ThreadInfo.ArchiveDuration,
+            IsArchived = entity.ThreadInfo.IsArchived,
+            IsLocked = entity.ThreadInfo.IsLocked,
+            Name = entity.ThreadInfo.ThreadName,
+            SlowMode = entity.ThreadInfo.SlowMode,
+            Type = entity.ThreadInfo.Type
+        });
     }
 
-    private async Task<JobExecutionDetail?> CreateJobExecutionDetailAsync(LogItem header)
+    private Task<JobExecutionDetail?> CreateJobExecutionDetailAsync(LogItem header)
     {
-        return await GetBaseQuery<JobExecution>(header)
-            .Select(o => new JobExecutionDetail
-            {
-                Result = o.Result,
-                EndAt = o.EndAt,
-                JobName = o.JobName,
-                StartAt = o.StartAt,
-                WasError = o.WasError,
-                StartUserId = o.StartUserId
-            }).FirstOrDefaultAsync();
+        return CreateDetailAsync<JobExecution, JobExecutionDetail>(header, entity => new JobExecutionDetail
+        {
+            EndAt = entity.EndAt,
+            JobName = entity.JobName,
+            Result = entity.Result,
+            StartAt = entity.StartAt,
+            StartUserId = entity.StartUserId,
+            WasError = entity.WasError
+        });
     }
 
-    private async Task<ApiRequestDetail?> CreateApiRequestDetailAsync(LogItem header)
+    private Task<ApiRequestDetail?> CreateApiRequestDetailAsync(LogItem header)
     {
-        return await GetBaseQuery<ApiRequest>(header)
-            .Select(o => new ApiRequestDetail
-            {
-                StartAt = o.StartAt,
-                Parameters = o.Parameters,
-                Result = o.Result,
-                EndAt = o.EndAt,
-                Headers = o.Headers,
-                Identification = o.Identification,
-                Ip = o.Ip,
-                Language = o.Language,
-                Path = $"{o.Method} {o.Path}",
-                ActionName = o.ActionName,
-                ControllerName = o.ControllerName,
-                TemplatePath = $"{o.Method} {o.TemplatePath}",
-                ApiGroupName = o.ApiGroupName,
-                Role = o.Role,
-                ForwardedIp = o.ForwardedIp
-            }).FirstOrDefaultAsync();
+        return CreateDetailAsync<ApiRequest, ApiRequestDetail>(header, entity => new ApiRequestDetail
+        {
+            ActionName = entity.ActionName,
+            ApiGroupName = entity.ApiGroupName,
+            ControllerName = entity.ControllerName,
+            EndAt = entity.EndAt,
+            ForwardedIp = entity.ForwardedIp,
+            Headers = entity.Headers,
+            Identification = entity.Identification,
+            Ip = entity.Ip,
+            Language = entity.Language,
+            Parameters = entity.Parameters,
+            Path = $"{entity.Method} {entity.Path}",
+            Result = entity.Result,
+            Role = entity.Role,
+            StartAt = entity.StartAt,
+            TemplatePath = $"{entity.Method} {entity.TemplatePath}"
+        });
     }
 
     private async Task<ThreadUpdatedDetail?> CreateThreaduUpdatedDetailAsync(LogItem header)
     {
-        var threadInfos = await GetBaseQuery<ThreadUpdated>(header)
-            .Select(o => new
-            {
-                TagsBefore = o.Before.Tags,
-                TagsAfter = o.After.Tags
-            })
-            .FirstOrDefaultAsync();
+        var threadInfos = await CreateDetailAsync<ThreadUpdated, Tuple<List<string>, List<string>>>(header, entity => Tuple.Create(entity.Before.Tags, entity.After.Tags));
         if (threadInfos is null)
             return null;
 
         var result = new ThreadUpdatedDetail
         {
-            Tags = new Diff<List<string>>(threadInfos.TagsBefore, threadInfos.TagsAfter).NullIfEquals()
+            Tags = new Diff<List<string>>(threadInfos.Item1, threadInfos.Item2).NullIfEquals()
         };
 
         return ModelHelper.IsModelEmpty(result) ? null : result;
@@ -282,15 +259,15 @@ public partial class ReadDetailAction
 
     private async Task<RoleDeletedDetail?> CreateRoleDeletedDetailAsync(LogItem header)
     {
-        return await GetBaseQuery<RoleDeleted>(header).Select(o => o.RoleInfo).Select(o => new RoleDeletedDetail
+        return await CreateDetailAsync<RoleDeleted, RoleDeletedDetail>(header, entity => new RoleDeletedDetail
         {
-            Color = o.Color,
-            IconId = o.IconId,
-            IsHoisted = o.IsHoisted,
-            IsMentionable = o.IsMentionable,
-            Name = o.Name,
-            Permissions = o.Permissions,
-            RoleId = o.RoleId
-        }).FirstOrDefaultAsync();
+            Color = entity.RoleInfo.Color,
+            IconId = entity.RoleInfo.IconId,
+            IsHoisted = entity.RoleInfo.IsHoisted,
+            IsMentionable = entity.RoleInfo.IsMentionable,
+            Name = entity.RoleInfo.Name,
+            Permissions = entity.RoleInfo.Permissions,
+            RoleId = entity.RoleInfo.RoleId
+        });
     }
 }

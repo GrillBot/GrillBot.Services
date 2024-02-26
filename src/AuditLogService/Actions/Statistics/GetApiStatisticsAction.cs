@@ -34,7 +34,7 @@ public class GetApiStatisticsAction : ApiAction
 
     private async Task<Dictionary<string, long>> GetApiStatisticsByDateForApiGroupAsync(params string[] apiGroupNames)
     {
-        using (CreateCounter($"GetApiStatisticsForDate.{string.Join(", ", apiGroupNames)}"))
+        using (CreateCounter($"Database"))
         {
             var stats = await DbContext.ApiRequests.AsNoTracking()
                 .Where(o => apiGroupNames.Contains(o.ApiGroupName))
@@ -51,7 +51,7 @@ public class GetApiStatisticsAction : ApiAction
 
     private async Task<List<StatisticItem>> GetEndpointStatisticsAsync()
     {
-        using (CreateCounter("GetEndpointStatistics"))
+        using (CreateCounter("Database"))
         {
             var stats = await StatisticsContext.RequestStats.AsNoTracking()
                 .Select(o => new StatisticItem

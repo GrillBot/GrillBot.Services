@@ -33,7 +33,7 @@ public class GetInteractionStatisticsAction : ApiAction
 
     private async Task<Dictionary<string, long>> GetStatisticsByDateAsync()
     {
-        using (CreateCounter("GetStatisticsByDate"))
+        using (CreateCounter("Database"))
         {
             var stats = await DbContext.InteractionCommands.AsNoTracking()
                 .GroupBy(o => o.InteractionDate)
@@ -49,7 +49,7 @@ public class GetInteractionStatisticsAction : ApiAction
 
     private async Task<List<StatisticItem>> GetCommandStatisticsAsync()
     {
-        using (CreateCounter("GetCommandStatistics"))
+        using (CreateCounter("Database"))
         {
             var stats = await StatisticsContext.InteractionStatistics.AsNoTracking()
                 .Select(o => new StatisticItem

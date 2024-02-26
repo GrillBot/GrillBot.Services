@@ -1,26 +1,25 @@
 ﻿using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Models.Response.Info.Dashboard;
+using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Dashboard;
 
-public class GetTodayAvgTimesDashboard : ApiActionBase
+public class GetTodayAvgTimesDashboard : ApiAction
 {
     private AuditLogStatisticsContext StatisticsContext { get; }
 
-    public GetTodayAvgTimesDashboard(AuditLogStatisticsContext statisticsContext)
+    public GetTodayAvgTimesDashboard(AuditLogStatisticsContext statisticsContext, ICounterManager counterManager) : base(counterManager)
     {
         StatisticsContext = statisticsContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var data = await StatisticsContext.DailyAvgTimes.AsNoTracking()
-            .FirstOrDefaultAsync(o => o.Date == today);
-        data ??= new DailyAvgTimes();
-
+        var data = await ReadTodayDailyStatsAsync();
         var result = new TodayAvgTimes
         {
             Interactions = (long)Math.Round(data.Interactions),
@@ -30,5 +29,16 @@ public class GetTodayAvgTimesDashboard : ApiActionBase
         };
 
         return ApiResult.Ok(result);
+    }
+
+    private async Task<DailyAvgTimes> ReadTodayDailyStatsAsync()
+    {
+        var today = DateTime.UtcNow.ToDateOnly();
+
+        using (CreateCounter("Database"))
+        {
+            var data = await StatisticsContext.DailyAvgTimes.AsNoTracking().FirstOrDefaultAsync(o => o.Date == today);
+            return data ?? new DailyAvgTimes();
+        }
     }
 }

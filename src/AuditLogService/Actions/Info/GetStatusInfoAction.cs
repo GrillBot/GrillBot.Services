@@ -2,32 +2,39 @@
 using AuditLogService.Core.Options;
 using AuditLogService.Models.Response.Info;
 using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace AuditLogService.Actions.Info;
 
-public class GetStatusInfoAction : ApiActionBase
+public class GetStatusInfoAction : ApiAction
 {
-    private AuditLogServiceContext Context { get; }
+    private AuditLogServiceContext DbContext { get; }
     private AppOptions AppOptions { get; }
 
-    public GetStatusInfoAction(AuditLogServiceContext context, IOptions<AppOptions> options)
+    public GetStatusInfoAction(AuditLogServiceContext context, IOptions<AppOptions> options, ICounterManager counterManager) : base(counterManager)
     {
-        Context = context;
+        DbContext = context;
         AppOptions = options.Value;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var expirationDate = DateTime.UtcNow.AddMonths(-AppOptions.ExpirationMonths);
-
         var result = new StatusInfo
         {
-            ItemsToArchive = await Context.LogItems.AsNoTracking()
-                .CountAsync(o => !o.IsDeleted && o.CreatedAt <= expirationDate)
+            ItemsToArchive = await ReadItemsToArchiveCountAsync()
         };
 
         return ApiResult.Ok(result);
+    }
+
+    private async Task<int> ReadItemsToArchiveCountAsync()
+    {
+        var expirationDate = DateTime.UtcNow.AddMonths(-AppOptions.ExpirationMonths);
+
+        using (CreateCounter("Database"))
+            return await DbContext.LogItems.AsNoTracking().CountAsync(o => o.CreatedAt <= expirationDate);
     }
 }

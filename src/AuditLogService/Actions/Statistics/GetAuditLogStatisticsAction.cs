@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Models.Response.Statistics;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
@@ -10,13 +9,10 @@ namespace AuditLogService.Actions.Statistics;
 
 public class GetAuditLogStatisticsAction : ApiAction
 {
-    private AuditLogStatisticsContext StatisticsContext { get; }
     private AuditLogServiceContext DbContext { get; }
 
-    public GetAuditLogStatisticsAction(AuditLogStatisticsContext statisticsContext, AuditLogServiceContext auditLogServiceContext,
-        ICounterManager counterManager) : base(counterManager)
+    public GetAuditLogStatisticsAction(AuditLogServiceContext auditLogServiceContext, ICounterManager counterManager) : base(counterManager)
     {
-        StatisticsContext = statisticsContext;
         DbContext = auditLogServiceContext;
     }
 
@@ -34,7 +30,7 @@ public class GetAuditLogStatisticsAction : ApiAction
 
     private async Task<Dictionary<string, long>> GetStatisticsByTypeAsync()
     {
-        using (CreateCounter("GetStatisticsByType"))
+        using (CreateCounter("Database"))
         {
             var stats = await DbContext.LogItems.AsNoTracking()
                 .GroupBy(o => o.Type)
@@ -48,7 +44,7 @@ public class GetAuditLogStatisticsAction : ApiAction
 
     private async Task<Dictionary<string, long>> GetStatisticsByDateAsync()
     {
-        using (CreateCounter("GetStatisticsByDate"))
+        using (CreateCounter("Database"))
         {
             var stats = await DbContext.LogItems.AsNoTracking()
                 .GroupBy(o => o.LogDate)
@@ -64,7 +60,7 @@ public class GetAuditLogStatisticsAction : ApiAction
 
     private async Task<List<FileExtensionStatistic>> GetFileExtensionStatisticsAsync()
     {
-        using (CreateCounter("GetFileExtensionStatistics"))
+        using (CreateCounter("Database"))
         {
             var query = DbContext.Files.AsNoTracking()
                 .GroupBy(o => (o.Extension ?? ".NoExtension").ToLower())

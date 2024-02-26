@@ -8,7 +8,6 @@ namespace AuditLogService.Core.Entity;
 [Index(nameof(CreatedAt))]
 [Index(nameof(GuildId))]
 [Index(nameof(LogDate))]
-[Index(nameof(Type), nameof(IsDeleted))]
 public class LogItem
 {
     [Key]
@@ -32,9 +31,6 @@ public class LogItem
     public LogType Type { get; set; }
 
     public ISet<File> Files { get; set; }
-
-    public bool IsDeleted { get; set; }
-    public bool IsPendingProcess { get; set; }
 
     public DateOnly LogDate { get; set; }
 
@@ -69,9 +65,6 @@ public class LogItem
 
     [NotMapped]
     public bool CanCreate { get; set; }
-
-    [NotMapped]
-    public List<LogItem> MergedItems { get; set; } = new();
 
     #endregion
 

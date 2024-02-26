@@ -5,6 +5,7 @@ using Discord;
 using GrillBot.Core.Extensions;
 using GrillBot.Core.Models.Pagination;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace AuditLogService.Actions.Search;
 
@@ -99,14 +100,12 @@ public partial class SearchItemsAction
 
     private async Task SetTextPreviewAsync(LogListItem result)
     {
-        var preview = await Context.LogMessages.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new TextPreview
-            {
-                Message = o.Message,
-                FullSource = $"{o.SourceAppName}/{o.Source}"
-            })
-            .FirstOrDefaultAsync();
+        var preview = await CreatePreviewAsync<Core.Entity.LogMessage, TextPreview>(result, entity => new TextPreview
+        {
+            FullSource = $"{entity.SourceAppName}/{entity.Source}",
+            Message = entity.Message
+        });
+
         if (preview is null)
             return;
 
@@ -119,19 +118,13 @@ public partial class SearchItemsAction
 
     private async Task SetChannelPreviewAsync(LogListItem result)
     {
-        var baseQuery = result.Type switch
+        var channel = result.Type switch
         {
-            LogType.ChannelCreated => Context.ChannelCreatedItems.AsNoTracking().Where(o => o.LogItemId == result.Id).Select(o => o.ChannelInfo),
-            LogType.ChannelDeleted => Context.ChannelDeletedItems.AsNoTracking().Where(o => o.LogItemId == result.Id).Select(o => o.ChannelInfo),
+            LogType.ChannelCreated => await CreatePreviewAsync<ChannelCreated, ChannelInfo>(result, entity => entity.ChannelInfo),
+            LogType.ChannelDeleted => await CreatePreviewAsync<ChannelDeleted, ChannelInfo>(result, entity => entity.ChannelInfo),
             _ => null
         };
 
-        if (baseQuery is null)
-            return;
-
-        var channel = await baseQuery
-            .Select(o => new { o.ChannelName, o.ChannelType, o.SlowMode, o.IsNsfw, o.Bitrate })
-            .FirstOrDefaultAsync();
         if (channel is null)
             return;
 
@@ -147,51 +140,37 @@ public partial class SearchItemsAction
 
     private async Task SetChannelUpdatedPreviewAsync(LogListItem result)
     {
-        var query = Context.ChannelUpdatedItems.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new ChannelUpdatedPreview
-            {
-                Position = o.Before.Position != o.After.Position,
-                SlowMode = o.Before.SlowMode != o.After.SlowMode,
-                Bitrate = o.Before.Bitrate != o.After.SlowMode,
-                Name = o.Before.ChannelName != o.After.ChannelName,
-                IsNsfw = o.Before.IsNsfw != o.After.IsNsfw,
-                Flags = o.Before.Flags != o.After.Flags,
-                Topic = o.Before.Topic != o.After.Topic
-            });
-
         result.IsDetailAvailable = true;
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<ChannelUpdated, ChannelUpdatedPreview>(result, o => new ChannelUpdatedPreview
+        {
+            Position = o.Before.Position != o.After.Position,
+            SlowMode = o.Before.SlowMode != o.After.SlowMode,
+            Bitrate = o.Before.Bitrate != o.After.SlowMode,
+            Name = o.Before.ChannelName != o.After.ChannelName,
+            IsNsfw = o.Before.IsNsfw != o.After.IsNsfw,
+            Flags = o.Before.Flags != o.After.Flags,
+            Topic = o.Before.Topic != o.After.Topic
+        });
     }
 
     private async Task SetEmoteDeletedPreviewAsync(LogListItem result)
     {
-        var query = Context.DeletedEmotes.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new EmoteDeletedPreview
-            {
-                Id = o.EmoteId,
-                Name = o.EmoteName
-            });
-
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<DeletedEmote, EmoteDeletedPreview>(result, entity => new EmoteDeletedPreview
+        {
+            Id = entity.EmoteId,
+            Name = entity.EmoteName
+        });
     }
 
     private async Task SetOverwritePreviewAsync(LogListItem result)
     {
-        var baseQuery = result.Type switch
+        var overwrite = result.Type switch
         {
-            LogType.OverwriteCreated => Context.OverwriteCreatedItems.AsNoTracking().Where(o => o.LogItemId == result.Id).Select(o => o.OverwriteInfo),
-            LogType.OverwriteDeleted => Context.OverwriteDeletedItems.AsNoTracking().Where(o => o.LogItemId == result.Id).Select(o => o.OverwriteInfo),
+            LogType.OverwriteCreated => await CreatePreviewAsync<OverwriteCreated, OverwriteInfo>(result, entity => entity.OverwriteInfo),
+            LogType.OverwriteDeleted => await CreatePreviewAsync<OverwriteDeleted, OverwriteInfo>(result, entity => entity.OverwriteInfo),
             _ => null
         };
 
-        if (baseQuery is null)
-            return;
-
-        var overwrite = await baseQuery
-            .Select(o => new { o.TargetId, o.Target, o.AllowValue, o.DenyValue })
-            .FirstOrDefaultAsync();
         if (overwrite is null)
             return;
 
@@ -207,49 +186,41 @@ public partial class SearchItemsAction
 
     private async Task SetOverwriteUpdatedPreviewAsync(LogListItem result)
     {
-        var query = Context.OverwriteUpdatedItems.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new OverwriteUpdatedPreview
-            {
-                TargetId = o.After.TargetId,
-                TargetType = o.After.Target
-            });
-
         result.IsDetailAvailable = true;
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<OverwriteUpdated, OverwriteUpdatedPreview>(result, entity => new OverwriteUpdatedPreview
+        {
+            TargetId = entity.After.TargetId,
+            TargetType = entity.After.Target
+        });
     }
 
     private async Task SetUnbanPreviewAsync(LogListItem result)
     {
-        var query = Context.Unbans.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new UnbanPreview { UserId = o.UserId });
-
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<Unban, UnbanPreview>(result, entity => new UnbanPreview
+        {
+            UserId = entity.UserId
+        });
     }
 
     private async Task SetMemberUpdatedPreviewAsync(LogListItem result)
     {
-        var query = Context.MemberUpdatedItems.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new MemberUpdatedPreview
-            {
-                NicknameChanged = o.Before.Nickname != o.After.Nickname,
-                UserId = o.Before.UserId,
-                FlagsChanged = o.Before.Flags != o.After.Flags,
-                VoiceMuteChanged = o.Before.IsDeaf != o.After.IsDeaf || o.Before.IsMuted != o.After.IsMuted,
-                SelfUnverifyMinimalTimeChange = o.Before.SelfUnverifyMinimalTime != o.After.SelfUnverifyMinimalTime
-            });
-
         result.IsDetailAvailable = true;
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<MemberUpdated, MemberUpdatedPreview>(result, o => new MemberUpdatedPreview
+        {
+            NicknameChanged = o.Before.Nickname != o.After.Nickname,
+            UserId = o.Before.UserId,
+            FlagsChanged = o.Before.Flags != o.After.Flags,
+            VoiceMuteChanged = o.Before.IsDeaf != o.After.IsDeaf || o.Before.IsMuted != o.After.IsMuted,
+            SelfUnverifyMinimalTimeChange = o.Before.SelfUnverifyMinimalTime != o.After.SelfUnverifyMinimalTime
+        });
     }
 
     private async Task SetMemberRoleUpdatedPreviewAsync(LogListItem result)
     {
-        var roles = await Context.MemberRoleUpdatedItems.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .ToListAsync();
+        List<MemberRoleUpdated> roles;
+        using (CreateCounter("Database"))
+            roles = await Context.MemberRoleUpdatedItems.AsNoTracking().Where(o => o.LogItemId == result.Id).ToListAsync();
+
         if (roles.Count == 0)
             return;
 
@@ -262,98 +233,81 @@ public partial class SearchItemsAction
 
     private async Task SetGuildUpdatedPreviewAsync(LogListItem result)
     {
-        var query = Context.GuildUpdatedItems.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new GuildUpdatedPreview
-            {
-                SystemChannelFlags = o.Before.SystemChannelFlags != o.After.SystemChannelFlags,
-                Name = o.Before.Name != o.After.Name,
-                DefaultMessageNotifications = o.Before.DefaultMessageNotifications != o.After.DefaultMessageNotifications,
-                Description = o.Before.Description != o.After.Description,
-                Features = o.Before.Features != o.After.Features,
-                AfkTimeout = o.Before.AfkTimeout != o.After.AfkTimeout,
-                BannerId = o.Before.BannerId != o.After.BannerId,
-                IconId = o.Before.IconId != o.After.IconId,
-                MfaLevel = o.Before.MfaLevel != o.After.MfaLevel,
-                NsfwLevel = o.Before.NsfwLevel != o.After.NsfwLevel,
-                PremiumTier = o.Before.PremiumTier != o.After.PremiumTier,
-                SplashId = o.Before.SplashId != o.After.SplashId,
-                VanityUrl = o.Before.VanityUrl != o.After.VanityUrl,
-                VerificationLevel = o.Before.VerificationLevel != o.After.VerificationLevel,
-                AfkChannelId = o.Before.AfkChannelId != o.After.AfkChannelId,
-                DiscoverySplashId = o.Before.DiscoverySplashId != o.After.DiscoverySplashId,
-                ExplicitContentFilter = o.Before.ExplicitContentFilter != o.After.ExplicitContentFilter,
-                RulesChannelId = o.Before.RulesChannelId != o.After.RulesChannelId,
-                SystemChannelId = o.Before.SystemChannelId != o.After.SystemChannelId,
-                PublicUpdatesChannelId = o.Before.PublicUpdatesChannelId != o.After.PublicUpdatesChannelId
-            });
-
         result.IsDetailAvailable = true;
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<GuildUpdated, GuildUpdatedPreview>(result, o => new GuildUpdatedPreview
+        {
+            SystemChannelFlags = o.Before.SystemChannelFlags != o.After.SystemChannelFlags,
+            Name = o.Before.Name != o.After.Name,
+            DefaultMessageNotifications = o.Before.DefaultMessageNotifications != o.After.DefaultMessageNotifications,
+            Description = o.Before.Description != o.After.Description,
+            Features = o.Before.Features != o.After.Features,
+            AfkTimeout = o.Before.AfkTimeout != o.After.AfkTimeout,
+            BannerId = o.Before.BannerId != o.After.BannerId,
+            IconId = o.Before.IconId != o.After.IconId,
+            MfaLevel = o.Before.MfaLevel != o.After.MfaLevel,
+            NsfwLevel = o.Before.NsfwLevel != o.After.NsfwLevel,
+            PremiumTier = o.Before.PremiumTier != o.After.PremiumTier,
+            SplashId = o.Before.SplashId != o.After.SplashId,
+            VanityUrl = o.Before.VanityUrl != o.After.VanityUrl,
+            VerificationLevel = o.Before.VerificationLevel != o.After.VerificationLevel,
+            AfkChannelId = o.Before.AfkChannelId != o.After.AfkChannelId,
+            DiscoverySplashId = o.Before.DiscoverySplashId != o.After.DiscoverySplashId,
+            ExplicitContentFilter = o.Before.ExplicitContentFilter != o.After.ExplicitContentFilter,
+            RulesChannelId = o.Before.RulesChannelId != o.After.RulesChannelId,
+            SystemChannelId = o.Before.SystemChannelId != o.After.SystemChannelId,
+            PublicUpdatesChannelId = o.Before.PublicUpdatesChannelId != o.After.PublicUpdatesChannelId
+        });
     }
 
     private async Task SetUserLeftPreviewAsync(LogListItem result)
     {
-        var query = Context.UserLeftItems.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new UserLeftPreview
-            {
-                BanReason = o.BanReason,
-                UserId = o.UserId,
-                IsBan = o.IsBan,
-                MemberCount = o.MemberCount
-            });
-
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<UserLeft, UserLeftPreview>(result, entity => new UserLeftPreview
+        {
+            BanReason = entity.BanReason,
+            IsBan = entity.IsBan,
+            MemberCount = entity.MemberCount,
+            UserId = entity.UserId
+        });
     }
 
     private async Task SetUserJoinedPreviewAsync(LogListItem result)
     {
-        var query = Context.UserJoinedItems.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new UserJoinedPreview { MemberCount = o.MemberCount });
-
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<UserJoined, UserJoinedPreview>(result, entity => new UserJoinedPreview
+        {
+            MemberCount = entity.MemberCount
+        });
     }
 
     private async Task SetMessageEditedPreviewAsync(LogListItem result)
     {
-        var query = Context.MessageEditedItems.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new MessageEditedPreview
-            {
-                ContentAfter = o.ContentAfter,
-                ContentBefore = o.ContentBefore,
-                JumpUrl = o.JumpUrl
-            });
-
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<MessageEdited, MessageEditedPreview>(result, entity => new MessageEditedPreview
+        {
+            ContentAfter = entity.ContentAfter,
+            ContentBefore = entity.ContentBefore,
+            JumpUrl = entity.JumpUrl
+        });
     }
 
     private async Task SetMesasgeDeletedPreviewAsync(LogListItem result)
     {
-        var query = Context.MessageDeletedItems.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new MessageDeletedPreview
+        var preview = await CreatePreviewAsync<MessageDeleted, MessageDeletedPreview>(result, entity => new MessageDeletedPreview
+        {
+            AuthorId = entity.AuthorId,
+            Content = entity.Content,
+            Embeds = entity.Embeds.Select(e => new EmbedPreview
             {
-                Content = o.Content,
-                AuthorId = o.AuthorId,
-                MessageCreatedAt = o.MessageCreatedAt,
-                Embeds = o.Embeds.Select(e => new EmbedPreview
-                {
-                    Title = e.Title,
-                    Type = e.Type,
-                    AuthorName = e.AuthorName,
-                    ContainsFooter = e.ContainsFooter,
-                    FieldsCount = e.Fields.Count,
-                    ImageInfo = e.ImageInfo,
-                    ProviderName = e.ProviderName,
-                    ThumbnailInfo = e.ThumbnailInfo,
-                    VideoInfo = e.VideoInfo
-                }).ToList()
-            });
+                AuthorName = e.AuthorName,
+                ContainsFooter = e.ContainsFooter,
+                FieldsCount = e.Fields.Count,
+                ImageInfo = e.ImageInfo,
+                ProviderName = e.ProviderName,
+                ThumbnailInfo = e.ThumbnailInfo,
+                Title = e.Title,
+                Type = e.Type,
+                VideoInfo = e.VideoInfo
+            }).ToList()
+        });
 
-        var preview = await query.FirstOrDefaultAsync();
         result.Preview = preview;
 
         if (preview is not null)
@@ -362,73 +316,55 @@ public partial class SearchItemsAction
 
     private async Task SetInteractionCommandPreviewAsync(LogListItem result)
     {
-        var query = Context.InteractionCommands.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new InteractionCommandPreview
-            {
-                Name = $"{o.Name} ({o.ModuleName}/{o.MethodName})",
-                HasResponded = o.HasResponded,
-                IsSuccess = o.IsSuccess
-            });
-
         result.IsDetailAvailable = true;
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<InteractionCommand, InteractionCommandPreview>(result, entity => new InteractionCommandPreview
+        {
+            HasResponded = entity.HasResponded,
+            IsSuccess = entity.IsSuccess,
+            Name = $"{entity.Name} ({entity.ModuleName}/{entity.MethodName})",
+            CommandError = entity.CommandError
+        });
     }
 
     private async Task SetThreadDeletedPreviewAsync(LogListItem result)
     {
-        var query = Context.ThreadDeletedItems.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new ThreadDeletedPreview { Name = o.ThreadInfo.ThreadName });
-
         result.IsDetailAvailable = true;
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<ThreadDeleted, ThreadDeletedPreview>(result, entity => new ThreadDeletedPreview
+        {
+            Name = entity.ThreadInfo.ThreadName
+        });
     }
 
     private async Task SetJobPreviewAsync(LogListItem result)
     {
-        var query = Context.JobExecutions.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new JobPreview
-            {
-                JobName = o.JobName,
-                EndAt = o.EndAt,
-                StartAt = o.StartAt,
-                WasError = o.WasError
-            });
-
         result.IsDetailAvailable = true;
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<JobExecution, JobPreview>(result, entity => new JobPreview
+        {
+            EndAt = entity.EndAt,
+            JobName = entity.JobName,
+            StartAt = entity.StartAt,
+            WasError = entity.WasError
+        });
     }
 
     private async Task SetApiPreviewAsync(LogListItem result)
     {
-        var query = Context.ApiRequests.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new ApiPreview
-            {
-                Action = $"{o.ControllerName}.{o.ActionName}",
-                Duration = (int)o.Duration,
-                Path = $"{o.Method} {o.TemplatePath} (API {o.ApiGroupName})",
-                Result = o.Result
-            });
-
         result.IsDetailAvailable = true;
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<ApiRequest, ApiPreview>(result, entity => new ApiPreview
+        {
+            Action = $"{entity.ControllerName}.{entity.ActionName}",
+            Duration = (int)entity.Duration,
+            Path = $"{entity.Method} {entity.TemplatePath} (API {entity.ApiGroupName})",
+            Result = entity.Result
+        });
     }
 
     private async Task SetThreadUpdatedPreviewAsync(LogListItem result)
     {
-        var info = await Context.ThreadUpdatedItems.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new
-            {
-                Before = o.Before.Tags,
-                After = o.After.Tags
-            }).FirstOrDefaultAsync();
+        var info = await CreatePreviewAsync<ThreadUpdated, Tuple<List<string>, List<string>>>(result, entity => Tuple.Create(entity.Before.Tags, entity.After.Tags));
 
-        var tagsBefore = info?.Before ?? new List<string>();
-        var tagsAfter = info?.After ?? new List<string>();
+        var tagsBefore = info?.Item1 ?? new List<string>();
+        var tagsAfter = info?.Item2 ?? new List<string>();
 
         result.IsDetailAvailable = true;
         result.Preview = new ThreadUpdatedPreview
@@ -439,15 +375,21 @@ public partial class SearchItemsAction
 
     private async Task SetRoleDeletedPreviewAsync(LogListItem result)
     {
-        var query = Context.RoleDeleted.AsNoTracking()
-            .Where(o => o.LogItemId == result.Id)
-            .Select(o => new RoleDeletedPreview
-            {
-                Name = o.RoleInfo.Name,
-                RoleId = o.RoleInfo.RoleId
-            });
-
         result.IsDetailAvailable = true;
-        result.Preview = await query.FirstOrDefaultAsync();
+        result.Preview = await CreatePreviewAsync<RoleDeleted, RoleDeletedPreview>(result, entity => new RoleDeletedPreview
+        {
+            Name = entity.RoleInfo.Name,
+            RoleId = entity.RoleInfo.RoleId
+        });
+    }
+
+    private async Task<TPreview?> CreatePreviewAsync<TEntity, TPreview>(LogListItem item, Expression<Func<TEntity, TPreview>> projection) where TEntity : ChildEntityBase
+    {
+        var query = Context.Set<TEntity>().AsNoTracking()
+            .Where(o => o.LogItemId == item.Id)
+            .Select(projection);
+
+        using (CreateCounter("Database"))
+            return await query.FirstOrDefaultAsync();
     }
 }

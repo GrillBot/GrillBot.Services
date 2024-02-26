@@ -8,97 +8,107 @@ public partial class CreateArchivationDataAction
 {
     private async Task<bool> ExistsItemsToArchiveAsync(DateTime expirationDate)
     {
-        var countToArchive = await Context.LogItems.AsNoTracking()
-            .CountAsync(o => !o.IsDeleted && o.CreatedAt <= expirationDate);
+        int countToArchive;
+        using (CreateCounter("Database"))
+            countToArchive = await Context.LogItems.AsNoTracking().CountAsync(o => o.CreatedAt <= expirationDate);
 
         return countToArchive >= AppOptions.MinimalItemsToArchive;
     }
 
     private async Task<List<LogItem>> ReadItemsToArchiveAsync(DateTime expirationDate)
     {
-        IQueryable<TData> WithCommonFilter<TData>(IQueryable<TData> query, LogItem item) where TData : ChildEntityBase
-            => query.Where(o => o.LogItemId == item.Id).AsNoTracking();
-
-        var items = await Context.LogItems.AsNoTracking()
+        var itemsQuery = Context.LogItems.AsNoTracking()
             .Include(o => o.Files)
-            .Where(o => !o.IsDeleted && o.CreatedAt <= expirationDate)
+            .Where(o => o.CreatedAt <= expirationDate)
             .OrderBy(o => o.CreatedAt)
-            .Take(AppOptions.MaxItemsToArchivePerRun)
-            .ToListAsync();
+            .Take(AppOptions.MaxItemsToArchivePerRun);
+
+        List<LogItem> items;
+        using (CreateCounter("Database"))
+            items = await itemsQuery.ToListAsync();
 
         foreach (var item in items)
         {
             switch (item.Type)
             {
                 case LogType.Info or LogType.Warning or LogType.Error:
-                    item.LogMessage = await WithCommonFilter(Context.LogMessages, item).FirstOrDefaultAsync();
+                    item.LogMessage = await ReadChildDataAsync(Context.LogMessages, item);
                     break;
                 case LogType.ChannelCreated:
-                    item.ChannelCreated = await WithCommonFilter(Context.ChannelCreatedItems, item).Include(o => o.ChannelInfo).FirstOrDefaultAsync();
+                    item.ChannelCreated = await ReadChildDataAsync(Context.ChannelCreatedItems.Include(o => o.ChannelInfo), item);
                     break;
                 case LogType.ChannelDeleted:
-                    item.ChannelDeleted = await WithCommonFilter(Context.ChannelDeletedItems, item).Include(o => o.ChannelInfo).FirstOrDefaultAsync();
+                    item.ChannelDeleted = await ReadChildDataAsync(Context.ChannelDeletedItems.Include(o => o.ChannelInfo), item);
                     break;
                 case LogType.ChannelUpdated:
-                    item.ChannelUpdated = await WithCommonFilter(Context.ChannelUpdatedItems, item).Include(o => o.Before).Include(o => o.After).FirstOrDefaultAsync();
+                    item.ChannelUpdated = await ReadChildDataAsync(Context.ChannelUpdatedItems.Include(o => o.Before).Include(o => o.After), item);
                     break;
                 case LogType.EmoteDeleted:
-                    item.DeletedEmote = await WithCommonFilter(Context.DeletedEmotes, item).FirstOrDefaultAsync();
+                    item.DeletedEmote = await ReadChildDataAsync(Context.DeletedEmotes, item);
                     break;
                 case LogType.OverwriteCreated:
-                    item.OverwriteCreated = await WithCommonFilter(Context.OverwriteCreatedItems, item).Include(o => o.OverwriteInfo).FirstOrDefaultAsync();
+                    item.OverwriteCreated = await ReadChildDataAsync(Context.OverwriteCreatedItems.Include(o => o.OverwriteInfo), item);
                     break;
                 case LogType.OverwriteDeleted:
-                    item.OverwriteDeleted = await WithCommonFilter(Context.OverwriteDeletedItems, item).Include(o => o.OverwriteInfo).FirstOrDefaultAsync();
+                    item.OverwriteDeleted = await ReadChildDataAsync(Context.OverwriteDeletedItems.Include(o => o.OverwriteInfo), item);
                     break;
                 case LogType.OverwriteUpdated:
-                    item.OverwriteUpdated = await WithCommonFilter(Context.OverwriteUpdatedItems, item).Include(o => o.Before).Include(o => o.After).FirstOrDefaultAsync();
+                    item.OverwriteUpdated = await ReadChildDataAsync(Context.OverwriteUpdatedItems.Include(o => o.Before).Include(o => o.After), item);
                     break;
                 case LogType.Unban:
-                    item.Unban = await WithCommonFilter(Context.Unbans, item).FirstOrDefaultAsync();
+                    item.Unban = await ReadChildDataAsync(Context.Unbans, item);
                     break;
                 case LogType.MemberUpdated:
-                    item.MemberUpdated = await WithCommonFilter(Context.MemberUpdatedItems, item).Include(o => o.Before).Include(o => o.After).FirstOrDefaultAsync();
+                    item.MemberUpdated = await ReadChildDataAsync(Context.MemberUpdatedItems.Include(o => o.Before).Include(o => o.After), item);
                     break;
                 case LogType.MemberRoleUpdated:
-                    item.MemberRolesUpdated = (await Context.MemberRoleUpdatedItems.AsNoTracking().Where(o => o.LogItemId == item.Id).ToListAsync()).ToHashSet();
+                    using (CreateCounter("Database"))
+                        item.MemberRolesUpdated = (await Context.MemberRoleUpdatedItems.AsNoTracking().Where(o => o.LogItemId == item.Id).ToListAsync()).ToHashSet();
                     break;
                 case LogType.GuildUpdated:
-                    item.GuildUpdated = await WithCommonFilter(Context.GuildUpdatedItems, item).Include(o => o.Before).Include(o => o.After).FirstOrDefaultAsync();
+                    item.GuildUpdated = await ReadChildDataAsync(Context.GuildUpdatedItems.Include(o => o.Before).Include(o => o.After), item);
                     break;
                 case LogType.UserLeft:
-                    item.UserLeft = await WithCommonFilter(Context.UserLeftItems, item).FirstOrDefaultAsync();
+                    item.UserLeft = await ReadChildDataAsync(Context.UserLeftItems, item);
                     break;
                 case LogType.UserJoined:
-                    item.UserJoined = await WithCommonFilter(Context.UserJoinedItems, item).FirstOrDefaultAsync();
+                    item.UserJoined = await ReadChildDataAsync(Context.UserJoinedItems, item);
                     break;
                 case LogType.MessageEdited:
-                    item.MessageEdited = await WithCommonFilter(Context.MessageEditedItems, item).FirstOrDefaultAsync();
+                    item.MessageEdited = await ReadChildDataAsync(Context.MessageEditedItems, item);
                     break;
                 case LogType.MessageDeleted:
-                    item.MessageDeleted = await WithCommonFilter(Context.MessageDeletedItems, item).Include(o => o.Embeds).ThenInclude(o => o.Fields).FirstOrDefaultAsync();
+                    item.MessageDeleted = await ReadChildDataAsync(Context.MessageDeletedItems.Include(o => o.Embeds).ThenInclude(o => o.Fields), item);
                     break;
                 case LogType.InteractionCommand:
-                    item.InteractionCommand = await WithCommonFilter(Context.InteractionCommands, item).FirstOrDefaultAsync();
+                    item.InteractionCommand = await ReadChildDataAsync(Context.InteractionCommands, item);
                     break;
                 case LogType.ThreadDeleted:
-                    item.ThreadDeleted = await WithCommonFilter(Context.ThreadDeletedItems, item).Include(o => o.ThreadInfo).FirstOrDefaultAsync();
+                    item.ThreadDeleted = await ReadChildDataAsync(Context.ThreadDeletedItems.Include(o => o.ThreadInfo), item);
                     break;
                 case LogType.JobCompleted:
-                    item.Job = await WithCommonFilter(Context.JobExecutions, item).FirstOrDefaultAsync();
+                    item.Job = await ReadChildDataAsync(Context.JobExecutions, item);
                     break;
                 case LogType.Api:
-                    item.ApiRequest = await WithCommonFilter(Context.ApiRequests, item).FirstOrDefaultAsync();
+                    item.ApiRequest = await ReadChildDataAsync(Context.ApiRequests, item);
                     break;
                 case LogType.ThreadUpdated:
-                    item.ThreadUpdated = await WithCommonFilter(Context.ThreadUpdatedItems, item).Include(o => o.Before).Include(o => o.After).FirstOrDefaultAsync();
+                    item.ThreadUpdated = await ReadChildDataAsync(Context.ThreadUpdatedItems.Include(o => o.Before).Include(o => o.After), item);
                     break;
                 case LogType.RoleDeleted:
-                    item.RoleDeleted = await WithCommonFilter(Context.RoleDeleted, item).Include(o => o.RoleInfo).FirstOrDefaultAsync();
+                    item.RoleDeleted = await ReadChildDataAsync(Context.RoleDeleted.Include(o => o.RoleInfo), item);
                     break;
             }
         }
 
         return items;
+    }
+
+    private async Task<TData?> ReadChildDataAsync<TData>(IQueryable<TData> query, LogItem header) where TData : ChildEntityBase
+    {
+        query = query.Where(o => o.LogItemId == header.Id).AsNoTracking();
+
+        using (CreateCounter("Database"))
+            return await query.FirstOrDefaultAsync();
     }
 }
