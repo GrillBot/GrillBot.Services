@@ -14,7 +14,7 @@ RUN mkdir -p /src/AuditLogService
 COPY "AuditLogService/AuditLogService.csproj" /src/AuditLogService
 RUN dotnet restore "src/AuditLogService/AuditLogService.csproj" -r linux-x64
 
-COPY . /src/AuditLogService
+COPY "AuditLogService/" /src/AuditLogService
 RUN mkdir -p /publish
 RUN dotnet publish /src/AuditLogService -c Release -o /publish --no-restore -r linux-x64 --self-contained false
 

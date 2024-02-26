@@ -40,8 +40,27 @@ jobs:
               - 'src/ImageProcessingService/**'
             AuditLogService:
               - 'src/AuditLogService/**'
+              - 'src/AuditLogService.Dockerfile'
             UserMeasuresService:
               - 'src/UserMeasuresService/**'
+  BuildCommonLibraries:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+          source-url: https://nuget.pkg.github.com/GrillBot/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Restore dependencies
+        run: dotnet restore -r linux-x64 src/GrillBot.Services.Common/
+      - name: Build (DEBUG)
+        run: dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/GrillBot.Services.Common
+      - name: Build (RELEASE)
+        run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/GrillBot.Services.Common
   RubbergodService_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -328,7 +347,7 @@ jobs:
           script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-image-processing-service
   AuditLogService_Build:
     runs-on: ubuntu-latest
-    needs: PathsFilter
+    needs: [PathsFilter, BuildCommonLibraries]
     if: needs.PathsFilter.outputs.AuditLogService == 'true'
     steps:
       - name: Checkout repository
