@@ -25,11 +25,7 @@ public class GetStatusInfoAction : ApiActionBase
         var result = new StatusInfo
         {
             ItemsToArchive = await Context.LogItems.AsNoTracking()
-                .CountAsync(o => !o.IsDeleted && o.CreatedAt <= expirationDate),
-            ItemsToDelete = await Context.LogItems.AsNoTracking()
-                .CountAsync(o => o.IsDeleted),
-            ItemsToProcess = await Context.LogItems.AsNoTracking()
-                .CountAsync(o => o.IsPendingProcess)
+                .CountAsync(o => !o.IsDeleted && o.CreatedAt <= expirationDate)
         };
 
         return ApiResult.Ok(result);
