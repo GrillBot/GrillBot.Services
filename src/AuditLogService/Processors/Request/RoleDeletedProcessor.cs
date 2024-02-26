@@ -1,5 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Models.Request.CreateItems;
+using AuditLogService.Models.Events.Create;
 using AuditLogService.Processors.Request.Abstractions;
 using Discord;
 using Discord.Rest;
@@ -34,7 +34,7 @@ public class RoleDeletedProcessor : RequestProcessorBase
         };
 
         if (logData.Properties.Permissions is not null)
-            roleInfo.Permissions = logData.Properties.Permissions.Value.ToList().Select(o => o.ToString()).ToList();
+            roleInfo.Permissions = logData.Properties.Permissions.Value.ToList().ConvertAll(o => o.ToString());
 
         entity.UserId = auditLog.User.Id.ToString();
         entity.DiscordId = auditLog.Id.ToString();

@@ -2,15 +2,17 @@
 using AuditLogService.Core.Entity;
 using AuditLogService.Models.Response.Info.Dashboard;
 using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Dashboard;
 
-public abstract class DashboardListBaseAction<TEntity> : ApiActionBase where TEntity : ChildEntityBase
+public abstract class DashboardListBaseAction<TEntity> : ApiAction where TEntity : ChildEntityBase
 {
     private AuditLogServiceContext Context { get; }
 
-    protected DashboardListBaseAction(AuditLogServiceContext context)
+    protected DashboardListBaseAction(AuditLogServiceContext context, ICounterManager counterManager) : base(counterManager)
     {
         Context = context;
     }
@@ -19,7 +21,7 @@ public abstract class DashboardListBaseAction<TEntity> : ApiActionBase where TEn
     {
         var query = Context.Set<TEntity>()
             .OrderByDescending(CreateSorting())
-            .AsQueryable();
+            .AsNoTracking();
         var filter = CreateFilter();
         if (filter is not null)
             query = query.Where(filter);
@@ -28,8 +30,11 @@ public abstract class DashboardListBaseAction<TEntity> : ApiActionBase where TEn
             .Select(CreateProjection())
             .Take(10);
 
-        var result = await mappedQuery.ToListAsync();
-        return ApiResult.Ok(result);
+        using (CreateCounter("Database"))
+        {
+            var result = await mappedQuery.ToListAsync();
+            return ApiResult.Ok(result);
+        }
     }
 
     protected abstract Expression<Func<TEntity, DateTime>> CreateSorting();

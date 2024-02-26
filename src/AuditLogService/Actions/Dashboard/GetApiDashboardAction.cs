@@ -1,12 +1,13 @@
 ﻿using System.Linq.Expressions;
 using AuditLogService.Core.Entity;
 using AuditLogService.Models.Response.Info.Dashboard;
+using GrillBot.Core.Managers.Performance;
 
 namespace AuditLogService.Actions.Dashboard;
 
 public class GetApiDashboardAction : DashboardListBaseAction<ApiRequest>
 {
-    public GetApiDashboardAction(AuditLogServiceContext context) : base(context)
+    public GetApiDashboardAction(AuditLogServiceContext context, ICounterManager counterManager) : base(context, counterManager)
     {
     }
 

@@ -1,21 +1,23 @@
 ﻿using AuditLogService.Core.Entity.Statistics;
 using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Info;
 
-public class GetJobsInfoAction : ApiActionBase
+public class GetJobsInfoAction : ApiAction
 {
     private AuditLogStatisticsContext StatisticsContext { get; }
 
-    public GetJobsInfoAction(AuditLogStatisticsContext statisticsContext)
+    public GetJobsInfoAction(AuditLogStatisticsContext statisticsContext, ICounterManager counterManager) : base(counterManager)
     {
         StatisticsContext = statisticsContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var result = await StatisticsContext.JobInfos.AsNoTracking()
+        var query = StatisticsContext.JobInfos.AsNoTracking()
             .Select(o => new Models.Response.Info.JobInfo
             {
                 AvgTime = o.AvgTime,
@@ -27,8 +29,12 @@ public class GetJobsInfoAction : ApiActionBase
                 Name = o.Name,
                 StartCount = o.StartCount,
                 TotalDuration = o.TotalDuration
-            }).ToListAsync();
+            });
 
-        return ApiResult.Ok(result);
+        using (CreateCounter("Database"))
+        {
+            var result = await query.ToListAsync();
+            return ApiResult.Ok(result);
+        }
     }
 }

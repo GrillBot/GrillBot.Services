@@ -1,6 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Models.Request;
-using AuditLogService.Models.Request.CreateItems;
+using AuditLogService.Models.Events.Create;
 using AuditLogService.Processors.Request.Abstractions;
 using Discord;
 using Discord.Rest;

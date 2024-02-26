@@ -1,6 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Models.Request;
-using AuditLogService.Models.Request.CreateItems;
+using AuditLogService.Models.Events.Create;
 using AuditLogService.Processors.Request.Abstractions;
 using Discord;
 using Discord.Rest;
@@ -76,20 +75,5 @@ public class MessageDeletedProcessor : RequestProcessorBase
         }
 
         return embedEntity;
-    }
-
-    private static string? ParseVideoInfo(EmbedVideo? video, string? providerName)
-    {
-        if (video == null)
-            return null;
-
-        var size = $"({video.Value.Width}x{video.Value.Height})";
-
-        if (providerName != "Twitch")
-            return $"{video.Value.Url} {size}";
-
-        var url = new Uri(video.Value.Url);
-        var queryFields = url.Query[1..].Split('&').Select(o => o.Split('=')).ToDictionary(o => o[0], o => o[1]);
-        return $"{queryFields["channel"]} {size}";
     }
 }

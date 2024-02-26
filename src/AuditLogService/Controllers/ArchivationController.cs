@@ -14,6 +14,6 @@ public class ArchivationController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ArchivationResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> ProcessArchivationAsync()
-        => await ProcessAsync<ArchiveOldLogsAction>();
+    public async Task<IActionResult> CreateArchivationDataAsync()
+        => await ProcessAsync<CreateArchivationDataAction>();
 }

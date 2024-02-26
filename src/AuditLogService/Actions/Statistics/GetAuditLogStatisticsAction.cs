@@ -1,23 +1,19 @@
 ﻿using AuditLogService.Core.Entity;
-using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Models.Response.Statistics;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
+using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Statistics;
 
-public class GetAuditLogStatisticsAction : ApiActionBase
+public class GetAuditLogStatisticsAction : ApiAction
 {
-    private AuditLogStatisticsContext StatisticsContext { get; }
-    private AuditLogServiceContext AuditLogServiceContext { get; }
-    private ICounterManager CounterManager { get; }
+    private AuditLogServiceContext DbContext { get; }
 
-    public GetAuditLogStatisticsAction(AuditLogStatisticsContext statisticsContext, AuditLogServiceContext auditLogServiceContext, ICounterManager counterManager)
+    public GetAuditLogStatisticsAction(AuditLogServiceContext auditLogServiceContext, ICounterManager counterManager) : base(counterManager)
     {
-        StatisticsContext = statisticsContext;
-        AuditLogServiceContext = auditLogServiceContext;
-        CounterManager = counterManager;
+        DbContext = auditLogServiceContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -34,37 +30,49 @@ public class GetAuditLogStatisticsAction : ApiActionBase
 
     private async Task<Dictionary<string, long>> GetStatisticsByTypeAsync()
     {
-        var data = await StatisticsContext.TypeStatistics.AsNoTracking().ToListAsync();
+        using (CreateCounter("Database"))
+        {
+            var stats = await DbContext.LogItems.AsNoTracking()
+                .GroupBy(o => o.Type)
+                .OrderBy(o => o.Key)
+                .Select(o => new { o.Key, Count = o.LongCount() })
+                .ToListAsync();
 
-        return data
-            .Select(o => new { Type = o.Type.ToString(), o.Count })
-            .OrderBy(o => o.Type)
-            .ToDictionary(o => o.Type, o => o.Count);
+            return stats.ToDictionary(o => o.Key.ToString(), o => o.Count);
+        }
     }
 
     private async Task<Dictionary<string, long>> GetStatisticsByDateAsync()
     {
-        return await StatisticsContext.DateStatistics.AsNoTracking()
-            .GroupBy(o => new { o.Date.Year, o.Date.Month })
-            .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
-            .Select(o => new { Date = $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", Count = o.Sum(x => x.Count) })
-            .ToDictionaryAsync(o => o.Date, o => o.Count);
+        using (CreateCounter("Database"))
+        {
+            var stats = await DbContext.LogItems.AsNoTracking()
+                .GroupBy(o => o.LogDate)
+                .Select(o => new { o.Key, Count = o.LongCount() })
+                .ToListAsync();
+
+            return stats
+                .GroupBy(o => new { o.Key.Year, o.Key.Month })
+                .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
+                .ToDictionary(o => $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", o => o.Sum(x => x.Count));
+        }
     }
 
     private async Task<List<FileExtensionStatistic>> GetFileExtensionStatisticsAsync()
     {
-        var query = AuditLogServiceContext.Files.AsNoTracking()
-            .Where(o => !AuditLogServiceContext.LogItems.Any(x => x.IsDeleted && x.Id == o.LogItemId))
-            .GroupBy(o => o.Extension ?? ".NoExtension")
-            .Select(o => new FileExtensionStatistic
-            {
-                Extension = o.Key,
-                Count = o.Count(),
-                Size = o.Sum(x => x.Size)
-            })
-            .OrderBy(o => o.Extension);
+        using (CreateCounter("Database"))
+        {
+            var query = DbContext.Files.AsNoTracking()
+                .GroupBy(o => (o.Extension ?? ".NoExtension").ToLower())
+                .Select(o => new FileExtensionStatistic
+                {
+                    Extension = o.Key,
+                    Count = o.Count(),
+                    Size = o.Sum(x => x.Size)
+                })
+                .OrderBy(o => o.Extension);
 
-        using (CounterManager.Create("Api.Statistics.GetAuditLogStatistics.GetFileExtensionStatistics"))
             return await query.ToListAsync();
+        }
     }
 }

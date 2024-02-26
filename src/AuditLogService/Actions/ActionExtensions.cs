@@ -5,12 +5,9 @@ public static class ActionExtensions
     public static void AddActions(this IServiceCollection services)
     {
         services
-            .AddScoped<CreateItemsAction>()
-            .AddScoped<Delete.DeleteItemAction>()
-            .AddScoped<Delete.BulkDeleteAction>()
             .AddScoped<Search.SearchItemsAction>()
             .AddScoped<Detail.ReadDetailAction>()
-            .AddScoped<Archivation.ArchiveOldLogsAction>()
+            .AddScoped<Archivation.CreateArchivationDataAction>()
             .AddScoped<Statistics.GetAuditLogStatisticsAction>()
             .AddScoped<Statistics.GetInteractionStatisticsAction>()
             .AddScoped<Statistics.GetUserCommandStatisticsAction>()

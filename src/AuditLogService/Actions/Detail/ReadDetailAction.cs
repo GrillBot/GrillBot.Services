@@ -1,24 +1,26 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
 using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Detail;
 
-public partial class ReadDetailAction : ApiActionBase
+public partial class ReadDetailAction : ApiAction
 {
-    private AuditLogServiceContext Context { get; set; }
+    private AuditLogServiceContext DbContext { get; set; }
 
-    public ReadDetailAction(AuditLogServiceContext context)
+    public ReadDetailAction(AuditLogServiceContext context, ICounterManager counterManager) : base(counterManager)
     {
-        Context = context;
+        DbContext = context;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
         var id = (Guid)Parameters[0]!;
 
-        var logHeader = await Context.LogItems.AsNoTracking().FirstOrDefaultAsync(o => !o.IsDeleted && o.Id == id);
+        var logHeader = await ReadHeaderAsync(id);
         if (logHeader is null)
             return new ApiResult(StatusCodes.Status404NotFound);
 
@@ -68,5 +70,11 @@ public partial class ReadDetailAction : ApiActionBase
         }
 
         return ApiResult.Ok(result);
+    }
+
+    private async Task<LogItem?> ReadHeaderAsync(Guid id)
+    {
+        using (CreateCounter("Database"))
+            return await DbContext.LogItems.AsNoTracking().FirstOrDefaultAsync(o => o.Id == id);
     }
 }

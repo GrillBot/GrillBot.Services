@@ -23,23 +23,6 @@ namespace AuditLogService.Core.Migrations.Statistics
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("AuditLogService.Core.Entity.Statistics.ApiDateCountStatistic", b =>
-                {
-                    b.Property<string>("ApiGroup")
-                        .HasMaxLength(5)
-                        .HasColumnType("character varying(5)");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<long>("Count")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("ApiGroup", "Date");
-
-                    b.ToTable("DateCountStatistics", "statistics");
-                });
-
             modelBuilder.Entity("AuditLogService.Core.Entity.Statistics.ApiRequestStat", b =>
                 {
                     b.Property<string>("Endpoint")
@@ -97,32 +80,6 @@ namespace AuditLogService.Core.Migrations.Statistics
                     b.ToTable("ApiUserActionStatistics", "statistics");
                 });
 
-            modelBuilder.Entity("AuditLogService.Core.Entity.Statistics.AuditLogDateStatistic", b =>
-                {
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<long>("Count")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Date");
-
-                    b.ToTable("DateStatistics", "statistics");
-                });
-
-            modelBuilder.Entity("AuditLogService.Core.Entity.Statistics.AuditLogTypeStatistic", b =>
-                {
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.Property<long>("Count")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Type");
-
-                    b.ToTable("TypeStatistics", "statistics");
-                });
-
             modelBuilder.Entity("AuditLogService.Core.Entity.Statistics.DailyAvgTimes", b =>
                 {
                     b.Property<DateOnly>("Date")
@@ -157,19 +114,6 @@ namespace AuditLogService.Core.Migrations.Statistics
                     b.HasKey("TableName");
 
                     b.ToTable("DatabaseStatistics", "statistics");
-                });
-
-            modelBuilder.Entity("AuditLogService.Core.Entity.Statistics.InteractionDateCountStatistic", b =>
-                {
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<long>("Count")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Date");
-
-                    b.ToTable("InteractionDateCountStatistics", "statistics");
                 });
 
             modelBuilder.Entity("AuditLogService.Core.Entity.Statistics.InteractionStatistic", b =>

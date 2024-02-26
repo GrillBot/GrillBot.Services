@@ -551,12 +551,6 @@ namespace AuditLogService.Core.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsPendingProcess")
-                        .HasColumnType("boolean");
-
                     b.Property<DateOnly>("LogDate")
                         .HasColumnType("date");
 
@@ -574,8 +568,6 @@ namespace AuditLogService.Core.Migrations
                     b.HasIndex("GuildId");
 
                     b.HasIndex("LogDate");
-
-                    b.HasIndex("Type", "IsDeleted");
 
                     b.ToTable("LogItems");
                 });
