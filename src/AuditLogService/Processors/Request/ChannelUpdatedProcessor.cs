@@ -17,7 +17,7 @@ public class ChannelUpdatedProcessor : RequestProcessorBase
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var logItem = await FindAuditLogAsync(request);
-        if (logItem is null && request.ChannelUpdated!.Before!.Position == request.ChannelUpdated.After!.Position)
+        if (logItem is null && !IsPositionOrApiUpdate(request.ChannelUpdated!))
         {
             entity.CanCreate = false;
             return;
@@ -66,4 +66,10 @@ public class ChannelUpdatedProcessor : RequestProcessorBase
 
     protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
         => ((ChannelUpdateAuditLogData)entry.Data).ChannelId == request.ChannelId.ToUlong();
+
+    private static bool IsPositionOrApiUpdate(DiffRequest<ChannelInfoRequest> diff)
+    {
+        return diff.Before!.Position != diff.After!.Position ||
+            diff.Before.Flags != diff.After.Flags;
+    }
 }
