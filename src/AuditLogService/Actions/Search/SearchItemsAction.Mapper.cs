@@ -294,6 +294,7 @@ public partial class SearchItemsAction
         {
             AuthorId = entity.AuthorId,
             Content = entity.Content,
+            MessageCreatedAt = entity.MessageCreatedAt,
             Embeds = entity.Embeds.Select(e => new EmbedPreview
             {
                 AuthorName = e.AuthorName,
