@@ -90,6 +90,12 @@ jobs:
         run: |
           npm ci
           npm run build
+      - name: PointsService
+        if: needs.PathsFilter.outputs.PointsService == 'true'
+        run: |
+          dotnet restore -r linux-x64 src/PointsService/
+          dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/PointsService/
+          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/PointsService/
   CreateDockerImages:
     runs-on: ubuntu-latest
     needs: [PathsFilter, BuildServices]
@@ -122,6 +128,16 @@ jobs:
           context: src/Graphics
           push: true
           tags: ghcr.io/grillbot/grillbot.services:graphics
+      - name: PointsService
+        if: needs.PathsFilter.outputs.PointsService == 'true'
+        uses: docker/build-push-action@v4
+        with:
+          context: src/
+          file: src/PointsService.Dockerfile
+          push: true
+          tags: ghcr.io/grillbot/grillbot.services:points_service
+          build-args: |
+            github_actions_token=${{ secrets.GITHUB_TOKEN }}
   DeployToDevelopment:
     runs-on: ubuntu-latest
     needs: [PathsFilter, CreateDockerImages]
@@ -146,6 +162,15 @@ jobs:
           password: ${{ secrets.SSH_DEV_PASSWORD }}
           port: 22
           script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-graphics
+      - name: PointsService
+        if: needs.PathsFilter.outputs.PointsService == 'true'
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          password: ${{ secrets.SSH_DEV_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S /scripts/update-grillbot-dev.sh points
   RubbergodService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_RubbergodService"
@@ -174,56 +199,11 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-graphics
-  PointsService_Build:
-    runs-on: ubuntu-latest
-    needs: [PathsFilter, BuildCommonLibraries]
-    if: needs.PathsFilter.outputs.PointsService == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 7.0.x
-          source-url: https://nuget.pkg.github.com/GrillBot/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - name: Install dependencies
-        run: dotnet restore -r linux-x64 src/PointsService/
-      - name: Build (DEBUG)
-        run: dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/PointsService/
-      - name: Build (RELEASE)
-        run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/PointsService/
-  PointsService_CreateDockerImage:
-    runs-on: ubuntu-latest
-    needs: PointsService_Build
-    if: github.ref == 'refs/heads/master'
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Login to the container registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          context: src/
-          file: src/PointsService.Dockerfile
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:points_service
-          build-args: |
-            github_actions_token=${{ secrets.GITHUB_TOKEN }}
   PointsService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_PointsService"
-    needs: PointsService_CreateDockerImage
-    if: github.ref == 'refs/heads/master'
+    needs: [PathsFilter, CreateDockerImages]
+    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.PointsService == 'true'
     steps:
       - name: Execute deployment on SSH
         uses: appleboy/ssh-action@v0.1.8
@@ -233,20 +213,6 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh points
-  PointsService_Deploy_Development:
-    runs-on: ubuntu-latest
-    environment: "Development"
-    needs: PointsService_CreateDockerImage
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.SSH_DEV_HOST }}
-          username: ${{ secrets.SSH_DEV_USERNAME }}
-          password: ${{ secrets.SSH_DEV_PASSWORD }}
-          port: 22
-          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S /scripts/update-grillbot-dev.sh points
   ImageProcessingService_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -470,7 +436,6 @@ jobs:
     needs:
       [
         DeployToDevelopment,
-        PointsService_Deploy_Development,
         ImageProcessingService_Deploy_Development,
         AuditLogService_Deploy_Development,
         UserMeasuresService_Deploy_Development,
