@@ -15,7 +15,7 @@ RUN mkdir -p /src/PointsService
 COPY "PointsService/PointsService.csproj" /src/PointsService
 RUN dotnet restore "src/PointsService/PointsService.csproj" -r linux-x64
 
-COPY . /src/PointsService
+COPY "PointsService/" /src/PointsService
 RUN mkdir -p /publish
 RUN dotnet publish /src/PointsService -c Release -o /publish --no-restore -r linux-x64 --self-contained false
 
@@ -24,7 +24,6 @@ LABEL org.opencontainers.image.source https://github.com/grillbot/grillbot.servi
 
 WORKDIR /app
 EXPOSE 5258
-
 ENV TZ=Europe/Prague
 ENV ASPNETCORE_URLS 'http://+:5258'
 ENV DOTNET_PRINT_TELEMETRY_MESSAGE 'false'
