@@ -8,8 +8,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="6.0.2" />
-		<PackageReference Include="GrillBot.Core" Version="1.6.8" />
-		<PackageReference Include="GrillBot.Core.RabbitMQ" Version="1.0.5" />
+		<PackageReference Include="GrillBot.Core" Version="1.7.0" />
+		<PackageReference Include="GrillBot.Core.RabbitMQ" Version="1.0.6" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.8" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.8">
 			<PrivateAssets>all</PrivateAssets>

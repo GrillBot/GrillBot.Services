@@ -24,11 +24,11 @@ public class GetSlashCommandsAction : ApiActionBase
     {
         var data = ReadFromCache();
         if (data is not null)
-            return ApiResult.FromSuccess(data);
+            return ApiResult.Ok(data);
 
         data = await ReadFromRubbergodAsync();
         MemoryCache.Set(CacheKey, data, DateTimeOffset.Now.AddDays(7));
-        return ApiResult.FromSuccess(data);
+        return ApiResult.Ok(data);
     }
 
     private Dictionary<string, Cog>? ReadFromCache()

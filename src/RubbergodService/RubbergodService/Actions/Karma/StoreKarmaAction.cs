@@ -26,6 +26,6 @@ public class StoreKarmaAction : ApiActionBase
         }
 
         await Repository.CommitAsync();
-        return ApiResult.FromSuccess();
+        return ApiResult.Ok();
     }
 }

@@ -33,6 +33,6 @@ public class GetKarmaPageAction : ApiActionBase
             });
         });
 
-        return ApiResult.FromSuccess(result);
+        return ApiResult.Ok(result);
     }
 }

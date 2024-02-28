@@ -370,7 +370,7 @@ public partial class SearchItemsAction
         result.IsDetailAvailable = true;
         result.Preview = new ThreadUpdatedPreview
         {
-            TagsChanged = !tagsBefore.OrderBy(o => o).SequenceEqual(tagsAfter.OrderBy(o => o))
+            TagsChanged = !tagsBefore.IsSequenceEqual(tagsAfter)
         };
     }
 
