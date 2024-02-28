@@ -5,7 +5,7 @@ Service for connectivity between [GrillBot](https://github.com/GrillBot) and [Ru
 ## Requirements
 
 - PostgreSQL server (minimal recomended version is 13).
-- .NET 7.0 (with ASP.NET Core 7)
+- .NET 7.0 (with ASP.NET Core 7).
 
 If you're running service on Linux distributions, you have to install these packages: `tzdata`, `libc6-dev`.
 
