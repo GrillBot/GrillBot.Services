@@ -75,12 +75,21 @@ jobs:
           source-url: https://nuget.pkg.github.com/GrillBot/index.json
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Setup Node.JS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
       - name: RubbergodService
+        if: needs.PathsFilter.outputs.RubbergodService == 'true'
         run: |
           dotnet restore -r linux-x64 src/RubbergodService/RubbergodService/
           dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/RubbergodService/RubbergodService/
           dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/RubbergodService/RubbergodService/
-        if: needs.PathsFilter.outputs.RubbergodService == 'true'
+      - name: Graphics
+        if: needs.PathsFilter.outputs.Graphics == 'true'
+        run: |
+          npm ci
+          npm run build
   CreateDockerImages:
     runs-on: ubuntu-latest
     needs: [PathsFilter, BuildServices]
@@ -106,6 +115,13 @@ jobs:
           tags: ghcr.io/grillbot/grillbot.services:rubbergod_service
           build-args: |
             github_actions_token=${{ secrets.GITHUB_TOKEN }}
+      - name: Graphics
+        if: needs.PathsFilter.outputs.Graphics == 'true'
+        uses: docker/build-push-action@v4
+        with:
+          context: src/Graphics
+          push: true
+          tags: ghcr.io/grillbot/grillbot.services:graphics
   DeployToDevelopment:
     runs-on: ubuntu-latest
     needs: [PathsFilter, CreateDockerImages]
@@ -121,6 +137,15 @@ jobs:
           password: ${{ secrets.SSH_DEV_PASSWORD }}
           port: 22
           script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-rubbergod-service
+      - name: Graphics
+        if: needs.PathsFilter.outputs.Graphics == 'true'
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          password: ${{ secrets.SSH_DEV_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-graphics
   RubbergodService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_RubbergodService"
@@ -135,51 +160,11 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-rubbergod-service
-  Graphics_Build:
-    runs-on: ubuntu-latest
-    needs: PathsFilter
-    if: needs.PathsFilter.outputs.Graphics == 'true'
-    defaults:
-      run:
-        working-directory: src/Graphics/
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Setup Node.JS
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.x
-      - name: Install dependencies
-        run: npm ci
-      - name: Build
-        run: npm run build
-  Graphics_CreateDockerImage:
-    runs-on: ubuntu-latest
-    needs: Graphics_Build
-    if: github.ref == 'refs/heads/master'
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Login to the container registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          context: src/Graphics
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:graphics
   Graphics_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_Graphics"
-    needs: Graphics_CreateDockerImage
-    if: github.ref == 'refs/heads/master'
+    needs: [PathsFilter, CreateDockerImages]
+    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.Graphics == 'true'
     steps:
       - name: Execute deployment on SSH
         uses: appleboy/ssh-action@v0.1.8
@@ -189,20 +174,6 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-graphics
-  Graphics_Deploy_Development:
-    runs-on: ubuntu-latest
-    environment: "Development"
-    needs: Graphics_CreateDockerImage
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.SSH_DEV_HOST }}
-          username: ${{ secrets.SSH_DEV_USERNAME }}
-          password: ${{ secrets.SSH_DEV_PASSWORD }}
-          port: 22
-          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-graphics
   PointsService_Build:
     runs-on: ubuntu-latest
     needs: [PathsFilter, BuildCommonLibraries]
@@ -499,7 +470,6 @@ jobs:
     needs:
       [
         DeployToDevelopment,
-        Graphics_Deploy_Development,
         PointsService_Deploy_Development,
         ImageProcessingService_Deploy_Development,
         AuditLogService_Deploy_Development,
