@@ -113,6 +113,7 @@ jobs:
     environment: Development
     steps:
       - name: RubbergodService
+        if: needs.PathsFilter.outputs.RubbergodService == 'true'
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SSH_DEV_HOST }}
