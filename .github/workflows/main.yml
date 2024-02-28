@@ -36,6 +36,7 @@ jobs:
               - 'src/Graphics/**'
             PointsService:
               - 'src/PointsService/**'
+              - 'src/PointsService.Dockerfile'
             ImageProcessingService:
               - 'src/ImageProcessingService/**'
             AuditLogService:
@@ -203,7 +204,7 @@ jobs:
           script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-graphics
   PointsService_Build:
     runs-on: ubuntu-latest
-    needs: PathsFilter
+    needs: [PathsFilter, BuildCommonLibraries]
     if: needs.PathsFilter.outputs.PointsService == 'true'
     steps:
       - name: Checkout repository
@@ -240,7 +241,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: src/PointsService
+          context: src/
+          file: src/PointsService.Dockerfile
           push: true
           tags: ghcr.io/grillbot/grillbot.services:points_service
           build-args: |

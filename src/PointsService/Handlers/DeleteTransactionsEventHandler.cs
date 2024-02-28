@@ -7,10 +7,8 @@ using PointsService.Models.Events;
 
 namespace PointsService.Handlers;
 
-public class DeleteTransactionsEventHandler : BaseEventWithDb<DeleteTransactionsPayload>
+public class DeleteTransactionsEventHandler : BasePointsEvent<DeleteTransactionsPayload>
 {
-    public override string QueueName => new DeleteTransactionsPayload().QueueName;
-
     public DeleteTransactionsEventHandler(ILoggerFactory loggerFactory, PointsServiceContext dbContext, ICounterManager counterManager, IRabbitMQPublisher publisher)
         : base(loggerFactory, dbContext, counterManager, publisher)
     {

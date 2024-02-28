@@ -9,10 +9,8 @@ using PointsService.Models.Users;
 
 namespace PointsService.Handlers;
 
-public class SynchronizationEventHandler : BaseEventWithDb<SynchronizationPayload>
+public class SynchronizationEventHandler : BasePointsEvent<SynchronizationPayload>
 {
-    public override string QueueName => new SynchronizationPayload().QueueName;
-
     public SynchronizationEventHandler(ILoggerFactory loggerFactory, PointsServiceContext dbContext, ICounterManager counterManager, IRabbitMQPublisher publisher)
         : base(loggerFactory, dbContext, counterManager, publisher)
     {
