@@ -497,7 +497,7 @@ jobs:
     environment: Development
     needs:
       [
-        RubbergodService_Deploy_Development,
+        DeployToDevelopment,
         Graphics_Deploy_Development,
         PointsService_Deploy_Development,
         ImageProcessingService_Deploy_Development,
