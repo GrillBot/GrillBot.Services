@@ -81,43 +81,24 @@ jobs:
           dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/RubbergodService/RubbergodService/
           dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/RubbergodService/RubbergodService/
         if: needs.PathsFilter.outputs.RubbergodService == 'true'
-  RubbergodService_Build:
+  CreateDockerImages:
     runs-on: ubuntu-latest
-    needs: PathsFilter
-    if: needs.PathsFilter.outputs.RubbergodService == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 7.0.x
-          source-url: https://nuget.pkg.github.com/GrillBot/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - name: Install dependencies
-        run: dotnet restore -r linux-x64 src/RubbergodService/RubbergodService/
-      - name: Build (DEBUG)
-        run: dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/RubbergodService/RubbergodService/
-      - name: Build (RELEASE)
-        run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/RubbergodService/RubbergodService/
-  RubbergodService_CreateDockerImage:
-    runs-on: ubuntu-latest
-    needs: RubbergodService_Build
+    needs: [PathsFilter, BuildServices]
     if: github.ref == 'refs/heads/master'
     permissions:
       contents: read
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Login to the container registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push
+      - name: RubbergodService
+        if: needs.PathsFilter.outputs.RubbergodService == 'true'
         uses: docker/build-push-action@v4
         with:
           context: src/RubbergodService
@@ -125,11 +106,25 @@ jobs:
           tags: ghcr.io/grillbot/grillbot.services:rubbergod_service
           build-args: |
             github_actions_token=${{ secrets.GITHUB_TOKEN }}
+  DeployToDevelopment:
+    runs-on: ubuntu-latest
+    needs: [PathsFilter, CreateDockerImages]
+    if: github.ref == 'refs/heads/master'
+    environment: Development
+    steps:
+      - name: RubbergodService
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          password: ${{ secrets.SSH_DEV_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-rubbergod-service
   RubbergodService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_RubbergodService"
-    needs: RubbergodService_CreateDockerImage
-    if: github.ref == 'refs/heads/master'
+    needs: [PathsFilter, CreateDockerImages]
+    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.RubbergodService == 'true'
     steps:
       - name: Execute deployment on SSH
         uses: appleboy/ssh-action@v0.1.8
@@ -139,20 +134,6 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-rubbergod-service
-  RubbergodService_Deploy_Development:
-    runs-on: ubuntu-latest
-    environment: "Development"
-    needs: RubbergodService_CreateDockerImage
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.SSH_DEV_HOST }}
-          username: ${{ secrets.SSH_DEV_USERNAME }}
-          password: ${{ secrets.SSH_DEV_PASSWORD }}
-          port: 22
-          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-rubbergod-service
   Graphics_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -514,14 +495,15 @@ jobs:
   PruneDevelopmentImages:
     runs-on: ubuntu-latest
     environment: Development
-    needs: [
-      RubbergodService_Deploy_Development,
-      Graphics_Deploy_Development,
-      PointsService_Deploy_Development,
-      ImageProcessingService_Deploy_Development,
-      AuditLogService_Deploy_Development,
-      UserMeasuresService_Deploy_Development
-    ]
+    needs:
+      [
+        RubbergodService_Deploy_Development,
+        Graphics_Deploy_Development,
+        PointsService_Deploy_Development,
+        ImageProcessingService_Deploy_Development,
+        AuditLogService_Deploy_Development,
+        UserMeasuresService_Deploy_Development,
+      ]
     if: ${{ github.ref == 'refs/heads/master' && always() && !failure() && !cancelled() }}
     steps:
       - name: Prune images
@@ -534,14 +516,15 @@ jobs:
           script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S docker image prune -f
   PruneProductionImages:
     runs-on: ubuntu-latest
-    needs: [
-      RubbergodService_Deploy_Production,
-      Graphics_Deploy_Production,
-      PointsService_Deploy_Production,
-      ImageProcessingService_Deploy_Production,
-      AuditLogService_Deploy_Production,
-      UserMeasuresService_Deploy_Production
-    ]
+    needs:
+      [
+        RubbergodService_Deploy_Production,
+        Graphics_Deploy_Production,
+        PointsService_Deploy_Production,
+        ImageProcessingService_Deploy_Production,
+        AuditLogService_Deploy_Production,
+        UserMeasuresService_Deploy_Production,
+      ]
     if: ${{ github.ref == 'refs/heads/master' && always() && !failure() && !cancelled() }}
     environment: ProductionInternal
     steps:
@@ -553,5 +536,3 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: echo '${{ secrets.SSH_PASSWORD }}' | sudo -S docker image prune -f
-
-
