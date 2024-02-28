@@ -505,7 +505,7 @@ jobs:
     ]
     if: ${{ github.ref == 'refs/heads/master' && always() && !failure() && !cancelled() }}
     steps:
-      - name: Say hello
+      - name: Prune images
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SSH_DEV_HOST }}
@@ -513,4 +513,37 @@ jobs:
           password: ${{ secrets.SSH_DEV_PASSWORD }}
           port: 22
           script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S docker image prune -f
+  PruneProductionImages:
+    runs-on: ubuntu-latest
+    needs: [
+      RubbergodService_Deploy_Production,
+      Graphics_Deploy_Production,
+      PointsService_Deploy_Production,
+      ImageProcessingService_Deploy_Production,
+      AuditLogService_Deploy_Production,
+      UserMeasuresService_Deploy_Production
+    ]
+    if: ${{ github.ref == 'refs/heads/master' && always() && !failure() && !cancelled() }}
+    strategy:
+      fail-fast: true
+      matrix: 
+        target: [
+          Production_RubbergodService,
+          Production_Graphics,
+          Production_PointsService,
+          Production_ImageProcessingService,
+          Production_AuditLogService,
+          Production_UserMeasuresService
+        ]
+    environment: ${{ matrix.target }}
+    steps:
+      - name: Prune images
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_PASSWORD }}' | sudo -S docker image prune -f
+
 

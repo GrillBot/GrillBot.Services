@@ -32,7 +32,7 @@ If you starting service in production environment (container is recommended), yo
 
 ## Containers
 
-Latest docker image is published in GitHub packages.
+Latest docker image is published in the GitHub packages.
 
 ## Licence
 
