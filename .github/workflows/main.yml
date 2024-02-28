@@ -524,18 +524,7 @@ jobs:
       UserMeasuresService_Deploy_Production
     ]
     if: ${{ github.ref == 'refs/heads/master' && always() && !failure() && !cancelled() }}
-    strategy:
-      fail-fast: true
-      matrix: 
-        target: [
-          Production_RubbergodService,
-          Production_Graphics,
-          Production_PointsService,
-          Production_ImageProcessingService,
-          Production_AuditLogService,
-          Production_UserMeasuresService
-        ]
-    environment: ${{ matrix.target }}
+    environment: ProductionInternal
     steps:
       - name: Prune images
         uses: appleboy/ssh-action@v0.1.8
