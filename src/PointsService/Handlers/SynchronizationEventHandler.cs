@@ -24,12 +24,16 @@ public class SynchronizationEventHandler : BasePointsEvent<SynchronizationPayloa
         foreach (var channelInfo in payload.Channels)
             await SynchronizeChannelAsync(payload.GuildId, channelInfo);
 
-        await DbContext.SaveChangesAsync();
+        using (CreateCounter("Database"))
+            await DbContext.SaveChangesAsync();
     }
 
     private async Task SynchronizeUserAsync(string guildId, UserInfo userInfo)
     {
-        var entity = await DbContext.Users.FirstOrDefaultAsync(o => o.GuildId == guildId && o.Id == userInfo.Id);
+        User? entity;
+        using (CreateCounter("Database"))
+            entity = await DbContext.Users.FirstOrDefaultAsync(o => o.GuildId == guildId && o.Id == userInfo.Id);
+
         if (entity is null)
         {
             entity = new User
@@ -47,7 +51,10 @@ public class SynchronizationEventHandler : BasePointsEvent<SynchronizationPayloa
 
     private async Task SynchronizeChannelAsync(string guildId, ChannelInfo channelInfo)
     {
-        var entity = await DbContext.Channels.FirstOrDefaultAsync(o => o.GuildId == guildId && o.Id == channelInfo.Id);
+        Channel? entity;
+        using (CreateCounter("Database"))
+            entity = await DbContext.Channels.FirstOrDefaultAsync(o => o.GuildId == guildId && o.Id == channelInfo.Id);
+
         if (entity is null)
         {
             entity = new Channel
