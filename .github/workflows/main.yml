@@ -102,6 +102,12 @@ jobs:
           dotnet restore -r linux-x64 src/ImageProcessingService/
           dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/ImageProcessingService/
           dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/ImageProcessingService/
+      - name: AuditLogService
+        if: needs.PathsFilter.outputs.AuditLogService == 'true'
+        run: |
+          dotnet restore -r linux-x64 src/AuditLogService/
+          dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/AuditLogService/
+          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/AuditLogService/
   CreateDockerImages:
     runs-on: ubuntu-latest
     needs: [PathsFilter, BuildServices]
@@ -153,6 +159,16 @@ jobs:
           tags: ghcr.io/grillbot/grillbot.services:image_processing_service
           build-args: |
             github_actions_token=${{ secrets.GITHUB_TOKEN }}
+      - name: AuditLogService
+        if: needs.PathsFilter.outputs.AuditLogService == 'true'
+        uses: docker/build-push-action@v4
+        with:
+          context: src/
+          file: src/AuditLogService.Dockerfile
+          push: true
+          tags: ghcr.io/grillbot/grillbot.services:audit_log_service
+          build-args: |
+            github_actions_token=${{ secrets.GITHUB_TOKEN }}
   DeployToDevelopment:
     runs-on: ubuntu-latest
     needs: [PathsFilter, CreateDockerImages]
@@ -195,6 +211,15 @@ jobs:
           password: ${{ secrets.SSH_DEV_PASSWORD }}
           port: 22
           script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-image-processing-service
+      - name: AuditLogService
+        if: needs.PathsFilter.outputs.AuditLogService == 'true'
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          password: ${{ secrets.SSH_DEV_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_Password }}' | sudo -S /scripts/update-grillbot-dev.sh auditlog
   RubbergodService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_RubbergodService"
@@ -251,56 +276,11 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-image-processing-service
-  AuditLogService_Build:
-    runs-on: ubuntu-latest
-    needs: [PathsFilter, BuildCommonLibraries]
-    if: needs.PathsFilter.outputs.AuditLogService == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 7.0.x
-          source-url: https://nuget.pkg.github.com/GrillBot/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - name: Install dependencies
-        run: dotnet restore -r linux-x64 src/AuditLogService/
-      - name: Build (DEBUG)
-        run: dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/AuditLogService/
-      - name: Build (RELEASE)
-        run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/AuditLogService/
-  AuditLogService_CreateDockerImage:
-    runs-on: ubuntu-latest
-    needs: AuditLogService_Build
-    if: github.ref == 'refs/heads/master'
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Login to the container registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          context: src/
-          file: src/AuditLogService.Dockerfile
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:audit_log_service
-          build-args: |
-            github_actions_token=${{ secrets.GITHUB_TOKEN }}
   AuditLogService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_AuditLogService"
-    needs: AuditLogService_CreateDockerImage
-    if: github.ref == 'refs/heads/master'
+    needs: [PathsFilter, CreateDockerImages]
+    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.AuditLogService == 'true'
     steps:
       - name: Execute deployment on SSH
         uses: appleboy/ssh-action@v0.1.8
@@ -310,20 +290,6 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh auditlog
-  AuditLogService_Deploy_Development:
-    runs-on: ubuntu-latest
-    environment: "Development"
-    needs: AuditLogService_CreateDockerImage
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.SSH_DEV_HOST }}
-          username: ${{ secrets.SSH_DEV_USERNAME }}
-          password: ${{ secrets.SSH_DEV_PASSWORD }}
-          port: 22
-          script: echo '${{ secrets.SSH_DEV_Password }}' | sudo -S /scripts/update-grillbot-dev.sh auditlog
   UserMeasuresService_Build:
     runs-on: ubuntu-latest
     needs: PathsFilter
@@ -402,7 +368,6 @@ jobs:
     needs:
       [
         DeployToDevelopment,
-        AuditLogService_Deploy_Development,
         UserMeasuresService_Deploy_Development,
       ]
     if: ${{ github.ref == 'refs/heads/master' && always() && !failure() && !cancelled() }}
