@@ -12,7 +12,7 @@ COPY "GrillBot.Services.Common/" /src/GrillBot.Services.Common
 
 # App
 RUN mkdir -p /src/UserMeasuresService
-COPY "UserMeasuresService.csproj" /src/UserMeasuresService
+COPY "UserMeasuresService/UserMeasuresService.csproj" /src/UserMeasuresService
 RUN dotnet restore "src/UserMeasuresService/UserMeasuresService.csproj" -r linux-x64
 
 COPY "UserMeasuresService/" /src/UserMeasuresService
