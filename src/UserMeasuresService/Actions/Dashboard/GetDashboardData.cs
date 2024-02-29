@@ -1,20 +1,19 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
+using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
 using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Models.Dashboard;
 
 namespace UserMeasuresService.Actions.Dashboard;
 
-public class GetDashboardData : ApiActionBase
+public class GetDashboardData : ApiAction
 {
     private UserMeasuresContext DbContext { get; }
-    private ICounterManager CounterManager { get; }
 
-    public GetDashboardData(UserMeasuresContext dbContext, ICounterManager counterManager)
+    public GetDashboardData(UserMeasuresContext dbContext, ICounterManager counterManager) : base(counterManager)
     {
         DbContext = dbContext;
-        CounterManager = counterManager;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -58,7 +57,7 @@ public class GetDashboardData : ApiActionBase
 
     private async Task<List<InternalDashboardRow>> ReadDashboardRowsAsync(IQueryable<InternalDashboardRow> query)
     {
-        using (CounterManager.Create("Api.Dashboard.GetDashboardData.Database"))
+        using (CreateCounter("Database"))
         {
             return await query
                 .AsNoTracking()

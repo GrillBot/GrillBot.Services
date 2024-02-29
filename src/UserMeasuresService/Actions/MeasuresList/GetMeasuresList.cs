@@ -1,21 +1,20 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Models.Pagination;
+using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
 using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Models.MeasuresList;
 
 namespace UserMeasuresService.Actions.MeasuresList;
 
-public class GetMeasuresList : ApiActionBase
+public class GetMeasuresList : ApiAction
 {
     private UserMeasuresContext DbContext { get; }
-    private ICounterManager CounterManager { get; }
 
-    public GetMeasuresList(UserMeasuresContext dbContext, ICounterManager counterManager)
+    public GetMeasuresList(UserMeasuresContext dbContext, ICounterManager counterManager) : base(counterManager)
     {
         DbContext = dbContext;
-        CounterManager = counterManager;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -48,7 +47,7 @@ public class GetMeasuresList : ApiActionBase
             query = query.Where(o => o.CreatedAtUtc <= parameters.CreatedTo);
 
         query = query.OrderByDescending(o => o.CreatedAtUtc);
-        using (CounterManager.Create("Api.MeasuresList.GetMeasuresList.Database"))
+        using (CreateCounter("Database"))
             return await query.ToListAsync();
     }
 
@@ -71,7 +70,7 @@ public class GetMeasuresList : ApiActionBase
             query = query.Where(o => o.CreatedAtUtc <= parameters.CreatedTo);
 
         query = query.OrderByDescending(o => o.CreatedAtUtc);
-        using (CounterManager.Create("Api.MeasuresList.GetMeasuresList.Database"))
+        using (CreateCounter("Database"))
             return await query.ToListAsync();
     }
 

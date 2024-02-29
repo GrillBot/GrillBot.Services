@@ -32,6 +32,7 @@ jobs:
           filters: |
             RubbergodService:
               - 'src/RubbergodService/**'
+              - 'src/RubbergodService.Dockerfile'
             Graphics:
               - 'src/Graphics/**'
             PointsService:
@@ -39,11 +40,13 @@ jobs:
               - 'src/PointsService.Dockerfile'
             ImageProcessingService:
               - 'src/ImageProcessingService/**'
+              - 'src/ImageProcessingService.Dockerfile'
             AuditLogService:
               - 'src/AuditLogService/**'
               - 'src/AuditLogService.Dockerfile'
             UserMeasuresService:
               - 'src/UserMeasuresService/**'
+              - 'src/UserMeasuresService.Dockerfile'
   BuildCommonLibraries:
     runs-on: ubuntu-latest
     steps:
@@ -134,7 +137,8 @@ jobs:
         if: needs.PathsFilter.outputs.RubbergodService == 'true'
         uses: docker/build-push-action@v4
         with:
-          context: src/RubbergodService
+          context: src/
+          file: src/RubbergodService.Dockerfile
           push: true
           tags: ghcr.io/grillbot/grillbot.services:rubbergod_service
           build-args: |
@@ -160,7 +164,8 @@ jobs:
         if: needs.PathsFilter.outputs.ImageProcessingService == 'true'
         uses: docker/build-push-action@v4
         with:
-          context: src/ImageProcessingService
+          context: src/
+          file: src/ImageProcessingService.Dockerfile
           push: true
           tags: ghcr.io/grillbot/grillbot.services:image_processing_service
           build-args: |
@@ -179,7 +184,8 @@ jobs:
         if: needs.PathsFilter.outputs.UserMeasuresService == 'true'
         uses: docker/build-push-action@v4
         with:
-          context: src/UserMeasuresService
+          context: src/
+          file: src/UserMeasuresService.Dockerfile
           push: true
           tags: ghcr.io/grillbot/grillbot.services:user_measures_service
           build-args: |

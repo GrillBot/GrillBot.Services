@@ -1,16 +1,15 @@
 ﻿using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.Publisher;
 using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Handlers.Abstractions;
 using UserMeasuresService.Models.Events;
 
 namespace UserMeasuresService.Handlers;
 
-public class UnverifyEventHandler : BaseEventHandlerWithDb<UnverifyPayload>
+public class UnverifyEventHandler : BaseMeasuresHandler<UnverifyPayload>
 {
-    public override string QueueName => new UnverifyPayload().QueueName;
-
-    public UnverifyEventHandler(UserMeasuresContext dbContext, ILoggerFactory loggerFactory, ICounterManager counterManager)
-        : base(loggerFactory, dbContext, counterManager)
+    public UnverifyEventHandler(UserMeasuresContext dbContext, ILoggerFactory loggerFactory, ICounterManager counterManager, IRabbitMQPublisher publisher)
+        : base(loggerFactory, dbContext, counterManager, publisher)
     {
     }
 

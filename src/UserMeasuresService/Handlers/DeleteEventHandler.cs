@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.Publisher;
 using Microsoft.EntityFrameworkCore;
 using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Handlers.Abstractions;
@@ -6,12 +7,10 @@ using UserMeasuresService.Models.Events;
 
 namespace UserMeasuresService.Handlers;
 
-public class DeleteEventHandler : BaseEventHandlerWithDb<DeletePayload>
+public class DeleteEventHandler : BaseMeasuresHandler<DeletePayload>
 {
-    public override string QueueName => new DeletePayload().QueueName;
-
-    public DeleteEventHandler(ILoggerFactory loggerFactory, UserMeasuresContext dbContext, ICounterManager counterManager)
-        : base(loggerFactory, dbContext, counterManager)
+    public DeleteEventHandler(ILoggerFactory loggerFactory, UserMeasuresContext dbContext, ICounterManager counterManager, IRabbitMQPublisher publisher)
+        : base(loggerFactory, dbContext, counterManager, publisher)
     {
     }
 

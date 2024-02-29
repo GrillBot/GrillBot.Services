@@ -1,16 +1,15 @@
 ﻿using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.Publisher;
 using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Handlers.Abstractions;
 using UserMeasuresService.Models.Events;
 
 namespace UserMeasuresService.Handlers;
 
-public class MemberWarningEventHandler : BaseEventHandlerWithDb<MemberWarningPayload>
+public class MemberWarningEventHandler : BaseMeasuresHandler<MemberWarningPayload>
 {
-    public override string QueueName => new MemberWarningPayload().QueueName;
-
-    public MemberWarningEventHandler(ILoggerFactory loggerFactory, UserMeasuresContext dbContext, ICounterManager counterManager)
-        : base(loggerFactory, dbContext, counterManager)
+    public MemberWarningEventHandler(ILoggerFactory loggerFactory, UserMeasuresContext dbContext, ICounterManager counterManager, IRabbitMQPublisher publisher)
+        : base(loggerFactory, dbContext, counterManager, publisher)
     {
     }
 

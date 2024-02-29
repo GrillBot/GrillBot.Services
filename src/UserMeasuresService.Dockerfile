@@ -4,12 +4,18 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS Build
 ARG github_actions_token
 RUN dotnet nuget add source https://nuget.pkg.github.com/GrillBot/index.json -n GrillBot -u Misha12 -p "${github_actions_token}" --store-password-in-clear-text
 
+# Common lib
+RUN mkdir -p /src/GrillBot.Services.Common
+COPY "GrillBot.Services.Common/GrillBot.Services.Common.csproj" /src/GrillBot.Services.Common
+RUN dotnet restore "src/GrillBot.Services.Common/GrillBot.Services.Common.csproj" -r linux-x64
+COPY "GrillBot.Services.Common/" /src/GrillBot.Services.Common
+
 # App
 RUN mkdir -p /src/UserMeasuresService
 COPY "UserMeasuresService.csproj" /src/UserMeasuresService
 RUN dotnet restore "src/UserMeasuresService/UserMeasuresService.csproj" -r linux-x64
 
-COPY . /src/UserMeasuresService
+COPY "UserMeasuresService/" /src/UserMeasuresService
 RUN mkdir -p /publish
 RUN dotnet publish /src/UserMeasuresService -c Release -o /publish --no-restore -r linux-x64 --self-contained false
 
