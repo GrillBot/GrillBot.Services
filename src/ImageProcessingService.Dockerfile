@@ -4,12 +4,18 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS Build
 ARG github_actions_token
 RUN dotnet nuget add source https://nuget.pkg.github.com/GrillBot/index.json -n GrillBot -u Misha12 -p "${github_actions_token}" --store-password-in-clear-text
 
+# Common lib
+RUN mkdir -p /src/GrillBot.Services.Common
+COPY "GrillBot.Services.Common/GrillBot.Services.Common.csproj" /src/GrillBot.Services.Common
+RUN dotnet restore "src/GrillBot.Services.Common/GrillBot.Services.Common.csproj" -r linux-x64
+COPY "GrillBot.Services.Common/" /src/GrillBot.Services.Common
+
 # App
 RUN mkdir -p /src/ImageProcessingService
-COPY "ImageProcessingService.csproj" /src/ImageProcessingService
+COPY "ImageProcessingService/ImageProcessingService.csproj" /src/ImageProcessingService
 RUN dotnet restore "src/ImageProcessingService/ImageProcessingService.csproj" -r linux-x64
 
-COPY . /src/ImageProcessingService
+COPY "ImageProcessingService/" /src/ImageProcessingService
 RUN mkdir -p /publish
 RUN dotnet publish /src/ImageProcessingService -c Release -o /publish --no-restore -r linux-x64 --self-contained false
 
@@ -19,7 +25,6 @@ LABEL org.opencontainers.image.source https://github.com/grillbot/grillbot.servi
 WORKDIR /app
 EXPOSE 5213
 ENV TZ=Europe/Prague
-
 ENV ASPNETCORE_URLS 'http://+:5213'
 ENV DOTNET_PRINT_TELEMETRY_MESSAGE 'false'
 
