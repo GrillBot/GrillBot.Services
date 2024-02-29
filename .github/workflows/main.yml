@@ -345,6 +345,69 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh user_measures
+  VerifyProductionDeployment:
+    runs-on: ubuntu-latest
+    environment: ProductionInternal
+    needs:
+      [
+        PathsFilter,
+        RubbergodService_Deploy_Production,
+        Graphics_Deploy_Production,
+        PointsService_Deploy_Production,
+        ImageProcessingService_Deploy_Production,
+        AuditLogService_Deploy_Production,
+        UserMeasuresService_Deploy_Production,
+      ]
+    if: ${{ github.ref == 'refs/heads/master' && always() && !failure() && !cancelled() }}
+    steps:
+      - name: RubergodService
+        uses: jtalk/url-health-check-action@v4
+        if: needs.PathsFilter.outputs.RubbergodService == 'true' && needs.RubbergodService_Deploy_Production.result == 'success'
+        with:
+          url: https://health.grillbot.eu/rubbergodService
+          follow-redirect: true
+          max-attempts: 10
+          retry-delay: 5s
+      - name: GraphicsService
+        uses: jtalk/url-health-check-action@v4
+        if: needs.PathsFilter.outputs.Graphics == 'true' && needs.Graphics_Deploy_Production.result == 'success'
+        with:
+          url: https://health.grillbot.eu/graphics
+          follow-redirect: true
+          max-attempts: 10
+          retry-delay: 5s
+      - name: PointsService
+        uses: jtalk/url-health-check-action@v4
+        if: needs.PathsFilter.outputs.PointsService == 'true' && needs.PointsService_Deploy_Production.result == 'success'
+        with:
+          url: https://health.grillbot.eu/points
+          follow-redirect: true
+          max-attempts: 10
+          retry-delay: 5s
+      - name: ImageProcessingService
+        uses: jtalk/url-health-check-action@v4
+        if: needs.PathsFilter.outputs.ImageProcessingService == 'true' && needs.ImageProcessingService_Deploy_Production.result == 'success'
+        with:
+          url: https://health.grillbot.eu/imageProcessing
+          follow-redirect: true
+          max-attempts: 10
+          retry-delay: 5s
+      - name: AuditLogService
+        uses: jtalk/url-health-check-action@v4
+        if: needs.PathsFilter.outputs.AuditLogService == 'true' && needs.AuditLogService_Deploy_Production.result == 'success'
+        with:
+          url: https://health.grillbot.eu/auditLog
+          follow-redirect: true
+          max-attempts: 10
+          retry-delay: 5s
+      - name: UserMeasuresService
+        uses: jtalk/url-health-check-action@v4
+        if: needs.PathsFilter.outputs.UserMeasuresService == 'true' && needs.UserMeasuresService_Deploy_Production.result == 'success'
+        with:
+          url: https://health.grillbot.eu/userMeasures
+          follow-redirect: true
+          max-attempts: 10
+          retry-delay: 5s
   PruneDevelopmentImages:
     runs-on: ubuntu-latest
     environment: Development
@@ -361,16 +424,8 @@ jobs:
           script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S docker image prune -f
   PruneProductionImages:
     runs-on: ubuntu-latest
-    needs:
-      [
-        RubbergodService_Deploy_Production,
-        Graphics_Deploy_Production,
-        PointsService_Deploy_Production,
-        ImageProcessingService_Deploy_Production,
-        AuditLogService_Deploy_Production,
-        UserMeasuresService_Deploy_Production,
-      ]
-    if: ${{ github.ref == 'refs/heads/master' && always() && !failure() && !cancelled() }}
+    needs: VerifyProductionDeployment
+    if: github.ref == 'refs/heads/master'
     environment: ProductionInternal
     steps:
       - name: Prune images
