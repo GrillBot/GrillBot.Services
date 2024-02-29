@@ -103,6 +103,7 @@ jobs:
           dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/RubbergodService/
       - name: Graphics
         if: needs.PathsFilter.outputs.Graphics == 'true'
+        working-directory: src/Graphics/
         run: |
           npm ci
           npm run build
