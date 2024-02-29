@@ -98,9 +98,9 @@ jobs:
       - name: RubbergodService
         if: needs.PathsFilter.outputs.RubbergodService == 'true'
         run: |
-          dotnet restore -r linux-x64 src/RubbergodService/RubbergodService/
-          dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/RubbergodService/RubbergodService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/RubbergodService/RubbergodService/
+          dotnet restore -r linux-x64 src/RubbergodService/
+          dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/RubbergodService/
+          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/RubbergodService/
       - name: Graphics
         if: needs.PathsFilter.outputs.Graphics == 'true'
         run: |
