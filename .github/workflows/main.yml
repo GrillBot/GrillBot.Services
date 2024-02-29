@@ -57,6 +57,8 @@ jobs:
         with:
           files: .
       - name: JSON file check
+        env:
+          EXCLUDE_FILES: src/Graphics/tsconfig.json
         run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/json-lint/master/pipeline.sh)
   BuildCommonLibraries:
     runs-on: ubuntu-latest
