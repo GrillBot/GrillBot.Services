@@ -21,6 +21,7 @@ public static class ActionExtensions
             .AddScoped<CheckTransactionExistsAction>()
             .AddScoped<GetImagePointsStatusAction>()
             .AddScoped<GetLeaderboardCountAction>()
-            .AddScoped<GetStatusInfoAction>();
+            .AddScoped<GetStatusInfoAction>()
+            .AddScoped<GetTransactionsCountForGuildAction>();
     }
 }

@@ -23,4 +23,8 @@ public class TransactionController : ControllerBase
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
     public Task<IActionResult> ExistsAnyAsync([DiscordId, StringLength(30)] string guildId, [DiscordId, StringLength(30)] string userId)
         => ProcessAsync<CheckTransactionExistsAction>(guildId, userId);
+
+    [HttpGet("{guildId}/count")]
+    public Task<IActionResult> GetTransactionsCountForGuildActionAsync([DiscordId, StringLength(30)] string guildId)
+        => ProcessAsync<GetTransactionsCountForGuildAction>(guildId);
 }
