@@ -1,22 +1,26 @@
+using GrillBot.Core.Services;
+using GrillBot.Services.Common;
+using ImageProcessingService.Actions;
+using ImageProcessingService.Caching;
 using ImageProcessingService.Core;
+using ImageProcessingService.Core.Options;
 
-var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.ConfigureKestrel(opt =>
-{
-    opt.Limits.MaxRequestBodySize = 1073741824; // 1GB
-    opt.AddServerHeader = false;
-});
-builder.Services.AddCoreServices(builder.Configuration);
+var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
+    args,
+    (services, configuration) =>
+    {
+        services.AddCaching();
+        services.AddSwaggerGen();
+        services.AddActions();
+        services.AddExternalServices(configuration);
+    },
+    configureKestrel: options => options.Limits.MaxRequestBodySize = 1073741824, // 1GB
+    configureHealthChecks: (healthCheckBuilder, _) => healthCheckBuilder.AddCheck<GraphicsServiceHealthCheck>(nameof(GraphicsServiceHealthCheck)),
+    configureDevOnlyMiddleware: app =>
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+);
 
-var app = builder.Build();
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseAuthorization();
-app.MapControllers();
-app.MapHealthChecks("/health");
-
-app.Run();
+await application.RunAsync();

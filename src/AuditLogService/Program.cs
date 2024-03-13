@@ -1,30 +1,55 @@
-using AuditLogService.Core;
+using AuditLogService.Actions;
+using AuditLogService.Cache;
 using AuditLogService.Core.Discord;
 using AuditLogService.Core.Entity;
 using AuditLogService.Core.Entity.Statistics;
+using AuditLogService.Core.Options;
+using AuditLogService.Core.Providers;
+using AuditLogService.Handlers;
+using AuditLogService.Managers;
+using AuditLogService.Processors;
 using GrillBot.Core;
+using GrillBot.Services.Common;
+using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.ConfigureKestrel(opt => opt.AddServerHeader = false);
-builder.Services.AddCoreServices(builder.Configuration);
+var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
+    args,
+    (services, configuration) =>
+    {
+        var connectionString = configuration.GetConnectionString("Default")!;
 
-var app = builder.Build();
+        services
+            .AddDatabaseContext<AuditLogServiceContext>(b => b.UseNpgsql(connectionString))
+            .AddDatabaseContext<AuditLogStatisticsContext>(b => b.UseNpgsql(connectionString));
 
-app.Services.GetRequiredService<DiscordLogManager>();
-await app.InitDatabaseAsync<AuditLogServiceContext>();
-await app.InitDatabaseAsync<AuditLogStatisticsContext>();
+        services.AddStatisticsProvider<StatisticsProvider>();
+        services.AddSwaggerGen();
+        services.AddActions();
+        services.AddDiscord();
+        services.AddCaching();
+        services.AddRabbitMQ();
+        services.AddManagers();
 
-using var scope = app.Services.CreateScope();
-await scope.ServiceProvider.GetRequiredService<DiscordManager>().LoginAsync();
+        services.AddScoped<RequestProcessorFactory>();
+    },
+    configureHealthChecks: (builder, configuration) =>
+    {
+        var connectionString = configuration.GetConnectionString("Default")!;
+        builder.AddNpgSql(connectionString);
+    },
+    preRunInitialization: async (app, scopedProvider) =>
+    {
+        app.ApplicationServices.GetRequiredService<DiscordLogManager>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+        await app.InitDatabaseAsync<AuditLogServiceContext>();
+        await app.InitDatabaseAsync<AuditLogStatisticsContext>();
+        await scopedProvider.GetRequiredService<DiscordManager>().LoginAsync();
+    },
+    configureDevOnlyMiddleware: app =>
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+);
 
-app.UseAuthorization();
-app.MapControllers();
-app.MapHealthChecks("/health");
-
-app.Run();
+await application.RunAsync();

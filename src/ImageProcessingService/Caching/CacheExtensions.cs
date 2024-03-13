@@ -4,7 +4,7 @@ namespace ImageProcessingService.Caching;
 
 public static class CacheExtensions
 {
-    public static IServiceCollection AddCacheServices(this IServiceCollection services)
+    public static IServiceCollection AddCaching(this IServiceCollection services)
     {
         services.AddMemoryCache();
 

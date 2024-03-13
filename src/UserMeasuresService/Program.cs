@@ -1,24 +1,35 @@
 using GrillBot.Core;
-using UserMeasuresService.Core;
+using GrillBot.Services.Common;
+using Microsoft.EntityFrameworkCore;
+using UserMeasuresService.Actions;
 using UserMeasuresService.Core.Entity;
+using UserMeasuresService.Core.Providers;
+using UserMeasuresService.Handlers;
+using UserMeasuresService.Options;
 
-var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.ConfigureKestrel(opt => opt.AddServerHeader = false);
-builder.Services.AddCoreServices(builder.Configuration);
+var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
+    args,
+    (services, configuration) =>
+    {
+        var connectionString = configuration.GetConnectionString("Default")!;
 
-var app = builder.Build();
+        services.AddDatabaseContext<UserMeasuresContext>(b => b.UseNpgsql(connectionString));
+        services.AddStatisticsProvider<StatisticsProvider>();
+        services.AddSwaggerGen();
+        services.AddActions();
+        services.AddRabbitMQHandlers();
+    },
+    configureHealthChecks: (healthCheckBuilder, configuration) =>
+    {
+        var connectionString = configuration.GetConnectionString("Default")!;
+        healthCheckBuilder.AddNpgSql(connectionString);
+    },
+    preRunInitialization: (app, _) => app.InitDatabaseAsync<UserMeasuresContext>(),
+    configureDevOnlyMiddleware: app =>
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+);
 
-await app.InitDatabaseAsync<UserMeasuresContext>();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseAuthorization();
-app.MapControllers();
-app.MapHealthChecks("/health");
-
-app.Run();
+await application.RunAsync();
