@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuditLogService", "src\Audi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserMeasuresService", "src\UserMeasuresService\UserMeasuresService.csproj", "{5074AF70-0291-4BDD-9ACC-D9A7D3B69F24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrillBot.Services.Common", "src\GrillBot.Services.Common\GrillBot.Services.Common.csproj", "{8193287A-A766-4FB5-82FC-61FF8664FCE5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrillBot.Services.Common", "src\GrillBot.Services.Common\GrillBot.Services.Common.csproj", "{8193287A-A766-4FB5-82FC-61FF8664FCE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmoteService", "src\EmoteService\EmoteService.csproj", "{88CEDE4C-77AE-4661-B630-46F279E0B9C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,8 +47,15 @@ Global
 		{8193287A-A766-4FB5-82FC-61FF8664FCE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8193287A-A766-4FB5-82FC-61FF8664FCE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8193287A-A766-4FB5-82FC-61FF8664FCE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88CEDE4C-77AE-4661-B630-46F279E0B9C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88CEDE4C-77AE-4661-B630-46F279E0B9C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88CEDE4C-77AE-4661-B630-46F279E0B9C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88CEDE4C-77AE-4661-B630-46F279E0B9C9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {34B8C8F8-B46F-420A-9B94-1AD2DA4E7166}
 	EndGlobalSection
 EndGlobal

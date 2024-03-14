@@ -22,6 +22,7 @@ jobs:
       ImageProcessingService: ${{ steps.filter.outputs.ImageProcessingService }}
       AuditLogService: ${{ steps.filter.outputs.AuditLogService }}
       UserMeasuresService: ${{ steps.filter.outputs.UserMeasuresService }}
+      EmoteService: ${{ steps.filter.outputs.EmoteService }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -47,6 +48,9 @@ jobs:
             UserMeasuresService:
               - 'src/UserMeasuresService/**'
               - 'src/UserMeasuresService.Dockerfile'
+            EmoteService:
+              - 'src/EmoteService/**'
+              - 'src/EmoteService.Dockerfile'
   CheckStaticContent:
     runs-on: ubuntu-latest
     steps:
@@ -131,6 +135,12 @@ jobs:
           dotnet restore -r linux-x64 src/UserMeasuresService/
           dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/UserMeasuresService/
           dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/UserMeasuresService/
+      - name: EmoteService
+        if: needs.PathsFilter.outputs.EmoteService == 'true'
+        run: |
+          docker restore -r linux-x64 src/EmoteService/
+          dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/EmoteService/
+          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/EmoteService/
   CreateDockerImages:
     runs-on: ubuntu-latest
     needs: [PathsFilter, BuildServices]
@@ -204,6 +214,16 @@ jobs:
           tags: ghcr.io/grillbot/grillbot.services:user_measures_service
           build-args: |
             github_actions_token=${{ secrets.GITHUB_TOKEN }}
+      - name: EmoteService
+        if: needs.PathsFilter.outputs.EmoteService == 'true'
+        uses: docker/build-push-action@v4
+        with:
+          context: src/
+          file: src/EmoteService.Dockerfile
+          push: true
+          tags: ghcr.io/grillbot/grillbot.services:emote_service
+          build-args: |
+            github_actions_token=${{ secrets.GITHUB_TOKEN }}
   DeployToDevelopment:
     runs-on: ubuntu-latest
     needs: [PathsFilter, CreateDockerImages]
@@ -264,6 +284,15 @@ jobs:
           password: ${{ secrets.SSH_DEV_PASSWORD }}
           port: 22
           script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S /scripts/update-grillbot-dev.sh user_measures
+      - name: EmoteService
+        if: needs.PathsFilter.outputs.EmoteService == 'true'
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          password: ${{ secrets.SSH_DEV_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S /scripts/update-grillbot-dev.sh emote
   RubbergodService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_RubbergodService"
@@ -348,6 +377,20 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh user_measures
+  EmoteService_Deploy_Production:
+    runs-on: ubuntu-latest
+    environment: "Production_EmoteService"
+    needs: [PathsFilter, CreateDockerImages]
+    if: false && github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.EmoteService == 'true'
+    steps:
+      - name: Execute deployment on SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_Username }}
+          password: ${{ secrets.SSH_Password }}
+          port: 22
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh emote
   VerifyProductionDeployment:
     runs-on: ubuntu-latest
     environment: ProductionInternal
@@ -360,6 +403,7 @@ jobs:
         ImageProcessingService_Deploy_Production,
         AuditLogService_Deploy_Production,
         UserMeasuresService_Deploy_Production,
+        EmoteService_Deploy_Production
       ]
     if: ${{ github.ref == 'refs/heads/master' && always() && !failure() && !cancelled() }}
     steps:
@@ -408,6 +452,14 @@ jobs:
         if: needs.PathsFilter.outputs.UserMeasuresService == 'true' && needs.UserMeasuresService_Deploy_Production.result == 'success'
         with:
           url: https://health.grillbot.eu/userMeasures
+          follow-redirect: true
+          max-attempts: 10
+          retry-delay: 5s
+      - name: EmoteService
+        uses: jtalk/url-health-check-action@v4
+        if: needs.PathsFilter.outputs.EmoteService == 'true' && needs.EmoteService_Deploy_Production.result == 'success'
+        with:
+          url: https://health.grillbot.eu/emote
           follow-redirect: true
           max-attempts: 10
           retry-delay: 5s

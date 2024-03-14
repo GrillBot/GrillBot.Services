@@ -3,6 +3,7 @@
 Repository for all services that GrillBot depends.
 
 - [AuditLogService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/AuditLogService)
+- [EmoteService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/UserMeasuresService)
 - [Graphics](https://github.com/GrillBot/GrillBot.Services/tree/master/src/Graphics)
 - [ImageProcessingService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/ImageProcessingService)
 - [PointsService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/PointsService)
@@ -14,6 +15,7 @@ Repository for all services that GrillBot depends.
 Exists only one name of image `ghcr.io/grillbot/grillbot.services` and service are divided by tags.
 
 - AuditLogService - `ghcr.io/grillbot/grillbot.services:audit_log_service`
+- EmoteService - `ghcr.io/grillbot/grillbot.services:emote_service`
 - Graphics - `ghcr.io/grillbot/grillbot.services:graphics`
 - ImageProcessingService - `ghcr.io/grillbot/grillbot.services:image_processing_service`
 - PointsService - `ghcr.io/grillbot/grillbot.services:points_service`
