@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core;
+using GrillBot.Services.Common.Registrators;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Reflection;
 
 namespace GrillBot.Services.Common;
 
@@ -24,6 +26,9 @@ public static class ServiceBuilder
         Action<IApplicationBuilder>? configureDevOnlyMiddleware = null
     ) where TAppOptions : class
     {
+        var runningAssembly = Assembly.GetEntryAssembly()
+            ?? throw new InvalidOperationException("Unable to run service from unmanaged code.");
+
         var builder = WebApplication.CreateBuilder(args);
 
         // Kestrel
@@ -62,6 +67,10 @@ public static class ServiceBuilder
 
         if (typeof(TAppOptions) != typeof(object))
             builder.Services.Configure<TAppOptions>(builder.Configuration);
+
+        // Registrators
+        builder.Services.RegisterActionsFromAssembly(runningAssembly);
+        builder.Services.RegisterRabbitMQFromAssembly(builder.Configuration, runningAssembly);
 
         // Other services and configurations.
         configureServices(builder.Services, builder.Configuration);

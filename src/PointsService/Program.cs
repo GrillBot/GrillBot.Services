@@ -1,11 +1,9 @@
 using GrillBot.Core;
 using GrillBot.Services.Common;
 using Microsoft.EntityFrameworkCore;
-using PointsService.Actions;
 using PointsService.Core.Entity;
 using PointsService.Core.Options;
 using PointsService.Core.Providers;
-using PointsService.Handlers;
 
 var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
     args,
@@ -16,8 +14,6 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         services.AddDatabaseContext<PointsServiceContext>(b => b.UseNpgsql(connectionString));
         services.AddStatisticsProvider<StatisticsProvider>();
         services.AddSwaggerGen();
-        services.AddActions();
-        services.AddRabbitMQ();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
     {

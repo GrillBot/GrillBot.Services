@@ -1,11 +1,9 @@
-using AuditLogService.Actions;
 using AuditLogService.Cache;
 using AuditLogService.Core.Discord;
 using AuditLogService.Core.Entity;
 using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Core.Options;
 using AuditLogService.Core.Providers;
-using AuditLogService.Handlers;
 using AuditLogService.Managers;
 using AuditLogService.Processors;
 using GrillBot.Core;
@@ -24,10 +22,8 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
 
         services.AddStatisticsProvider<StatisticsProvider>();
         services.AddSwaggerGen();
-        services.AddActions();
         services.AddDiscord();
         services.AddCaching();
-        services.AddRabbitMQ();
         services.AddManagers();
 
         services.AddScoped<RequestProcessorFactory>();

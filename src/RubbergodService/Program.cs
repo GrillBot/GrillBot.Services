@@ -1,7 +1,6 @@
 using GrillBot.Core;
 using GrillBot.Services.Common;
 using Microsoft.EntityFrameworkCore;
-using RubbergodService.Actions;
 using RubbergodService.Core;
 using RubbergodService.Core.Entity;
 using RubbergodService.Core.Providers;
@@ -21,7 +20,6 @@ var application = await ServiceBuilder.CreateWebAppAsync(
         services.AddStatisticsProvider<StatisticsProvider>();
         services.AddSwaggerGen();
         services.AddDiscord();
-        services.AddActions();
         services.AddDirectApi();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
