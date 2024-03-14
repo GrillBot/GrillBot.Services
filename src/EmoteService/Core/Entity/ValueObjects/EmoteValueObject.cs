@@ -11,4 +11,7 @@ public class EmoteValueObject
     public string EmoteName { get; set; } = null!;
 
     public bool EmoteIsAnimated { get; set; }
+
+    public override string ToString()
+        => $"<{(EmoteIsAnimated ? "a" : "")}:{EmoteName}:{EmoteId}>";
 }
