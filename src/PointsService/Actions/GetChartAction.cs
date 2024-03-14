@@ -32,11 +32,12 @@ public class GetChartAction : ApiAction
         var showReactions = showEverything || request.OnlyReactions;
 
         var query = CreateDailyStatsQuery(request)
+            .GroupBy(o => o.Date)
             .Select(o => new PointsChartItem
             {
-                Day = o.Date,
-                MessagePoints = showMessages ? o.MessagePoints : 0,
-                ReactionPoints = showReactions ? o.ReactionPoints : 0
+                Day = o.Key,
+                MessagePoints = showMessages ? o.Sum(x => x.MessagePoints) : 0,
+                ReactionPoints = showReactions ? o.Sum(x => x.ReactionPoints) : 0
             });
 
         List<PointsChartItem> items;
