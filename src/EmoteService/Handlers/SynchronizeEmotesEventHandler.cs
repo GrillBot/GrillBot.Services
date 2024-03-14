@@ -8,14 +8,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Handlers;
 
-public class SynchronizeEmotesEventHandler : BaseEventHandlerWithDb<SynchronizeEmotesEvent, EmoteServiceContext>
+public class SynchronizeEmotesEventHandler : BaseEventHandlerWithDb<SynchronizeEmotesPayload, EmoteServiceContext>
 {
     public SynchronizeEmotesEventHandler(ILoggerFactory loggerFactory, EmoteServiceContext dbContext, ICounterManager counterManager,
         IRabbitMQPublisher publisher) : base(loggerFactory, dbContext, counterManager, publisher)
     {
     }
 
-    protected override async Task HandleInternalAsync(SynchronizeEmotesEvent payload)
+    protected override async Task HandleInternalAsync(SynchronizeEmotesPayload payload)
     {
         await ClearEmotesAsync(payload.GuildId);
         await InsertEmotesAsync(payload.GuildId, payload.Emotes);
