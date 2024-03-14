@@ -7,12 +7,9 @@ namespace PointsService.Handlers.Abstractions;
 
 public abstract class CreateTransactionBaseEventHandler<TPayload> : BasePointsEvent<TPayload> where TPayload : CreateTransactionBasePayload, new()
 {
-    protected ILogger Logger { get; }
-
     protected CreateTransactionBaseEventHandler(ILoggerFactory loggerFactory, PointsServiceContext dbContext, ICounterManager counterManager,
         IRabbitMQPublisher publisher) : base(loggerFactory, dbContext, counterManager, publisher)
     {
-        Logger = loggerFactory.CreateLogger(GetType());
     }
 
     protected bool ValidationFailed(string message, bool suppressAudit = false)
