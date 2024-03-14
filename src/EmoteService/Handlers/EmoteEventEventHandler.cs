@@ -19,7 +19,7 @@ public class EmoteEventEventHandler : BaseEventHandlerWithDb<EmoteEventPayload, 
     protected override async Task HandleInternalAsync(EmoteEventPayload payload)
     {
         var emoteValue = Emote.Parse(payload.EmoteId);
-        if (!await IsSupportedEmoteAsync(payload.GuildId, emoteValue))
+        if (!await IsSupportedEmoteAsync(emoteValue))
             return;
 
         var entity = await GetEntityAsync(payload.GuildId, payload.UserId, emoteValue);
@@ -54,11 +54,11 @@ public class EmoteEventEventHandler : BaseEventHandlerWithDb<EmoteEventPayload, 
     private void ValidationFailed(string message)
         => Logger.LogWarning(new EventId(2, "ValidationFailed_PublishAudit"), "{message}", message);
 
-    private async Task<bool> IsSupportedEmoteAsync(string guildId, Emote emote)
+    private async Task<bool> IsSupportedEmoteAsync(Emote emote)
     {
         bool isSupported;
         using (CreateCounter("Database"))
-            isSupported = await DbContext.EmoteDefinitions.Where(o => o.GuildId == guildId).WithEmoteQuery(emote).AnyAsync();
+            isSupported = await DbContext.EmoteDefinitions.WithEmoteQuery(emote).AnyAsync();
 
         if (!isSupported)
             ValidationFailed($"Unsupported emote {emote}");
