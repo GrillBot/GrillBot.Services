@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Actions;
 
-public class GetEmoteInfo : ApiAction
+public class GetEmoteInfoAction : ApiAction
 {
     private readonly EmoteServiceContext _dbContext;
 
-    public GetEmoteInfo(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager)
+    public GetEmoteInfoAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager)
     {
         _dbContext = dbContext;
     }

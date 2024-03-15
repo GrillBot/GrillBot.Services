@@ -29,5 +29,5 @@ public class EmoteController : ControllerBase
     public Task<IActionResult> GetEmoteInfoAsync(
         [DiscordId, StringLength(32)] string guildId,
         [EmoteId, StringLength(255)] string emoteId
-    ) => ProcessAsync<GetEmoteInfo>(guildId, emoteId);
+    ) => ProcessAsync<GetEmoteInfoAction>(guildId, emoteId);
 }
