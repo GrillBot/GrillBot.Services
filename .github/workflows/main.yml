@@ -136,7 +136,7 @@ jobs:
           dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/UserMeasuresService/
           dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/UserMeasuresService/
       - name: EmoteService
-        if: false && needs.PathsFilter.outputs.EmoteService == 'true'
+        if: needs.PathsFilter.outputs.EmoteService == 'true'
         run: |
           dotnet restore -r linux-x64 src/EmoteService/
           dotnet build -c Debug -r linux-x64 --no-self-contained --no-restore src/EmoteService/
@@ -215,7 +215,7 @@ jobs:
           build-args: |
             github_actions_token=${{ secrets.GITHUB_TOKEN }}
       - name: EmoteService
-        if: false && needs.PathsFilter.outputs.EmoteService == 'true'
+        if: needs.PathsFilter.outputs.EmoteService == 'true'
         uses: docker/build-push-action@v4
         with:
           context: src/
@@ -285,7 +285,7 @@ jobs:
           port: 22
           script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S /scripts/update-grillbot-dev.sh user_measures
       - name: EmoteService
-        if: false && needs.PathsFilter.outputs.EmoteService == 'true'
+        if: needs.PathsFilter.outputs.EmoteService == 'true'
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SSH_DEV_HOST }}
@@ -381,7 +381,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: "Production_EmoteService"
     needs: [PathsFilter, CreateDockerImages]
-    if: false && github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.EmoteService == 'true'
+    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.EmoteService == 'true'
     steps:
       - name: Execute deployment on SSH
         uses: appleboy/ssh-action@v0.1.8
