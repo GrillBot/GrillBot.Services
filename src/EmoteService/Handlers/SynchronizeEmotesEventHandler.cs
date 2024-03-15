@@ -4,7 +4,6 @@ using EmoteService.Models.Events;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
-using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Handlers;
 
@@ -23,18 +22,13 @@ public class SynchronizeEmotesEventHandler : BaseEventHandlerWithDb<SynchronizeE
 
     private async Task ClearEmotesAsync(string guildId)
     {
-        List<EmoteDefinition> emotes;
-        using (CreateCounter("Database"))
-            emotes = await DbContext.EmoteDefinitions.Where(o => o.GuildId == guildId).ToListAsync();
-
+        var query = DbContext.EmoteDefinitions.Where(o => o.GuildId == guildId);
+        var emotes = await ContextHelper.ReadEntitiesAsync(query);
         if (emotes.Count == 0)
             return;
 
-        using (CreateCounter("Database"))
-        {
-            DbContext.RemoveRange(emotes);
-            await DbContext.SaveChangesAsync();
-        }
+        DbContext.RemoveRange(emotes);
+        await ContextHelper.SaveChagesAsync();
     }
 
     private async Task InsertEmotesAsync(string guildId, List<string> emotes)
@@ -52,10 +46,7 @@ public class SynchronizeEmotesEventHandler : BaseEventHandlerWithDb<SynchronizeE
                 GuildId = guildId
             });
 
-        using (CreateCounter("Database"))
-        {
-            await DbContext.AddRangeAsync(emoteEntities);
-            await DbContext.SaveChangesAsync();
-        }
+        await DbContext.AddRangeAsync(emoteEntities);
+        await ContextHelper.SaveChagesAsync();
     }
 }

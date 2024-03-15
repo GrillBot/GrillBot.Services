@@ -5,7 +5,6 @@ using EmoteService.Models.Events;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
-using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Handlers;
 
@@ -47,8 +46,7 @@ public class EmoteEventEventHandler : BaseEventHandlerWithDb<EmoteEventPayload, 
                 DbContext.Remove(entity);
         }
 
-        using (CreateCounter("Database"))
-            await DbContext.SaveChangesAsync();
+        await ContextHelper.SaveChagesAsync();
     }
 
     private void ValidationFailed(string message)
@@ -56,9 +54,8 @@ public class EmoteEventEventHandler : BaseEventHandlerWithDb<EmoteEventPayload, 
 
     private async Task<bool> IsSupportedEmoteAsync(Emote emote)
     {
-        bool isSupported;
-        using (CreateCounter("Database"))
-            isSupported = await DbContext.EmoteDefinitions.WithEmoteQuery(emote).AnyAsync();
+        var query = DbContext.EmoteDefinitions.WithEmoteQuery(emote);
+        var isSupported = await ContextHelper.IsAnyAsync(query);
 
         if (!isSupported)
             ValidationFailed($"Unsupported emote {emote}");
@@ -67,8 +64,8 @@ public class EmoteEventEventHandler : BaseEventHandlerWithDb<EmoteEventPayload, 
 
     private async Task<EmoteUserStatItem?> GetEntityAsync(string guildId, string userId, Emote emote)
     {
-        using (CreateCounter("Database"))
-            return await DbContext.EmoteUserStatItems.Where(o => o.GuildId == guildId && o.UserId == userId).WithEmoteQuery(emote).FirstOrDefaultAsync();
+        var query = DbContext.EmoteUserStatItems.Where(o => o.GuildId == guildId && o.UserId == userId).WithEmoteQuery(emote);
+        return await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
     }
 
     private async Task<EmoteUserStatItem> CreateEntityAsync(string guildId, string userId, Emote emote)

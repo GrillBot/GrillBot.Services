@@ -22,8 +22,8 @@ public class EmoteController : ControllerBase
 
     [HttpGet("{guildId}/supported")]
     [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
-    public Task<IActionResult> GetSupportedEmotesListAsync([DiscordId, StringLength(32)] string guildId)
-        => ProcessAsync<GetSupportedEmotesListAction>(guildId);
+    public Task<IActionResult> GetSupportedEmotesListAsync()
+        => ProcessAsync<GetSupportedEmotesListAction>();
 
     [HttpGet("{guildId}/{emoteId}/info")]
     public Task<IActionResult> GetEmoteInfoAsync(

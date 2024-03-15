@@ -9,13 +9,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Actions;
 
-public class GetEmoteInfoAction : ApiAction
+public class GetEmoteInfoAction : ApiAction<EmoteServiceContext>
 {
-    private readonly EmoteServiceContext _dbContext;
-
-    public GetEmoteInfoAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager)
+    public GetEmoteInfoAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager, dbContext)
     {
-        _dbContext = dbContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -37,18 +34,15 @@ public class GetEmoteInfoAction : ApiAction
 
     private async Task<string?> GetOwnerGuildIdAsync(Emote emote)
     {
-        using (CreateCounter("Database"))
-            return await _dbContext.EmoteDefinitions.WithEmoteQuery(emote).Select(o => o.GuildId).FirstOrDefaultAsync();
+        var query = DbContext.EmoteDefinitions.WithEmoteQuery(emote).Select(o => o.GuildId);
+        return await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
     }
 
     private async Task<EmoteInfoStatistics?> GetStatisticsAsync(Emote emote, string guildId)
     {
-        var baseQuery = _dbContext.EmoteUserStatItems.Where(o => o.GuildId == guildId).WithEmoteQuery(emote);
-        using (CreateCounter("Database"))
-        {
-            if (!await baseQuery.AnyAsync())
-                return null;
-        }
+        var baseQuery = DbContext.EmoteUserStatItems.Where(o => o.GuildId == guildId).WithEmoteQuery(emote);
+        if (!await ContextHelper.IsAnyAsync(baseQuery))
+            return null;
 
         var statistics = new EmoteInfoStatistics();
 

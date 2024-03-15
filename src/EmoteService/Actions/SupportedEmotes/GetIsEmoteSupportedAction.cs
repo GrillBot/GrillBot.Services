@@ -4,17 +4,13 @@ using EmoteService.Extensions.QueryExtensions;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.Infrastructure.Api;
-using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Actions.SupportedEmotes;
 
-public class GetIsEmoteSupportedAction : ApiAction
+public class GetIsEmoteSupportedAction : ApiAction<EmoteServiceContext>
 {
-    private readonly EmoteServiceContext _dbContext;
-
-    public GetIsEmoteSupportedAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager)
+    public GetIsEmoteSupportedAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager, dbContext)
     {
-        _dbContext = dbContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -22,10 +18,8 @@ public class GetIsEmoteSupportedAction : ApiAction
         var guildId = (string)Parameters[0]!;
         var emote = Emote.Parse((string)Parameters[1]!);
 
-        bool isSupported;
-        using (CreateCounter("Database"))
-            isSupported = await _dbContext.EmoteDefinitions.Where(o => o.GuildId == guildId).WithEmoteQuery(emote).AnyAsync();
-
+        var query = DbContext.EmoteDefinitions.Where(o => o.GuildId == guildId).WithEmoteQuery(emote);
+        var isSupported = await ContextHelper.IsAnyAsync(query);
         return ApiResult.Ok(isSupported);
     }
 }

@@ -6,27 +6,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Actions.SupportedEmotes;
 
-public class GetSupportedEmotesListAction : ApiAction
+public class GetSupportedEmotesListAction : ApiAction<EmoteServiceContext>
 {
-    private readonly EmoteServiceContext _dbContext;
-
-    public GetSupportedEmotesListAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager)
+    public GetSupportedEmotesListAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager, dbContext)
     {
-        _dbContext = dbContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var guildId = (string)Parameters[0]!;
-        var definitions = await GetDefinitionsAsync(guildId);
+        var definitionsQuery = DbContext.EmoteDefinitions.AsNoTracking();
+        var definitions = await ContextHelper.ReadEntitiesAsync(definitionsQuery);
         var emotes = definitions.ConvertAll(d => d.ToString());
 
         return ApiResult.Ok(emotes);
-    }
-
-    private async Task<List<EmoteDefinition>> GetDefinitionsAsync(string guildId)
-    {
-        using (CreateCounter("Database"))
-            return await _dbContext.EmoteDefinitions.AsNoTracking().Where(o => o.GuildId == guildId).ToListAsync();
     }
 }

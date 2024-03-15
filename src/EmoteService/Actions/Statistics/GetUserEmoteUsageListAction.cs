@@ -7,6 +7,7 @@ using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Models;
 using GrillBot.Core.Models.Pagination;
+using GrillBot.Services.Common.EntityFramework.Extensions;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -30,7 +31,7 @@ public class GetUserEmoteUsageListAction : ApiAction<EmoteServiceContext>
 
         query = CreateSorting(query, request.Sort);
 
-        var paginatedEntities = await ReadPaginatedEntities(query, request.Pagination);
+        var paginatedEntities = await ContextHelper.ReadEntitiesWithPaginationAsync(query, request.Pagination);
         var result = await PaginatedResponse<EmoteUserUsageItem>.CopyAndMapAsync(paginatedEntities, entity => Task.FromResult(MapEntity(entity)));
 
         return ApiResult.Ok(result);
@@ -38,12 +39,14 @@ public class GetUserEmoteUsageListAction : ApiAction<EmoteServiceContext>
 
     private static IQueryable<EmoteUserStatItem> CreateSorting(IQueryable<EmoteUserStatItem> query, SortParameters parameters)
     {
-        return parameters.OrderBy switch
+        var expressions = parameters.OrderBy switch
         {
-            "FirstOccurence" => query.CreateSortingOfParameter(item => item.FirstOccurence, parameters.Descending),
-            "LastOccurence" => query.CreateSortingOfParameter(item => item.LastOccurence, parameters.Descending),
-            _ => query.CreateSortingOfParameter(item => item.UseCount, parameters.Descending)
+            "FirstOccurence" => new Expression<Func<EmoteUserStatItem, object>>[] { entity => entity.FirstOccurence },
+            "LastOccurence" => new Expression<Func<EmoteUserStatItem, object>>[] { entity => entity.LastOccurence },
+            _ => new Expression<Func<EmoteUserStatItem, object>>[] { entity => entity.UseCount },
         };
+
+        return query.WithSorting(expressions, parameters.Descending);
     }
 
     private static EmoteUserUsageItem MapEntity(EmoteUserStatItem item)

@@ -4,17 +4,13 @@ using EmoteService.Extensions.QueryExtensions;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.Infrastructure.Api;
-using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Actions.Statistics;
 
-public class DeleteStatisticsAction : ApiAction
+public class DeleteStatisticsAction : ApiAction<EmoteServiceContext>
 {
-    private readonly EmoteServiceContext _dbContext;
-
-    public DeleteStatisticsAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager)
+    public DeleteStatisticsAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager, dbContext)
     {
-        _dbContext = dbContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -23,26 +19,20 @@ public class DeleteStatisticsAction : ApiAction
         var emote = Emote.Parse((string)Parameters[1]!);
         var userId = Parameters.ElementAtOrDefault(2) as string;
 
-        var statisticsQuery = _dbContext.EmoteUserStatItems
+        var statisticsQuery = DbContext.EmoteUserStatItems
             .Where(o => o.GuildId == guildId)
             .WithEmoteQuery(emote);
 
         if (!string.IsNullOrEmpty(userId))
             statisticsQuery = statisticsQuery.Where(o => o.UserId == userId);
 
-        List<EmoteUserStatItem> statistics;
-        using (CreateCounter("Database"))
-            statistics = await statisticsQuery.ToListAsync();
-
+        var statistics = await ContextHelper.ReadEntitiesAsync(statisticsQuery);
         if (statistics.Count == 0)
             return ApiResult.NotFound();
 
-        _dbContext.RemoveRange(statistics);
+        DbContext.RemoveRange(statistics);
 
-        int deletedRows;
-        using (CreateCounter("Database"))
-            deletedRows = await _dbContext.SaveChangesAsync();
-
+        var deletedRows = await ContextHelper.SaveChagesAsync();
         return ApiResult.Ok(deletedRows);
     }
 }

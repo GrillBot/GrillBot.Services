@@ -14,14 +14,16 @@ public abstract class BaseEventHandler<TPayload> : BaseRabbitMQHandler<TPayload>
     protected IRabbitMQPublisher Publisher { get; }
 
     protected ILogger Logger { get; }
+    protected string CounterKey { get; }
 
     protected BaseEventHandler(ILoggerFactory loggerFactory, ICounterManager counterManager, IRabbitMQPublisher publisher) : base(loggerFactory)
     {
         CounterManager = counterManager;
         Publisher = publisher;
         Logger = loggerFactory.CreateLogger(GetType());
+        CounterKey = $"RabbitMQ.{QueueName}.Consumer";
     }
 
     protected CounterItem CreateCounter(string operation)
-        => CounterManager.Create($"RabbitMQ.{QueueName}.Consumer.{operation}");
+        => CounterManager.Create($"{CounterKey}.{operation}");
 }

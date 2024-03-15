@@ -29,7 +29,7 @@ public class MergeStatisticsAction : ApiAction<EmoteServiceContext>
             return ApiResult.BadRequest(CreateValidationError("UnknownDestinationEmote", nameof(destinationEmote)));
 
         var (createdEmotesCount, deletedEmotesCount) = await ProcessMergeAsync(guildId, sourceEmote, destinationEmote);
-        var modifiedRowsCount = await SaveChangesAsync();
+        var modifiedRowsCount = await ContextHelper.SaveChagesAsync();
 
         var result = new MergeStatisticsResult
         {
@@ -42,7 +42,7 @@ public class MergeStatisticsAction : ApiAction<EmoteServiceContext>
     }
 
     private async Task<bool> IsEmoteSupportedAsync(Emote sourceEmote)
-        => await IsAnyAsync(DbContext.EmoteDefinitions.WithEmoteQuery(sourceEmote));
+        => await ContextHelper.IsAnyAsync(DbContext.EmoteDefinitions.WithEmoteQuery(sourceEmote));
 
     private static ValidationProblemDetails CreateValidationError(string errorKey, string property)
     {
@@ -55,14 +55,14 @@ public class MergeStatisticsAction : ApiAction<EmoteServiceContext>
     private async Task<(int createdEmotesCount, int deletedEmotesCount)> ProcessMergeAsync(string guildId, Emote sourceEmote, Emote destinationEmote)
     {
         var baseQuery = DbContext.EmoteUserStatItems.Where(o => o.GuildId == guildId);
-        var sourceStatistics = await ReadEntities(baseQuery.WithEmoteQuery(sourceEmote));
+        var sourceStatistics = await ContextHelper.ReadEntitiesAsync(baseQuery.WithEmoteQuery(sourceEmote));
         if (sourceStatistics.Count == 0)
             return (0, 0);
 
         var createdEmotesCount = 0;
         var deletedEmotesCount = 0;
 
-        var destinationStatistics = await ReadEntities(baseQuery.WithEmoteQuery(destinationEmote));
+        var destinationStatistics = await ContextHelper.ReadEntitiesAsync(baseQuery.WithEmoteQuery(destinationEmote));
         foreach (var sourceStatistic in sourceStatistics)
         {
             var destinationStatistic = destinationStatistics.Find(o => o.UserId == sourceStatistic.UserId);

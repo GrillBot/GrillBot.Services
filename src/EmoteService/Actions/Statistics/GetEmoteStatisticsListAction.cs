@@ -6,8 +6,10 @@ using EmoteService.Models.Response;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Models;
+using GrillBot.Services.Common.EntityFramework.Extensions;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Reactive.Linq;
 
 namespace EmoteService.Actions.Statistics;
@@ -26,7 +28,7 @@ public class GetEmoteStatisticsListAction : ApiAction<EmoteServiceContext>
         groupedQuery = CreateFilter(groupedQuery, request);
         groupedQuery = CreateSorting(groupedQuery, request.Sort);
 
-        var result = await ReadPaginatedEntities(groupedQuery, request.Pagination);
+        var result = await ContextHelper.ReadEntitiesWithPaginationAsync(groupedQuery, request.Pagination);
 
         if (!request.Unsupported)
         {
@@ -94,13 +96,15 @@ public class GetEmoteStatisticsListAction : ApiAction<EmoteServiceContext>
 
     private static IQueryable<EmoteStatisticsItem> CreateSorting(IQueryable<EmoteStatisticsItem> query, SortParameters parameters)
     {
-        return parameters.OrderBy switch
+        var expressions = parameters.OrderBy switch
         {
-            "FirstOccurence" => query.CreateSortingOfParameter(item => item.FirstOccurence, parameters.Descending),
-            "LastOccurence" => query.CreateSortingOfParameter(item => item.LastOccurence, parameters.Descending),
-            "UsersCount" => query.CreateSortingOfParameter(item => item.UsersCount, parameters.Descending),
-            _ => query.CreateSortingOfParameter(item => item.UseCount, parameters.Descending)
+            "FirstOccurence" => new Expression<Func<EmoteStatisticsItem, object>>[] { entity => entity.FirstOccurence },
+            "LastOccurence" => new Expression<Func<EmoteStatisticsItem, object>>[] { entity => entity.LastOccurence },
+            "UsersCount" => new Expression<Func<EmoteStatisticsItem, object>>[] { entity => entity.UsersCount },
+            _ => new Expression<Func<EmoteStatisticsItem, object>>[] { entity => entity.UseCount }
         };
+
+        return query.WithSorting(expressions, parameters.Descending);
     }
 
     private static string CreateEmoteUrl(string id, string name, bool animated)
