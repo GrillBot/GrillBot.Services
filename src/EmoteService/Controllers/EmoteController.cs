@@ -1,5 +1,6 @@
 ﻿using EmoteService.Actions;
 using EmoteService.Actions.SupportedEmotes;
+using EmoteService.Models.Response;
 using GrillBot.Core.Validation;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -13,19 +14,20 @@ public class EmoteController : ControllerBase
     {
     }
 
-    [HttpGet("{guildId}/supported/{emoteId}")]
+    [HttpGet("supported/{guildId}/{emoteId}")]
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
     public Task<IActionResult> GetIsEmoteSupportedAsync(
         [DiscordId, StringLength(32)] string guildId,
         [EmoteId, StringLength(255)] string emoteId
     ) => ProcessAsync<GetIsEmoteSupportedAction>(guildId, emoteId);
 
-    [HttpGet("{guildId}/supported")]
+    [HttpGet("supported")]
     [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
     public Task<IActionResult> GetSupportedEmotesListAsync()
         => ProcessAsync<GetSupportedEmotesListAction>();
 
     [HttpGet("{guildId}/{emoteId}/info")]
+    [ProducesResponseType(typeof(EmoteInfo), StatusCodes.Status200OK)]
     public Task<IActionResult> GetEmoteInfoAsync(
         [DiscordId, StringLength(32)] string guildId,
         [EmoteId, StringLength(255)] string emoteId
