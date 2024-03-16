@@ -16,7 +16,11 @@ public class GetSupportedEmotesListAction : ApiAction<EmoteServiceContext>
     {
         var definitionsQuery = DbContext.EmoteDefinitions.AsNoTracking();
         var definitions = await ContextHelper.ReadEntitiesAsync(definitionsQuery);
-        var emotes = definitions.ConvertAll(d => d.ToString());
+        var emotes = definitions.ConvertAll(d => new Models.Response.EmoteDefinition
+        {
+            FullId = d.ToString(),
+            GuildId = d.GuildId
+        });
 
         return ApiResult.Ok(emotes);
     }
