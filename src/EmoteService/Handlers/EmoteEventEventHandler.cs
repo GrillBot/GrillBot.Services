@@ -18,7 +18,7 @@ public class EmoteEventEventHandler : BaseEventHandlerWithDb<EmoteEventPayload, 
     protected override async Task HandleInternalAsync(EmoteEventPayload payload)
     {
         var emoteValue = Emote.Parse(payload.EmoteId);
-        if (!await IsSupportedEmoteAsync(emoteValue))
+        if (payload.IsIncrement && !await IsSupportedEmoteAsync(emoteValue))
             return;
 
         var entity = await GetEntityAsync(payload.GuildId, payload.UserId, emoteValue);

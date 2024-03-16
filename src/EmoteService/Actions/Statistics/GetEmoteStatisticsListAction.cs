@@ -51,6 +51,9 @@ public class GetEmoteStatisticsListAction : ApiAction<EmoteServiceContext>
         if (!string.IsNullOrEmpty(request.GuildId))
             query = query.Where(o => o.GuildId == request.GuildId);
 
+        if (!string.IsNullOrEmpty(request.UserId))
+            query = query.Where(o => o.UserId == request.UserId);
+
         if (request.IgnoreAnimated)
             query = query.Where(o => !o.EmoteIsAnimated);
 

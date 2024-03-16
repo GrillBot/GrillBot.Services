@@ -35,7 +35,15 @@ public class GetEmoteInfoAction : ApiAction<EmoteServiceContext>
     private async Task<string?> GetOwnerGuildIdAsync(Emote emote)
     {
         var query = DbContext.EmoteDefinitions.WithEmoteQuery(emote).Select(o => o.GuildId);
-        return await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
+        var guildId = await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
+
+        if (string.IsNullOrEmpty(guildId))
+        {
+            var statisticsQuery = DbContext.EmoteUserStatItems.WithEmoteQuery(emote).OrderBy(o => o.FirstOccurence).Select(o => o.GuildId);
+            guildId = await ContextHelper.ReadFirstOrDefaultEntityAsync(statisticsQuery);
+        }
+
+        return guildId;
     }
 
     private async Task<EmoteInfoStatistics?> GetStatisticsAsync(Emote emote, string guildId)

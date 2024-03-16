@@ -13,6 +13,10 @@ public class EmoteStatisticsListRequest
     [StringLength(32)]
     public string? GuildId { get; set; }
 
+    [DiscordId]
+    [StringLength(32)]
+    public string? UserId { get; set; }
+
     public int? UseCountFrom { get; set; }
     public int? UseCountTo { get; set; }
     public DateTime? FirstOccurenceFrom { get; set; }
