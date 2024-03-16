@@ -109,7 +109,7 @@ public class GetEmoteStatisticsListAction : ApiAction<EmoteServiceContext>
 
     private static string CreateEmoteUrl(string id, string name, bool animated)
     {
-        var definition = new EmoteDefinition
+        var definition = new Core.Entity.EmoteDefinition
         {
             EmoteId = id,
             EmoteIsAnimated = animated,
