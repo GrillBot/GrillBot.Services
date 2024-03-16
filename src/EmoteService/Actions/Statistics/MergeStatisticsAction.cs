@@ -22,12 +22,6 @@ public class MergeStatisticsAction : ApiAction<EmoteServiceContext>
         var sourceEmote = Emote.Parse((string)Parameters[1]!);
         var destinationEmote = Emote.Parse((string)Parameters[2]!);
 
-        if (await IsEmoteSupportedAsync(sourceEmote))
-            return ApiResult.BadRequest(CreateValidationError("KnownSourceEmote", nameof(sourceEmote)));
-
-        if (!await IsEmoteSupportedAsync(destinationEmote))
-            return ApiResult.BadRequest(CreateValidationError("UnknownDestinationEmote", nameof(destinationEmote)));
-
         var (createdEmotesCount, deletedEmotesCount) = await ProcessMergeAsync(guildId, sourceEmote, destinationEmote);
         var modifiedRowsCount = await ContextHelper.SaveChagesAsync();
 
@@ -39,17 +33,6 @@ public class MergeStatisticsAction : ApiAction<EmoteServiceContext>
         };
 
         return ApiResult.Ok(result);
-    }
-
-    private async Task<bool> IsEmoteSupportedAsync(Emote sourceEmote)
-        => await ContextHelper.IsAnyAsync(DbContext.EmoteDefinitions.WithEmoteQuery(sourceEmote));
-
-    private static ValidationProblemDetails CreateValidationError(string errorKey, string property)
-    {
-        var modelState = new ModelStateDictionary();
-        modelState.AddModelError(property, errorKey);
-
-        return new ValidationProblemDetails(modelState);
     }
 
     private async Task<(int createdEmotesCount, int deletedEmotesCount)> ProcessMergeAsync(string guildId, Emote sourceEmote, Emote destinationEmote)
