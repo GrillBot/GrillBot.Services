@@ -22,7 +22,7 @@ public class EmoteController : ControllerBase
     ) => ProcessAsync<GetIsEmoteSupportedAction>(guildId, emoteId);
 
     [HttpGet("supported")]
-    [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<EmoteDefinition>), StatusCodes.Status200OK)]
     public Task<IActionResult> GetSupportedEmotesListAsync()
         => ProcessAsync<GetSupportedEmotesListAction>();
 
