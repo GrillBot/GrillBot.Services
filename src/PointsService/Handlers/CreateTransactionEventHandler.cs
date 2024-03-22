@@ -25,9 +25,9 @@ public class CreateTransactionEventHandler : CreateTransactionBaseEventHandler<C
 
     protected override async Task HandleInternalAsync(CreateTransactionPayload payload)
     {
-        var author = await FindUserAsync(payload.GuildId, payload.Message.AuthorId);
-        var reactionUser = payload.Reaction is null ? null : await FindUserAsync(payload.GuildId, payload.Reaction.UserId);
-        var channel = await FindChannelAsync(payload);
+        var author = await FindOrCreateUserAsync(payload.GuildId, payload.Message.AuthorId);
+        var reactionUser = payload.Reaction is null ? null : await FindOrCreateUserAsync(payload.GuildId, payload.Reaction.UserId);
+        var channel = await FindOrCreateChannelAsync(payload);
 
         if (!await CanCreateTransactionAsync(payload, author, reactionUser, channel))
             return;
@@ -49,33 +49,39 @@ public class CreateTransactionEventHandler : CreateTransactionBaseEventHandler<C
         await EnqueueUserForRecalculationAsync(payload.GuildId, userId);
     }
 
-    private async Task<Channel?> FindChannelAsync(CreateTransactionPayload payload)
+    private async Task<Channel> FindOrCreateChannelAsync(CreateTransactionPayload payload)
     {
-        using (CreateCounter("Database"))
-            return await DbContext.Channels.AsNoTracking().FirstOrDefaultAsync(o => o.GuildId == payload.GuildId && o.Id == payload.ChannelId);
+        var channelQuery = DbContext.Channels.Where(o => o.GuildId == payload.GuildId && o.Id == payload.ChannelId);
+        var channel = await ContextHelper.ReadFirstOrDefaultEntityAsync(channelQuery);
+
+        if (channel is null)
+        {
+            channel = new Channel
+            {
+                GuildId = payload.GuildId,
+                Id = payload.ChannelId
+            };
+
+            await DbContext.AddAsync(channel);
+        }
+
+        return channel;
     }
 
-    private async Task<bool> CanCreateTransactionAsync(CreateTransactionPayload payload, User? author, User? reactionUser, Channel? channel)
+    private async Task<bool> CanCreateTransactionAsync(CreateTransactionPayload payload, User author, User? reactionUser, Channel channel)
     {
         // User validation
-        if (author is null)
-            return ValidationFailed($"Unknown message author. ({payload.GuildId}/{payload.Message.AuthorId})", true);
-        if (payload.Reaction is not null && reactionUser is null)
-            return ValidationFailed($"Unknown reaction user. ({payload.GuildId}/{payload.Reaction.UserId})", true);
-
         var user = reactionUser ?? author;
         if (!user.IsUser)
             return ValidationFailed("Unable to give points to the bot.");
         if (user.PointsDisabled)
-            return ValidationFailed("Target user have disabled points.");
+            return ValidationFailed("Target user have disabled points.", true);
 
         // Channel validation
-        if (channel is null)
-            return ValidationFailed($"Unknown channel. ({payload.GuildId}/{payload.ChannelId})", true);
         if (channel.IsDeleted)
             return ValidationFailed("Unable to give points to the deleted channel.");
         if (channel.PointsDisabled)
-            return ValidationFailed("Target channel have disabled points.");
+            return ValidationFailed("Target channel have disabled points.", true);
 
         // Message validation
         if (payload.Message.MessageType is MessageType.ApplicationCommand or MessageType.ContextMenuCommand)
@@ -88,7 +94,7 @@ public class CreateTransactionEventHandler : CreateTransactionBaseEventHandler<C
             return ValidationFailed("Unable to give points, applied message length policy.", true);
 
         // Transaction validation
-        if (!await CheckTransactionExistsAsync(payload))
+        if (await CheckTransactionExistsAsync(payload))
             return ValidationFailed("Unable to give points, duplicate transcation.", true);
 
         return true;
@@ -143,9 +149,8 @@ public class CreateTransactionEventHandler : CreateTransactionBaseEventHandler<C
         var reactionId = payload.Reaction?.GetReactionId() ?? "";
         var userId = payload.Reaction?.UserId ?? payload.Message.AuthorId;
 
-        var exists = await DbContext.Transactions.AsNoTracking()
-            .AnyAsync(o => o.GuildId == payload.GuildId && o.MessageId == payload.Message.Id && o.UserId == userId && o.ReactionId == reactionId);
-
-        return !exists;
+        var existsQuery = DbContext.Transactions.AsNoTracking()
+            .Where(o => o.GuildId == payload.GuildId && o.MessageId == payload.Message.Id && o.UserId == userId && o.ReactionId == reactionId);
+        return await ContextHelper.IsAnyAsync(existsQuery);
     }
 }

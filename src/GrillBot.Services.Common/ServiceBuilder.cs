@@ -71,6 +71,7 @@ public static class ServiceBuilder
         // Registrators
         builder.Services.RegisterActionsFromAssembly(runningAssembly);
         builder.Services.RegisterRabbitMQFromAssembly(builder.Configuration, runningAssembly);
+        builder.Services.RegisterCacheFromAssembly(runningAssembly);
 
         // Other services and configurations.
         configureServices(builder.Services, builder.Configuration);

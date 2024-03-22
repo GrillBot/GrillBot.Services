@@ -1,9 +1,8 @@
 ﻿using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
-using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
 using PointsService.Handlers.Abstractions;
-using PointsService.Models;
+using PointsService.Models.Channels;
 using PointsService.Models.Events;
 using PointsService.Models.Users;
 
@@ -28,45 +27,49 @@ public class SynchronizationEventHandler : BasePointsEvent<SynchronizationPayloa
             await DbContext.SaveChangesAsync();
     }
 
-    private async Task SynchronizeUserAsync(string guildId, UserInfo userInfo)
+    private async Task SynchronizeUserAsync(string guildId, UserSyncItem user)
     {
-        User? entity;
-        using (CreateCounter("Database"))
-            entity = await DbContext.Users.FirstOrDefaultAsync(o => o.GuildId == guildId && o.Id == userInfo.Id);
+        var userQuery = DbContext.Users.Where(o => o.GuildId == guildId && o.Id == user.Id);
+        var entity = await ContextHelper.ReadFirstOrDefaultEntityAsync(userQuery);
 
         if (entity is null)
         {
             entity = new User
             {
-                Id = userInfo.Id,
+                Id = user.Id,
                 GuildId = guildId
             };
 
             await DbContext.AddAsync(entity);
         }
 
-        entity.PointsDisabled = userInfo.PointsDisabled;
-        entity.IsUser = userInfo.IsUser;
+        if (user.PointsDisabled is not null)
+            entity.PointsDisabled = user.PointsDisabled.Value;
+
+        if (user.IsUser is not null)
+            entity.IsUser = user.IsUser.Value;
     }
 
-    private async Task SynchronizeChannelAsync(string guildId, ChannelInfo channelInfo)
+    private async Task SynchronizeChannelAsync(string guildId, ChannelSyncItem channel)
     {
-        Channel? entity;
-        using (CreateCounter("Database"))
-            entity = await DbContext.Channels.FirstOrDefaultAsync(o => o.GuildId == guildId && o.Id == channelInfo.Id);
+        var channelQuery = DbContext.Channels.Where(o => o.GuildId == guildId && o.Id == channel.Id);
+        var entity = await ContextHelper.ReadFirstOrDefaultEntityAsync(channelQuery);
 
         if (entity is null)
         {
             entity = new Channel
             {
-                Id = channelInfo.Id,
+                Id = channel.Id,
                 GuildId = guildId
             };
 
             await DbContext.AddAsync(entity);
         }
 
-        entity.IsDeleted = channelInfo.IsDeleted;
-        entity.PointsDisabled = channelInfo.PointsDisabled;
+        if (channel.IsDeleted is not null)
+            entity.IsDeleted = channel.IsDeleted.Value;
+
+        if (channel.PointsDisabled is not null)
+            entity.PointsDisabled = channel.PointsDisabled.Value;
     }
 }

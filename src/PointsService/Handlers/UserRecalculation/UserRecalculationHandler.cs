@@ -15,9 +15,7 @@ public partial class UserRecalculationHandler : BasePointsEvent<UserRecalculatio
 
     protected override async Task HandleInternalAsync(UserRecalculationPayload payload)
     {
-        var user = await FindUserAsync(payload.GuildId, payload.UserId);
-        if (user is null)
-            return;
+        var user = await FindOrCreateUserAsync(payload.GuildId, payload.UserId);
 
         await ProcessActionAsync(ComputeUserInfoAsync, user, nameof(ComputeUserInfoAsync));
         await ProcessActionAsync(ComputeDailyStatsAsync, user, nameof(ComputeDailyStatsAsync));

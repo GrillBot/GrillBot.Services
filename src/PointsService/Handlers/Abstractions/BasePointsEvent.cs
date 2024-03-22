@@ -2,7 +2,6 @@
 using GrillBot.Core.RabbitMQ;
 using GrillBot.Core.RabbitMQ.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
-using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
 using PointsService.Models.Events;
 
@@ -15,10 +14,25 @@ public abstract class BasePointsEvent<TPayload> : BaseEventHandlerWithDb<TPayloa
     {
     }
 
-    protected async Task<User?> FindUserAsync(string guildId, string userId)
+    protected async Task<User> FindOrCreateUserAsync(string guildId, string userId)
     {
-        using (CreateCounter("Database"))
-            return await DbContext.Users.FirstOrDefaultAsync(o => o.GuildId == guildId && o.Id == userId);
+        var userQuery = DbContext.Users.Where(o => o.GuildId == guildId && o.Id == userId);
+        var entity = await ContextHelper.ReadFirstOrDefaultEntityAsync(userQuery);
+
+        if (entity is null)
+        {
+            entity = new User
+            {
+                Id = userId,
+                GuildId = guildId,
+                IsUser = true,
+                PointsPosition = int.MaxValue
+            };
+
+            await DbContext.AddAsync(entity);
+        }
+
+        return entity;
     }
 
     protected Task EnqueueUserForRecalculationAsync(string guildId, string userId)

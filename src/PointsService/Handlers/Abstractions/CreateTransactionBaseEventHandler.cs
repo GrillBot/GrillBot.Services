@@ -24,10 +24,7 @@ public abstract class CreateTransactionBaseEventHandler<TPayload> : BasePointsEv
 
     protected async Task CommitTransactionAsync(Transaction transaction)
     {
-        using (CreateCounter("Database"))
-        {
-            await DbContext.AddAsync(transaction);
-            await DbContext.SaveChangesAsync();
-        }
+        await DbContext.AddAsync(transaction);
+        await ContextHelper.SaveChagesAsync();
     }
 }

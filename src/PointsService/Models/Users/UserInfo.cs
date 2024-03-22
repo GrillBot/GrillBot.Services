@@ -2,7 +2,8 @@
 
 public class UserInfo
 {
-    public string Id { get; set; } = null!;
+    public bool NoActivity { get; set; }
     public bool PointsDisabled { get; set; }
-    public bool IsUser { get; set; }
+    public int? PointsPostion { get; set; }
+    public PointsStatus? Status { get; set; }
 }

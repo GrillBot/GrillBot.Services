@@ -35,14 +35,12 @@ public class CreateTransactionViaAdminEventHandler : CreateTransactionBaseEventH
 
     private async Task<bool> CanCreateTransactionAsync(CreateTransactionAdminPayload payload)
     {
-        var user = await FindUserAsync(payload.GuildId, payload.UserId);
+        var user = await FindOrCreateUserAsync(payload.GuildId, payload.UserId);
 
-        if (user is null)
-            return ValidationFailed($"Unable to give points to the unknown user. ({payload.GuildId}/{payload.UserId})");
         if (!user.IsUser)
             return ValidationFailed("Unable to give points to the bot.");
         if (user.PointsDisabled)
-            return ValidationFailed("Target user have disabled points.");
+            return ValidationFailed("Target user have disabled points.", true);
 
         return true;
     }
