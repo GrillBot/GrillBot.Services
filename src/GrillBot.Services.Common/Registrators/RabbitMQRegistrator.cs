@@ -27,8 +27,8 @@ public static class RabbitMQRegistrator
         var section = configuration.GetSection("RabbitMQ");
 
         return section.Exists()
-            || string.IsNullOrEmpty(section["Hostname"])
-            || string.IsNullOrEmpty(section["Username"])
-            || string.IsNullOrEmpty(section["Password"]);
+            && !string.IsNullOrEmpty(section["Hostname"])
+            && !string.IsNullOrEmpty(section["Username"])
+            && !string.IsNullOrEmpty(section["Password"]);
     }
 }
