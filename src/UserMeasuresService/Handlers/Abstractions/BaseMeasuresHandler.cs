@@ -18,15 +18,12 @@ public abstract class BaseMeasuresHandler<TPayload> : BaseEventHandlerWithDb<TPa
         if (entity is null)
             return;
 
-        using (CreateCounter("Database"))
+        if (entity.IsNew)
         {
-            if (entity.IsNew)
-            {
-                entity.Id = Guid.NewGuid();
-                await DbContext.AddAsync(entity);
-            }
-
-            await DbContext.SaveChangesAsync();
+            entity.Id = Guid.NewGuid();
+            await DbContext.AddAsync(entity);
         }
+
+        await ContextHelper.SaveChagesAsync();
     }
 }

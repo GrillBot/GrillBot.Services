@@ -8,13 +8,10 @@ using UserMeasuresService.Models.MeasuresList;
 
 namespace UserMeasuresService.Actions.MeasuresList;
 
-public class GetMeasuresList : ApiAction
+public class GetMeasuresList : ApiAction<UserMeasuresContext>
 {
-    private UserMeasuresContext DbContext { get; }
-
-    public GetMeasuresList(UserMeasuresContext dbContext, ICounterManager counterManager) : base(counterManager)
+    public GetMeasuresList(UserMeasuresContext dbContext, ICounterManager counterManager) : base(counterManager, dbContext)
     {
-        DbContext = dbContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -47,8 +44,7 @@ public class GetMeasuresList : ApiAction
             query = query.Where(o => o.CreatedAtUtc <= parameters.CreatedTo);
 
         query = query.OrderByDescending(o => o.CreatedAtUtc);
-        using (CreateCounter("Database"))
-            return await query.ToListAsync();
+        return await ContextHelper.ReadEntitiesAsync(query);
     }
 
     private async Task<List<UnverifyItem>> ReadUnverifiesAsync(MeasuresListParams parameters)
@@ -70,8 +66,7 @@ public class GetMeasuresList : ApiAction
             query = query.Where(o => o.CreatedAtUtc <= parameters.CreatedTo);
 
         query = query.OrderByDescending(o => o.CreatedAtUtc);
-        using (CreateCounter("Database"))
-            return await query.ToListAsync();
+        return await ContextHelper.ReadEntitiesAsync(query);
     }
 
     private IEnumerable<MeasuresItem> MapItems(List<MemberWarningItem> warnings, List<UnverifyItem> unverifies)

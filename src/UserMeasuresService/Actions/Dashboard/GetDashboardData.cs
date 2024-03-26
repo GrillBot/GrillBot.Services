@@ -7,13 +7,10 @@ using UserMeasuresService.Models.Dashboard;
 
 namespace UserMeasuresService.Actions.Dashboard;
 
-public class GetDashboardData : ApiAction
+public class GetDashboardData : ApiAction<UserMeasuresContext>
 {
-    private UserMeasuresContext DbContext { get; }
-
-    public GetDashboardData(UserMeasuresContext dbContext, ICounterManager counterManager) : base(counterManager)
+    public GetDashboardData(UserMeasuresContext dbContext, ICounterManager counterManager) : base(counterManager, dbContext)
     {
-        DbContext = dbContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -57,13 +54,11 @@ public class GetDashboardData : ApiAction
 
     private async Task<List<InternalDashboardRow>> ReadDashboardRowsAsync(IQueryable<InternalDashboardRow> query)
     {
-        using (CreateCounter("Database"))
-        {
-            return await query
-                .AsNoTracking()
-                .OrderByDescending(o => o.CreatedAtUtc)
-                .Take(10)
-                .ToListAsync();
-        }
+        query = query
+            .AsNoTracking()
+            .OrderByDescending(o => o.CreatedAtUtc)
+            .Take(10);
+
+        return await ContextHelper.ReadEntitiesAsync(query);
     }
 }

@@ -1,18 +1,14 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.Infrastructure.Api;
-using Microsoft.EntityFrameworkCore;
 using UserMeasuresService.Core.Entity;
 
 namespace UserMeasuresService.Actions.Info;
 
-public class GetItemsCountOfGuild : ApiAction
+public class GetItemsCountOfGuild : ApiAction<UserMeasuresContext>
 {
-    private UserMeasuresContext DbContext { get; }
-
-    public GetItemsCountOfGuild(UserMeasuresContext dbContext, ICounterManager counterManager) : base(counterManager)
+    public GetItemsCountOfGuild(UserMeasuresContext dbContext, ICounterManager counterManager) : base(counterManager, dbContext)
     {
-        DbContext = dbContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -26,14 +22,8 @@ public class GetItemsCountOfGuild : ApiAction
     }
 
     private async Task<int> ComputeUnverifiesAsync(string guildId)
-    {
-        using (CreateCounter("Database"))
-            return await DbContext.Unverifies.AsNoTracking().CountAsync(o => o.GuildId == guildId);
-    }
+        => await ContextHelper.ReadCountAsync(DbContext.Unverifies.Where(o => o.GuildId == guildId));
 
     private async Task<int> ComputeWarningsAsync(string guildId)
-    {
-        using (CreateCounter("Database"))
-            return await DbContext.MemberWarnings.AsNoTracking().CountAsync(o => o.GuildId == guildId);
-    }
+        => await ContextHelper.ReadCountAsync(DbContext.MemberWarnings.Where(o => o.GuildId == guildId));
 }

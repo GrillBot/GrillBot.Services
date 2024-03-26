@@ -1,6 +1,5 @@
 ﻿using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
-using Microsoft.EntityFrameworkCore;
 using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Handlers.Abstractions;
 using UserMeasuresService.Models.Events;
@@ -16,7 +15,7 @@ public class UnverifyModifyEventHandler : BaseMeasuresHandler<UnverifyModifyPayl
 
     protected override async Task HandleInternalAsync(UnverifyModifyPayload payload)
     {
-        var item = await DbContext.Unverifies.FirstOrDefaultAsync(o => o.LogSetId == payload.LogSetId);
+        var item = await ContextHelper.ReadFirstOrDefaultEntityAsync(DbContext.Unverifies.Where(o => o.LogSetId == payload.LogSetId));
         if (item is null)
             return;
 

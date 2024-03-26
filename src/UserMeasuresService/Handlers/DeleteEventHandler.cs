@@ -1,6 +1,5 @@
 ﻿using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
-using Microsoft.EntityFrameworkCore;
 using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Handlers.Abstractions;
 using UserMeasuresService.Models.Events;
@@ -25,16 +24,10 @@ public class DeleteEventHandler : BaseMeasuresHandler<DeletePayload>
         if (item is null)
             return;
 
-        using (CreateCounter("Database"))
-        {
-            DbContext.Remove(item);
-            await DbContext.SaveChangesAsync();
-        }
+        DbContext.Remove(item);
+        await ContextHelper.SaveChagesAsync();
     }
 
     private async Task<MemberWarningItem?> ReadWarningAsync(Guid id)
-    {
-        using (CreateCounter("Database"))
-            return await DbContext.MemberWarnings.FirstOrDefaultAsync(o => o.Id == id);
-    }
+        => await ContextHelper.ReadFirstOrDefaultEntityAsync(DbContext.MemberWarnings.Where(o => o.Id == id));
 }
