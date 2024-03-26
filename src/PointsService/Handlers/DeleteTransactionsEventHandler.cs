@@ -1,6 +1,5 @@
 ﻿using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
-using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
 using PointsService.Handlers.Abstractions;
 using PointsService.Models.Events;
@@ -20,27 +19,19 @@ public class DeleteTransactionsEventHandler : BasePointsEvent<DeleteTransactions
         if (transactions.Count == 0)
             return;
 
-        using (CreateCounter("Database"))
-        {
-            DbContext.RemoveRange(transactions);
-            await DbContext.SaveChangesAsync();
-        }
-
+        DbContext.RemoveRange(transactions);
+        await ContextHelper.SaveChagesAsync();
         await EnqueueUserForRecalculationAsync(transactions);
     }
 
     private async Task<List<Transaction>> ReadTransactionsAsync(DeleteTransactionsPayload payload)
     {
-        using (CreateCounter("Database"))
-        {
-            var query = DbContext.Transactions
-                .Where(o => o.GuildId == payload.GuildId && o.MergedCount == 0 && o.MessageId == payload.MessageId);
+        var query = DbContext.Transactions
+            .Where(o => o.GuildId == payload.GuildId && o.MergedCount == 0 && o.MessageId == payload.MessageId);
+        if (!string.IsNullOrEmpty(payload.ReactionId))
+            query = query.Where(o => o.ReactionId == payload.ReactionId);
 
-            if (!string.IsNullOrEmpty(payload.ReactionId))
-                query = query.Where(o => o.ReactionId == payload.ReactionId);
-
-            return await query.ToListAsync();
-        }
+        return await ContextHelper.ReadEntitiesAsync(query);
     }
 
     private async Task EnqueueUserForRecalculationAsync(List<Transaction> transactions)

@@ -38,7 +38,7 @@ public class ContextHelper<TDbContext> where TDbContext : DbContext
             return await query.FirstAsync();
     }
 
-    public async Task<TEntity?> ReadFirstOrDefaultEntityAsync<TEntity>(IQueryable<TEntity> query) where TEntity : class
+    public async Task<TEntity?> ReadFirstOrDefaultEntityAsync<TEntity>(IQueryable<TEntity> query)
     {
         using (CreateCounter("Database"))
             return await query.FirstOrDefaultAsync();

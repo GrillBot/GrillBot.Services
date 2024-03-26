@@ -37,7 +37,6 @@ public class GetStatusInfoAction : ApiAction
         var query = DbContext.Transactions.AsNoTracking()
             .Where(o => o.CreatedAt < expirationDate && o.MergedCount == 0);
 
-        using (CreateCounter("Database"))
-            return await query.CountAsync();
+        return await ContextHelper.ReadCountAsync(query);
     }
 }

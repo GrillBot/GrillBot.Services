@@ -1,6 +1,5 @@
 ﻿using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PointsService.Core.Entity;
 using PointsService.Core.Options;
@@ -27,24 +26,16 @@ public class MergeValidTransactionsAction : MergeTransactionsBaseAction
 
     protected override async Task<bool> CanProcessMergeAsync()
     {
-        int expiredCount;
-        using (CreateCounter("Database"))
-        {
-            expiredCount = await DbContext.Transactions.AsNoTracking()
-                .CountAsync(o => o.CreatedAt < ExpirationDate && o.MergedCount == 0);
-        }
+        var query = DbContext.Transactions.Where(o => o.CreatedAt < ExpirationDate && o.MergedCount == 0);
+        var expiredCount = await ContextHelper.ReadCountAsync(query);
 
         return expiredCount >= Options.MinimalTransactionsForMerge;
     }
 
     protected override async Task<List<Transaction>> GetTransactionsForMergeAsync()
     {
-        using (CreateCounter("Database"))
-        {
-            return await DbContext.Transactions
-                .Where(o => o.CreatedAt < ExpirationDate && o.MergedCount == 0)
-                .ToListAsync();
-        }
+        var query = DbContext.Transactions.Where(o => o.CreatedAt < ExpirationDate && o.MergedCount == 0);
+        return await ContextHelper.ReadEntitiesAsync(query);
     }
 
     protected override List<Transaction> ProcessMergeInternal(List<Transaction> transactions)

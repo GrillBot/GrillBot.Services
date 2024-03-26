@@ -23,8 +23,7 @@ public class SynchronizationEventHandler : BasePointsEvent<SynchronizationPayloa
         foreach (var channelInfo in payload.Channels)
             await SynchronizeChannelAsync(payload.GuildId, channelInfo);
 
-        using (CreateCounter("Database"))
-            await DbContext.SaveChangesAsync();
+        await ContextHelper.SaveChagesAsync();
     }
 
     private async Task SynchronizeUserAsync(string guildId, UserSyncItem user)

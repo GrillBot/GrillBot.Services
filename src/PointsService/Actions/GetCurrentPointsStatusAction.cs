@@ -37,7 +37,7 @@ public class GetCurrentPointsStatusAction : ApiAction
         var query = DbContext.Leaderboard.AsNoTracking()
             .Where(o => o.GuildId == guildId && o.UserId == userId);
 
-        using (CreateCounter("Database"))
-            return (await query.FirstOrDefaultAsync()) ?? new LeaderboardItem();
+        var result = await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
+        return result ?? new LeaderboardItem();
     }
 }

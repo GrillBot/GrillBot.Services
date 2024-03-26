@@ -40,10 +40,7 @@ public class GetChartAction : ApiAction
                 ReactionPoints = showReactions ? o.Sum(x => x.ReactionPoints) : 0
             });
 
-        List<PointsChartItem> items;
-        using (CreateCounter("Database"))
-            items = await query.ToListAsync();
-
+        var items = await ContextHelper.ReadEntitiesAsync(query);
         return ApiResult.Ok(items);
     }
 
@@ -57,13 +54,10 @@ public class GetChartAction : ApiAction
                 Max = o.Max(x => x.CreatedAt.Date)
             });
 
-        using (CreateCounter("Database"))
-        {
-            var result = await query.FirstOrDefaultAsync();
-            if (result is null)
-                return (DateTime.UtcNow.Date, DateTime.UtcNow.Date);
-            return (result.Min, result.Max);
-        }
+        var result = await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
+        if (result is null)
+            return (DateTime.UtcNow.Date, DateTime.UtcNow.Date);
+        return (result.Min, result.Max);
     }
 
     private IQueryable<Transaction> CreateQuery(AdminListRequest request)

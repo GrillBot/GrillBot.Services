@@ -80,6 +80,6 @@ public class GetAdminListAction : ApiAction
             };
         }
 
-        return await PaginatedResponse<Transaction>.CreateWithEntityAsync(query, request.Pagination);
+        return await ContextHelper.ReadEntitiesWithPaginationAsync(query, request.Pagination);
     }
 }

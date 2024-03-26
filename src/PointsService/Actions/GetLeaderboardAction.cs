@@ -69,8 +69,5 @@ public class GetLeaderboardAction : ApiAction
     }
 
     private async Task<List<LeaderboardItem>> ReadLeaderboardFromQueryAsync(IQueryable<LeaderboardItem> query)
-    {
-        using (CreateCounter("Database"))
-            return await query.AsNoTracking().ToListAsync();
-    }
+        => await ContextHelper.ReadEntitiesAsync(query.AsNoTracking());
 }

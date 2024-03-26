@@ -34,15 +34,10 @@ public abstract class MergeTransactionsBaseAction : ApiAction
         var mergedTransactions = ProcessMerge(transactions);
         var dailyStatsToDelete = await GetDailyStatsForDeleteAsync(transactions, mergedTransactions);
 
-        using (CreateCounter("Database"))
-        {
-            DbContext.RemoveRange(transactions);
-            DbContext.RemoveRange(dailyStatsToDelete);
-
-            await DbContext.AddRangeAsync(mergedTransactions);
-            await DbContext.SaveChangesAsync();
-        }
-
+        DbContext.RemoveRange(transactions);
+        DbContext.RemoveRange(dailyStatsToDelete);
+        await DbContext.AddRangeAsync(mergedTransactions);
+        await ContextHelper.SaveChagesAsync();
         await EnqueueUserRecalculationsAsync(mergedTransactions);
 
         stopwatch.Stop();
@@ -85,11 +80,8 @@ public abstract class MergeTransactionsBaseAction : ApiAction
         var userIds = mergedTransactions.Select(o => o.UserId).Distinct().ToList();
         var guildIds = mergedTransactions.Select(o => o.GuildId).Distinct().ToList();
 
-        var query = DbContext.DailyStats
-            .Where(o => o.Date >= fromDate && o.Date <= toDate && userIds.Contains(o.UserId) && guildIds.Contains(o.GuildId));
-
-        using (CreateCounter("Database"))
-            return await query.ToListAsync();
+        var query = DbContext.DailyStats.Where(o => o.Date >= fromDate && o.Date <= toDate && userIds.Contains(o.UserId) && guildIds.Contains(o.GuildId));
+        return await ContextHelper.ReadEntitiesAsync(query);
     }
 
     protected static Transaction CloneTransaction(Transaction transaction)

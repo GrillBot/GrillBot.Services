@@ -30,7 +30,6 @@ public partial class UserRecalculationHandler : BasePointsEvent<UserRecalculatio
         using (CreateCounter(actionName))
             await action(user);
 
-        using (CreateCounter("Database"))
-            await DbContext.SaveChangesAsync();
+        await ContextHelper.SaveChagesAsync();
     }
 }

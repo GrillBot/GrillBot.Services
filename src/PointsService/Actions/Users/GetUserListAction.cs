@@ -1,6 +1,5 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.Models.Pagination;
 using GrillBot.Core.RabbitMQ.Publisher;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Core;
@@ -21,11 +20,8 @@ public class GetUserListAction : ApiAction
         var request = (UserListRequest)Parameters[0]!;
         var query = CreateQuery(request);
 
-        using (CreateCounter("Database"))
-        {
-            var result = await PaginatedResponse<UserListItem>.CreateWithEntityAsync(query, request.Pagination);
-            return ApiResult.Ok(result);
-        }
+        var result = await ContextHelper.ReadEntitiesWithPaginationAsync(query, request.Pagination);
+        return ApiResult.Ok(result);
     }
 
     private IQueryable<UserListItem> CreateQuery(UserListRequest request)

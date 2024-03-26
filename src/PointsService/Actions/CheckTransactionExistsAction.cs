@@ -1,7 +1,6 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
-using Microsoft.EntityFrameworkCore;
 using PointsService.Core;
 using PointsService.Core.Entity;
 
@@ -18,13 +17,9 @@ public class CheckTransactionExistsAction : ApiAction
     {
         var guildId = (string)Parameters[0]!;
         var userId = (string)Parameters[1]!;
+        var query = DbContext.Leaderboard.Where(o => o.GuildId == guildId && o.UserId == userId && o.Total > 0);
+        var exists = await ContextHelper.IsAnyAsync(query);
 
-        using (CreateCounter("Database"))
-        {
-            var exists = await DbContext.Leaderboard.AsNoTracking()
-                .AnyAsync(o => o.GuildId == guildId && o.UserId == userId && o.Total > 0);
-
-            return ApiResult.Ok(exists);
-        }
+        return ApiResult.Ok(exists);
     }
 }

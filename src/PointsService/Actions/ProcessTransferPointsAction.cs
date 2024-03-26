@@ -52,8 +52,7 @@ public class ProcessTransferPointsAction : ApiAction
             .Where(o => o.GuildId == guildId && o.UserId == userId)
             .Select(o => o.YearBack);
 
-        using (CreateCounter("Database"))
-            return await query.FirstOrDefaultAsync();
+        return await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
     }
 
     private async Task ValidateUserAsync(string guildId, string userId, ModelStateDictionary modelState, string propertyName)

@@ -1,7 +1,6 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
-using Microsoft.EntityFrameworkCore;
 using PointsService.Core;
 using PointsService.Core.Entity;
 
@@ -17,13 +16,9 @@ public class GetLeaderboardCountAction : ApiAction
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;
+        var query = DbContext.Leaderboard.Where(o => o.GuildId == guildId);
+        var result = await ContextHelper.ReadCountAsync(query);
 
-        using (CreateCounter("Database"))
-        {
-            var count = await DbContext.Leaderboard.AsNoTracking()
-                .CountAsync(o => o.GuildId == guildId);
-
-            return ApiResult.Ok(count);
-        }
+        return ApiResult.Ok(result);
     }
 }
