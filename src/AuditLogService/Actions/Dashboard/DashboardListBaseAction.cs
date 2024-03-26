@@ -8,18 +8,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Dashboard;
 
-public abstract class DashboardListBaseAction<TEntity> : ApiAction where TEntity : ChildEntityBase
+public abstract class DashboardListBaseAction<TEntity> : ApiAction<AuditLogServiceContext> where TEntity : ChildEntityBase
 {
-    private AuditLogServiceContext Context { get; }
-
-    protected DashboardListBaseAction(AuditLogServiceContext context, ICounterManager counterManager) : base(counterManager)
+    protected DashboardListBaseAction(AuditLogServiceContext context, ICounterManager counterManager) : base(counterManager, context)
     {
-        Context = context;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var query = Context.Set<TEntity>()
+        var query = DbContext.Set<TEntity>()
             .OrderByDescending(CreateSorting())
             .AsNoTracking();
         var filter = CreateFilter();
@@ -30,11 +27,8 @@ public abstract class DashboardListBaseAction<TEntity> : ApiAction where TEntity
             .Select(CreateProjection())
             .Take(10);
 
-        using (CreateCounter("Database"))
-        {
-            var result = await mappedQuery.ToListAsync();
-            return ApiResult.Ok(result);
-        }
+        var result = await ContextHelper.ReadEntitiesAsync(mappedQuery);
+        return ApiResult.Ok(result);
     }
 
     protected abstract Expression<Func<TEntity, DateTime>> CreateSorting();

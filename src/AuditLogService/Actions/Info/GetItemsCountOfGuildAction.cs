@@ -2,27 +2,21 @@
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.Infrastructure.Api;
-using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Info;
 
-public class GetItemsCountOfGuildAction : ApiAction
+public class GetItemsCountOfGuildAction : ApiAction<AuditLogServiceContext>
 {
-    private AuditLogServiceContext DbContext { get; }
-
-    public GetItemsCountOfGuildAction(AuditLogServiceContext context, ICounterManager counterManager) : base(counterManager)
+    public GetItemsCountOfGuildAction(AuditLogServiceContext context, ICounterManager counterManager) : base(counterManager, context)
     {
-        DbContext = context;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;
+        var query = DbContext.LogItems.Where(o => o.GuildId == guildId);
+        var count = await ContextHelper.ReadCountAsync(query);
 
-        using (CreateCounter("Database"))
-        {
-            var count = await DbContext.LogItems.AsNoTracking().CountAsync(o => o.GuildId == guildId);
-            return ApiResult.Ok(count);
-        }
+        return ApiResult.Ok(count);
     }
 }

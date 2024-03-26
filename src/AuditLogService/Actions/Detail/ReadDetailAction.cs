@@ -7,13 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Detail;
 
-public partial class ReadDetailAction : ApiAction
+public partial class ReadDetailAction : ApiAction<AuditLogServiceContext>
 {
-    private AuditLogServiceContext DbContext { get; set; }
-
-    public ReadDetailAction(AuditLogServiceContext context, ICounterManager counterManager) : base(counterManager)
+    public ReadDetailAction(AuditLogServiceContext context, ICounterManager counterManager) : base(counterManager, context)
     {
-        DbContext = context;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -74,7 +71,7 @@ public partial class ReadDetailAction : ApiAction
 
     private async Task<LogItem?> ReadHeaderAsync(Guid id)
     {
-        using (CreateCounter("Database"))
-            return await DbContext.LogItems.AsNoTracking().FirstOrDefaultAsync(o => o.Id == id);
+        var query = DbContext.LogItems.Where(o => o.Id == id).AsNoTracking();
+        return await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
     }
 }

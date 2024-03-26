@@ -7,27 +7,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Statistics;
 
-public class GetUserApiStatisticsAction : ApiAction
+public class GetUserApiStatisticsAction : ApiAction<AuditLogStatisticsContext>
 {
-    private AuditLogStatisticsContext StatisticsContext { get; }
-
-    public GetUserApiStatisticsAction(AuditLogStatisticsContext statisticsContext, ICounterManager counterManager) : base(counterManager)
+    public GetUserApiStatisticsAction(AuditLogStatisticsContext statisticsContext, ICounterManager counterManager) : base(counterManager, statisticsContext)
     {
-        StatisticsContext = statisticsContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
         var criteria = (string)Parameters[0]!;
 
-        var query = Filter(StatisticsContext.ApiUserActionStatistics, criteria)
+        var query = Filter(DbContext.ApiUserActionStatistics, criteria)
             .Select(o => Tuple.Create(o.Action, o.Count, o.UserId))
             .AsNoTracking();
 
-        List<Tuple<string, long, string>> data;
-        using (CreateCounter("Database"))
-            data = await query.ToListAsync();
-
+        var data = await ContextHelper.ReadEntitiesAsync(query);
         var result = data.ConvertAll(o => new UserActionCountItem
         {
             Action = o.Item1,

@@ -9,14 +9,12 @@ using Microsoft.Extensions.Options;
 
 namespace AuditLogService.Actions.Info;
 
-public class GetStatusInfoAction : ApiAction
+public class GetStatusInfoAction : ApiAction<AuditLogServiceContext>
 {
-    private AuditLogServiceContext DbContext { get; }
     private AppOptions AppOptions { get; }
 
-    public GetStatusInfoAction(AuditLogServiceContext context, IOptions<AppOptions> options, ICounterManager counterManager) : base(counterManager)
+    public GetStatusInfoAction(AuditLogServiceContext context, IOptions<AppOptions> options, ICounterManager counterManager) : base(counterManager, context)
     {
-        DbContext = context;
         AppOptions = options.Value;
     }
 
@@ -33,8 +31,8 @@ public class GetStatusInfoAction : ApiAction
     private async Task<int> ReadItemsToArchiveCountAsync()
     {
         var expirationDate = DateTime.UtcNow.AddMonths(-AppOptions.ExpirationMonths);
+        var query = DbContext.LogItems.Where(o => o.CreatedAt <= expirationDate).AsNoTracking();
 
-        using (CreateCounter("Database"))
-            return await DbContext.LogItems.AsNoTracking().CountAsync(o => o.CreatedAt <= expirationDate);
+        return await ContextHelper.ReadCountAsync(query);
     }
 }

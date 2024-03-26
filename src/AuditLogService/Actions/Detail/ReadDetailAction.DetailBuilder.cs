@@ -13,15 +13,14 @@ namespace AuditLogService.Actions.Detail;
 
 public partial class ReadDetailAction
 {
-    private async Task<TData?> CreateDetailAsync<TEntity, TData>(LogItem header, Expression<Func<TEntity, TData>> projection) where TEntity : ChildEntityBase
+    private async Task<TData?> CreateDetailAsync<TEntity, TData>(LogItem header, Expression<Func<TEntity, TData>> projection) where TEntity : ChildEntityBase where TData : class
     {
         var query = DbContext.Set<TEntity>()
             .Where(o => o.LogItemId == header.Id)
             .AsNoTracking()
             .Select(projection);
 
-        using (CreateCounter("Database"))
-            return await query.FirstOrDefaultAsync();
+        return await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
     }
 
     private Task<MessageDetail?> CreateMessageDetailAsync(LogItem header)

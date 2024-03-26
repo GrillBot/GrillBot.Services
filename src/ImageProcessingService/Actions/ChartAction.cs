@@ -1,6 +1,5 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using ImageMagick;
-using GrillBot.Core.Services.Graphics.Models;
 using GrillBot.Core.Services.Graphics;
 using ImageProcessingService.Models;
 using Microsoft.AspNetCore.Mvc;

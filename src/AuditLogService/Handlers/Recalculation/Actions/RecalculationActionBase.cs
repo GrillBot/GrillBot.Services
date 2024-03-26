@@ -8,8 +8,8 @@ namespace AuditLogService.Handlers.Recalculation.Actions;
 
 public abstract class RecalculationActionBase
 {
-    protected AuditLogServiceContext DbContext { get; set; }
-    protected AuditLogStatisticsContext StatisticsContext { get; set; }
+    protected AuditLogServiceContext DbContext { get; }
+    protected AuditLogStatisticsContext StatisticsContext { get; }
 
     protected RecalculationActionBase(IServiceProvider serviceProvider)
     {

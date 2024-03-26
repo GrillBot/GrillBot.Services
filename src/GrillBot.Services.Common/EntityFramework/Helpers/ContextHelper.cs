@@ -20,7 +20,7 @@ public class ContextHelper<TDbContext> where TDbContext : DbContext
     private CounterItem CreateCounter(string operation)
         => _counterManager.Create($"{_counterKey}.{operation}");
 
-    public async Task<List<TEntity>> ReadEntitiesAsync<TEntity>(IQueryable<TEntity> query) where TEntity : class
+    public async Task<List<TEntity>> ReadEntitiesAsync<TEntity>(IQueryable<TEntity> query)
     {
         using (CreateCounter("Database"))
             return await query.ToListAsync();
@@ -48,6 +48,12 @@ public class ContextHelper<TDbContext> where TDbContext : DbContext
     {
         using (CreateCounter("Database"))
             return await query.CountAsync();
+    }
+
+    public async Task<Dictionary<TKey, TValue>> ReadToDictionaryAsync<TEntity, TKey, TValue>(IQueryable<TEntity> query, Func<TEntity, TKey> keySelector, Func<TEntity, TValue> valueSelector) where TKey : notnull where TEntity : class
+    {
+        using (CreateCounter("Database"))
+            return await query.ToDictionaryAsync(keySelector, valueSelector);
     }
 
     public async Task<bool> IsAnyAsync<TEntity>(IQueryable<TEntity> query) where TEntity : class

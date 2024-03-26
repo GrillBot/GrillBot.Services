@@ -8,16 +8,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Statistics;
 
-public class GetInteractionStatisticsAction : ApiAction
+public class GetInteractionStatisticsAction : ApiAction<AuditLogServiceContext>
 {
     private AuditLogStatisticsContext StatisticsContext { get; }
-    private AuditLogServiceContext DbContext { get; }
 
     public GetInteractionStatisticsAction(AuditLogStatisticsContext statisticsContext, AuditLogServiceContext dbContext, ICounterManager counterManager)
-        : base(counterManager)
+        : base(counterManager, dbContext)
     {
         StatisticsContext = statisticsContext;
-        DbContext = dbContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -33,43 +31,36 @@ public class GetInteractionStatisticsAction : ApiAction
 
     private async Task<Dictionary<string, long>> GetStatisticsByDateAsync()
     {
-        using (CreateCounter("Database"))
-        {
-            var stats = await DbContext.InteractionCommands.AsNoTracking()
-                .GroupBy(o => o.InteractionDate)
-                .Select(o => new { o.Key, Count = o.LongCount() })
-                .ToListAsync();
+        var statsQuery = DbContext.InteractionCommands.AsNoTracking()
+            .GroupBy(o => o.InteractionDate)
+            .Select(o => new { o.Key, Count = o.LongCount() });
+        var stats = await ContextHelper.ReadEntitiesAsync(statsQuery);
 
-            return stats
-                .GroupBy(o => new { o.Key.Year, o.Key.Month })
-                .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
-                .ToDictionary(o => $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", o => o.Sum(x => x.Count));
-        }
+        return stats
+            .GroupBy(o => new { o.Key.Year, o.Key.Month })
+            .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
+            .ToDictionary(o => $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", o => o.Sum(x => x.Count));
     }
 
     private async Task<List<StatisticItem>> GetCommandStatisticsAsync()
     {
-        using (CreateCounter("Database"))
+        var statsQuery = StatisticsContext.InteractionStatistics.AsNoTracking().Select(o => new StatisticItem
         {
-            var stats = await StatisticsContext.InteractionStatistics.AsNoTracking()
-                .Select(o => new StatisticItem
-                {
-                    FailedCount = o.FailedCount,
-                    Key = o.Action,
-                    Last = o.LastRun,
-                    LastRunDuration = o.LastRunDuration,
-                    MaxDuration = o.MaxDuration,
-                    MinDuration = o.MinDuration,
-                    SuccessCount = o.SuccessCount,
-                    TotalDuration = o.TotalDuration
-                })
-                .ToListAsync();
+            FailedCount = o.FailedCount,
+            Key = o.Action,
+            Last = o.LastRun,
+            LastRunDuration = o.LastRunDuration,
+            MaxDuration = o.MaxDuration,
+            MinDuration = o.MinDuration,
+            SuccessCount = o.SuccessCount,
+            TotalDuration = o.TotalDuration
+        });
 
-            return stats
-                .OrderByDescending(o => o.AvgDuration)
-                .ThenByDescending(o => o.SuccessCount + o.FailedCount)
-                .ThenBy(o => o.Key)
-                .ToList();
-        }
+        var stats = await ContextHelper.ReadEntitiesAsync(statsQuery);
+        return stats
+            .OrderByDescending(o => o.AvgDuration)
+            .ThenByDescending(o => o.SuccessCount + o.FailedCount)
+            .ThenBy(o => o.Key)
+            .ToList();
     }
 }

@@ -31,9 +31,7 @@ public class BulkDeleteEventHandler : BaseEventHandlerWithDb<BulkDeletePayload, 
             await EnqueueFileDeletionAsync(logItem);
         }
 
-        using (CreateCounter("Database"))
-            await DbContext.SaveChangesAsync();
-
+        await ContextHelper.SaveChagesAsync();
         await DataRecalculation.EnqueueRecalculationAsync(logItems);
     }
 
@@ -45,9 +43,7 @@ public class BulkDeleteEventHandler : BaseEventHandlerWithDb<BulkDeletePayload, 
         foreach (var chunk in ids.Distinct().Chunk(100))
         {
             var query = baseQuery.Where(o => chunk.Contains(o.Id));
-
-            using (CreateCounter("Database"))
-                result.AddRange(await query.ToListAsync());
+            result.AddRange(await ContextHelper.ReadEntitiesAsync(query));
         }
 
         return result;
@@ -188,7 +184,7 @@ public class BulkDeleteEventHandler : BaseEventHandlerWithDb<BulkDeletePayload, 
         if (includeAction is not null)
             query = includeAction(query);
 
-        var childItem = await query.ToListAsync();
+        var childItem = await ContextHelper.ReadEntitiesAsync(query);
         DbContext.RemoveRange(childItem);
 
         return childItem;

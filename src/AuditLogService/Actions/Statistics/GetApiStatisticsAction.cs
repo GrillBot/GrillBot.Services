@@ -8,16 +8,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Statistics;
 
-public class GetApiStatisticsAction : ApiAction
+public class GetApiStatisticsAction : ApiAction<AuditLogServiceContext>
 {
     private AuditLogStatisticsContext StatisticsContext { get; }
-    private AuditLogServiceContext DbContext { get; }
 
     public GetApiStatisticsAction(AuditLogStatisticsContext statisticsContext, AuditLogServiceContext dbContext,
-        ICounterManager counterManager) : base(counterManager)
+        ICounterManager counterManager) : base(counterManager, dbContext)
     {
         StatisticsContext = statisticsContext;
-        DbContext = dbContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -34,43 +32,36 @@ public class GetApiStatisticsAction : ApiAction
 
     private async Task<Dictionary<string, long>> GetApiStatisticsByDateForApiGroupAsync(params string[] apiGroupNames)
     {
-        using (CreateCounter($"Database"))
-        {
-            var stats = await DbContext.ApiRequests.AsNoTracking()
-                .Where(o => apiGroupNames.Contains(o.ApiGroupName))
-                .GroupBy(o => o.RequestDate)
-                .Select(o => new { o.Key, Count = o.LongCount() })
-                .ToListAsync();
+        var query = DbContext.ApiRequests.AsNoTracking()
+            .Where(o => apiGroupNames.Contains(o.ApiGroupName))
+            .GroupBy(o => o.RequestDate)
+            .Select(o => new { o.Key, Count = o.LongCount() });
+        var stats = await ContextHelper.ReadEntitiesAsync(query);
 
-            return stats
-                .GroupBy(o => new { o.Key.Year, o.Key.Month })
-                .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
-                .ToDictionary(o => $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", o => o.Sum(x => x.Count));
-        }
+        return stats
+            .GroupBy(o => new { o.Key.Year, o.Key.Month })
+            .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
+            .ToDictionary(o => $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", o => o.Sum(x => x.Count));
     }
 
     private async Task<List<StatisticItem>> GetEndpointStatisticsAsync()
     {
-        using (CreateCounter("Database"))
+        var query = StatisticsContext.RequestStats.AsNoTracking().Select(o => new StatisticItem
         {
-            var stats = await StatisticsContext.RequestStats.AsNoTracking()
-                .Select(o => new StatisticItem
-                {
-                    FailedCount = o.FailedCount,
-                    Key = o.Endpoint,
-                    Last = o.LastRequest,
-                    LastRunDuration = o.LastRunDuration,
-                    MaxDuration = o.MaxDuration,
-                    MinDuration = o.MinDuration,
-                    SuccessCount = o.SuccessCount,
-                    TotalDuration = o.TotalDuration
-                })
-                .ToListAsync();
+            FailedCount = o.FailedCount,
+            Key = o.Endpoint,
+            Last = o.LastRequest,
+            LastRunDuration = o.LastRunDuration,
+            MaxDuration = o.MaxDuration,
+            MinDuration = o.MinDuration,
+            SuccessCount = o.SuccessCount,
+            TotalDuration = o.TotalDuration
+        });
 
-            return stats
-                .OrderByDescending(o => o.AvgDuration)
-                .ThenBy(o => o.Key)
-                .ToList();
-        }
+        var stats = await ContextHelper.ReadEntitiesAsync(query);
+        return stats
+            .OrderByDescending(o => o.AvgDuration)
+            .ThenBy(o => o.Key)
+            .ToList();
     }
 }

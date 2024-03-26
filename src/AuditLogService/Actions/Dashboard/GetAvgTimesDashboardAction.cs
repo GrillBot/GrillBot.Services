@@ -8,13 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Dashboard;
 
-public class GetTodayAvgTimesDashboard : ApiAction
+public class GetTodayAvgTimesDashboard : ApiAction<AuditLogStatisticsContext>
 {
-    private AuditLogStatisticsContext StatisticsContext { get; }
-
-    public GetTodayAvgTimesDashboard(AuditLogStatisticsContext statisticsContext, ICounterManager counterManager) : base(counterManager)
+    public GetTodayAvgTimesDashboard(AuditLogStatisticsContext statisticsContext, ICounterManager counterManager) : base(counterManager, statisticsContext)
     {
-        StatisticsContext = statisticsContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -34,11 +31,9 @@ public class GetTodayAvgTimesDashboard : ApiAction
     private async Task<DailyAvgTimes> ReadTodayDailyStatsAsync()
     {
         var today = DateTime.UtcNow.ToDateOnly();
+        var query = DbContext.DailyAvgTimes.Where(o => o.Date == today).AsNoTracking();
+        var data = await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
 
-        using (CreateCounter("Database"))
-        {
-            var data = await StatisticsContext.DailyAvgTimes.AsNoTracking().FirstOrDefaultAsync(o => o.Date == today);
-            return data ?? new DailyAvgTimes();
-        }
+        return data ?? new();
     }
 }

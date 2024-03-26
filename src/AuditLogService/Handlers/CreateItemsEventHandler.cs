@@ -39,9 +39,7 @@ public class CreateItemsEventHandler : BaseEventHandlerWithDb<CreateItemsPayload
             entities.Add(entity);
         }
 
-        using (CreateCounter("Database"))
-            await DbContext.SaveChangesAsync();
-
+        await ContextHelper.SaveChagesAsync();
         await DataRecalculation.EnqueueRecalculationAsync(entities);
 
         if (_processingInfoBatch.Items.Count > 0)

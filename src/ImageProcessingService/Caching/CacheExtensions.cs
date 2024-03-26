@@ -1,6 +1,4 @@
-﻿using ImageProcessingService.Caching.Models;
-
-namespace ImageProcessingService.Caching;
+﻿namespace ImageProcessingService.Caching;
 
 public static class CacheExtensions
 {

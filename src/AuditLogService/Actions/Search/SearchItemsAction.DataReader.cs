@@ -19,7 +19,7 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.Info) || request.IsAdvancedFilterSet(LogType.Warning) || request.IsAdvancedFilterSet(LogType.Error))
         {
-            var query = CreateCommonFilterForAdvancedSearch(Context.LogMessages, request);
+            var query = CreateCommonFilterForAdvancedSearch(DbContext.LogMessages, request);
             TextSearchRequest? searchReq = null;
 
             if (request.IsAdvancedFilterSet(LogType.Info))
@@ -53,7 +53,7 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.InteractionCommand))
         {
-            var baseQuery = CreateCommonFilterForAdvancedSearch(Context.InteractionCommands, request);
+            var baseQuery = CreateCommonFilterForAdvancedSearch(DbContext.InteractionCommands, request);
             var searchReq = advancedSearch.Interaction!;
 
             if (!string.IsNullOrEmpty(searchReq.ActionName))
@@ -75,7 +75,7 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.JobCompleted))
         {
-            var baseQuery = CreateCommonFilterForAdvancedSearch(Context.JobExecutions, request);
+            var baseQuery = CreateCommonFilterForAdvancedSearch(DbContext.JobExecutions, request);
             var searchReq = advancedSearch.Job!;
 
             if (!string.IsNullOrEmpty(searchReq.ActionName))
@@ -92,7 +92,7 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.Api))
         {
-            var baseQuery = CreateCommonFilterForAdvancedSearch(Context.ApiRequests, request);
+            var baseQuery = CreateCommonFilterForAdvancedSearch(DbContext.ApiRequests, request);
             var searchReq = advancedSearch.Api!;
 
             if (!string.IsNullOrEmpty(searchReq.ControllerName))
@@ -117,7 +117,7 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.OverwriteCreated))
         {
-            var query = CreateCommonFilterForAdvancedSearch(Context.OverwriteCreatedItems, request)
+            var query = CreateCommonFilterForAdvancedSearch(DbContext.OverwriteCreatedItems, request)
                 .Where(o => o.OverwriteInfo.TargetId == advancedSearch.OverwriteCreated!.UserId);
 
             result.AddRange(await SelectIdsAsync(query));
@@ -125,7 +125,7 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.OverwriteDeleted))
         {
-            var query = CreateCommonFilterForAdvancedSearch(Context.OverwriteDeletedItems, request)
+            var query = CreateCommonFilterForAdvancedSearch(DbContext.OverwriteDeletedItems, request)
                 .Where(o => o.OverwriteInfo.TargetId == advancedSearch.OverwriteDeleted!.UserId);
 
             result.AddRange(await SelectIdsAsync(query));
@@ -133,7 +133,7 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.OverwriteUpdated))
         {
-            var query = CreateCommonFilterForAdvancedSearch(Context.OverwriteUpdatedItems, request)
+            var query = CreateCommonFilterForAdvancedSearch(DbContext.OverwriteUpdatedItems, request)
                 .Where(o => o.Before.TargetId == advancedSearch.OverwriteUpdated!.UserId || o.After.TargetId == advancedSearch.OverwriteUpdated!.UserId);
 
             result.AddRange(await SelectIdsAsync(query));
@@ -141,17 +141,16 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.MemberRoleUpdated))
         {
-            var query = Context.MemberRoleUpdatedItems.AsNoTracking()
+            var query = DbContext.MemberRoleUpdatedItems.AsNoTracking()
                 .Where(o => o.UserId == advancedSearch.MemberRolesUpdated!.UserId)
                 .Select(o => o.LogItemId);
 
-            using (CreateCounter("Database"))
-                result.AddRange(await query.ToListAsync());
+            result.AddRange(await ContextHelper.ReadEntitiesAsync(query));
         }
 
         if (request.IsAdvancedFilterSet(LogType.MemberUpdated))
         {
-            var query = CreateCommonFilterForAdvancedSearch(Context.MemberUpdatedItems, request)
+            var query = CreateCommonFilterForAdvancedSearch(DbContext.MemberUpdatedItems, request)
                 .Where(o => o.Before.UserId == advancedSearch.MemberUpdated!.UserId || o.After.UserId == advancedSearch.MemberUpdated!.UserId);
 
             result.AddRange(await SelectIdsAsync(query));
@@ -159,7 +158,7 @@ public partial class SearchItemsAction
 
         if (request.IsAdvancedFilterSet(LogType.MessageDeleted))
         {
-            var baseQuery = CreateCommonFilterForAdvancedSearch(Context.MessageDeletedItems, request);
+            var baseQuery = CreateCommonFilterForAdvancedSearch(DbContext.MessageDeletedItems, request);
             var searchReq = advancedSearch.MessageDeleted!;
 
             if (searchReq.ContainsEmbed is not null)
@@ -196,14 +195,11 @@ public partial class SearchItemsAction
     }
 
     private async Task<List<Guid>> SelectIdsAsync<TChildEntity>(IQueryable<TChildEntity> query) where TChildEntity : ChildEntityBase
-    {
-        using (CreateCounter("Database"))
-            return await query.Select(o => o.LogItemId).ToListAsync();
-    }
+        => await ContextHelper.ReadEntitiesAsync(query.Select(o => o.LogItemId));
 
     private async Task<PaginatedResponse<LogItem>> ReadLogHeadersAsync(SearchRequest request)
     {
-        var query = Context.LogItems.Include(o => o.Files).AsNoTracking();
+        var query = DbContext.LogItems.Include(o => o.Files).AsNoTracking();
 
         if (request.ShowTypes.Count > 0)
             query = query.Where(o => request.ShowTypes.Contains(o.Type));
@@ -226,8 +222,6 @@ public partial class SearchItemsAction
             query = query.Where(o => request.Ids.Contains(o.Id));
 
         query = request.Sort.Descending ? query.OrderByDescending(o => o.CreatedAt) : query.OrderBy(o => o.CreatedAt);
-
-        using (CreateCounter("Database"))
-            return await PaginatedResponse<LogItem>.CreateWithEntityAsync(query, request.Pagination);
+        return await ContextHelper.ReadEntitiesWithPaginationAsync(query, request.Pagination);
     }
 }

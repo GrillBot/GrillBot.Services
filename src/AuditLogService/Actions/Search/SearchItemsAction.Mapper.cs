@@ -217,12 +217,8 @@ public partial class SearchItemsAction
 
     private async Task SetMemberRoleUpdatedPreviewAsync(LogListItem result)
     {
-        List<MemberRoleUpdated> roles;
-        using (CreateCounter("Database"))
-            roles = await Context.MemberRoleUpdatedItems.AsNoTracking().Where(o => o.LogItemId == result.Id).ToListAsync();
-
-        if (roles.Count == 0)
-            return;
+        var roles = await ContextHelper.ReadEntitiesAsync(DbContext.MemberRoleUpdatedItems.Where(o => o.LogItemId == result.Id).AsNoTracking());
+        if (roles.Count == 0) return;
 
         result.Preview = new MemberRoleUpdatedPreview
         {
@@ -384,13 +380,12 @@ public partial class SearchItemsAction
         });
     }
 
-    private async Task<TPreview?> CreatePreviewAsync<TEntity, TPreview>(LogListItem item, Expression<Func<TEntity, TPreview>> projection) where TEntity : ChildEntityBase
+    private async Task<TPreview?> CreatePreviewAsync<TEntity, TPreview>(LogListItem item, Expression<Func<TEntity, TPreview>> projection) where TEntity : ChildEntityBase where TPreview : class
     {
-        var query = Context.Set<TEntity>().AsNoTracking()
+        var query = DbContext.Set<TEntity>().AsNoTracking()
             .Where(o => o.LogItemId == item.Id)
             .Select(projection);
 
-        using (CreateCounter("Database"))
-            return await query.FirstOrDefaultAsync();
+        return await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
     }
 }

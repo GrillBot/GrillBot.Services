@@ -7,15 +7,13 @@ using Microsoft.Extensions.Options;
 
 namespace AuditLogService.Actions.Archivation;
 
-public partial class CreateArchivationDataAction : ApiAction
+public partial class CreateArchivationDataAction : ApiAction<AuditLogServiceContext>
 {
     private AppOptions AppOptions { get; }
-    private AuditLogServiceContext Context { get; }
 
     public CreateArchivationDataAction(IOptionsSnapshot<AppOptions> options, AuditLogServiceContext context, ICounterManager counterManager)
-        : base(counterManager)
+        : base(counterManager, context)
     {
-        Context = context;
         AppOptions = options.Get(null);
     }
 

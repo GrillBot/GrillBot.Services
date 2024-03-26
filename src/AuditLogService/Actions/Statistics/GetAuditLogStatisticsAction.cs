@@ -7,13 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Statistics;
 
-public class GetAuditLogStatisticsAction : ApiAction
+public class GetAuditLogStatisticsAction : ApiAction<AuditLogServiceContext>
 {
-    private AuditLogServiceContext DbContext { get; }
-
-    public GetAuditLogStatisticsAction(AuditLogServiceContext auditLogServiceContext, ICounterManager counterManager) : base(counterManager)
+    public GetAuditLogStatisticsAction(AuditLogServiceContext auditLogServiceContext, ICounterManager counterManager) : base(counterManager, auditLogServiceContext)
     {
-        DbContext = auditLogServiceContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -30,49 +27,40 @@ public class GetAuditLogStatisticsAction : ApiAction
 
     private async Task<Dictionary<string, long>> GetStatisticsByTypeAsync()
     {
-        using (CreateCounter("Database"))
-        {
-            var stats = await DbContext.LogItems.AsNoTracking()
-                .GroupBy(o => o.Type)
-                .OrderBy(o => o.Key)
-                .Select(o => new { o.Key, Count = o.LongCount() })
-                .ToListAsync();
+        var query = DbContext.LogItems.AsNoTracking()
+            .GroupBy(o => o.Type)
+            .OrderBy(o => o.Key)
+            .Select(o => new { o.Key, Count = o.LongCount() });
 
-            return stats.ToDictionary(o => o.Key.ToString(), o => o.Count);
-        }
+        return await ContextHelper.ReadToDictionaryAsync(query, o => o.Key.ToString(), o => o.Count);
     }
 
     private async Task<Dictionary<string, long>> GetStatisticsByDateAsync()
     {
-        using (CreateCounter("Database"))
-        {
-            var stats = await DbContext.LogItems.AsNoTracking()
-                .GroupBy(o => o.LogDate)
-                .Select(o => new { o.Key, Count = o.LongCount() })
-                .ToListAsync();
+        var query = DbContext.LogItems.AsNoTracking()
+            .GroupBy(o => o.LogDate)
+            .Select(o => new { o.Key, Count = o.LongCount() });
 
-            return stats
-                .GroupBy(o => new { o.Key.Year, o.Key.Month })
-                .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
-                .ToDictionary(o => $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", o => o.Sum(x => x.Count));
-        }
+        var stats = await ContextHelper.ReadEntitiesAsync(query);
+
+        return stats
+            .GroupBy(o => new { o.Key.Year, o.Key.Month })
+            .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
+            .ToDictionary(o => $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", o => o.Sum(x => x.Count));
     }
 
     private async Task<List<FileExtensionStatistic>> GetFileExtensionStatisticsAsync()
     {
-        using (CreateCounter("Database"))
-        {
-            var query = DbContext.Files.AsNoTracking()
-                .GroupBy(o => (o.Extension ?? ".NoExtension").ToLower())
-                .Select(o => new FileExtensionStatistic
-                {
-                    Extension = o.Key,
-                    Count = o.Count(),
-                    Size = o.Sum(x => x.Size)
-                })
-                .OrderBy(o => o.Extension);
+        var query = DbContext.Files.AsNoTracking()
+            .GroupBy(o => (o.Extension ?? ".NoExtension").ToLower())
+            .Select(o => new FileExtensionStatistic
+            {
+                Extension = o.Key,
+                Count = o.Count(),
+                Size = o.Sum(x => x.Size)
+            })
+            .OrderBy(o => o.Extension);
 
-            return await query.ToListAsync();
-        }
+        return await ContextHelper.ReadEntitiesAsync(query);
     }
 }

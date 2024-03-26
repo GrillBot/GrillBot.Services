@@ -6,18 +6,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Info;
 
-public class GetJobsInfoAction : ApiAction
+public class GetJobsInfoAction : ApiAction<AuditLogStatisticsContext>
 {
-    private AuditLogStatisticsContext StatisticsContext { get; }
-
-    public GetJobsInfoAction(AuditLogStatisticsContext statisticsContext, ICounterManager counterManager) : base(counterManager)
+    public GetJobsInfoAction(AuditLogStatisticsContext statisticsContext, ICounterManager counterManager) : base(counterManager, statisticsContext)
     {
-        StatisticsContext = statisticsContext;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var query = StatisticsContext.JobInfos.AsNoTracking()
+        var query = DbContext.JobInfos.AsNoTracking()
             .Select(o => new Models.Response.Info.JobInfo
             {
                 AvgTime = o.AvgTime,
@@ -31,10 +28,7 @@ public class GetJobsInfoAction : ApiAction
                 TotalDuration = o.TotalDuration
             });
 
-        using (CreateCounter("Database"))
-        {
-            var result = await query.ToListAsync();
-            return ApiResult.Ok(result);
-        }
+        var result = await ContextHelper.ReadEntitiesAsync(query);
+        return ApiResult.Ok(result);
     }
 }
