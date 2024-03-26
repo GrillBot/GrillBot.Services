@@ -13,19 +13,13 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
 
         services.AddDatabaseContext<UserMeasuresContext>(b => b.UseNpgsql(connectionString));
         services.AddStatisticsProvider<StatisticsProvider>();
-        services.AddSwaggerGen();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
     {
         var connectionString = configuration.GetConnectionString("Default")!;
         healthCheckBuilder.AddNpgSql(connectionString);
     },
-    preRunInitialization: (app, _) => app.InitDatabaseAsync<UserMeasuresContext>(),
-    configureDevOnlyMiddleware: app =>
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
+    preRunInitialization: (app, _) => app.InitDatabaseAsync<UserMeasuresContext>()
 );
 
 await application.RunAsync();

@@ -12,7 +12,6 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         var connectionString = configuration.GetConnectionString("Default")!;
 
         services.AddDatabaseContext<EmoteServiceContext>(b => b.UseNpgsql(connectionString));
-        services.AddSwaggerGen();
         services.AddStatisticsProvider<StatisticsProvider>();
     },
     configureHealthChecks: (builder, configuration) =>
@@ -20,12 +19,7 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         var connectionString = configuration.GetConnectionString("Default")!;
         builder.AddNpgSql(connectionString);
     },
-    preRunInitialization: (app, _) => app.InitDatabaseAsync<EmoteServiceContext>(),
-    configureDevOnlyMiddleware: app =>
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
+    preRunInitialization: (app, _) => app.InitDatabaseAsync<EmoteServiceContext>()
 );
 
 await application.RunAsync();

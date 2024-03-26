@@ -59,7 +59,7 @@ public static class ServiceBuilder
             configureHealthChecks(healthChecks, builder.Configuration);
 
         // OpenAPI
-        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddEndpointsApiExplorer().AddSwaggerGen();
 
         // Static configuration
         builder.Services.Configure<RouteOptions>(opt => opt.LowercaseUrls = true);
@@ -84,8 +84,14 @@ public static class ServiceBuilder
             await preRunInitialization(app, scope.ServiceProvider);
         }
 
-        if (app.Environment.IsDevelopment() && configureDevOnlyMiddleware is not null)
-            configureDevOnlyMiddleware(app);
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
+            if (configureDevOnlyMiddleware is not null)
+                configureDevOnlyMiddleware(app);
+        }
 
         if (configureMiddleware is not null)
             configureMiddleware(app);

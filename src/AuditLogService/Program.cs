@@ -21,7 +21,6 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
             .AddDatabaseContext<AuditLogStatisticsContext>(b => b.UseNpgsql(connectionString));
 
         services.AddStatisticsProvider<StatisticsProvider>();
-        services.AddSwaggerGen();
         services.AddDiscord();
         services.AddCaching();
         services.AddManagers();
@@ -40,11 +39,6 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         await app.InitDatabaseAsync<AuditLogServiceContext>();
         await app.InitDatabaseAsync<AuditLogStatisticsContext>();
         await scopedProvider.GetRequiredService<DiscordManager>().LoginAsync();
-    },
-    configureDevOnlyMiddleware: app =>
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
     }
 );
 

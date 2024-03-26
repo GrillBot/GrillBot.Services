@@ -18,7 +18,6 @@ var application = await ServiceBuilder.CreateWebAppAsync(
         services.AddScoped<RubbergodServiceRepository>();
         services.AddMemoryCache();
         services.AddStatisticsProvider<StatisticsProvider>();
-        services.AddSwaggerGen();
         services.AddDiscord();
         services.AddDirectApi();
     },
@@ -33,11 +32,6 @@ var application = await ServiceBuilder.CreateWebAppAsync(
 
         await app.InitDatabaseAsync<RubbergodServiceContext>();
         await scopedProvider.GetRequiredService<DiscordManager>().LoginAsync();
-    },
-    configureDevOnlyMiddleware: app =>
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
     }
 );
 

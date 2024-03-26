@@ -9,16 +9,10 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
     (services, configuration) =>
     {
         services.AddCaching();
-        services.AddSwaggerGen();
         services.AddExternalServices(configuration);
     },
     configureKestrel: options => options.Limits.MaxRequestBodySize = 1073741824, // 1GB
-    configureHealthChecks: (healthCheckBuilder, _) => healthCheckBuilder.AddCheck<GraphicsServiceHealthCheck>(nameof(GraphicsServiceHealthCheck)),
-    configureDevOnlyMiddleware: app =>
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
+    configureHealthChecks: (healthCheckBuilder, _) => healthCheckBuilder.AddCheck<GraphicsServiceHealthCheck>(nameof(GraphicsServiceHealthCheck))
 );
 
 await application.RunAsync();
