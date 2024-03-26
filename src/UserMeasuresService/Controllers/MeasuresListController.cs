@@ -14,6 +14,7 @@ public class MeasuresListController : GrillBot.Core.Infrastructure.Actions.Contr
 
     [HttpPost]
     [ProducesResponseType(typeof(PaginatedResponse<MeasuresItem>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetMeasuresListAsync(MeasuresListParams parameters)
         => await ProcessAsync<GetMeasuresList>(parameters);
 }

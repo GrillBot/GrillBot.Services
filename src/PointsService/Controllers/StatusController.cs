@@ -15,10 +15,14 @@ public class StatusController : ControllerBase
 
     [HttpGet("{guildId}/{userId}")]
     [ProducesResponseType(typeof(PointsStatus), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> GetStatusOfPointsAsync([Required, StringLength(30), DiscordId] string guildId, [Required, StringLength(30), DiscordId] string userId)
         => ProcessAsync<GetCurrentPointsStatusAction>(guildId, userId, false);
 
     [HttpGet("{guildId}/{userId}/image")]
+    [ProducesResponseType(typeof(ImagePointsStatus), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> GetImagePointsStatusAsync([Required, StringLength(30), DiscordId] string guildId, [Required, StringLength(30), DiscordId] string userId)
         => ProcessAsync<GetImagePointsStatusAction>(guildId, userId);
 }

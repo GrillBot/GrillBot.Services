@@ -14,6 +14,7 @@ public class AdminController : ControllerBase
 
     [HttpPost("list")]
     [ProducesResponseType(typeof(PaginatedResponse<TransactionItem>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> GetTransactionListAsync([FromBody] AdminListRequest request)
         => ProcessAsync<GetAdminListAction>(request);
 }

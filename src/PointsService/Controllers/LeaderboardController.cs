@@ -15,6 +15,7 @@ public class LeaderboardController : ControllerBase
 
     [HttpGet("{guildId}")]
     [ProducesResponseType(typeof(List<BoardItem>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> GetLeaderboardAsync([FromRoute] LeaderboardRequest request)
         => ProcessAsync<GetLeaderboardAction>(request);
 

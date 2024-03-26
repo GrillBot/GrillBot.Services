@@ -13,6 +13,7 @@ public class MergeController : ControllerBase
 
     [HttpPost]
     [ProducesResponseType(typeof(MergeResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public Task<IActionResult> MergeTransctionsAsync()
         => ProcessAsync<MergeValidTransactionsAction>();
 }

@@ -21,10 +21,13 @@ public class TransactionController : ControllerBase
 
     [HttpGet("{guildId}/{userId}")]
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> ExistsAnyAsync([DiscordId, StringLength(30)] string guildId, [DiscordId, StringLength(30)] string userId)
         => ProcessAsync<CheckTransactionExistsAction>(guildId, userId);
 
     [HttpGet("{guildId}/count")]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> GetTransactionsCountForGuildActionAsync([DiscordId, StringLength(30)] string guildId)
         => ProcessAsync<GetTransactionsCountForGuildAction>(guildId);
 }

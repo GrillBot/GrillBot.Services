@@ -13,6 +13,7 @@ public class ChartController : ControllerBase
 
     [HttpPost]
     [ProducesResponseType(typeof(List<PointsChartItem>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> GetChartDataAsync([FromBody] AdminListRequest request)
         => ProcessAsync<GetChartAction>(request);
 }

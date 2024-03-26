@@ -35,11 +35,13 @@ public class StatisticsController : ControllerBase
 
     [HttpPost("emoteUsersUsage")]
     [ProducesResponseType(typeof(PaginatedResponse<EmoteUserUsageItem>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> GetUserEmoteUsageListAsync([FromBody] EmoteUserUsageListRequest request)
         => ProcessAsync<GetUserEmoteUsageListAction>(request);
 
     [HttpPost("emoteStatistics")]
     [ProducesResponseType(typeof(PaginatedResponse<EmoteStatisticsItem>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> GetEmoteStatisticsListAsync([FromBody] EmoteStatisticsListRequest request)
         => ProcessAsync<GetEmoteStatisticsListAction>(request);
 }

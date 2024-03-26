@@ -16,6 +16,7 @@ public class DiagnosticController : Controller
     }
 
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<DiagnosticInfo>> GetInfoAsync()
         => Ok(await DiagnosticsProvider.GetInfoAsync());
 }
