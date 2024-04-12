@@ -463,31 +463,3 @@ jobs:
           follow-redirect: true
           max-attempts: 10
           retry-delay: 5s
-  PruneDevelopmentImages:
-    runs-on: ubuntu-latest
-    environment: Development
-    needs: DeployToDevelopment
-    if: ${{ github.ref == 'refs/heads/master' && always() && !failure() && !cancelled() }}
-    steps:
-      - name: Prune images
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.SSH_DEV_HOST }}
-          username: ${{ secrets.SSH_DEV_USERNAME }}
-          password: ${{ secrets.SSH_DEV_PASSWORD }}
-          port: 22
-          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S docker image prune -f
-  PruneProductionImages:
-    runs-on: ubuntu-latest
-    needs: VerifyProductionDeployment
-    if: github.ref == 'refs/heads/master'
-    environment: ProductionInternal
-    steps:
-      - name: Prune images
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port: 22
-          script: echo '${{ secrets.SSH_PASSWORD }}' | sudo -S docker image prune -f
