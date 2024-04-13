@@ -44,4 +44,11 @@ public class StatisticsController : ControllerBase
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> GetEmoteStatisticsListAsync([FromBody] EmoteStatisticsListRequest request)
         => ProcessAsync<GetEmoteStatisticsListAction>(request);
+
+    [HttpGet("count/{guildId}")]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public Task<IActionResult> GetStatisticsCountInGuildAsync(
+        [DiscordId, StringLength(32)] string guildId
+    ) => ProcessAsync<GetStatisticsCountInGuildAction>(guildId);
 }
