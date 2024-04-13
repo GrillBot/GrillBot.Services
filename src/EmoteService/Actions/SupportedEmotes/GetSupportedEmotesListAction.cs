@@ -14,7 +14,11 @@ public class GetSupportedEmotesListAction : ApiAction<EmoteServiceContext>
 
     public override async Task<ApiResult> ProcessAsync()
     {
+        var guildId = GetOptionalParameter<string>(0);
         var definitionsQuery = DbContext.EmoteDefinitions.AsNoTracking();
+        if (!string.IsNullOrEmpty(guildId))
+            definitionsQuery = definitionsQuery.Where(o => o.GuildId == guildId);
+
         var definitions = await ContextHelper.ReadEntitiesAsync(definitionsQuery);
         var emotes = definitions.ConvertAll(d => new Models.Response.EmoteDefinition
         {

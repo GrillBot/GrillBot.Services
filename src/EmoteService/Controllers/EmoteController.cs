@@ -14,18 +14,10 @@ public class EmoteController : ControllerBase
     {
     }
 
-    [HttpGet("supported/{guildId}/{emoteId}")]
-    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    public Task<IActionResult> GetIsEmoteSupportedAsync(
-        [DiscordId, StringLength(32)] string guildId,
-        [EmoteId, StringLength(255)] string emoteId
-    ) => ProcessAsync<GetIsEmoteSupportedAction>(guildId, emoteId);
-
     [HttpGet("supported")]
     [ProducesResponseType(typeof(List<EmoteDefinition>), StatusCodes.Status200OK)]
-    public Task<IActionResult> GetSupportedEmotesListAsync()
-        => ProcessAsync<GetSupportedEmotesListAction>();
+    public Task<IActionResult> GetSupportedEmotesListAsync(string? guildId = null)
+        => ProcessAsync<GetSupportedEmotesListAction>(guildId);
 
     [HttpGet("{guildId}/{emoteId}/info")]
     [ProducesResponseType(typeof(EmoteInfo), StatusCodes.Status200OK)]
