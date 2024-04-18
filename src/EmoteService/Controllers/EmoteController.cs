@@ -26,4 +26,13 @@ public class EmoteController : ControllerBase
         [DiscordId, StringLength(32)] string guildId,
         [EmoteId, StringLength(255)] string emoteId
     ) => ProcessAsync<GetEmoteInfoAction>(guildId, emoteId);
+
+    [HttpDelete("supported/{guildId}/{emoteId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public Task<IActionResult> DeleteSupportedEmoteAsync(
+        [StringLength(32), DiscordId] string guildId,
+        [StringLength(255), EmoteId] string emoteId
+    ) => ProcessAsync<DeleteSupportedEmoteAction>(guildId, emoteId);
 }
