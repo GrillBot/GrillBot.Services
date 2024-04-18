@@ -1,10 +1,10 @@
-﻿using AuditLogService.Cache.Abstraction;
-using Discord;
+﻿using Discord;
 using GrillBot.Core.Managers.Performance;
+using GrillBot.Services.Common.Cache;
 
 namespace AuditLogService.Cache;
 
-public class AuditLogCache : ScopeDisposableCache<ulong, Dictionary<ActionType, IReadOnlyCollection<IAuditLogEntry>>>
+public class AuditLogCache : ScopedCache<ulong, Dictionary<ActionType, IReadOnlyCollection<IAuditLogEntry>>>
 {
     public AuditLogCache(ICounterManager counterManager) : base(counterManager)
     {
@@ -12,25 +12,21 @@ public class AuditLogCache : ScopeDisposableCache<ulong, Dictionary<ActionType, 
 
     public IEnumerable<IAuditLogEntry>? GetAuditLogs(ulong guildId, ActionType actionType)
     {
-        var guildLogs = Read(guildId);
-        if (guildLogs is null)
+        if (!TryRead(guildId, out var guildLogs))
             return null;
 
         using (CreateCounterItem("GetAuditLogs"))
-        {
             return guildLogs.TryGetValue(actionType, out var logs) ? logs : null;
-        }
     }
 
     public void StoreLogs(ulong guildId, ActionType actionType, IReadOnlyCollection<IAuditLogEntry> logs)
     {
         using (CreateCounterItem("StoreLogs"))
         {
-            var guildLogs = Read(guildId);
+            if (!TryRead(guildId, out var guildLogs))
+                guildLogs = new Dictionary<ActionType, IReadOnlyCollection<IAuditLogEntry>>();
 
-            guildLogs ??= new Dictionary<ActionType, IReadOnlyCollection<IAuditLogEntry>>();
             guildLogs[actionType] = logs;
-
             Write(guildId, guildLogs);
         }
     }

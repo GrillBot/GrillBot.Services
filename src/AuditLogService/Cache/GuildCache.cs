@@ -1,18 +1,16 @@
-﻿using AuditLogService.Cache.Abstraction;
-using Discord;
+﻿using Discord;
 using GrillBot.Core.Managers.Performance;
+using GrillBot.Services.Common.Cache;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace AuditLogService.Cache;
 
-public class GuildCache : InMemoryPersistentCache<IGuild>
+public class GuildCache : InMemoryCache<IGuild>
 {
-    public GuildCache(IMemoryCache cache, ICounterManager counterManager) : base(cache, counterManager)
+    public GuildCache(IMemoryCache cache, ICounterManager counterManager) : base(counterManager, cache)
     {
     }
 
-    public IGuild? GetGuild(ulong guildId) => Read(guildId.ToString());
-
-    public void StoreGuild(IGuild guild)
-        => Write(guild.Id.ToString(), guild, DateTimeOffset.Now.AddHours(4));
+    public IGuild? GetGuild(ulong guildId) => TryReadData(guildId.ToString(), out var guild) ? guild : null;
+    public void StoreGuild(IGuild guild) => Write(guild.Id.ToString(), guild, DateTimeOffset.Now.AddHours(4));
 }

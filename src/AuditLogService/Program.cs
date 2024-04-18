@@ -1,4 +1,3 @@
-using AuditLogService.Cache;
 using AuditLogService.Core.Discord;
 using AuditLogService.Core.Entity;
 using AuditLogService.Core.Entity.Statistics;
@@ -22,7 +21,6 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
 
         services.AddStatisticsProvider<StatisticsProvider>();
         services.AddDiscord();
-        services.AddCaching();
         services.AddManagers();
 
         services.AddScoped<RequestProcessorFactory>();
