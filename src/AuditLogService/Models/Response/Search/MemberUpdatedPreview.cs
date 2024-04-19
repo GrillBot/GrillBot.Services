@@ -8,4 +8,5 @@ public class MemberUpdatedPreview
     public bool VoiceMuteChanged { get; set; }
     public bool SelfUnverifyMinimalTimeChange { get; set; }
     public bool FlagsChanged { get; set; }
+    public bool PointsDeactivatedChanged { get; set; }
 }

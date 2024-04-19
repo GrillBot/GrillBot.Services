@@ -3,8 +3,10 @@ using GrillBot.Services.Common;
 using ImageProcessingService.Caching;
 using ImageProcessingService.Core;
 using ImageProcessingService.Core.Options;
+using System.Reflection;
 
 var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
+    Assembly.GetExecutingAssembly(),
     args,
     (services, configuration) =>
     {

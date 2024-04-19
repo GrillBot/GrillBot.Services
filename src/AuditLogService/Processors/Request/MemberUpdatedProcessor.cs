@@ -18,8 +18,8 @@ public class MemberUpdatedProcessor : RequestProcessorBase
     {
         if (request.MemberUpdated!.IsApiUpdate())
         {
-            var before = CreateMemberInfo(request.MemberUpdated.UserId, request.MemberUpdated.SelfUnverifyMinimalTime!.Before, request.MemberUpdated.Flags!.Before);
-            var after = CreateMemberInfo(request.MemberUpdated.UserId, request.MemberUpdated.SelfUnverifyMinimalTime!.After, request.MemberUpdated.Flags!.After);
+            var before = CreateMemberInfo(request.MemberUpdated.UserId, request.MemberUpdated.SelfUnverifyMinimalTime?.Before, request.MemberUpdated.Flags?.Before, request.MemberUpdated.PointsDeactivated?.Before);
+            var after = CreateMemberInfo(request.MemberUpdated.UserId, request.MemberUpdated.SelfUnverifyMinimalTime?.After, request.MemberUpdated.Flags?.After, request.MemberUpdated.PointsDeactivated?.After);
 
             entity.MemberUpdated = new MemberUpdated
             {
@@ -67,14 +67,15 @@ public class MemberUpdatedProcessor : RequestProcessorBase
         };
     }
 
-    private static MemberInfo CreateMemberInfo(string userId, string? selfUnverifyMinimalTime, int? flags)
+    private static MemberInfo CreateMemberInfo(string userId, string? selfUnverifyMinimalTime, int? flags, bool? pointsDeactivated)
     {
         return new MemberInfo
         {
             Flags = flags,
             Id = Guid.NewGuid(),
             UserId = userId,
-            SelfUnverifyMinimalTime = selfUnverifyMinimalTime
+            SelfUnverifyMinimalTime = selfUnverifyMinimalTime,
+            PointsDeactivated = pointsDeactivated
         };
     }
 

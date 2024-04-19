@@ -191,6 +191,8 @@ public partial class CreateArchivationDataAction
             json["SelfUnverifyMinimalTime"] = info.SelfUnverifyMinimalTime;
         if (info.Flags is not null)
             json["Flags"] = info.Flags.Value;
+        if (info.PointsDeactivated is not null)
+            json["PointsDeactivated"] = info.PointsDeactivated.Value;
 
         return json;
     }

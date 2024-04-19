@@ -211,7 +211,8 @@ public partial class SearchItemsAction
             UserId = o.Before.UserId,
             FlagsChanged = o.Before.Flags != o.After.Flags,
             VoiceMuteChanged = o.Before.IsDeaf != o.After.IsDeaf || o.Before.IsMuted != o.After.IsMuted,
-            SelfUnverifyMinimalTimeChange = o.Before.SelfUnverifyMinimalTime != o.After.SelfUnverifyMinimalTime
+            SelfUnverifyMinimalTimeChange = o.Before.SelfUnverifyMinimalTime != o.After.SelfUnverifyMinimalTime,
+            PointsDeactivatedChanged = o.Before.PointsDeactivated != o.After.PointsDeactivated
         });
     }
 

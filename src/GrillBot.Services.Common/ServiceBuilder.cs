@@ -16,6 +16,7 @@ namespace GrillBot.Services.Common;
 public static class ServiceBuilder
 {
     public static async Task<WebApplication> CreateWebAppAsync<TAppOptions>(
+        Assembly runningAssembly,
         string[] args,
         Action<IServiceCollection, IConfiguration> configureServices,
         Action<KestrelServerOptions>? configureKestrel = null,
@@ -26,9 +27,6 @@ public static class ServiceBuilder
         Action<IApplicationBuilder>? configureDevOnlyMiddleware = null
     ) where TAppOptions : class
     {
-        var runningAssembly = Assembly.GetEntryAssembly()
-            ?? throw new InvalidOperationException("Unable to run service from unmanaged code.");
-
         var builder = WebApplication.CreateBuilder(args);
 
         // Kestrel
@@ -104,6 +102,7 @@ public static class ServiceBuilder
     }
 
     public static Task<WebApplication> CreateWebAppAsync(
+        Assembly runningAssembly,
         string[] args,
         Action<IServiceCollection, IConfiguration> configureServices,
         Action<KestrelServerOptions>? configureKestrel = null,
@@ -112,5 +111,18 @@ public static class ServiceBuilder
         Func<IApplicationBuilder, IServiceProvider, Task>? preRunInitialization = null,
         Action<IApplicationBuilder>? configureMiddleware = null,
         Action<IApplicationBuilder>? configureDevOnlyMiddleware = null
-    ) => CreateWebAppAsync<object>(args, configureServices, configureKestrel, configureControllers, configureHealthChecks, preRunInitialization, configureMiddleware, configureDevOnlyMiddleware);
+    )
+    {
+        return CreateWebAppAsync<object>(
+            runningAssembly,
+            args,
+            configureServices,
+            configureKestrel,
+            configureControllers,
+            configureHealthChecks,
+            preRunInitialization,
+            configureMiddleware,
+            configureDevOnlyMiddleware
+        );
+    }
 }

@@ -4,8 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
 using PointsService.Core.Options;
 using PointsService.Core.Providers;
+using System.Reflection;
 
 var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
+    Assembly.GetExecutingAssembly(),
     args,
     (services, configuration) =>
     {

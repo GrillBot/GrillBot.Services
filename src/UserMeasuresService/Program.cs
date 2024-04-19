@@ -1,11 +1,13 @@
 using GrillBot.Core;
 using GrillBot.Services.Common;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Core.Providers;
 using UserMeasuresService.Options;
 
 var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
+    Assembly.GetExecutingAssembly(),
     args,
     (services, configuration) =>
     {

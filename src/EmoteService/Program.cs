@@ -4,8 +4,10 @@ using EmoteService.Core.Providers;
 using GrillBot.Core;
 using GrillBot.Services.Common;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
+    Assembly.GetExecutingAssembly(),
     args,
     (services, configuration) =>
     {

@@ -19,4 +19,5 @@ public class MemberInfo
     public bool? IsDeaf { get; set; }
     public string? SelfUnverifyMinimalTime { get; set; }
     public int? Flags { get; set; }
+    public bool? PointsDeactivated { get; set; }
 }

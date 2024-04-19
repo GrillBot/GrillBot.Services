@@ -10,4 +10,5 @@ public class MemberUpdatedDetail
     public Diff<bool?>? IsDeaf { get; set; }
     public Diff<string?>? SelfUnverifyMinimalTime { get; set; }
     public Diff<int?>? Flags { get; set; }
+    public Diff<bool?>? PointsDeactivated { get; set; }
 }

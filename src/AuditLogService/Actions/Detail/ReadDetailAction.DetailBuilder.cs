@@ -93,7 +93,8 @@ public partial class ReadDetailAction
             SelfUnverifyMinimalTime = new Diff<string?>(before.SelfUnverifyMinimalTime, after.SelfUnverifyMinimalTime).NullIfEquals(),
             Nickname = new Diff<string?>(before.Nickname, after.Nickname).NullIfEquals(),
             IsDeaf = new Diff<bool?>(before.IsDeaf, after.IsDeaf).NullIfEquals(),
-            UserId = before.UserId
+            UserId = before.UserId,
+            PointsDeactivated = new Diff<bool?>(before.PointsDeactivated, after.PointsDeactivated).NullIfEquals()
         };
 
         return ModelHelper.IsModelEmpty(result) ? null : result;

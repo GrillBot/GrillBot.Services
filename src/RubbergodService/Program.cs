@@ -7,8 +7,10 @@ using RubbergodService.Core.Providers;
 using RubbergodService.Core.Repository;
 using RubbergodService.DirectApi;
 using RubbergodService.Discord;
+using System.Reflection;
 
 var application = await ServiceBuilder.CreateWebAppAsync(
+    Assembly.GetExecutingAssembly(),
     args,
     (services, configuration) =>
     {
