@@ -1,4 +1,4 @@
-﻿2 hodinusing Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PointsService.Actions;
 using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
