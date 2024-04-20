@@ -71,5 +71,5 @@ public class ProcessTransferPointsAction : ApiAction
     }
 
     private Task EnqueueTransactionRequestAsync(string guildId, string userId, int amount)
-        => Publisher.PublishAsync(new CreateTransactionAdminPayload(guildId, userId, amount));
+        => Publisher.PublishAsync(new CreateTransactionAdminPayload(guildId, userId, amount), new());
 }

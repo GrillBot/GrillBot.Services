@@ -15,7 +15,7 @@ public class SynchronizationEventHandler : BasePointsEvent<SynchronizationPayloa
     {
     }
 
-    protected override async Task HandleInternalAsync(SynchronizationPayload payload)
+    protected override async Task HandleInternalAsync(SynchronizationPayload payload, Dictionary<string, string> headers)
     {
         foreach (var userInfo in payload.Users)
             await SynchronizeUserAsync(payload.GuildId, userInfo);

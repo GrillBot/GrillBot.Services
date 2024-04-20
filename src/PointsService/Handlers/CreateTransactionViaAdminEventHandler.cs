@@ -14,7 +14,7 @@ public class CreateTransactionViaAdminEventHandler : CreateTransactionBaseEventH
     {
     }
 
-    protected override async Task HandleInternalAsync(CreateTransactionAdminPayload payload)
+    protected override async Task HandleInternalAsync(CreateTransactionAdminPayload payload, Dictionary<string, string> headers)
     {
         if (!await CanCreateTransactionAsync(payload))
             return;

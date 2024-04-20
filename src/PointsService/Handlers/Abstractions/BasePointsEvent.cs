@@ -36,5 +36,5 @@ public abstract class BasePointsEvent<TPayload> : BaseEventHandlerWithDb<TPayloa
     }
 
     protected Task EnqueueUserForRecalculationAsync(string guildId, string userId)
-        => Publisher.PublishAsync(new UserRecalculationPayload(guildId, userId));
+        => Publisher.PublishAsync(new UserRecalculationPayload(guildId, userId), new());
 }

@@ -23,7 +23,7 @@ public class CreateTransactionEventHandler : CreateTransactionBaseEventHandler<C
         RandomManager = randomManager;
     }
 
-    protected override async Task HandleInternalAsync(CreateTransactionPayload payload)
+    protected override async Task HandleInternalAsync(CreateTransactionPayload payload, Dictionary<string, string> headers)
     {
         var author = await FindOrCreateUserAsync(payload.GuildId, payload.Message.AuthorId);
         var reactionUser = payload.Reaction is null ? null : await FindOrCreateUserAsync(payload.GuildId, payload.Reaction.UserId);

@@ -13,7 +13,7 @@ public partial class UserRecalculationHandler : BasePointsEvent<UserRecalculatio
     {
     }
 
-    protected override async Task HandleInternalAsync(UserRecalculationPayload payload)
+    protected override async Task HandleInternalAsync(UserRecalculationPayload payload, Dictionary<string, string> headers)
     {
         var user = await FindOrCreateUserAsync(payload.GuildId, payload.UserId);
 

@@ -4,6 +4,7 @@ using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.Cache;
 using Microsoft.Extensions.Configuration;
 
+#pragma warning disable S3928 // Parameter names used into ArgumentException constructors should match an existing one 
 namespace GrillBot.Services.Common.Discord;
 
 public class DiscordManager

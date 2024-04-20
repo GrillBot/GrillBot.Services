@@ -13,7 +13,7 @@ public class DeleteTransactionsEventHandler : BasePointsEvent<DeleteTransactions
     {
     }
 
-    protected override async Task HandleInternalAsync(DeleteTransactionsPayload payload)
+    protected override async Task HandleInternalAsync(DeleteTransactionsPayload payload, Dictionary<string, string> headers)
     {
         var transactions = await ReadTransactionsAsync(payload);
         if (transactions.Count == 0)
@@ -41,6 +41,6 @@ public class DeleteTransactionsEventHandler : BasePointsEvent<DeleteTransactions
             .Select(o => o.First());
 
         foreach (var userTransaction in users)
-            await Publisher.PublishAsync(new UserRecalculationPayload(userTransaction.GuildId, userTransaction.UserId));
+            await Publisher.PublishAsync(new UserRecalculationPayload(userTransaction.GuildId, userTransaction.UserId), new());
     }
 }

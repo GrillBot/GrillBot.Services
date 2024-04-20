@@ -22,5 +22,5 @@ public abstract class ApiAction : GrillBot.Services.Common.Infrastructure.Api.Ap
     }
 
     protected Task EnqueueUserForRecalculationAsync(string guildId, string userId)
-        => Publisher.PublishAsync(new UserRecalculationPayload(guildId, userId));
+        => Publisher.PublishAsync(new UserRecalculationPayload(guildId, userId), new());
 }
