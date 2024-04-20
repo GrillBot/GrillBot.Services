@@ -14,16 +14,14 @@ public class GetItemsCountOfGuild : ApiAction<UserMeasuresContext>
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;
-        var unverifies = await ComputeUnverifiesAsync(guildId);
-        var warnings = await ComputeWarningsAsync(guildId);
-        var result = unverifies + warnings;
+        var unverifies = await ComputeRowsAsync<UnverifyItem>(guildId);
+        var warnings = await ComputeRowsAsync<MemberWarningItem>(guildId);
+        var timeouts = await ComputeRowsAsync<TimeoutItem>(guildId);
+        var result = unverifies + warnings + timeouts;
 
         return ApiResult.Ok(result);
     }
 
-    private async Task<int> ComputeUnverifiesAsync(string guildId)
-        => await ContextHelper.ReadCountAsync(DbContext.Unverifies.Where(o => o.GuildId == guildId));
-
-    private async Task<int> ComputeWarningsAsync(string guildId)
-        => await ContextHelper.ReadCountAsync(DbContext.MemberWarnings.Where(o => o.GuildId == guildId));
+    private async Task<int> ComputeRowsAsync<TEntity>(string guildId) where TEntity : UserMeasureBase
+        => await ContextHelper.ReadCountAsync(DbContext.Set<TEntity>().Where(o => o.GuildId == guildId));
 }

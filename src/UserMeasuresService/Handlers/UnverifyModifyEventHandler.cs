@@ -13,14 +13,14 @@ public class UnverifyModifyEventHandler : BaseMeasuresHandler<UnverifyModifyPayl
     {
     }
 
-    protected override async Task HandleInternalAsync(UnverifyModifyPayload payload)
+    protected override async Task HandleInternalAsync(UnverifyModifyPayload payload, Dictionary<string, string> headers)
     {
         var item = await ContextHelper.ReadFirstOrDefaultEntityAsync(DbContext.Unverifies.Where(o => o.LogSetId == payload.LogSetId));
         if (item is null)
             return;
 
-        if (payload.NewEnd.HasValue)
-            item.ValidTo = payload.NewEnd.Value.ToUniversalTime();
+        if (payload.NewEndUtc.HasValue)
+            item.ValidTo = payload.NewEndUtc.Value.ToUniversalTime();
 
         await SaveEntityAsync(item);
     }

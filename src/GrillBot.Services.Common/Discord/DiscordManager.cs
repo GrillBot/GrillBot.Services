@@ -1,9 +1,10 @@
-﻿using AuditLogService.Cache;
-using Discord;
+﻿using Discord;
 using Discord.Rest;
 using GrillBot.Core.Managers.Performance;
+using GrillBot.Services.Common.Cache;
+using Microsoft.Extensions.Configuration;
 
-namespace AuditLogService.Core.Discord;
+namespace GrillBot.Services.Common.Discord;
 
 public class DiscordManager
 {
@@ -25,7 +26,8 @@ public class DiscordManager
 
     public async Task LoginAsync()
     {
-        var token = Configuration.GetConnectionString("BotToken") ?? throw new ArgumentNullException(nameof(Configuration));
+        var token = Configuration.GetConnectionString("BotToken")
+            ?? throw new ArgumentNullException(nameof(Configuration));
 
         using (CounterManager.Create("Discord.API.Login"))
         {

@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using System.Diagnostics.CodeAnalysis;
 
-namespace GrillBot.Services.Common.Cache;
+namespace GrillBot.Services.Common.Cache.Abstraction;
 
 internal interface IInMemoryCache { }
 

@@ -1,7 +1,8 @@
 ﻿using Discord;
 using Discord.Rest;
+using Microsoft.Extensions.Logging;
 
-namespace AuditLogService.Core.Discord;
+namespace GrillBot.Services.Common.Discord;
 
 public class DiscordLogManager
 {

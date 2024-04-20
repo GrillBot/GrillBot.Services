@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core;
+using GrillBot.Services.Common.Discord;
 using GrillBot.Services.Common.Registrators;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -65,6 +66,7 @@ public static class ServiceBuilder
         builder.Services.Configure<RouteOptions>(opt => opt.LowercaseUrls = true);
         builder.Services.Configure<ForwardedHeadersOptions>(opt => opt.ForwardedHeaders = ForwardedHeaders.All);
 
+        // AppSettings
         if (typeof(TAppOptions) != typeof(object))
             builder.Services.Configure<TAppOptions>(builder.Configuration);
 
@@ -76,11 +78,15 @@ public static class ServiceBuilder
         // Other services and configurations.
         configureServices(builder.Services, builder.Configuration);
 
+        builder.Services.AddDiscord(builder.Configuration);
+
         var app = builder.Build();
 
         if (preRunInitialization is not null)
         {
             using var scope = app.Services.CreateScope();
+
+            await app.InitDiscordAsync(scope.ServiceProvider);
             await preRunInitialization(app, scope.ServiceProvider);
         }
 

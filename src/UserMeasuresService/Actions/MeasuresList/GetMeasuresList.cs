@@ -3,6 +3,7 @@ using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Models.Pagination;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Models.MeasuresList;
 
@@ -17,20 +18,21 @@ public class GetMeasuresList : ApiAction<UserMeasuresContext>
     public override async Task<ApiResult> ProcessAsync()
     {
         var parameters = (MeasuresListParams)Parameters[0]!;
-        var warnings = await ReadWarningsAsync(parameters);
-        var unverifies = await ReadUnverifiesAsync(parameters);
-        var items = MapItems(warnings, unverifies).OrderByDescending(o => o.CreatedAtUtc).ToList();
+        var warnings = await ReadEntitiesAsync<MemberWarningItem>(parameters, "Warning");
+        var unverifies = await ReadEntitiesAsync<UnverifyItem>(parameters, "Unverify");
+        var timeouts = await ReadEntitiesAsync<TimeoutItem>(parameters, "Timeout");
+        var items = MapItems(warnings, unverifies, timeouts).OrderByDescending(o => o.CreatedAtUtc).ToList();
         var result = PaginatedResponse<MeasuresItem>.Create(items, parameters.Pagination);
 
         return ApiResult.Ok(result);
     }
 
-    private async Task<List<MemberWarningItem>> ReadWarningsAsync(MeasuresListParams parameters)
+    private async Task<List<TEntity>> ReadEntitiesAsync<TEntity>(MeasuresListParams parameters, string type) where TEntity : UserMeasureBase
     {
-        if (!string.IsNullOrEmpty(parameters.Type) && parameters.Type != "Warning")
-            return new List<MemberWarningItem>();
+        if (!string.IsNullOrEmpty(parameters.Type) && parameters.Type != type)
+            return new List<TEntity>();
 
-        var query = DbContext.MemberWarnings.AsNoTracking();
+        var query = DbContext.Set<TEntity>().AsNoTracking();
 
         if (!string.IsNullOrEmpty(parameters.GuildId))
             query = query.Where(o => o.GuildId == parameters.GuildId);
@@ -39,37 +41,15 @@ public class GetMeasuresList : ApiAction<UserMeasuresContext>
         if (!string.IsNullOrEmpty(parameters.ModeratorId))
             query = query.Where(o => o.ModeratorId == parameters.ModeratorId);
         if (parameters.CreatedFrom is not null)
-            query = query.Where(o => o.CreatedAtUtc >= parameters.CreatedFrom);
+            query = query.Where(o => o.CreatedAtUtc >= parameters.CreatedFrom.Value);
         if (parameters.CreatedTo is not null)
-            query = query.Where(o => o.CreatedAtUtc <= parameters.CreatedTo);
+            query = query.Where(o => o.CreatedAtUtc <= parameters.CreatedTo.Value);
 
         query = query.OrderByDescending(o => o.CreatedAtUtc);
         return await ContextHelper.ReadEntitiesAsync(query);
     }
 
-    private async Task<List<UnverifyItem>> ReadUnverifiesAsync(MeasuresListParams parameters)
-    {
-        if (!string.IsNullOrEmpty(parameters.Type) && parameters.Type != "Unverify")
-            return new List<UnverifyItem>();
-
-        var query = DbContext.Unverifies.AsNoTracking();
-
-        if (!string.IsNullOrEmpty(parameters.GuildId))
-            query = query.Where(o => o.GuildId == parameters.GuildId);
-        if (!string.IsNullOrEmpty(parameters.UserId))
-            query = query.Where(o => o.UserId == parameters.UserId);
-        if (!string.IsNullOrEmpty(parameters.ModeratorId))
-            query = query.Where(o => o.ModeratorId == parameters.ModeratorId);
-        if (parameters.CreatedFrom is not null)
-            query = query.Where(o => o.CreatedAtUtc >= parameters.CreatedFrom);
-        if (parameters.CreatedTo is not null)
-            query = query.Where(o => o.CreatedAtUtc <= parameters.CreatedTo);
-
-        query = query.OrderByDescending(o => o.CreatedAtUtc);
-        return await ContextHelper.ReadEntitiesAsync(query);
-    }
-
-    private IEnumerable<MeasuresItem> MapItems(List<MemberWarningItem> warnings, List<UnverifyItem> unverifies)
+    private IEnumerable<MeasuresItem> MapItems(List<MemberWarningItem> warnings, List<UnverifyItem> unverifies, List<TimeoutItem> timeouts)
     {
         foreach (var warning in warnings.Select(TransformBase))
         {
@@ -85,6 +65,16 @@ public class GetMeasuresList : ApiAction<UserMeasuresContext>
             unverifyItem.ValidTo = unverify.ValidTo;
 
             yield return unverifyItem;
+        }
+
+        foreach (var timeout in timeouts)
+        {
+            var timeoutItem = TransformBase(timeout);
+
+            timeoutItem.Type = "Timeout";
+            timeoutItem.ValidTo = timeout.ValidTo;
+
+            yield return timeoutItem;
         }
     }
 

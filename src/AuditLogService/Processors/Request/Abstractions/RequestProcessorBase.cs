@@ -1,10 +1,10 @@
-﻿using AuditLogService.Core.Discord;
-using AuditLogService.Core.Entity;
+﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
 using AuditLogService.Models.Events.Create;
 using Discord;
 using Discord.Net;
 using GrillBot.Core.Extensions;
+using GrillBot.Services.Common.Discord;
 using System.Net;
 
 namespace AuditLogService.Processors.Request.Abstractions;

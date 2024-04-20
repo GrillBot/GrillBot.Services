@@ -1,4 +1,3 @@
-using AuditLogService.Core.Discord;
 using AuditLogService.Core.Entity;
 using AuditLogService.Core.Entity.Statistics;
 using AuditLogService.Core.Options;
@@ -22,7 +21,6 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
             .AddDatabaseContext<AuditLogStatisticsContext>(b => b.UseNpgsql(connectionString));
 
         services.AddStatisticsProvider<StatisticsProvider>();
-        services.AddDiscord();
         services.AddManagers();
 
         services.AddScoped<RequestProcessorFactory>();
@@ -32,13 +30,10 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         var connectionString = configuration.GetConnectionString("Default")!;
         builder.AddNpgSql(connectionString);
     },
-    preRunInitialization: async (app, scopedProvider) =>
+    preRunInitialization: async (app, _) =>
     {
-        app.ApplicationServices.GetRequiredService<DiscordLogManager>();
-
         await app.InitDatabaseAsync<AuditLogServiceContext>();
         await app.InitDatabaseAsync<AuditLogStatisticsContext>();
-        await scopedProvider.GetRequiredService<DiscordManager>().LoginAsync();
     }
 );
 

@@ -15,50 +15,40 @@ public class GetDashboardData : ApiAction<UserMeasuresContext>
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var unverifies = await ReadUnverifiesAsync();
-        var warnings = await ReadWarningsAsync();
-        var data = unverifies.Concat(warnings).OrderByDescending(o => o.CreatedAtUtc).Take(10).ToList();
+        var unverifies = await ReadRowsAsync<UnverifyItem>("Unverify");
+        var warnings = await ReadRowsAsync<MemberWarningItem>("Warning");
+        var timeouts = await ReadRowsAsync<TimeoutItem>("Timeout");
+        var items = unverifies.Concat(warnings).Concat(timeouts);
 
-        var result = data.ConvertAll(o => new DashboardRow
-        {
-            Type = o.Type,
-            UserId = o.UserId
-        });
+        var result = items
+            .OrderByDescending(o => o.CreatedAtUtc)
+            .Take(10)
+            .Select(o => new DashboardRow
+            {
+                Type = o.Type,
+                UserId = o.UserId
+            })
+            .ToList();
 
         return ApiResult.Ok(result);
     }
 
-    private async Task<List<InternalDashboardRow>> ReadUnverifiesAsync()
+    private async Task<List<InternalDashboardRow>> ReadRowsAsync<TEntity>(string type) where TEntity : UserMeasureBase
     {
-        var query = DbContext.Unverifies.Select(o => new InternalDashboardRow
-        {
-            Type = "Unverify",
-            CreatedAtUtc = o.CreatedAtUtc,
-            UserId = o.UserId
-        });
-
-        return await ReadDashboardRowsAsync(query);
-    }
-
-    private async Task<List<InternalDashboardRow>> ReadWarningsAsync()
-    {
-        var query = DbContext.MemberWarnings.Select(o => new InternalDashboardRow
-        {
-            UserId = o.UserId,
-            CreatedAtUtc = o.CreatedAtUtc,
-            Type = "Warning"
-        });
-
-        return await ReadDashboardRowsAsync(query);
-    }
-
-    private async Task<List<InternalDashboardRow>> ReadDashboardRowsAsync(IQueryable<InternalDashboardRow> query)
-    {
-        query = query
+        var query = DbContext.Set<TEntity>()
             .AsNoTracking()
             .OrderByDescending(o => o.CreatedAtUtc)
-            .Take(10);
+            .Take(10)
+            .Select(o => new InternalDashboardRow
+            {
+                CreatedAtUtc = o.CreatedAtUtc,
+                UserId = o.UserId
+            });
 
-        return await ContextHelper.ReadEntitiesAsync(query);
+        var rows = await ContextHelper.ReadEntitiesAsync(query);
+        foreach (var row in rows)
+            row.Type = type;
+
+        return rows;
     }
 }

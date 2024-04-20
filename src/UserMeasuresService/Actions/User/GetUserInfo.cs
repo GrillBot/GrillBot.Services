@@ -19,16 +19,14 @@ public class GetUserInfo : ApiAction<UserMeasuresContext>
 
         var result = new UserInfo
         {
-            UnverifyCount = await ComputeUnverifiesAsync(guildId, userId),
-            WarningCount = await ComputeWarningsAsync(guildId, userId)
+            UnverifyCount = await ComputeCountAsync<UnverifyItem>(guildId, userId),
+            WarningCount = await ComputeCountAsync<MemberWarningItem>(guildId, userId),
+            TimeoutCount = await ComputeCountAsync<TimeoutItem>(guildId, userId)
         };
 
         return ApiResult.Ok(result);
     }
 
-    private async Task<int> ComputeUnverifiesAsync(string guildId, string userId)
-        => await ContextHelper.ReadCountAsync(DbContext.Unverifies.Where(o => o.GuildId == guildId && o.UserId == userId));
-
-    private async Task<int> ComputeWarningsAsync(string guildId, string userId)
-        => await ContextHelper.ReadCountAsync(DbContext.MemberWarnings.Where(o => o.GuildId == guildId && o.UserId == userId));
+    public async Task<int> ComputeCountAsync<TEntity>(string guildId, string userId) where TEntity : UserMeasureBase
+        => await ContextHelper.ReadCountAsync(DbContext.Set<TEntity>().Where(o => o.GuildId == guildId && o.UserId == userId));
 }

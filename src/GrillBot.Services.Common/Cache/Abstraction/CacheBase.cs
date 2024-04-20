@@ -1,6 +1,6 @@
 ﻿using GrillBot.Core.Managers.Performance;
 
-namespace GrillBot.Services.Common.Cache;
+namespace GrillBot.Services.Common.Cache.Abstraction;
 
 public abstract class CacheBase
 {

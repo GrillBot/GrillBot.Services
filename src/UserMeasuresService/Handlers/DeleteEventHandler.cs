@@ -13,7 +13,7 @@ public class DeleteEventHandler : BaseMeasuresHandler<DeletePayload>
     {
     }
 
-    protected override async Task HandleInternalAsync(DeletePayload payload)
+    protected override async Task HandleInternalAsync(DeletePayload payload, Dictionary<string, string> headers)
     {
         await DeleteWarningAsync(payload.Id);
     }

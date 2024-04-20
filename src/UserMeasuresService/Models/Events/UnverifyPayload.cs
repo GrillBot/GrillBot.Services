@@ -4,17 +4,17 @@ public class UnverifyPayload : BasePayload
 {
     public override string QueueName => "user_measures:unverify";
 
-    public DateTime EndAt { get; set; }
+    public DateTime EndAtUtc { get; set; }
     public long LogSetId { get; set; }
 
     public UnverifyPayload()
     {
     }
 
-    public UnverifyPayload(DateTime createdAt, string reason, string guildId, string moderatorId, string targetUserId, DateTime endAt, long logSetId)
-        : base(createdAt, reason, guildId, moderatorId, targetUserId)
+    public UnverifyPayload(DateTime createdAtUtc, string reason, string guildId, string moderatorId, string targetUserId, DateTime endAtUtc, long logSetId)
+        : base(createdAtUtc, reason, guildId, moderatorId, targetUserId)
     {
-        EndAt = endAt;
+        EndAtUtc = endAtUtc;
         LogSetId = logSetId;
     }
 }

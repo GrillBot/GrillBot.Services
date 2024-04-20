@@ -1,9 +1,9 @@
 ﻿using Discord;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Services.Common.Cache;
+using GrillBot.Services.Common.Cache.Abstraction;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace AuditLogService.Cache;
+namespace GrillBot.Services.Common.Cache;
 
 public class GuildCache : InMemoryCache<IGuild>
 {

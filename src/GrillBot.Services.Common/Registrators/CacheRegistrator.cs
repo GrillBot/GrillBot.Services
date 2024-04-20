@@ -1,4 +1,4 @@
-﻿using GrillBot.Services.Common.Cache;
+﻿using GrillBot.Services.Common.Cache.Abstraction;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -12,6 +12,12 @@ public static class CacheRegistrator
     private static readonly Type _scopedInterface = typeof(IScopedCache);
 
     public static void RegisterCacheFromAssembly(this IServiceCollection services, Assembly assembly)
+    {
+        RegisterCache(services, typeof(CacheRegistrator).Assembly);
+        RegisterCache(services, assembly);
+    }
+
+    internal static void RegisterCache(IServiceCollection services, Assembly assembly)
     {
         var types = assembly.GetTypes();
         var caches = types.Where(o => o.IsClass && !o.IsAbstract && _cacheType.IsAssignableFrom(o)).ToList();

@@ -1,7 +1,7 @@
 ﻿using GrillBot.Core.Managers.Performance;
 using System.Diagnostics.CodeAnalysis;
 
-namespace GrillBot.Services.Common.Cache;
+namespace GrillBot.Services.Common.Cache.Abstraction;
 
 internal interface IScopedCache { }
 

@@ -10,4 +10,5 @@ public class UserMeasuresContext : DbContext
 
     public DbSet<UnverifyItem> Unverifies => Set<UnverifyItem>();
     public DbSet<MemberWarningItem> MemberWarnings => Set<MemberWarningItem>();
+    public DbSet<TimeoutItem> Timeouts => Set<TimeoutItem>();
 }

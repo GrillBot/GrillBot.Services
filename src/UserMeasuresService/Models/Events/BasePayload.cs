@@ -6,7 +6,7 @@ public abstract class BasePayload : IPayload
 {
     public abstract string QueueName { get; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
     public string Reason { get; set; } = null!;
     public string GuildId { get; set; } = null!;
     public string ModeratorId { get; set; } = null!;
@@ -16,9 +16,9 @@ public abstract class BasePayload : IPayload
     {
     }
 
-    protected BasePayload(DateTime createdAt, string reason, string guildId, string moderatorId, string targetUserId)
+    protected BasePayload(DateTime createdAtUtc, string reason, string guildId, string moderatorId, string targetUserId)
     {
-        CreatedAt = createdAt;
+        CreatedAtUtc = createdAtUtc;
         Reason = reason;
         GuildId = guildId;
         ModeratorId = moderatorId;

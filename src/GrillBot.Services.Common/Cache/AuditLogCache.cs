@@ -1,8 +1,8 @@
 ﻿using Discord;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Services.Common.Cache;
+using GrillBot.Services.Common.Cache.Abstraction;
 
-namespace AuditLogService.Cache;
+namespace GrillBot.Services.Common.Cache;
 
 public class AuditLogCache : ScopedCache<ulong, Dictionary<ActionType, IReadOnlyCollection<IAuditLogEntry>>>
 {

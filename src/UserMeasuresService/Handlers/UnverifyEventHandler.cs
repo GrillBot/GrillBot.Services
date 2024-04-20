@@ -13,16 +13,16 @@ public class UnverifyEventHandler : BaseMeasuresHandler<UnverifyPayload>
     {
     }
 
-    protected override async Task HandleInternalAsync(UnverifyPayload payload)
+    protected override async Task HandleInternalAsync(UnverifyPayload payload, Dictionary<string, string> headers)
     {
         var entity = new UnverifyItem
         {
-            CreatedAtUtc = payload.CreatedAt.ToUniversalTime(),
+            CreatedAtUtc = payload.CreatedAtUtc.ToUniversalTime(),
             GuildId = payload.GuildId,
             ModeratorId = payload.ModeratorId,
             Reason = payload.Reason,
             UserId = payload.TargetUserId,
-            ValidTo = payload.EndAt.ToUniversalTime(),
+            ValidTo = payload.EndAtUtc.ToUniversalTime(),
             LogSetId = payload.LogSetId
         };
 
