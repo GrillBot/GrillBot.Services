@@ -1,22 +1,23 @@
 ﻿using GrillBot.Core.Services.Diagnostics;
 using GrillBot.Core.Services.Diagnostics.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
-namespace EmoteService.Controllers;
+namespace GrillBot.Services.Common.Infrastructure.Api.Controllers;
 
 [ApiController]
-public class DiagnosticController : ControllerBase
+[Route("api/diag")]
+public class ServiceDiagnosticsController : Core.Infrastructure.Actions.ControllerBase
 {
     private readonly IDiagnosticsProvider _diagnosticsProvider;
 
-    public DiagnosticController(IServiceProvider serviceProvider, IDiagnosticsProvider diagnosticsProvider) : base(serviceProvider)
+    public ServiceDiagnosticsController(IDiagnosticsProvider diagnosticsProvider, IServiceProvider serviceProvider) : base(serviceProvider)
     {
         _diagnosticsProvider = diagnosticsProvider;
     }
 
     [HttpGet]
     [ProducesResponseType(typeof(DiagnosticInfo), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetInfoAsync()
+    public async Task<IActionResult> GetDiagnosticsAsync()
         => Ok(await _diagnosticsProvider.GetInfoAsync());
 }

@@ -43,13 +43,15 @@ public static class ServiceBuilder
         builder.Services.AddCoreManagers();
 
         // MVC
-        builder.Services.AddControllers(opt =>
+        var mvcBuilder = builder.Services.AddControllers(opt =>
         {
             opt.RegisterCoreFilter();
 
             if (configureControllers is not null)
                 configureControllers(opt);
         });
+
+        mvcBuilder.RegisterCommonControllers();
 
         // HealthChecks
         var healthChecks = builder.Services.AddHealthChecks();
