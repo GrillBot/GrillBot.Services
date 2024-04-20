@@ -15,7 +15,7 @@ public class EmoteEventEventHandler : BaseEventHandlerWithDb<EmoteEventPayload, 
     {
     }
 
-    protected override async Task HandleInternalAsync(EmoteEventPayload payload)
+    protected override async Task HandleInternalAsync(EmoteEventPayload payload, Dictionary<string, string> headers)
     {
         var emoteValue = Emote.Parse(payload.EmoteId);
         if (payload.IsIncrement && !await IsSupportedEmoteAsync(emoteValue))

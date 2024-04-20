@@ -14,7 +14,7 @@ public class SynchronizeEmotesEventHandler : BaseEventHandlerWithDb<SynchronizeE
     {
     }
 
-    protected override async Task HandleInternalAsync(SynchronizeEmotesPayload payload)
+    protected override async Task HandleInternalAsync(SynchronizeEmotesPayload payload, Dictionary<string, string> headers)
     {
         await ClearEmotesAsync(payload.GuildId);
         await InsertEmotesAsync(payload.GuildId, payload.Emotes);
