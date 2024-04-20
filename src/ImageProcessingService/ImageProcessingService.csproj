@@ -7,7 +7,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="GrillBot.Core.Services" Version="1.8.1" />
 		<PackageReference Include="Magick.NET-Q8-AnyCPU" Version="13.6.0" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="7.0.16" />
 	</ItemGroup>

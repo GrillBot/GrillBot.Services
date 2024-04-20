@@ -14,7 +14,7 @@ public class GraphicsServiceHealthCheck : IHealthCheck
 
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = new())
     {
-        var isAvailable = await GraphicsClient.IsAvailableAsync();
+        var isAvailable = await GraphicsClient.IsHealthyAsync();
         return new HealthCheckResult(isAvailable ? HealthStatus.Healthy : HealthStatus.Unhealthy);
     }
 }
