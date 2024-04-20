@@ -18,7 +18,7 @@ public class RecalculationHandler : BaseEventHandlerWithDb<RecalculationPayload,
         ServiceProvider = serviceProvider;
     }
 
-    protected override async Task HandleInternalAsync(RecalculationPayload payload)
+    protected override async Task HandleInternalAsync(RecalculationPayload payload, Dictionary<string, string> headers)
     {
         foreach (var action in GetRecalculationActions(payload))
         {

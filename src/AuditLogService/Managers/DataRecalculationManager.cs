@@ -18,7 +18,7 @@ public class DataRecalculationManager
     public async Task EnqueueRecalculationAsync(List<LogItem> items)
     {
         var batches = CreateBatches(items);
-        await Publisher.PublishBatchAsync(batches);
+        await Publisher.PublishBatchAsync(batches, new());
     }
 
     private static List<RecalculationPayload> CreateBatches(List<LogItem> items)

@@ -25,7 +25,7 @@ public class CreateItemsEventHandler : BaseEventHandlerWithDb<CreateItemsPayload
         RequestProcessorFactory = requestProcessorFactory;
     }
 
-    protected override async Task HandleInternalAsync(CreateItemsPayload payload)
+    protected override async Task HandleInternalAsync(CreateItemsPayload payload, Dictionary<string, string> headers)
     {
         var entities = new List<LogItem>();
 
@@ -43,7 +43,7 @@ public class CreateItemsEventHandler : BaseEventHandlerWithDb<CreateItemsPayload
         await DataRecalculation.EnqueueRecalculationAsync(entities);
 
         if (_processingInfoBatch.Items.Count > 0)
-            await Publisher.PublishAsync(_processingInfoBatch);
+            await Publisher.PublishAsync(_processingInfoBatch, new());
     }
 
     private async Task<LogItem> CreateLogItemAsync(LogRequest request)

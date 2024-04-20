@@ -19,7 +19,7 @@ public class BulkDeleteEventHandler : BaseEventHandlerWithDb<BulkDeletePayload, 
         DataRecalculation = dataRecalculation;
     }
 
-    protected override async Task HandleInternalAsync(BulkDeletePayload payload)
+    protected override async Task HandleInternalAsync(BulkDeletePayload payload, Dictionary<string, string> headers)
     {
         var logItems = await ReadLogItemsAsync(payload.Ids);
 
@@ -175,7 +175,7 @@ public class BulkDeleteEventHandler : BaseEventHandlerWithDb<BulkDeletePayload, 
             return;
 
         var batch = item.Files.Select(f => new FileDeletePayload(f.Filename)).ToList();
-        await Publisher.PublishBatchAsync(batch);
+        await Publisher.PublishBatchAsync(batch, new());
     }
 
     private async Task<List<TChildType>> RemoveChildDataAsync<TChildType>(LogItem parent, Func<IQueryable<TChildType>, IQueryable<TChildType>>? includeAction = null) where TChildType : ChildEntityBase
