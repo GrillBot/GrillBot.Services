@@ -1,13 +1,12 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Models.Pagination;
+using GrillBot.Core.Services.UserMeasures.Models.MeasuresList;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 using UserMeasuresService.Core.Entity;
-using UserMeasuresService.Models.MeasuresList;
 
-namespace UserMeasuresService.Actions.MeasuresList;
+namespace UserMeasuresService.Actions.Measures;
 
 public class GetMeasuresList : ApiAction<UserMeasuresContext>
 {

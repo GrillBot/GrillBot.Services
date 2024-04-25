@@ -1,4 +1,4 @@
-﻿namespace UserMeasuresService.Models.MeasuresList;
+﻿namespace UserMeasuresService.Models.Measures;
 
 public class MeasuresItem
 {

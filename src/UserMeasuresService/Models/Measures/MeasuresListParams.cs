@@ -2,7 +2,7 @@
 using GrillBot.Core.Validation;
 using System.ComponentModel.DataAnnotations;
 
-namespace UserMeasuresService.Models.MeasuresList;
+namespace UserMeasuresService.Models.Measures;
 
 public class MeasuresListParams : IValidatableObject
 {
