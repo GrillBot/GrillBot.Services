@@ -20,6 +20,6 @@ public class MeasuresController : GrillBot.Core.Infrastructure.Actions.Controlle
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    public Task<IActionResult> DeleteMeasureAsync(DeleteMeasuresRequest request)
+    public Task<IActionResult> DeleteMeasureAsync([FromQuery] DeleteMeasuresRequest request)
         => ProcessAsync<Actions.Measures.DeleteMeasureAction>(request);
 }
