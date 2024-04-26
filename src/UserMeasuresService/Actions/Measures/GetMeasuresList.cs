@@ -1,10 +1,10 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Models.Pagination;
-using GrillBot.Core.Services.UserMeasures.Models.MeasuresList;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
 using UserMeasuresService.Core.Entity;
+using UserMeasuresService.Models.Measures;
 
 namespace UserMeasuresService.Actions.Measures;
 
