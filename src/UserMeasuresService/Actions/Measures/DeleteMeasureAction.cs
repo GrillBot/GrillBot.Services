@@ -24,10 +24,19 @@ public class DeleteMeasureAction : ApiAction<UserMeasuresContext>
             itemFound |= await DeleteEntityAsync<TimeoutItem>(request.Id.Value);
         }
 
-        if (request.ExternalId.HasValue)
+        if (!string.IsNullOrEmpty(request.ExternalIdType) && request.ExternalId.HasValue)
         {
-            itemFound |= await DeleteEntityAsync(DbContext.Unverifies.Where(o => o.LogSetId == request.ExternalId.Value));
-            itemFound |= await DeleteEntityAsync(DbContext.Timeouts.Where(o => o.ExternalId == request.ExternalId.Value));
+            switch (request.ExternalIdType.ToLower())
+            {
+                case "unverify":
+                    itemFound |= await DeleteEntityAsync(DbContext.Unverifies.Where(o => o.LogSetId == request.ExternalId.Value));
+                    break;
+                case "timeout":
+                    itemFound |= await DeleteEntityAsync(DbContext.Timeouts.Where(o => o.ExternalId == request.ExternalId.Value));
+                    break;
+                default:
+                    return new ApiResult(StatusCodes.Status406NotAcceptable);
+            }
         }
 
         return itemFound ? ApiResult.Ok() : ApiResult.NotFound();

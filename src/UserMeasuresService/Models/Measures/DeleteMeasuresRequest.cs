@@ -6,6 +6,7 @@ public class DeleteMeasuresRequest : IValidatableObject
 {
     public Guid? Id { get; set; }
     public long? ExternalId { get; set; }
+    public string? ExternalIdType { get; set; }
 
     public DeleteMeasuresRequest()
     {
@@ -21,5 +22,11 @@ public class DeleteMeasuresRequest : IValidatableObject
     {
         if (Id is null && ExternalId is null)
             yield return new ValidationResult("Missing measure ID", new[] { nameof(Id), nameof(ExternalId) });
+
+        if (!string.IsNullOrEmpty(ExternalIdType) && ExternalId is null)
+            yield return new ValidationResult("Required ExternalId when ExternalIdType is filled.");
+
+        if (ExternalId is not null && string.IsNullOrEmpty(ExternalIdType))
+            yield return new ValidationResult("Required ExternalIdType when ExternalId is filled.");
     }
 }
