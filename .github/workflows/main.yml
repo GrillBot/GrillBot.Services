@@ -239,7 +239,7 @@ jobs:
           username: ${{ secrets.SSH_DEV_USERNAME }}
           password: ${{ secrets.SSH_DEV_PASSWORD }}
           port: 22
-          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-rubbergod-service
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S /scripts/update-grillbot-dev.sh rubbergod_service
       - name: Graphics
         if: needs.PathsFilter.outputs.Graphics == 'true'
         uses: appleboy/ssh-action@v0.1.8
@@ -248,7 +248,7 @@ jobs:
           username: ${{ secrets.SSH_DEV_USERNAME }}
           password: ${{ secrets.SSH_DEV_PASSWORD }}
           port: 22
-          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-graphics
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S /scripts/update-grillbot-dev.sh graphics
       - name: PointsService
         if: needs.PathsFilter.outputs.PointsService == 'true'
         uses: appleboy/ssh-action@v0.1.8
@@ -266,7 +266,7 @@ jobs:
           username: ${{ secrets.SSH_DEV_USERNAME }}
           password: ${{ secrets.SSH_DEV_PASSWORD }}
           port: 22
-          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S python3 /scripts/deploy/deploy.py grillbot-image-processing-service
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S /scripts/update-grillbot-dev.sh image_processing
       - name: AuditLogService
         if: needs.PathsFilter.outputs.AuditLogService == 'true'
         uses: appleboy/ssh-action@v0.1.8
@@ -307,7 +307,7 @@ jobs:
           username: ${{ secrets.SSH_Username }}
           password: ${{ secrets.SSH_Password }}
           port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-rubbergod-service
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh rubbergod_service
   Graphics_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_Graphics"
@@ -321,7 +321,7 @@ jobs:
           username: ${{ secrets.SSH_Username }}
           password: ${{ secrets.SSH_Password }}
           port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-graphics
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh graphics
   PointsService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_PointsService"
@@ -349,7 +349,7 @@ jobs:
           username: ${{ secrets.SSH_Username }}
           password: ${{ secrets.SSH_Password }}
           port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S python3 /scripts/deploy/deploy.py prod/grillbot-image-processing-service
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh image_processing
   AuditLogService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_AuditLogService"
