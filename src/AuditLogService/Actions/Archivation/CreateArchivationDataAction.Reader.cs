@@ -1,5 +1,6 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
+using AuditLogService.Core.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Archivation;
@@ -107,31 +108,8 @@ public partial class CreateArchivationDataAction
     }
 
     private async Task SetLogDataAsync<TData>(IEnumerable<LogItem> headers, IQueryable<TData> query, Action<LogItem, TData> setData) where TData : ChildEntityBase
-    {
-        var ids = headers.Select(o => o.Id).ToList();
+        => await headers.SetLogDataAsync(query, setData, ContextHelper, true);
 
-        query = query.Where(o => ids.Contains(o.LogItemId)).AsNoTracking();
-        var data = await ContextHelper.ReadEntitiesAsync(query);
-
-        foreach (var item in data)
-        {
-            var header = headers.First(o => o.Id == item.LogItemId);
-            setData(header, item);
-        }
-    }
-
-#pragma warning disable S4144 // Methods should not have identical implementations
     private async Task SetLogDataWithoutKeyAsync<TData>(IEnumerable<LogItem> headers, IQueryable<TData> query, Action<LogItem, TData> setData) where TData : ChildEntityBaseWithoutKey
-    {
-        var ids = headers.Select(o => o.Id).ToList();
-
-        query = query.Where(o => ids.Contains(o.LogItemId)).AsNoTracking();
-        var data = await ContextHelper.ReadEntitiesAsync(query);
-
-        foreach (var item in data)
-        {
-            var header = headers.First(o => o.Id == item.LogItemId);
-            setData(header, item);
-        }
-    }
+        => await headers.SetLogDataWithoutKeyAsync(query, setData, ContextHelper, true);
 }

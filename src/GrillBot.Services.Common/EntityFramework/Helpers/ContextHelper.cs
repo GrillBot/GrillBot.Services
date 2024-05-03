@@ -67,4 +67,10 @@ public class ContextHelper<TDbContext> where TDbContext : DbContext
         using (CreateCounter("Database"))
             return await _dbContext.SaveChangesAsync();
     }
+
+    public async Task<int> ExecuteBatchDeleteAsync<TEntity>(IQueryable<TEntity> query) where TEntity : class
+    {
+        using (CreateCounter("Database"))
+            return await query.ExecuteDeleteAsync();
+    }
 }

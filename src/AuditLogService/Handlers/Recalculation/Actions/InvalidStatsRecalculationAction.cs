@@ -35,13 +35,8 @@ public class InvalidStatsRecalculationAction : RecalculationActionBase
         }
 
         await ClearStatisticsAsync<DatabaseStatistic>(o => o.RecordsCount == 0);
-        await StatisticsContext.SaveChangesAsync();
     }
 
     private async Task ClearStatisticsAsync<TStatisticEntity>(Expression<Func<TStatisticEntity, bool>> searchExpression) where TStatisticEntity : class
-    {
-        var statistics = await StatisticsContext.Set<TStatisticEntity>().Where(searchExpression).ToListAsync();
-        if (statistics.Count > 0)
-            StatisticsContext.RemoveRange(statistics);
-    }
+        => await StatisticsContext.Set<TStatisticEntity>().Where(searchExpression).ExecuteDeleteAsync();
 }
