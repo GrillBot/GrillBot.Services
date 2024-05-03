@@ -1,14 +1,10 @@
 import express from 'express';
 import { PeepoImageBase } from './api/peepo-base';
 import { PeepoAngry } from './api/peepoangry';
-import { PeepoLove } from './api/peepolove';
 
 export const onRequest = async (request: express.Request, response: express.Response) => {
     let renderer: PeepoImageBase | null = null;
     switch (request.params.method) {
-        case 'love':
-            renderer = new PeepoLove(request.body);
-            break;
         case 'angry':
             renderer = new PeepoAngry(request.body);
             break;

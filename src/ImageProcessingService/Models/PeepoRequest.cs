@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GrillBot.Core.Validation;
+using ImageMagick;
 
 namespace ImageProcessingService.Models;
 
@@ -27,5 +28,20 @@ public class PeepoRequest
 
         var avatarSize = AvatarInfo.AvatarContent.Length;
         return avatarSize <= 2 * (GuildUploadLimit / 1000000 * 1024 * 1024 / 3);
+    }
+
+    public List<IMagickImage<byte>> GetProfilePictureFrames()
+    {
+        using var profilePicture = new MagickImageCollection(AvatarInfo.AvatarContent);
+
+        if (IsAnimated())
+        {
+            profilePicture.Coalesce();
+            return profilePicture.Select(o => o.Clone()).ToList();
+        }
+        else
+        {
+            return new List<IMagickImage<byte>> { profilePicture[0].Clone() };
+        }
     }
 }
