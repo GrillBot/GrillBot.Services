@@ -1,6 +1,7 @@
 ﻿using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Models.Pagination;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace GrillBot.Services.Common.EntityFramework.Helpers;
 
@@ -43,6 +44,9 @@ public class ContextHelper<TDbContext> where TDbContext : DbContext
         using (CreateCounter("Database"))
             return await query.FirstOrDefaultAsync();
     }
+
+    public Task<TEntity?> ReadFirstOrDefaultEntityAsync<TEntity>(Expression<Func<TEntity, bool>> whereExpression) where TEntity : class
+        => ReadFirstOrDefaultEntityAsync(_dbContext.Set<TEntity>().Where(whereExpression));
 
     public async Task<int> ReadCountAsync<TEntity>(IQueryable<TEntity> query) where TEntity : class
     {

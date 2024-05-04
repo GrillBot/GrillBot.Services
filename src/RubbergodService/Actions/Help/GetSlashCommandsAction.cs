@@ -1,7 +1,7 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.Extensions.Caching.Memory;
-using RubbergodService.Core.Models;
 using RubbergodService.DirectApi;
+using RubbergodService.Models;
 using System.Text;
 using System.Text.Json;
 

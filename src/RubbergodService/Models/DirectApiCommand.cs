@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace RubbergodService.Core.Models;
+namespace RubbergodService.Models;
 
 public class DirectApiCommand
 {

@@ -1,7 +1,7 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Models.Pagination;
-using RubbergodService.Core.Models;
 using RubbergodService.Core.Repository;
+using RubbergodService.Models;
 
 namespace RubbergodService.Actions.Karma;
 

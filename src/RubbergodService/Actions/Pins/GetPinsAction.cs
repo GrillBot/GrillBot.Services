@@ -1,9 +1,9 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using Microsoft.AspNetCore.Mvc;
 using RubbergodService.Core.Entity;
-using RubbergodService.Core.Models;
 using RubbergodService.Core.Repository;
 using RubbergodService.DirectApi;
+using RubbergodService.Models;
 
 namespace RubbergodService.Actions.Pins;
 

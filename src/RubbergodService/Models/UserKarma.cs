@@ -1,4 +1,4 @@
-﻿namespace RubbergodService.Core.Models;
+﻿namespace RubbergodService.Models;
 
 public class UserKarma
 {

@@ -20,11 +20,4 @@ public class Karma
 
     [JsonPropertyName("negative")]
     public int Negative { get; set; }
-
-    public void Update(Karma karma)
-    {
-        KarmaValue = karma.KarmaValue;
-        Positive = karma.Positive;
-        Negative = karma.Negative;
-    }
 }

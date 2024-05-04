@@ -10,11 +10,6 @@ public class PinsController : ControllerBase
     {
     }
 
-    [HttpDelete("{guildId}/{channelId}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> InvalidateCacheAsync(ulong guildId, ulong channelId)
-        => await ProcessAsync<InvalidateCacheAction>(guildId, channelId);
-
     [HttpGet("{guildId}/{channelId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPinsAsync(ulong guildId, ulong channelId, bool markdown = false)

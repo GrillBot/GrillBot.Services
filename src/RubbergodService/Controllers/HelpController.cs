@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RubbergodService.Core.Models;
+using RubbergodService.Models;
 using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace RubbergodService.Controllers;

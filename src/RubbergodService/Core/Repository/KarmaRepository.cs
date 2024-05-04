@@ -22,10 +22,4 @@ public class KarmaRepository : SubRepositoryBase<RubbergodServiceContext>
             return await PaginatedResponse<Karma>.CreateWithEntityAsync(query, parameters);
         }
     }
-
-    public async Task<Karma?> FindKarmaByMemberIdAsync(string memberId)
-    {
-        using (CreateCounter())
-            return await Context.Karma.FirstOrDefaultAsync(o => o.MemberId == memberId);
-    }
 }
