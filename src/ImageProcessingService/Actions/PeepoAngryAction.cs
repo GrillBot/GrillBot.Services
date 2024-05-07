@@ -1,76 +1,69 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
-using GrillBot.Core.Services.Graphics;
 using ImageMagick;
 using ImageProcessingService.Caching;
 using ImageProcessingService.Models;
+using ImageProcessingService.Renderers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImageProcessingService.Actions;
 
 public class PeepoAngryAction : ApiActionBase
 {
-    private PeepoCache Cache { get; }
-    private IGraphicsClient GraphicsClient { get; }
+    private readonly PeepoCache _cache;
 
-    public PeepoAngryAction(PeepoCache cache, IGraphicsClient graphicsClient)
+    public PeepoAngryAction(PeepoCache cache)
     {
-        Cache = cache;
-        GraphicsClient = graphicsClient;
+        _cache = cache;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = (PeepoRequest)Parameters[0]!;
 
-        var cachedImage = await Cache.GetByPeepoRequestAsync(request, "PeepoAngry");
+        var cachedImage = await _cache.GetByPeepoRequestAsync(request, "PeepoAngry");
         if (cachedImage is not null)
             return CreateResult(cachedImage.Image, cachedImage.ContentType);
 
-        var isAnimated = request.IsAnimated();
-        var profilePictureFrames = new List<byte[]>();
-
-        using var profilePicture = new MagickImageCollection(request.AvatarInfo.AvatarContent);
-
-        if (isAnimated)
-        {
-            profilePicture.Coalesce();
-            profilePictureFrames.AddRange(profilePicture.Select(frame => frame.ToByteArray()));
-        }
-        else
-        {
-            profilePictureFrames.Add(profilePicture[0].ToByteArray());
-        }
+        var profilePictureFrames = request.GetProfilePictureFrames();
 
         byte[] resultImage;
         string resultContentType;
 
-        var createdFrames = await GraphicsClient.CreatePeepoAngryAsync(profilePictureFrames);
-        if (createdFrames.Count == 1)
+        var createdFrames = PeepoangryRenderer.Render(profilePictureFrames);
+        try
         {
-            using var img = new MagickImage(createdFrames[0]);
-
-            resultImage = img.ToByteArray(MagickFormat.Png);
-            resultContentType = "image/png";
-        }
-        else
-        {
-            var framesQuery = createdFrames.Select(frameData =>
+            if (createdFrames.Count == 1)
             {
-                var frame = new MagickImage(frameData, MagickFormat.Png)
+                resultImage = createdFrames[0].ToByteArray(MagickFormat.Png);
+                resultContentType = "image/png";
+            }
+            else
+            {
+                var framesQuery = createdFrames.Select(rawFrame =>
                 {
-                    GifDisposeMethod = GifDisposeMethod.Background
-                };
+                    var frameData = rawFrame.ToByteArray(MagickFormat.Png);
+                    return new MagickImage(frameData, MagickFormat.Png)
+                    {
+                        GifDisposeMethod = GifDisposeMethod.Background
+                    };
+                });
 
-                return frame;
-            });
+                using var collection = new MagickImageCollection(framesQuery);
 
-            using var collection = new MagickImageCollection(framesQuery);
+                resultImage = collection.ToByteArray(MagickFormat.Gif);
+                resultContentType = "image/gif";
+            }
+        }
+        finally
+        {
+            foreach (var frame in createdFrames)
+                frame.Dispose();
 
-            resultImage = collection.ToByteArray(MagickFormat.Gif);
-            resultContentType = "image/gif";
+            foreach (var profilePicture in profilePictureFrames)
+                profilePicture.Dispose();
         }
 
-        await Cache.WriteByPeepoRequest(request, "PeepoAngry", resultImage, resultContentType);
+        await _cache.WriteByPeepoRequest(request, "PeepoAngry", resultImage, resultContentType);
         return CreateResult(resultImage, resultContentType);
     }
 
