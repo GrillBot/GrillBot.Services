@@ -42,9 +42,8 @@ public class DirectApiClient
         {
             if (CachedChannels.TryGetValue(channelId, out var cachedChannel)) return cachedChannel;
 
-            var channel = await DiscordClient.GetChannelAsync(channelId);
-            if (channel is null)
-                throw new ArgumentException($"Unable to find channel with ID {channelId}");
+            var channel = await DiscordClient.GetChannelAsync(channelId)
+                ?? throw new ArgumentException($"Unable to find channel with ID {channelId}");
             if (channel is not ITextChannel textChannel)
                 throw new ArgumentException("Communication channel is not text channel.");
 

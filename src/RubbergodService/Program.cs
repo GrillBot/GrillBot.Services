@@ -1,12 +1,10 @@
 using GrillBot.Core;
 using GrillBot.Services.Common;
 using Microsoft.EntityFrameworkCore;
-using RubbergodService.Core;
 using RubbergodService.Core.Entity;
 using RubbergodService.Core.Providers;
 using RubbergodService.Core.Repository;
 using RubbergodService.DirectApi;
-using RubbergodService.Discord;
 using System.Reflection;
 
 var application = await ServiceBuilder.CreateWebAppAsync(
@@ -20,7 +18,6 @@ var application = await ServiceBuilder.CreateWebAppAsync(
         services.AddScoped<RubbergodServiceRepository>();
         services.AddMemoryCache();
         services.AddStatisticsProvider<StatisticsProvider>();
-        services.AddDiscord();
         services.AddDirectApi();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
@@ -28,13 +25,7 @@ var application = await ServiceBuilder.CreateWebAppAsync(
         var connectionString = configuration.GetConnectionString("Default")!;
         healthCheckBuilder.AddNpgSql(connectionString);
     },
-    preRunInitialization: async (app, scopedProvider) =>
-    {
-        app.ApplicationServices.GetRequiredService<DiscordLogManager>();
-
-        await app.InitDatabaseAsync<RubbergodServiceContext>();
-        await scopedProvider.GetRequiredService<DiscordManager>().LoginAsync();
-    }
+    preRunInitialization: async (app, _) => await app.InitDatabaseAsync<RubbergodServiceContext>()
 );
 
 await application.RunAsync();
