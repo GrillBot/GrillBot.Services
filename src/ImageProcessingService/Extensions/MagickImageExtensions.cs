@@ -57,4 +57,14 @@ public static class MagickImageExtensions
         var result = builder.ToString();
         return result != value ? result[..^3] + "..." : result;
     }
+
+    public static SizeF MeasureText(this string value, string font, int fontSize)
+    {
+        var drawables = new Drawables().Font(font).FontPointSize(fontSize);
+        var size = drawables.FontTypeMetrics(value);
+
+        return size is null ?
+            new SizeF(0, 0) :
+            new SizeF(Convert.ToSingle(size.TextWidth), Convert.ToSingle(size.TextHeight));
+    }
 }

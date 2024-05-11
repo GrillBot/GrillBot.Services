@@ -7,10 +7,10 @@ namespace ImageProcessingService.Renderers;
 
 public static class PointsImageRenderer
 {
-    private static readonly Size _size = new(512, 450);
+    private static readonly Size _size = new(512, 410);
     private static readonly Size _profilePictureSize = new(200, 200);
     private static readonly (string name, int size) _usernameFont = ("Open Sans", 70);
-    private static readonly (string name, int size) _positionFont = ("Open Sans", 25);
+    private static readonly (string name, int size) _positionFont = ("Open Sans", 35);
     private static readonly (string name, int size) _pointsFont = ("Open Sans", 40);
     private const int BORDER = 25;
     private const int CORDER_RADIUS = 20;
@@ -84,7 +84,13 @@ public static class PointsImageRenderer
 
     private static void SetPointsStatus(IDrawables<byte> drawables, int points, int position)
     {
-        var positionTextY = _size.Height - BORDER - 20 - _pointsFont.size;
+        var positionText = $"{position}. místo";
+        var positionTextSize = positionText.MeasureText(_positionFont.name, _positionFont.size);
+        var positionTextX = Math.Max(
+            _size.Width - BORDER - 10 - positionTextSize.Width, // Expected position
+            BORDER + 15 + _profilePictureSize.Width // Start space.
+        );
+        var positionTextY = BORDER + 5 + _positionFont.size;
 
         // Position
         drawables
@@ -92,7 +98,7 @@ public static class PointsImageRenderer
             .FontPointSize(_positionFont.size)
             .TextAlignment(TextAlignment.Left)
             .FillColor(MagickColors.White)
-            .Text(BORDER + 10, positionTextY, $"{position}. místo");
+            .Text(positionTextX, positionTextY, positionText);
 
         // Points
         drawables
@@ -118,7 +124,7 @@ public static class PointsImageRenderer
 
             drawables.Composite(
                 _size.Width - BORDER - 10 - trophy.Width,
-                BORDER + 15,
+                BORDER + 15 + _positionFont.size,
                 CompositeOperator.Over,
                 trophy
             );
