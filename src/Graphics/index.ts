@@ -26,7 +26,6 @@ app.post('/chart', common.validate(chart.validators), (req, res, next) => new co
 app.get('/stats', common.statsEndpoint);
 app.post('/image/without-accident', common.validate(image.withoutAccident.validators), (req, res, next) => new common.RequestProcessing(req, res, next).execute(image.withoutAccident.onRequest));
 app.post('/image/points', common.validate(image.points.validators), (req, res, next) => new common.RequestProcessing(req, res, next).execute(image.points.onRequest));
-app.post('/image/peepo/:method', common.validate(image.peepo.validators), (req, res, next) => new common.RequestProcessing(req, res, next).execute(image.peepo.onRequest));
 app.use(errorHandler);
 
 app.listen(3000, () => console.log('App started on port 3000'));
