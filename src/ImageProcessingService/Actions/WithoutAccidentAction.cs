@@ -1,44 +1,35 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
-using GrillBot.Core.Services.Graphics;
-using GrillBot.Core.Services.Graphics.Models.Images;
 using ImageMagick;
 using ImageProcessingService.Caching;
 using ImageProcessingService.Models;
+using ImageProcessingService.Renderers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImageProcessingService.Actions;
 
 public class WithoutAccidentAction : ApiActionBase
 {
-    private WithoutAccidentCache Cache { get; }
-    private IGraphicsClient GraphicsClient { get; }
+    private readonly WithoutAccidentCache _cache;
 
-    public WithoutAccidentAction(WithoutAccidentCache cache, IGraphicsClient graphicsClient)
+    public WithoutAccidentAction(WithoutAccidentCache cache)
     {
-        Cache = cache;
-        GraphicsClient = graphicsClient;
+        _cache = cache;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var request = (WithoutAccidentImageRequest)Parameters[0]!;
+        var request = GetParameter<WithoutAccidentImageRequest>(0);
 
-        var cacheItem = await Cache.GetByRequestAsync(request);
+        var cacheItem = await _cache.GetByRequestAsync(request);
         if (cacheItem is not null)
             return CreateResult(cacheItem.Image);
 
         using var profilePicture = new MagickImage(request.AvatarInfo.AvatarContent);
-        profilePicture.Resize(512, 512);
+        using var result = WithoutAccidentRenderer.Render(profilePicture, request.DaysCount);
 
-        var imageRequest = new WithoutAccidentRequestData
-        {
-            Days = request.DaysCount,
-            ProfilePicture = profilePicture.ToBase64()
-        };
+        var image = result.ToByteArray(MagickFormat.Png);
 
-        var image = await GraphicsClient.CreateWithoutAccidentImage(imageRequest);
-
-        await Cache.WriteByRequestAsync(request, image);
+        await _cache.WriteByRequestAsync(request, image);
         return CreateResult(image);
     }
 
