@@ -7,11 +7,11 @@ namespace ImageProcessingService.Renderers;
 
 public static class PointsImageRenderer
 {
-    private static readonly Size _size = new(512, 512);
+    private static readonly Size _size = new(512, 450);
     private static readonly Size _profilePictureSize = new(200, 200);
     private static readonly (string name, int size) _usernameFont = ("Open Sans", 70);
-    private static readonly (string name, int size) _positionFont = ("Open Sans", 40);
-    private static readonly (string name, int size) _pointsFont = ("Open Sans", 60);
+    private static readonly (string name, int size) _positionFont = ("Open Sans", 25);
+    private static readonly (string name, int size) _pointsFont = ("Open Sans", 40);
     private const int BORDER = 25;
     private const int CORDER_RADIUS = 20;
 
@@ -107,7 +107,7 @@ public static class PointsImageRenderer
                 {
                     1 => "1 bod",
                     > 1 and < 5 => $"{points} body",
-                    _ => $"{points} bodů"
+                    _ => $"{points.ToStringWithSpaces()} bodů"
                 }).CutToImageWidth(_size.Width - ((10 + BORDER) * 2), _pointsFont.name, _pointsFont.size)
             );
 
