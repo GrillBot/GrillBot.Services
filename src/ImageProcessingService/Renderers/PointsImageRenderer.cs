@@ -19,19 +19,29 @@ public static class PointsImageRenderer
     {
         var dominantColor = profilePicture.GetDominantColor();
         var textBackground = CreateDarkerBackgroundColor(dominantColor);
+        var disposables = new List<IDisposable>(); // Objects for release after drawing.
         var image = new MagickImage(dominantColor, _size.Width, _size.Height);
 
-        var drawables = new Drawables()
-            .EnableStrokeAntialias()
-            .EnableTextAntialias()
-            .FillColor(textBackground)
-            .RoundRectangle(BORDER, BORDER, _size.Width - BORDER, _size.Height - BORDER, CORDER_RADIUS, CORDER_RADIUS);
+        try
+        {
+            var drawables = new Drawables()
+                .EnableStrokeAntialias()
+                .EnableTextAntialias()
+                .FillColor(textBackground)
+                .RoundRectangle(BORDER, BORDER, _size.Width - BORDER, _size.Height - BORDER, CORDER_RADIUS, CORDER_RADIUS);
 
-        SetProfilePicture(drawables, profilePicture);
-        SetUsername(drawables, username);
-        SetPointsStatus(drawables, points, position);
+            SetProfilePicture(drawables, profilePicture, disposables);
+            SetUsername(drawables, username);
+            SetPointsStatus(drawables, points, position);
 
-        drawables.Draw(image);
+            drawables.Draw(image);
+        }
+        finally
+        {
+            foreach (var disposable in disposables)
+                disposable.Dispose();
+        }
+
         return image;
     }
 
@@ -43,7 +53,7 @@ public static class PointsImageRenderer
         return MagickColor.FromRgba(tmpColor.R, tmpColor.G, tmpColor.B, tmpColor.A);
     }
 
-    private static void SetProfilePicture(IDrawables<byte> drawables, IMagickImage<byte> profilePicture)
+    private static void SetProfilePicture(IDrawables<byte> drawables, IMagickImage<byte> profilePicture, List<IDisposable> disposables)
     {
         profilePicture.Resize(_profilePictureSize.Width, _profilePictureSize.Height);
         profilePicture.RoundCorners(CORDER_RADIUS);
@@ -51,6 +61,7 @@ public static class PointsImageRenderer
         var shadow = profilePicture.Clone();
         shadow.Shadow(0, 0, 5, new(90), MagickColors.Black);
         shadow.BackgroundColor = MagickColors.None;
+        disposables.Add(shadow);
 
         drawables
             .Composite(BORDER + 10, BORDER + 10, CompositeOperator.Over, shadow)
