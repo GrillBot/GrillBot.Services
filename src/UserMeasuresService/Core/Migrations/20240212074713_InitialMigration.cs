@@ -21,10 +21,7 @@ namespace UserMeasuresService.Core.Migrations
                     UserId = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     Reason = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MemberWarnings", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_MemberWarnings", x => x.Id));
 
             migrationBuilder.CreateTable(
                 name: "Unverifies",

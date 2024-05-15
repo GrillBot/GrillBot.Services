@@ -1,5 +1,6 @@
 ﻿using GrillBot.Core;
 using GrillBot.Services.Common.Discord;
+using GrillBot.Services.Common.Infrastructure.Api.Filters;
 using GrillBot.Services.Common.Registrators;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -47,6 +48,7 @@ public static class ServiceBuilder
         var mvcBuilder = builder.Services.AddControllers(opt =>
         {
             opt.RegisterCoreFilter();
+            opt.Filters.Add<ExceptionFilter>();
 
             if (configureControllers is not null)
                 configureControllers(opt);

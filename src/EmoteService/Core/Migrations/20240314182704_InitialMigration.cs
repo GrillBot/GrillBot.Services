@@ -19,10 +19,7 @@ namespace EmoteService.Core.Migrations
                     EmoteIsAnimated = table.Column<bool>(type: "boolean", nullable: false),
                     GuildId = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EmoteDefinitions", x => new { x.EmoteId, x.EmoteName, x.EmoteIsAnimated, x.GuildId });
-                });
+                constraints: table => table.PrimaryKey("PK_EmoteDefinitions", x => new { x.EmoteId, x.EmoteName, x.EmoteIsAnimated, x.GuildId }));
 
             migrationBuilder.CreateTable(
                 name: "EmoteUserStatItems",

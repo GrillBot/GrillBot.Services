@@ -12,7 +12,7 @@ public class PinCacheItem
 
     [StringLength(255)]
     public string Filename { get; set; } = null!;
-    
+
     public DateTime CreatedAtUtc { get; set; }
 
     public byte[] Data { get; set; } = null!;

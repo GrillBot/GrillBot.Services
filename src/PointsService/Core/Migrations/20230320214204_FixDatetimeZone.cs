@@ -10,7 +10,6 @@ namespace PointsService.Core.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
         }
 
         /// <inheritdoc />
