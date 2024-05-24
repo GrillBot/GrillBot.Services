@@ -17,6 +17,7 @@ public abstract class RecalculationActionBase
         StatisticsContext = serviceProvider.GetRequiredService<AuditLogStatisticsContext>();
     }
 
+    public virtual bool CheckPreconditions(RecalculationPayload payload) => true;
     public abstract Task ProcessAsync(RecalculationPayload payload);
 
     protected async Task<TStatEntity> GetOrCreateStatEntity<TStatEntity>(Expression<Func<TStatEntity, bool>> searchExpression, params object[] primaryKeyData)

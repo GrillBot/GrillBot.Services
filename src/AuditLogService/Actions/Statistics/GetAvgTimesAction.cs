@@ -20,7 +20,7 @@ public class GetAvgTimesAction : ApiAction<AuditLogStatisticsContext>
             Interactions = await GetAvgTimesOfInteractionsAsync(),
             Jobs = await GetAvgTimesOfJobsAsync(),
             ExternalApi = await GetAvgTimesOfApiAsync("V2"),
-            InternalApi = await GetAvgTimesOfApiAsync("V1")
+            InternalApi = await GetAvgTimesOfApiAsync("V3")
         };
 
         return ApiResult.Ok(result);

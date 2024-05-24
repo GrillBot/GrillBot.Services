@@ -10,6 +10,9 @@ public class ApiUserStatsRecalculationAction : RecalculationActionBase
     {
     }
 
+    public override bool CheckPreconditions(RecalculationPayload payload)
+        => payload.Api is not null;
+
     public override async Task ProcessAsync(RecalculationPayload payload)
     {
         var action = $"{payload.Api!.Method} {payload.Api.TemplatePath}";
@@ -28,6 +31,10 @@ public class ApiUserStatsRecalculationAction : RecalculationActionBase
         if (apiGroup == "V2")
         {
             stats.Count = await dataQuery.CountAsync(o => o.ApiGroupName == "V2" && o.Identification == identification);
+        }
+        else if (apiGroup == "V3")
+        {
+            stats.Count = await dataQuery.LongCountAsync(o => o.ApiGroupName == "V3" && (o.LogItem.UserId ?? o.Identification) == identification);
         }
         else
         {

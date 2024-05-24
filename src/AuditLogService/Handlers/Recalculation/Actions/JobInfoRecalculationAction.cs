@@ -10,6 +10,9 @@ public class JobInfoRecalculationAction : RecalculationActionBase
     {
     }
 
+    public override bool CheckPreconditions(RecalculationPayload payload)
+        => payload.Job is not null;
+
     public override async Task ProcessAsync(RecalculationPayload payload)
     {
         var stats = await GetOrCreateStatEntity<JobInfo>(o => o.Name == payload.Job!.JobName, payload.Job!.JobName);

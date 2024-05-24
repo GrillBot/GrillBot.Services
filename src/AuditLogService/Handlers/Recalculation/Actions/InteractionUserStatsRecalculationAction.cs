@@ -10,6 +10,9 @@ public class InteractionUserStatsRecalculationAction : RecalculationActionBase
     {
     }
 
+    public override bool CheckPreconditions(RecalculationPayload payload)
+        => payload.Interaction is not null;
+
     public override async Task ProcessAsync(RecalculationPayload payload)
     {
         var action = $"{payload.Interaction!.Name} ({payload.Interaction.ModuleName}/{payload.Interaction.MethodName})";

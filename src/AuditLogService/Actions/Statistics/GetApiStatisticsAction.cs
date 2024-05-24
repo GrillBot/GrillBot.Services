@@ -24,7 +24,9 @@ public class GetApiStatisticsAction : ApiAction<AuditLogServiceContext>
         {
             ByDateInternalApi = await GetApiStatisticsByDateForApiGroupAsync("V1", "V3"),
             ByDatePublicApi = await GetApiStatisticsByDateForApiGroupAsync("V2"),
-            Endpoints = await GetEndpointStatisticsAsync()
+            Endpoints = await GetEndpointStatisticsAsync(),
+            DailyInternalApi = await GetDailyApiStatisticsAsync("V1", "V3"),
+            DailyPublicApi = await GetDailyApiStatisticsAsync("V2")
         };
 
         return ApiResult.Ok(statistics);
@@ -42,6 +44,22 @@ public class GetApiStatisticsAction : ApiAction<AuditLogServiceContext>
             .GroupBy(o => new { o.Key.Year, o.Key.Month })
             .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
             .ToDictionary(o => $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", o => o.Sum(x => x.Count));
+    }
+
+    private async Task<Dictionary<DateOnly, int>> GetDailyApiStatisticsAsync(params string[] apiGroupNames)
+    {
+        var query = DbContext.ApiRequests.AsNoTracking();
+
+        query = apiGroupNames.Length == 1
+            ? query.Where(r => r.ApiGroupName == apiGroupNames[0])
+            : query.Where(r => apiGroupNames.Contains(r.ApiGroupName));
+
+        var groupedQuery = query
+            .GroupBy(o => o.RequestDate)
+            .Select(o => new { o.Key, Count = o.Count() })
+            .OrderBy(o => o.Key).ThenBy(o => o.Count);
+
+        return await ContextHelper.ReadToDictionaryAsync(groupedQuery, e => e.Key, e => e.Count);
     }
 
     private async Task<List<StatisticItem>> GetEndpointStatisticsAsync()

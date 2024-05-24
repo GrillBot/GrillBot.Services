@@ -1,5 +1,6 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
+using AuditLogService.Core.Migrations;
 using AuditLogService.Models.Events.Recalculation;
 using GrillBot.Core.Extensions;
 using GrillBot.Core.RabbitMQ.Publisher;
@@ -41,7 +42,9 @@ public class DataRecalculationManager
 
         if (payload.Api is not null)
         {
-            var request = item.ApiRequest!;
+            var request = item.ApiRequest;
+            if (request is null)
+                return false;
 
             return request.RequestDate == payload.Api.RequestDate &&
                 request.Method == payload.Api.Method &&
@@ -53,6 +56,8 @@ public class DataRecalculationManager
         if (payload.Interaction is not null)
         {
             var interaction = item.InteractionCommand!;
+            if (interaction is null)
+                return false;
 
             return interaction.Name == payload.Interaction.Name &&
                 interaction.ModuleName == payload.Interaction.ModuleName &&
@@ -65,6 +70,8 @@ public class DataRecalculationManager
         if (payload.Job is not null)
         {
             var job = item.Job!;
+            if (job is null)
+                return false;
 
             return job.JobName == payload.Job.JobName &&
                 job.JobDate == payload.Job.JobDate;
@@ -79,8 +86,8 @@ public class DataRecalculationManager
 
         switch (item.Type)
         {
-            case LogType.Api:
-                var request = item.ApiRequest!;
+            case LogType.Api when item.ApiRequest is not null:
+                var request = item.ApiRequest;
                 payload.Api = new ApiRecalculationData
                 {
                     ApiGroupName = request.ApiGroupName,
@@ -90,8 +97,8 @@ public class DataRecalculationManager
                     TemplatePath = request.TemplatePath
                 };
                 break;
-            case LogType.InteractionCommand:
-                var interaction = item.InteractionCommand!;
+            case LogType.InteractionCommand when item.InteractionCommand is not null:
+                var interaction = item.InteractionCommand;
                 payload.Interaction = new InteractionRecalculationData
                 {
                     EndDate = interaction.EndAt.Date.ToDateOnly(),
@@ -102,8 +109,8 @@ public class DataRecalculationManager
                     UserId = item.UserId!
                 };
                 break;
-            case LogType.JobCompleted:
-                var job = item.Job!;
+            case LogType.JobCompleted when item.Job is not null:
+                var job = item.Job;
                 payload.Job = new JobRecalculationData
                 {
                     JobDate = job.JobDate,

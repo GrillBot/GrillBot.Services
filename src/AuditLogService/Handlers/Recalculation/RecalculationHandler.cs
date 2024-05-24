@@ -20,7 +20,7 @@ public class RecalculationHandler : BaseEventHandlerWithDb<RecalculationPayload,
 
     protected override async Task HandleInternalAsync(RecalculationPayload payload, Dictionary<string, string> headers)
     {
-        foreach (var action in GetRecalculationActions(payload))
+        foreach (var action in GetRecalculationActions(payload).Where(a => a.CheckPreconditions(payload)))
         {
             using (CreateCounter(action.GetType().Name))
                 await action.ProcessAsync(payload);
@@ -37,7 +37,7 @@ public class RecalculationHandler : BaseEventHandlerWithDb<RecalculationPayload,
                 yield return new ApiUserStatsRecalculationAction(ServiceProvider);
             }
 
-            yield return new DailyAvtTimesRecalculationAction(ServiceProvider);
+            yield return new DailyAvgTimesRecalculationAction(ServiceProvider);
 
             if (payload.Type is LogType.InteractionCommand)
             {

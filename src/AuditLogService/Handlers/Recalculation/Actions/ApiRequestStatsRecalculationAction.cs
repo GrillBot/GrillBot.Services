@@ -10,6 +10,9 @@ public class ApiRequestStatsRecalculationAction : RecalculationActionBase
     {
     }
 
+    public override bool CheckPreconditions(RecalculationPayload payload)
+        => payload.Api is not null;
+
     public override async Task ProcessAsync(RecalculationPayload payload)
     {
         var method = payload.Api!.Method;
