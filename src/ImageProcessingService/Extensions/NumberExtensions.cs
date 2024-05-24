@@ -11,6 +11,6 @@ public static class NumberExtensions
         for (var i = builder.Length - digitCount; i >= 0; i -= digitCount)
             builder.Insert(i, ' ');
 
-        return builder.ToString();
+        return builder.ToString().Trim();
     }
 }

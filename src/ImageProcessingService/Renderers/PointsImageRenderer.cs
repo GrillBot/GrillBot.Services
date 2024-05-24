@@ -107,7 +107,7 @@ public static class PointsImageRenderer
             .TextAlignment(TextAlignment.Left)
             .FillColor(MagickColors.White)
             .Text(
-                BORDER + 10,
+                BORDER + 15,
                 _size.Height - BORDER - 15,
                 (points switch
                 {
