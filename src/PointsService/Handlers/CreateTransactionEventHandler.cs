@@ -73,29 +73,29 @@ public class CreateTransactionEventHandler : CreateTransactionBaseEventHandler<C
         // User validation
         var user = reactionUser ?? author;
         if (!user.IsUser)
-            return ValidationFailed("Unable to give points to the bot.");
+            return await ValidationFailedAsync(payload, payload.ChannelId, "Unable to give points to the bot.");
         if (user.PointsDisabled)
-            return ValidationFailed("Target user have disabled points.", true);
+            return await ValidationFailedAsync(payload, payload.ChannelId, "Target user have disabled points.", true);
 
         // Channel validation
         if (channel.IsDeleted)
-            return ValidationFailed("Unable to give points to the deleted channel.");
+            return await ValidationFailedAsync(payload, payload.ChannelId, "Unable to give points to the deleted channel.");
         if (channel.PointsDisabled)
-            return ValidationFailed("Target channel have disabled points.", true);
+            return await ValidationFailedAsync(payload, payload.ChannelId, "Target channel have disabled points.", true);
 
         // Message validation
         if (payload.Message.MessageType is MessageType.ApplicationCommand or MessageType.ContextMenuCommand)
-            return ValidationFailed("Unable to give points to the command.");
+            return await ValidationFailedAsync(payload, payload.ChannelId, "Unable to give points to the command.");
         if (author.Id == reactionUser?.Id)
-            return ValidationFailed("Unable to give points to when reaction and message author have same owner.");
+            return await ValidationFailedAsync(payload, payload.ChannelId, "Unable to give points to when reaction and message author have same owner.");
         if (!CheckCooldown(user, payload))
-            return ValidationFailed("Unable to give points, applied cooldown policy.", true);
+            return await ValidationFailedAsync(payload, payload.ChannelId, "Unable to give points, applied cooldown policy.", true);
         if (payload.Message.ContentLength < Options.Message.GetConfigurationValue<int>("MinLength"))
-            return ValidationFailed("Unable to give points, applied message length policy.", true);
+            return await ValidationFailedAsync(payload, payload.ChannelId, "Unable to give points, applied message length policy.", true);
 
         // Transaction validation
         if (await CheckTransactionExistsAsync(payload))
-            return ValidationFailed("Unable to give points, duplicate transcation.", true);
+            return await ValidationFailedAsync(payload, payload.ChannelId, "Unable to give points, duplicate transcation.", true);
 
         return true;
     }
