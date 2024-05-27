@@ -1,8 +1,10 @@
 ﻿using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using AuditLogService.Core.Entity;
 using AuditLogService.Models.Response.Info.Dashboard;
 using GrillBot.Core.Managers.Performance;
 
+#pragma warning disable SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
 namespace AuditLogService.Actions.Dashboard;
 
 public class GetApiDashboardAction : DashboardListBaseAction<ApiRequest>
@@ -26,7 +28,20 @@ public class GetApiDashboardAction : DashboardListBaseAction<ApiRequest>
 
     protected override Expression<Func<ApiRequest, bool>> CreateFilter()
     {
-        var apiGroup = (string)Parameters[0]!;
-        return entity => entity.ApiGroupName == apiGroup && entity.ActionName != "GetDashboardAsync" && entity.ControllerName != "DashboardController";
+        var apiGroup = GetParameter<string>(0);
+        var internalApis = new[] { "V1", "V3" };
+
+        if (apiGroup == "V2")
+        {
+            return entity => entity.ApiGroupName == "V2";
+        }
+        else
+        {
+
+            return entity => internalApis.Contains(entity.ApiGroupName) &&
+                entity.ActionName != "GetDashboardAsync" &&
+                entity.ControllerName != "DashboardController" &&
+                !Regex.IsMatch(entity.TemplatePath, ".+/dashboard/?.*");
+        }
     }
 }
