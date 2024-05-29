@@ -7,6 +7,7 @@ Repository for all services that GrillBot depends.
 - [Graphics](https://github.com/GrillBot/GrillBot.Services/tree/master/src/Graphics)
 - [ImageProcessingService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/ImageProcessingService)
 - [PointsService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/PointsService)
+- [RemindService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/RemindService)
 - [RubbergodService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/RubbergodService)
 - [UserMeasuresService](https://github.com/GrillBot/GrillBot.Services/tree/master/src/UserMeasuresService)
 
@@ -19,5 +20,6 @@ Exists only one name of image `ghcr.io/grillbot/grillbot.services` and service a
 - Graphics - `ghcr.io/grillbot/grillbot.services:graphics`
 - ImageProcessingService - `ghcr.io/grillbot/grillbot.services:image_processing_service`
 - PointsService - `ghcr.io/grillbot/grillbot.services:points_service`
+- RemindService - `ghcr.io/grillbot/grillbot.services:remind_service`
 - RubbergodService - `ghcr.io/grillbot/grillbot.services:rubbergod`
 - UserMeasuresService - `ghcr.io/grillbot/grillbot.services:user_measures_service`
