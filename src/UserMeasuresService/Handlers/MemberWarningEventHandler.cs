@@ -2,7 +2,7 @@
 using GrillBot.Core.Extensions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.Publisher;
-using GrillBot.Core.Services.GrillBot.Models.Events;
+using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
 using GrillBot.Services.Common.Discord;
 using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Handlers.Abstractions;
@@ -59,7 +59,7 @@ public class MemberWarningEventHandler : BaseMeasuresHandler<MemberWarningPayloa
             true
         );
 
-        var message = new DiscordMessagePayload(null, item.UserId, null, Enumerable.Empty<DiscordMessageFile>(), null, null, embed);
+        var message = new DiscordMessagePayload(null, item.UserId, null, Enumerable.Empty<DiscordMessageFile>(), "UserMeasures", null, null, embed);
         await Publisher.PublishAsync(message, new());
     }
 }
