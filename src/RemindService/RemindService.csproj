@@ -7,8 +7,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Folder Include="Actions\" />
-		<Folder Include="Controllers\" />
 		<Folder Include="wwwroot\" />
 	</ItemGroup>
 

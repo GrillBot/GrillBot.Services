@@ -2,6 +2,8 @@
 
 public class AppOptions
 {
+    public const string FinishedUnsentMessageId = "0";
+
     public static Dictionary<int, string> PostponeHours { get; } = new Dictionary<int, string>
     {
         { 1, "one" },
@@ -14,4 +16,6 @@ public class AppOptions
         { 8, "eight" },
         { 9, "nine" },
     };
+
+    public TimeSpan MinimalTime { get; set; }
 }
