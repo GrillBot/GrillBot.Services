@@ -47,4 +47,10 @@ public class RemindController : GrillBot.Core.Infrastructure.Actions.ControllerB
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> GetSuggestionAsync([DiscordId] string userId)
         => ProcessAsync<ReminderSuggestionsAction>(userId);
+
+    [HttpPut("postpone/{notificationMessageId}/{hours}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public Task<IActionResult> PostponeRemindAsync([DiscordId] string notificationMessageId, int hours)
+        => ProcessAsync<PostponeRemindAction>(notificationMessageId, hours);
 }
