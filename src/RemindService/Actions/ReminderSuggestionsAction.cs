@@ -22,7 +22,7 @@ public class ReminderSuggestionsAction : ApiAction<RemindServiceContext>
             .Where(o => (o.FromUserId == userId || o.ToUserId == userId) && o.NotificationMessageId == null && !o.IsSendInProgress)
             .OrderByDescending(o => o.NotifyAtUtc)
             .Take(25)
-            .Select(o => new ReminderSuggestionItem(o.FromUserId, o.ToUserId, o.ToUserId == userId, o.NotifyAtUtc));
+            .Select(o => new ReminderSuggestionItem(o.Id, o.FromUserId, o.ToUserId, o.ToUserId == userId, o.NotifyAtUtc));
 
         var result = await ContextHelper.ReadEntitiesAsync(query);
         return ApiResult.Ok(result);
