@@ -19,6 +19,12 @@ public class TransactionController : ControllerBase
     public Task<IActionResult> TransferPointsAsync([FromBody] TransferPointsRequest request)
         => ProcessAsync<ProcessTransferPointsAction>(request);
 
+    [HttpPost("increment")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public Task<IActionResult> IncrementPointsAsync([FromBody] IncrementPointsRequest request)
+        => ProcessAsync<IncrementPointsAction>(request);
+
     [HttpGet("{guildId}/{userId}")]
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
