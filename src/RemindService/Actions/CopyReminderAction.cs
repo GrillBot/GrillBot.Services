@@ -78,7 +78,7 @@ public class CopyReminderAction : ApiAction<RemindServiceContext>
             ToUserId = request.ToUserId
         };
 
-        _createReminderAction.Init(HttpContext, new[] { createRequest });
+        _createReminderAction.Init(HttpContext, new[] { createRequest }, CurrentUser);
         var result = await _createReminderAction.ProcessAsync();
 
         return (CreateReminderResult)result.Data!;

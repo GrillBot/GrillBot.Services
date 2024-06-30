@@ -4,21 +4,27 @@ using EmoteService.Extensions.QueryExtensions;
 using EmoteService.Models.Response;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.Services.AuditLog.Enums;
+using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Services.Common.Infrastructure.Api;
 
 namespace EmoteService.Actions.Statistics;
 
 public class MergeStatisticsAction : ApiAction<EmoteServiceContext>
 {
-    public MergeStatisticsAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager, dbContext)
+    private readonly IRabbitPublisher _rabbitPublisher;
+
+    public MergeStatisticsAction(ICounterManager counterManager, EmoteServiceContext dbContext, IRabbitPublisher rabbitPublisher) : base(counterManager, dbContext)
     {
+        _rabbitPublisher = rabbitPublisher;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var guildId = (string)Parameters[0]!;
-        var sourceEmote = Emote.Parse((string)Parameters[1]!);
-        var destinationEmote = Emote.Parse((string)Parameters[2]!);
+        var guildId = GetParameter<string>(0);
+        var sourceEmote = Emote.Parse(GetParameter<string>(1));
+        var destinationEmote = Emote.Parse(GetParameter<string>(2));
 
         var (createdEmotesCount, deletedEmotesCount) = await ProcessMergeAsync(guildId, sourceEmote, destinationEmote);
         var modifiedRowsCount = await ContextHelper.SaveChagesAsync();
@@ -30,6 +36,7 @@ public class MergeStatisticsAction : ApiAction<EmoteServiceContext>
             ModifiedEmotesCount = modifiedRowsCount
         };
 
+        await NotifyAuditLogServiceAsync(result, sourceEmote, destinationEmote, guildId);
         return ApiResult.Ok(result);
     }
 
@@ -75,4 +82,16 @@ public class MergeStatisticsAction : ApiAction<EmoteServiceContext>
 
         return (createdEmotesCount, deletedEmotesCount);
     }
+
+    private Task NotifyAuditLogServiceAsync(MergeStatisticsResult result, Emote sourceEmote, Emote destinationEmote, string guildId)
+    {
+        var message = $"Merged emotes {sourceEmote} into {destinationEmote}. Created: {result.CreatedEmotesCount}. Deleted: {result.DeletedEmotesCount}. Total: {result.ModifiedEmotesCount}.";
+        var logRequest = new LogRequest(LogType.Info, DateTime.UtcNow, guildId, CurrentUser.Id, null, null)
+        {
+            LogMessage = new LogMessageRequest(message, LogSeverity.Info, "EmoteService", nameof(MergeStatisticsAction))
+        };
+
+        return _rabbitPublisher.PublishAsync(new CreateItemsPayload(logRequest));
+    }
+
 }
