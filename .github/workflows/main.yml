@@ -24,6 +24,7 @@ jobs:
       UserMeasuresService: ${{ steps.filter.outputs.UserMeasuresService }}
       EmoteService: ${{ steps.filter.outputs.EmoteService }}
       RemindService: ${{ steps.filter.outputs.RemindService }}
+      SearchingService: ${{ steps.filter.outputs.SearchingService }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -55,6 +56,9 @@ jobs:
             RemindService:
               - 'src/RemindService/**'
               - 'src/RemindService.Dockerfile'
+            SearchingService:
+              - 'src/SearchingService/**'
+              - 'src/SearchingService.Dockerfile'
   CheckStaticContent:
     runs-on: ubuntu-latest
     steps:
@@ -143,6 +147,11 @@ jobs:
         run: |
           dotnet restore -r linux-x64 src/RemindService/
           dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/RemindService/
+      - name: SearchingService
+        if: needs.PathsFilter.outputs.SearchingService == 'true'
+        run: |
+          dotnet restore -r linux-x64 src/SearchingService/
+          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/SearchingService/
   CreateDockerImages:
     runs-on: ubuntu-latest
     needs: [PathsFilter, BuildServices]
@@ -236,6 +245,16 @@ jobs:
           tags: ghcr.io/grillbot/grillbot.services:remind_service
           build-args: |
             github_actions_token=${{ secrets.GITHUB_TOKEN }}
+      - name: SearchingService
+        if: needs.PathsFilter.outputs.SearchingService == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: src/
+          file: src/SearchingService.Dockerfile
+          push: true
+          tags: ghcr.io/grillbot/grillbot.services:searching_service
+          build-args: |
+            github_actions_token=${{ secrets.GITHUB_TOKEN }}
   DeployToDevelopment:
     runs-on: ubuntu-latest
     needs: [PathsFilter, CreateDockerImages]
@@ -314,6 +333,15 @@ jobs:
           password: ${{ secrets.SSH_DEV_PASSWORD }}
           port: 22
           script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S /scripts/update-grillbot-dev.sh remind
+      - name: SearchingService
+        if: needs.PathsFilter.outputs.SearchingService == 'true'
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          password: ${{ secrets.SSH_DEV_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_DEV_PASSWORD }}' | sudo -S /scripts/update-grillbot-dev.sh searching
   RubbergodService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_RubbergodService"
@@ -426,6 +454,20 @@ jobs:
           password: ${{ secrets.SSH_Password }}
           port: 22
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh remind
+  SearchingService_Deploy_Production:
+    runs-on: ubuntu-latest
+    environment: "Production_SearchingService"
+    needs: [PathsFilter, CreateDockerImages]
+    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.SearchingService == 'true'
+    steps:
+      - name: Execute deployment on SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_Username }}
+          password: ${{ secrets.SSH_Password }}
+          port: 22
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh searching
   VerifyProductionDeployment:
     runs-on: ubuntu-latest
     environment: ProductionInternal
@@ -439,7 +481,8 @@ jobs:
         AuditLogService_Deploy_Production,
         UserMeasuresService_Deploy_Production,
         EmoteService_Deploy_Production,
-        RemindService_Deploy_Production
+        RemindService_Deploy_Production,
+        SearchingService_Deploy_Production
       ]
     if: ${{ github.ref == 'refs/heads/master' && always() && !failure() && !cancelled() }}
     steps:
@@ -504,6 +547,14 @@ jobs:
         if: needs.PathsFilter.outputs.RemindService == 'true' && needs.RemindService_Deploy_Production.result == 'success'
         with:
           url: https://health.grillbot.eu/remind
+          follow-redirect: true
+          max-attempts: 10
+          retry-delay: 5s
+      - name: RemindService
+        uses: jtalk/url-health-check-action@v4
+        if: needs.PathsFilter.outputs.SearchingService == 'true' && needs.SearchingService_Deploy_Production.result == 'success'
+        with:
+          url: https://health.grillbot.eu/searching
           follow-redirect: true
           max-attempts: 10
           retry-delay: 5s
