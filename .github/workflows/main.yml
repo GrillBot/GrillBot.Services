@@ -550,7 +550,7 @@ jobs:
           follow-redirect: true
           max-attempts: 10
           retry-delay: 5s
-      - name: RemindService
+      - name: SearchingService
         uses: jtalk/url-health-check-action@v4
         if: needs.PathsFilter.outputs.SearchingService == 'true' && needs.SearchingService_Deploy_Production.result == 'success'
         with:
