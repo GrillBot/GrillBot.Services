@@ -18,6 +18,6 @@ public class User
     public bool HaveManageMessages { get; set; }
 
     [NotMapped]
-    public bool CanDeleteItems
+    public bool IsAdministrator
         => IsSearchingAdmin || HaveGuildAdmin || HaveManageMessages;
 }

@@ -24,4 +24,5 @@ public class SearchItem
 
     public DateTime CreatedAt { get; set; }
     public DateTime ValidTo { get; set; }
+    public bool IsDeleted { get; set; }
 }

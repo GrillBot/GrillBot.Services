@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SearchingService.Core.Entity;
@@ -11,9 +12,11 @@ using SearchingService.Core.Entity;
 namespace SearchingService.Core.Migrations
 {
     [DbContext(typeof(SearchingServiceContext))]
-    partial class SearchingServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20240723073655_IsDeletedFlag")]
+    partial class IsDeletedFlag
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
