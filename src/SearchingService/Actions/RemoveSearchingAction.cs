@@ -15,7 +15,7 @@ public class RemoveSearchingAction : ApiAction<SearchingServiceContext>
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var id = GetParameter<long>(1);
+        var id = GetParameter<long>(0);
 
         var search = await ContextHelper.ReadFirstOrDefaultEntityAsync<SearchItem>(o => o.Id == id && !o.IsDeleted);
         if (search is null)
