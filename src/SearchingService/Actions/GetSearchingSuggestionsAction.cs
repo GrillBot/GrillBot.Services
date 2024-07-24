@@ -22,8 +22,8 @@ public class GetSearchingSuggestionsAction : ApiAction<SearchingServiceContext>
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = GetParameter<string>(0);
-        var executingUserId = GetParameter<string>(1);
-        var channelId = GetParameter<string>(2);
+        var channelId = GetParameter<string>(1);
+        var executingUserId = CurrentUser.Id ?? "0";
         var executingUser = (await ContextHelper.ReadFirstOrDefaultEntityAsync<User>(o => o.GuildId == guildId && o.UserId == executingUserId)) ?? new() { UserId = executingUserId };
         var result = await ReadItemsAsync(guildId, channelId, executingUser);
 

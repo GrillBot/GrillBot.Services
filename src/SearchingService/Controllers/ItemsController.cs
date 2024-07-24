@@ -20,14 +20,13 @@ public class ItemsController : GrillBot.Core.Infrastructure.Actions.ControllerBa
     public Task<IActionResult> GetSearchingListAsync([FromBody] SearchingListRequest request)
         => ProcessAsync<GetSearchingListAction>(request);
 
-    [HttpGet("suggestions/{guildId}/{channelId}/{executingUserId}")]
+    [HttpGet("suggestions/{guildId}/{channelId}")]
     [ProducesResponseType(typeof(List<SearchSuggestion>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public Task<IActionResult> GetSuggestionsAsync(
         [StringLength(30), DiscordId] string guildId,
-        [StringLength(30), DiscordId] string channelId,
-        [StringLength(30), DiscordId] string executingUserId
-    ) => ProcessAsync<GetSearchingSuggestionsAction>(guildId, executingUserId, channelId);
+        [StringLength(30), DiscordId] string channelId
+    ) => ProcessAsync<GetSearchingSuggestionsAction>(guildId, channelId);
 
     [HttpDelete("remove/{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
