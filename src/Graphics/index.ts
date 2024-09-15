@@ -23,6 +23,7 @@ app.use(common.durationCounter);
 
 app.post('/chart', common.validate(chart.validators), (req, res, next) => new common.RequestProcessing(req, res, next).execute(chart.onRequest));
 app.get('/stats', common.statsEndpoint);
+app.get('/api/diag/uptime', common.uptimeEndpoint);
 app.use(errorHandler);
 
 app.listen(3000, () => console.log('App started on port 3000'));

@@ -50,8 +50,13 @@ export const requestsCounter = (request: express.Request, response: express.Resp
     next();
 };
 
-export const statsEndpoint = (request: express.Request, response: express.Response): void => {
+export const statsEndpoint = (_: express.Request, response: express.Response): void => {
     response.status(200).json(stats);
+};
+
+export const uptimeEndpoint = (_: express.Request, response: express.Response): void => {
+    const uptime = Math.floor(process.uptime() * 1000);
+    response.status(200).json(uptime);
 };
 
 export const durationCounter = (req: express.Request, res: express.Response, next: express.NextFunction) => {
