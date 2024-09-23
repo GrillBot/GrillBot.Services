@@ -14,7 +14,7 @@
   "dependencies": {
     "chart.js": "^3.9.1",
     "chartjs-node-canvas": "^4.1.6",
-    "express": "^4.19.2",
+    "express": "^4.21.0",
     "express-actuator": "^1.8.4",
     "express-validator": "^7.0.1",
     "express-winston": "^4.2.0",
