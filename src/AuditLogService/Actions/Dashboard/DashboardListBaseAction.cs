@@ -25,7 +25,7 @@ public abstract class DashboardListBaseAction<TEntity> : ApiAction<AuditLogServi
 
         var mappedQuery = query
             .Select(CreateProjection())
-            .Take(10);
+            .Take(50);
 
         var result = await ContextHelper.ReadEntitiesAsync(mappedQuery);
         return ApiResult.Ok(result);
