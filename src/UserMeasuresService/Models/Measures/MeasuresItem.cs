@@ -2,6 +2,7 @@
 
 public class MeasuresItem
 {
+    public Guid MeasureId { get; set; }
     public string Type { get; set; } = null!;
     public DateTime CreatedAtUtc { get; set; }
     public string ModeratorId { get; set; } = null!;

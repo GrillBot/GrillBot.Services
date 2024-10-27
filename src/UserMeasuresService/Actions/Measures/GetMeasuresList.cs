@@ -85,7 +85,8 @@ public class GetMeasuresList : ApiAction<UserMeasuresContext>
             GuildId = baseEntity.GuildId,
             CreatedAtUtc = baseEntity.CreatedAtUtc,
             UserId = baseEntity.UserId,
-            Reason = baseEntity.Reason
+            Reason = baseEntity.Reason,
+            MeasureId = baseEntity.Id
         };
     }
 }
