@@ -30,7 +30,7 @@ public class TriggerRecalculationAction : ApiAction<AuditLogServiceContext>
 
     private async Task<List<LogItem>> ReadLogItemsAsync(LogType type)
     {
-        var query = DbContext.LogItems.AsNoTracking().Where(o => o.Type == type);
+        var query = DbContext.LogItems.AsNoTracking().Where(o => o.Type == type && !o.IsDeleted);
         var items = await ContextHelper.ReadEntitiesAsync(query);
 
         foreach (var chunk in items.Chunk(1000))

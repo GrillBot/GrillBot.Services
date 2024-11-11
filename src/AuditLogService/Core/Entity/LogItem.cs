@@ -8,6 +8,7 @@ namespace AuditLogService.Core.Entity;
 [Index(nameof(CreatedAt))]
 [Index(nameof(GuildId))]
 [Index(nameof(LogDate))]
+[Index(nameof(CreatedAt), nameof(IsDeleted))]
 public class LogItem
 {
     [Key]
@@ -33,6 +34,8 @@ public class LogItem
     public ISet<File> Files { get; set; }
 
     public DateOnly LogDate { get; set; }
+
+    public bool IsDeleted { get; set; }
 
     #region Data
 

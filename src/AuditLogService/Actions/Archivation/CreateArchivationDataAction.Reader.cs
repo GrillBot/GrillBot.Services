@@ -9,7 +9,7 @@ public partial class CreateArchivationDataAction
 {
     private async Task<bool> ExistsItemsToArchiveAsync(DateTime expirationDate)
     {
-        var query = DbContext.LogItems.Where(o => o.CreatedAt <= expirationDate);
+        var query = DbContext.LogItems.Where(o => o.CreatedAt <= expirationDate || o.IsDeleted);
         var countToArchive = await ContextHelper.ReadCountAsync(query);
 
         return countToArchive >= AppOptions.MinimalItemsToArchive;
@@ -19,7 +19,7 @@ public partial class CreateArchivationDataAction
     {
         var itemsQuery = DbContext.LogItems.AsNoTracking()
             .Include(o => o.Files)
-            .Where(o => o.CreatedAt <= expirationDate)
+            .Where(o => o.CreatedAt <= expirationDate || o.IsDeleted)
             .OrderBy(o => o.CreatedAt)
             .Take(AppOptions.MaxItemsToArchivePerRun);
 

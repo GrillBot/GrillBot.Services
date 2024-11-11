@@ -31,7 +31,7 @@ public class GetStatusInfoAction : ApiAction<AuditLogServiceContext>
     private async Task<int> ReadItemsToArchiveCountAsync()
     {
         var expirationDate = DateTime.UtcNow.AddMonths(-AppOptions.ExpirationMonths);
-        var query = DbContext.LogItems.Where(o => o.CreatedAt <= expirationDate).AsNoTracking();
+        var query = DbContext.LogItems.Where(o => o.CreatedAt <= expirationDate || o.IsDeleted).AsNoTracking();
 
         return await ContextHelper.ReadCountAsync(query);
     }

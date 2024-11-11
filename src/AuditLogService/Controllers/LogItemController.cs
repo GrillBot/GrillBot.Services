@@ -1,4 +1,5 @@
-﻿using AuditLogService.Actions.Detail;
+﻿using AuditLogService.Actions.Delete;
+using AuditLogService.Actions.Detail;
 using AuditLogService.Actions.Search;
 using AuditLogService.Models.Request.Search;
 using AuditLogService.Models.Response.Search;
@@ -25,4 +26,10 @@ public class LogItemController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DetailAsync(Guid id)
         => await ProcessAsync<ReadDetailAction>(id);
+
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public Task<IActionResult> DeleteAsync(Guid id)
+        => ProcessAsync<DeleteItemAction>(id);
 }

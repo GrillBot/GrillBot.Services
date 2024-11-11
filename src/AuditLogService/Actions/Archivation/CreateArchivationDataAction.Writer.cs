@@ -42,7 +42,8 @@ public partial class CreateArchivationDataAction
         {
             ["Id"] = item.Id.ToString(),
             ["CreatedAt"] = item.CreatedAt.ToString("o"),
-            ["Type"] = item.Type.ToString()
+            ["Type"] = item.Type.ToString(),
+            ["IsDeleted"] = item.IsDeleted
         };
 
         if (!string.IsNullOrEmpty(item.GuildId))

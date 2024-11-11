@@ -18,6 +18,7 @@ public abstract class DashboardListBaseAction<TEntity> : ApiAction<AuditLogServi
     {
         var query = DbContext.Set<TEntity>()
             .OrderByDescending(CreateSorting())
+            .Where(o => !o.LogItem.IsDeleted)
             .AsNoTracking();
         var filter = CreateFilter();
         if (filter is not null)

@@ -191,7 +191,7 @@ public partial class SearchItemsAction
         if (request.OnlyWithFiles)
             query = query.Where(o => o.LogItem.Files.Count > 0);
 
-        return query;
+        return query.Where(o => !o.LogItem.IsDeleted);
     }
 
     private async Task<List<Guid>> SelectIdsAsync<TChildEntity>(IQueryable<TChildEntity> query) where TChildEntity : ChildEntityBase
@@ -221,7 +221,9 @@ public partial class SearchItemsAction
         if (request.Ids is not null)
             query = query.Where(o => request.Ids.Contains(o.Id));
 
+        query = query.Where(o => !o.IsDeleted);
         query = request.Sort.Descending ? query.OrderByDescending(o => o.CreatedAt) : query.OrderBy(o => o.CreatedAt);
+
         return await ContextHelper.ReadEntitiesWithPaginationAsync(query, request.Pagination);
     }
 }
