@@ -36,15 +36,21 @@ public class RemoveSearchingAction : ApiAction<SearchingServiceContext>
         var modelState = new ModelStateDictionary();
 
         var guildId = Array.Find(CurrentUser.Permissions, o => o.StartsWith("GuildId:"))?.Replace("GuildId:", "");
-        var currentUser = await ContextHelper.ReadFirstOrDefaultEntityAsync<User>(o => o.GuildId == guildId && o.UserId == CurrentUser.Id);
+        var query = DbContext.Users.Where(o => o.UserId == CurrentUser.Id);
 
-        if (currentUser is null)
+        if (!CurrentUser.Permissions.Contains("Searching(Admin)"))
+            query = query.Where(o => o.GuildId == guildId);
+
+        var currentUsers = await ContextHelper.ReadEntitiesAsync(query);
+
+        if (currentUsers.Count == 0)
         {
             modelState.AddModelError("User", "SearchingModule/RemoveSearch/UnknownExecutor");
             return modelState;
         }
 
-        if (!(currentUser.IsAdministrator || item.UserId == currentUser.UserId))
+        var isSomewhereAdmin = currentUsers.Exists(o => o.IsAdministrator);
+        if (item.UserId != CurrentUser.Id && !isSomewhereAdmin)
             modelState.AddModelError("User", "SearchingModule/RemoveSearch/InsufficientPermissions");
 
         return modelState;
