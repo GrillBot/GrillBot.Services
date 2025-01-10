@@ -25,7 +25,16 @@ public class GetSearchingListAction : ApiAction<SearchingServiceContext>
 
         var result = await PaginatedResponse<SearchListItem>.CopyAndMapAsync(
             items,
-            entity => Task.FromResult(new SearchListItem(entity.Id, entity.UserId, entity.GuildId, entity.ChannelId, entity.Content, entity.CreatedAt, entity.ValidTo))
+            entity => Task.FromResult(new SearchListItem(
+                entity.Id,
+                entity.UserId,
+                entity.GuildId,
+                entity.ChannelId,
+                entity.Content,
+                entity.CreatedAt,
+                entity.ValidTo,
+                entity.IsDeleted
+            ))
         );
 
         return ApiResult.Ok(result);

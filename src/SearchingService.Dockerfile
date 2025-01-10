@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS Build
+FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
 
 # Run external NuGet source
 ARG github_actions_token
@@ -19,19 +19,18 @@ COPY "SearchingService/" /src/SearchingService
 RUN mkdir -p /publish
 RUN dotnet publish /src/SearchingService -c Release -o /publish --no-restore -r linux-x64 --self-contained false
 
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 as FinalImage
-LABEL org.opencontainers.image.source https://github.com/grillbot/grillbot.services
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine AS final_image
+LABEL org.opencontainers.image.source=https://github.com/grillbot/grillbot.services
 
 WORKDIR /app
 EXPOSE 5164
 
 ENV TZ=Europe/Prague
-ENV ASPNETCORE_URLS 'http://+:5164'
-ENV DOTNET_PRINT_TELEMETRY_MESSAGE 'false'
+ENV ASPNETCORE_URLS='http://+:5164'
+ENV DOTNET_PRINT_TELEMETRY_MESSAGE='false'
 
-RUN sed -i'.bak' 's/$/ contrib/' /etc/apt/sources.list
-RUN apt update && apt install -y --no-install-recommends tzdata libc6-dev
+RUN apk update && apk add tzdata
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-COPY --from=Build /publish .
+COPY --from=build /publish .
 ENTRYPOINT [ "dotnet", "SearchingService.dll" ]

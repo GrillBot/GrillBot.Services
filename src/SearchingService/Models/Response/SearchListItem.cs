@@ -7,7 +7,8 @@ public record SearchListItem(
     string ChannelId,
     string Content,
     DateTime CreatedAtUtc,
-    DateTime ValidToUtc
+    DateTime ValidToUtc,
+    bool IsDeleted
 )
 {
     public bool IsInvalid => ValidToUtc <= DateTime.UtcNow;
