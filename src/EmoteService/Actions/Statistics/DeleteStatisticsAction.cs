@@ -3,14 +3,20 @@ using EmoteService.Core.Entity;
 using EmoteService.Extensions.QueryExtensions;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.Services.AuditLog.Enums;
+using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Services.Common.Infrastructure.Api;
 
 namespace EmoteService.Actions.Statistics;
 
 public class DeleteStatisticsAction : ApiAction<EmoteServiceContext>
 {
-    public DeleteStatisticsAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager, dbContext)
+    private readonly IRabbitPublisher _rabbitPublisher;
+
+    public DeleteStatisticsAction(ICounterManager counterManager, EmoteServiceContext dbContext, IRabbitPublisher rabbitPublisher) : base(counterManager, dbContext)
     {
+        _rabbitPublisher = rabbitPublisher;
     }
 
     public override async Task<ApiResult> ProcessAsync()
@@ -26,13 +32,22 @@ public class DeleteStatisticsAction : ApiAction<EmoteServiceContext>
         if (!string.IsNullOrEmpty(userId))
             statisticsQuery = statisticsQuery.Where(o => o.UserId == userId);
 
-        var statistics = await ContextHelper.ReadEntitiesAsync(statisticsQuery);
-        if (statistics.Count == 0)
+        var deletedRows = await ContextHelper.ExecuteBatchDeleteAsync(statisticsQuery);
+        if (deletedRows == 0)
             return ApiResult.NotFound();
 
-        DbContext.RemoveRange(statistics);
-
-        var deletedRows = await ContextHelper.SaveChagesAsync();
+        await WriteToAuditLogAsync(emote.ToString(), deletedRows, guildId, userId);
         return ApiResult.Ok(deletedRows);
+    }
+
+    private Task WriteToAuditLogAsync(string emoteId, int deletedRows, string guildId, string? userId)
+    {
+        var message = $"Deleted emote statistics. Emote: {emoteId}. Deleted rows: {deletedRows}. UserId: {userId ?? "<null>"}";
+        var logRequest = new LogRequest(LogType.Info, DateTime.UtcNow, guildId, CurrentUser.Id, null, null)
+        {
+            LogMessage = new(message, LogSeverity.Info, "EmoteService", nameof(DeleteStatisticsAction))
+        };
+
+        return _rabbitPublisher.PublishAsync(new CreateItemsPayload(logRequest));
     }
 }
