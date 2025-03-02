@@ -1,5 +1,5 @@
 # Build phase
-FROM node:18-alpine as build
+FROM node:23-alpine AS build
 WORKDIR /usr
 
 RUN apk add build-base g++ cairo-dev jpeg-dev pango-dev giflib-dev
@@ -9,13 +9,13 @@ COPY . .
 RUN npm run build
 
 # Production phase
-FROM node:18-alpine as production
+FROM node:23-alpine AS production
 
 # Variables
 WORKDIR /usr/src/app
 EXPOSE 3000
-ENV NODE_ENV production
-LABEL org.opencontainers.image.source https://github.com/grillbot/grillbot.services
+ENV NODE_ENV=production
+LABEL org.opencontainers.image.source=https://github.com/grillbot/grillbot.services
 
 # Dependencies
 RUN apk add build-base g++ cairo-dev jpeg-dev pango-dev giflib-dev
