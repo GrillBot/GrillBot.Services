@@ -1,5 +1,7 @@
+ARG NODE_VERSION="22-alpine"
+
 # Build phase
-FROM node:23-alpine AS build
+FROM node:${NODE_VERSION} AS build
 WORKDIR /usr
 
 RUN apk add build-base g++ cairo-dev jpeg-dev pango-dev giflib-dev
@@ -9,7 +11,7 @@ COPY . .
 RUN npm run build
 
 # Production phase
-FROM node:23-alpine AS production
+FROM node:${NODE_VERSION} AS production
 
 # Variables
 WORKDIR /usr/src/app
@@ -22,9 +24,8 @@ RUN apk add build-base g++ cairo-dev jpeg-dev pango-dev giflib-dev
 RUN apk add terminus-font ttf-inconsolata ttf-dejavu font-noto font-noto-cjk ttf-font-awesome font-noto-extra
 
 # Final build
-RUN npm install pm2 -g
 COPY package*.json ./
 RUN npm ci --omit=dev
 COPY --from=build /usr/dist .
 
-CMD ["pm2-runtime", "index.js"]
+CMD ["node", "index.js"]
