@@ -38,7 +38,7 @@ public class ThreadDeletedProcessor : RequestProcessorBase
 
         entity.CreatedAt = auditLog.CreatedAt.UtcDateTime;
         entity.DiscordId = auditLog.Id.ToString();
-        entity.UserId = auditLog.Id.ToString();
+        entity.UserId = auditLog.User.Id.ToString();
         entity.ThreadDeleted = new ThreadDeleted
         {
             ThreadInfo = threadInfo,
