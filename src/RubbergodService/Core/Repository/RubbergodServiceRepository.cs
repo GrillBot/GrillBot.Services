@@ -10,10 +10,8 @@ public class RubbergodServiceRepository : RepositoryBase<RubbergodServiceContext
     {
         Karma = new KarmaRepository(Context, counterManager);
         Statistics = new StatisticsRepository(Context, counterManager);
-        PinCache = new PinCacheRepository(Context, counterManager);
     }
 
     public KarmaRepository Karma { get; }
     public StatisticsRepository Statistics { get; }
-    public PinCacheRepository PinCache { get; }
 }

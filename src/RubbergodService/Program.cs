@@ -16,7 +16,7 @@ var application = await ServiceBuilder.CreateWebAppAsync(
 
         services.AddDatabaseContext<RubbergodServiceContext>(b => b.UseNpgsql(connectionString));
         services.AddScoped<RubbergodServiceRepository>();
-        services.AddMemoryCache();
+        services.AddRedisCaching(configuration);
         services.AddStatisticsProvider<StatisticsProvider>();
         services.AddDirectApi();
     },

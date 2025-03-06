@@ -1,5 +1,6 @@
-﻿using GrillBot.Core.Infrastructure.Actions;
-using Microsoft.Extensions.Caching.Memory;
+﻿using GrillBot.Core.Caching;
+using GrillBot.Core.Infrastructure.Actions;
+using Microsoft.Extensions.Caching.Distributed;
 using RubbergodService.DirectApi;
 using RubbergodService.Models;
 using System.Text;
@@ -9,30 +10,28 @@ namespace RubbergodService.Actions.Help;
 
 public class GetSlashCommandsAction : ApiActionBase
 {
-    private const string CacheKey = "HelpSlashCommands";
+    private const string CacheKey = "RubbergodService/HelpSlashCommands";
 
     private DirectApiManager DirectApiManager { get; }
-    private IMemoryCache MemoryCache { get; }
 
-    public GetSlashCommandsAction(IMemoryCache memoryCache, DirectApiManager directApiManager)
+    private readonly IDistributedCache _cache;
+
+    public GetSlashCommandsAction(DirectApiManager directApiManager, IDistributedCache cache)
     {
         DirectApiManager = directApiManager;
-        MemoryCache = memoryCache;
+        _cache = cache;
     }
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        var data = ReadFromCache();
+        var data = await _cache.GetAsync<Dictionary<string, Cog>>(CacheKey);
         if (data is not null)
             return ApiResult.Ok(data);
 
         data = await ReadFromRubbergodAsync();
-        MemoryCache.Set(CacheKey, data, DateTimeOffset.Now.AddDays(7));
+        await _cache.SetAsync(CacheKey, data, TimeSpan.FromDays(7));
         return ApiResult.Ok(data);
     }
-
-    private Dictionary<string, Cog>? ReadFromCache()
-        => MemoryCache.TryGetValue<Dictionary<string, Cog>>(CacheKey, out var commands) ? commands : null;
 
     private async Task<Dictionary<string, Cog>> ReadFromRubbergodAsync()
     {
