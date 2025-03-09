@@ -15,7 +15,7 @@ public class User
     public DateTime? LastSuperReactionIncrement { get; set; }
     public bool IsUser { get; set; }
     public int PointsPosition { get; set; }
-    public long ActivePoints { get; set; }
-    public long ExpiredPoints { get; set; }
+    public int ActivePoints { get; set; }
+    public int ExpiredPoints { get; set; }
     public long MergedPoints { get; set; }
 }
