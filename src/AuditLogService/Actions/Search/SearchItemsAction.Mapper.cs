@@ -73,7 +73,7 @@ public partial class SearchItemsAction
                 await SetMessageEditedPreviewAsync(result);
                 break;
             case LogType.MessageDeleted:
-                await SetMesasgeDeletedPreviewAsync(result);
+                await SetMessageDeletedPreviewAsync(result);
                 break;
             case LogType.InteractionCommand:
                 await SetInteractionCommandPreviewAsync(result);
@@ -285,7 +285,7 @@ public partial class SearchItemsAction
         });
     }
 
-    private async Task SetMesasgeDeletedPreviewAsync(LogListItem result)
+    private async Task SetMessageDeletedPreviewAsync(LogListItem result)
     {
         var preview = await CreatePreviewAsync<MessageDeleted, MessageDeletedPreview>(result, entity => new MessageDeletedPreview
         {
@@ -307,9 +307,7 @@ public partial class SearchItemsAction
         });
 
         result.Preview = preview;
-
-        if (preview is not null)
-            result.IsDetailAvailable = preview.Embeds.Exists(o => o.FieldsCount > 0);
+        result.IsDetailAvailable = preview?.Embeds.Exists(o => o.FieldsCount > 0) == true || result.Files.Count > 0;
     }
 
     private async Task SetInteractionCommandPreviewAsync(LogListItem result)
