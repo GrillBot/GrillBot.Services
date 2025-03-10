@@ -13,7 +13,7 @@ public class EmoteUserStatItem : EmoteValueObject
     [StringLength(32)]
     public string UserId { get; set; } = null!;
 
-    public long UseCount { get; set; }
+    public int UseCount { get; set; }
 
     public DateTime FirstOccurence { get; set; }
     public DateTime LastOccurence { get; set; }
