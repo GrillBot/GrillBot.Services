@@ -2,7 +2,7 @@
 
 public class MessageEditedPreview
 {
-    public string ContentBefore { get; set; } = null!;
-    public string ContentAfter { get; set; } = null!;
+    public int ContentLengthBefore { get; set; }
+    public int ContentLengthAfter { get; set; }
     public string JumpUrl { get; set; } = null!;
 }

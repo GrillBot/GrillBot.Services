@@ -4,6 +4,7 @@ public class MessageDeletedPreview
 {
     public string AuthorId { get; set; } = null!;
     public DateTime MessageCreatedAt { get; set; }
-    public string? Content { get; set; }
-    public List<EmbedPreview> Embeds { get; set; } = new();
+    public int ContentLength { get; set; }
+    public int EmbedCount { get; set; }
+    public int EmbedFieldsCount { get; set; }
 }

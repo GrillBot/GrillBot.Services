@@ -45,11 +45,8 @@ public partial class SearchItemsAction
             case LogType.EmoteDeleted:
                 await SetEmoteDeletedPreviewAsync(result);
                 break;
-            case LogType.OverwriteCreated or LogType.OverwriteDeleted:
+            case LogType.OverwriteCreated or LogType.OverwriteDeleted or LogType.OverwriteUpdated:
                 await SetOverwritePreviewAsync(result);
-                break;
-            case LogType.OverwriteUpdated:
-                await SetOverwriteUpdatedPreviewAsync(result);
                 break;
             case LogType.Unban:
                 await SetUnbanPreviewAsync(result);
@@ -100,20 +97,12 @@ public partial class SearchItemsAction
 
     private async Task SetTextPreviewAsync(LogListItem result)
     {
-        var preview = await CreatePreviewAsync<Core.Entity.LogMessage, TextPreview>(result, entity => new TextPreview
+        result.Preview = await CreatePreviewAsync<Core.Entity.LogMessage, TextPreview>(result, entity => new TextPreview
         {
-            FullSource = $"{entity.SourceAppName}/{entity.Source}",
-            Message = entity.Message
+            FullSource = entity.SourceAppName + "/" + entity.Source
         });
 
-        if (preview is null)
-            return;
-
-        const int maxLength = 1000;
-        result.IsDetailAvailable = preview.Message.Length > maxLength;
-
-        preview.Message = preview.Message.Cut(maxLength) ?? "";
-        result.Preview = preview;
+        result.IsDetailAvailable = result.Preview is not null;
     }
 
     private async Task SetChannelPreviewAsync(LogListItem result)
@@ -168,30 +157,19 @@ public partial class SearchItemsAction
         {
             LogType.OverwriteCreated => await CreatePreviewAsync<OverwriteCreated, OverwriteInfo>(result, entity => entity.OverwriteInfo),
             LogType.OverwriteDeleted => await CreatePreviewAsync<OverwriteDeleted, OverwriteInfo>(result, entity => entity.OverwriteInfo),
+            LogType.OverwriteUpdated => await CreatePreviewAsync<OverwriteUpdated, OverwriteInfo>(result, entity => entity.After),
             _ => null
         };
 
         if (overwrite is null)
             return;
 
-        var perms = new OverwritePermissions(overwrite.AllowValue, overwrite.DenyValue);
+        result.IsDetailAvailable = true;
         result.Preview = new OverwritePreview
         {
-            Allow = perms.ToAllowList().ConvertAll(o => o.ToString()),
             TargetId = overwrite.TargetId,
-            Deny = perms.ToDenyList().ConvertAll(o => o.ToString()),
             TargetType = overwrite.Target
         };
-    }
-
-    private async Task SetOverwriteUpdatedPreviewAsync(LogListItem result)
-    {
-        result.IsDetailAvailable = true;
-        result.Preview = await CreatePreviewAsync<OverwriteUpdated, OverwriteUpdatedPreview>(result, entity => new OverwriteUpdatedPreview
-        {
-            TargetId = entity.After.TargetId,
-            TargetType = entity.After.Target
-        });
     }
 
     private async Task SetUnbanPreviewAsync(LogListItem result)
@@ -279,35 +257,26 @@ public partial class SearchItemsAction
     {
         result.Preview = await CreatePreviewAsync<MessageEdited, MessageEditedPreview>(result, entity => new MessageEditedPreview
         {
-            ContentAfter = entity.ContentAfter,
-            ContentBefore = entity.ContentBefore,
+            ContentLengthAfter = string.IsNullOrEmpty(entity.ContentAfter) ? 0 : entity.ContentAfter.Length,
+            ContentLengthBefore = string.IsNullOrEmpty(entity.ContentBefore) ? 0 : entity.ContentBefore.Length,
             JumpUrl = entity.JumpUrl
         });
+
+        result.IsDetailAvailable = true;
     }
 
     private async Task SetMessageDeletedPreviewAsync(LogListItem result)
     {
-        var preview = await CreatePreviewAsync<MessageDeleted, MessageDeletedPreview>(result, entity => new MessageDeletedPreview
+        result.Preview = await CreatePreviewAsync<MessageDeleted, MessageDeletedPreview>(result, entity => new MessageDeletedPreview
         {
             AuthorId = entity.AuthorId,
-            Content = entity.Content,
+            ContentLength = string.IsNullOrEmpty(entity.Content) ? 0 : entity.Content.Length,
             MessageCreatedAt = entity.MessageCreatedAt,
-            Embeds = entity.Embeds.Select(e => new EmbedPreview
-            {
-                AuthorName = e.AuthorName,
-                ContainsFooter = e.ContainsFooter,
-                FieldsCount = e.Fields.Count,
-                ImageInfo = e.ImageInfo,
-                ProviderName = e.ProviderName,
-                ThumbnailInfo = e.ThumbnailInfo,
-                Title = e.Title,
-                Type = e.Type,
-                VideoInfo = e.VideoInfo
-            }).ToList()
+            EmbedCount = entity.Embeds.Count,
+            EmbedFieldsCount = entity.Embeds.Sum(o => o.Fields.Count)
         });
 
-        result.Preview = preview;
-        result.IsDetailAvailable = preview?.Embeds.Exists(o => o.FieldsCount > 0) == true || result.Files.Count > 0;
+        result.IsDetailAvailable = true;
     }
 
     private async Task SetInteractionCommandPreviewAsync(LogListItem result)
