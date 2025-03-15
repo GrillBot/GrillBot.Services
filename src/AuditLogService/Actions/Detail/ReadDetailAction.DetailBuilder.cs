@@ -1,4 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
+using AuditLogService.Core.Enums;
 using AuditLogService.Core.Extensions;
 using AuditLogService.Core.Helpers;
 using AuditLogService.Models.Response.Detail;
@@ -54,6 +55,29 @@ public partial class ReadDetailAction
         };
 
         return ModelHelper.IsModelEmpty(result) ? null : result;
+    }
+
+    private async Task<OverwriteDetail?> CreateOverwriteDetailAsync(LogItem header)
+    {
+        var overwriteInfo = header.Type switch
+        {
+            LogType.OverwriteCreated => await CreateDetailAsync<OverwriteCreated, OverwriteInfo>(header, entity => entity.OverwriteInfo),
+            LogType.OverwriteDeleted => await CreateDetailAsync<OverwriteDeleted, OverwriteInfo>(header, entity => entity.OverwriteInfo),
+            _ => null
+        };
+
+        if (overwriteInfo is null)
+            return null;
+
+        var perms = new OverwritePermissions(overwriteInfo.AllowValue, overwriteInfo.DenyValue);
+
+        return new OverwriteDetail
+        {
+            Allow = perms.ToAllowList().ConvertAll(o => o.ToString()),
+            Deny = perms.ToDenyList().ConvertAll(o => o.ToString()),
+            TargetId = overwriteInfo.TargetId,
+            TargetType = overwriteInfo.Target
+        };
     }
 
     private async Task<OverwriteUpdatedDetail?> CreateOverwriteUpdatedDetailAsync(LogItem header)
@@ -161,6 +185,16 @@ public partial class ReadDetailAction
                 VideoInfo = e.VideoInfo
             }).ToList(),
             MessageCreatedAt = entity.MessageCreatedAt
+        });
+    }
+
+    private Task<MessageEditedDetail?> CreateMessageEditedDetailAsync(LogItem header)
+    {
+        return CreateDetailAsync<MessageEdited, MessageEditedDetail>(header, entity => new MessageEditedDetail
+        {
+            ContentAfter = entity.ContentAfter,
+            ContentBefore = entity.ContentBefore,
+            JumpLink = entity.JumpUrl
         });
     }
 

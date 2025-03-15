@@ -34,6 +34,9 @@ public partial class ReadDetailAction : ApiAction<AuditLogServiceContext>
             case LogType.ChannelUpdated:
                 result.Data = await CreateChannelUpdatedDetailAsync(logHeader);
                 break;
+            case LogType.OverwriteCreated or LogType.OverwriteDeleted:
+                result.Data = await CreateOverwriteDetailAsync(logHeader);
+                break;
             case LogType.OverwriteUpdated:
                 result.Data = await CreateOverwriteUpdatedDetailAsync(logHeader);
                 break;
@@ -42,6 +45,9 @@ public partial class ReadDetailAction : ApiAction<AuditLogServiceContext>
                 break;
             case LogType.GuildUpdated:
                 result.Data = await CreateGuildUpdatedDetailAsync(logHeader);
+                break;
+            case LogType.MessageEdited:
+                result.Data = await CreateMessageEditedDetailAsync(logHeader);
                 break;
             case LogType.MessageDeleted:
                 result.Data = await CreateMessageDeletedDetailAsync(logHeader);
