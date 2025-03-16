@@ -6,14 +6,14 @@ public class SendRemindNotificationPayload : IPayload
 {
     public string QueueName => "remind:send_remind";
 
-    public long RemindId { get; set; }
+    public int RemindId { get; set; }
     public bool IsEarly { get; set; }
 
     public SendRemindNotificationPayload()
     {
     }
 
-    public SendRemindNotificationPayload(long remindId, bool isEarly)
+    public SendRemindNotificationPayload(int remindId, bool isEarly)
     {
         RemindId = remindId;
         IsEarly = isEarly;

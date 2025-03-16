@@ -7,7 +7,7 @@ public class RemindMessage
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public long Id { get; set; }
+    public int Id { get; set; }
 
     [StringLength(32)]
     public string FromUserId { get; set; } = null!;

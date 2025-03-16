@@ -1,7 +1,7 @@
 ﻿namespace RemindService.Models.Response;
 
 public record RemindMessageItem(
-    long Id,
+    int Id,
     string FromUserId,
     string ToUserId,
     DateTime NotifyAtUtc,

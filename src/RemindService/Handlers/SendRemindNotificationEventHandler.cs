@@ -30,7 +30,7 @@ public class SendRemindNotificationEventHandler : BaseEventHandlerWithDb<SendRem
         await Publisher.PublishAsync(message);
     }
 
-    private async Task<RemindMessage?> GetRemindMessageAsync(long id)
+    private async Task<RemindMessage?> GetRemindMessageAsync(int id)
     {
         var query = DbContext.RemindMessages.Where(o => o.Id == id && !o.IsSendInProgress && string.IsNullOrEmpty(o.NotificationMessageId));
         return await ContextHelper.ReadFirstOrDefaultEntityAsync(query);

@@ -5,7 +5,7 @@ namespace RemindService.Models.Request;
 
 public class CopyReminderRequest
 {
-    public long RemindId { get; set; }
+    public int RemindId { get; set; }
 
     [DiscordId]
     [StringLength(32)]

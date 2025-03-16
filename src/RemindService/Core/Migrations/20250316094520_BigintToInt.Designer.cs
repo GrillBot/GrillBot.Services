@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RemindService.Core.Entity;
@@ -11,9 +12,11 @@ using RemindService.Core.Entity;
 namespace RemindService.Core.Migrations
 {
     [DbContext(typeof(RemindServiceContext))]
-    partial class RemindServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20250316094520_BigintToInt")]
+    partial class BigintToInt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

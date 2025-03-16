@@ -1,7 +1,7 @@
 ﻿namespace RemindService.Models.Response;
 
 public record ReminderSuggestionItem(
-    long RemindId,
+    int RemindId,
     string FromUserId,
     string ToUserId,
     bool IsIncoming,

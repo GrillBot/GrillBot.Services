@@ -1,3 +1,3 @@
 ﻿namespace RemindService.Models.Response;
 
-public record CreateReminderResult(long Id);
+public record CreateReminderResult(int Id);

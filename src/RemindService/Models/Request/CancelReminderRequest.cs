@@ -5,7 +5,7 @@ namespace RemindService.Models.Request;
 
 public class CancelReminderRequest
 {
-    public long RemindId { get; set; }
+    public int RemindId { get; set; }
 
     /// <summary>
     /// ID of user who executes cancellation.

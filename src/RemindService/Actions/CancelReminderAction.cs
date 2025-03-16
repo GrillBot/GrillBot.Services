@@ -11,7 +11,6 @@ using RemindService.Core.Entity;
 using RemindService.Models.Events;
 using RemindService.Models.Request;
 using RemindService.Options;
-using System.Runtime.CompilerServices;
 
 namespace RemindService.Actions;
 
@@ -86,7 +85,7 @@ public class CancelReminderAction : ApiAction<RemindServiceContext>
 
         var logRequest = new LogRequest(LogType.Info, DateTime.UtcNow, null, request.ExecutingUserId)
         {
-            LogMessage = new LogMessageRequest(string.Join(messageTemplate, message.Id), LogSeverity.Info, "RemindService", nameof(CancelReminderAction))
+            LogMessage = new LogMessageRequest(string.Format(messageTemplate, message.Id), LogSeverity.Info, "RemindService", nameof(CancelReminderAction))
         };
 
         await _publisher.PublishAsync(new CreateItemsPayload(logRequest));
