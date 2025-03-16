@@ -23,12 +23,7 @@ public partial class CreateArchivationDataAction
         };
 
         result.Content = json.ToJsonString();
-        result.ChannelIds = result.ChannelIds.Distinct().ToList();
-        result.GuildIds = result.GuildIds.Distinct().ToList();
-        result.UserIds = result.UserIds.Distinct().ToList();
-        result.Files = result.Files.Distinct().ToList();
         result.ItemsCount = items.Count;
-        result.TotalFilesSize = items.SelectMany(o => o.Files).Sum(o => o.Size);
         result.PerType = result.PerType.OrderBy(o => o.Key).ToDictionary(o => o.Key, o => o.Value);
 
         return result;
@@ -48,19 +43,22 @@ public partial class CreateArchivationDataAction
 
         if (!string.IsNullOrEmpty(item.GuildId))
         {
-            result.GuildIds.Add(item.GuildId);
+            if (!result.GuildIds.Contains(item.GuildId))
+                result.GuildIds.Add(item.GuildId);
             json["GuildId"] = item.GuildId;
         }
 
         if (!string.IsNullOrEmpty(item.UserId))
         {
-            result.UserIds.Add(item.UserId);
+            if (!result.UserIds.Contains(item.UserId))
+                result.UserIds.Add(item.UserId);
             json["UserId"] = item.UserId;
         }
 
         if (!string.IsNullOrEmpty(item.ChannelId))
         {
-            result.ChannelIds.Add(item.ChannelId);
+            if (!result.ChannelIds.Contains(item.ChannelId))
+                result.ChannelIds.Add(item.ChannelId);
             json["ChannelId"] = item.ChannelId;
         }
 
@@ -82,8 +80,10 @@ public partial class CreateArchivationDataAction
 
     private static JsonNode ProcessFile(File file, ArchivationResult result)
     {
-        result.Files.Add(file.Filename);
+        if (!result.Files.Contains(file.Filename))
+            result.Files.Add(file.Filename);
 
+        result.TotalFilesSize += file.Size;
         var json = new JsonObject
         {
             ["Id"] = file.Id.ToString(),

@@ -317,7 +317,7 @@ public partial class SearchItemsAction
         result.IsDetailAvailable = true;
         result.Preview = await CreatePreviewAsync<ApiRequest, ApiPreview>(result, entity => new ApiPreview
         {
-            Action = $"{entity.ControllerName}.{entity.ActionName}",
+            Action = $"{entity.ControllerName.Replace("Controller", "")}.{entity.ActionName}",
             Duration = (int)entity.Duration,
             Path = $"{entity.Method} {entity.TemplatePath} (API {entity.ApiGroupName})",
             Result = entity.Result

@@ -11,10 +11,10 @@ public partial class CreateArchivationDataAction : ApiAction<AuditLogServiceCont
 {
     private AppOptions AppOptions { get; }
 
-    public CreateArchivationDataAction(IOptionsSnapshot<AppOptions> options, AuditLogServiceContext context, ICounterManager counterManager)
+    public CreateArchivationDataAction(IOptions<AppOptions> options, AuditLogServiceContext context, ICounterManager counterManager)
         : base(counterManager, context)
     {
-        AppOptions = options.Get(null);
+        AppOptions = options.Value;
     }
 
     public override async Task<ApiResult> ProcessAsync()

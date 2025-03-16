@@ -31,7 +31,7 @@ public class GetApiDashboardAction : DashboardListBaseAction<ApiRequest>
         var apiGroup = GetParameter<string>(0);
 
         var internalApis = new[] { "V1", "V3" };
-        var ignoredControllers = new[] { "DashboardController", "LookupController" };
+        var ignoredControllers = new[] { "Dashboard", "Lookup" };
 
         if (apiGroup == "V2")
         {
@@ -42,7 +42,7 @@ public class GetApiDashboardAction : DashboardListBaseAction<ApiRequest>
 
             return entity => internalApis.Contains(entity.ApiGroupName) &&
                 entity.ActionName != "GetDashboardAsync" &&
-                !ignoredControllers.Contains(entity.ControllerName) &&
+                !ignoredControllers.Contains(entity.ControllerName.Replace("Controller", "")) &&
                 !Regex.IsMatch(entity.TemplatePath, ".+/dashboard/?.*");
         }
     }

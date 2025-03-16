@@ -45,10 +45,10 @@ public class ApiRequest : ChildEntityBase
     [StringLength(512)]
     public string Identification { get; set; } = null!;
 
-    [StringLength(128)]
+    [StringLength(64)]
     public string Ip { get; set; } = null!;
 
-    [StringLength(255)]
+    [StringLength(128)]
     public string Result { get; set; } = null!;
 
     public bool IsSuccess { get; set; }
@@ -58,7 +58,7 @@ public class ApiRequest : ChildEntityBase
     [StringLength(32)]
     public string? Role { get; set; }
 
-    [StringLength(128)]
+    [StringLength(64)]
     public string? ForwardedIp { get; set; }
 
     public long Duration { get; set; }

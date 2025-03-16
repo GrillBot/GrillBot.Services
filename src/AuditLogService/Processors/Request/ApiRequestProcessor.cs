@@ -29,7 +29,7 @@ public class ApiRequestProcessor : RequestProcessorBase
             Parameters = apiRequest.Parameters,
             Path = apiRequest.Path,
             ActionName = apiRequest.ActionName,
-            ControllerName = apiRequest.ControllerName,
+            ControllerName = apiRequest.ControllerName.Replace("Controller", ""),
             EndAt = apiRequest.EndAt,
             StartAt = apiRequest.StartAt,
             TemplatePath = apiRequest.TemplatePath,

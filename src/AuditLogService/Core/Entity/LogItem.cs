@@ -7,7 +7,6 @@ namespace AuditLogService.Core.Entity;
 
 [Index(nameof(CreatedAt))]
 [Index(nameof(GuildId))]
-[Index(nameof(LogDate))]
 [Index(nameof(CreatedAt), nameof(IsDeleted))]
 public class LogItem
 {

@@ -261,7 +261,7 @@ public partial class ReadDetailAction
         {
             ActionName = entity.ActionName,
             ApiGroupName = entity.ApiGroupName,
-            ControllerName = entity.ControllerName,
+            ControllerName = entity.ControllerName.Replace("Controller", ""),
             EndAt = entity.EndAt,
             ForwardedIp = entity.ForwardedIp,
             Headers = entity.Headers,

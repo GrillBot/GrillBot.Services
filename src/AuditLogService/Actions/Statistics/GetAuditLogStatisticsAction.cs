@@ -25,28 +25,29 @@ public class GetAuditLogStatisticsAction : ApiAction<AuditLogServiceContext>
         return ApiResult.Ok(result);
     }
 
-    private async Task<Dictionary<string, long>> GetStatisticsByTypeAsync()
+    private Task<Dictionary<string, long>> GetStatisticsByTypeAsync()
     {
         var query = DbContext.LogItems.AsNoTracking()
             .GroupBy(o => o.Type)
             .OrderBy(o => o.Key)
             .Select(o => new { o.Key, Count = o.LongCount() });
 
-        return await ContextHelper.ReadToDictionaryAsync(query, o => o.Key.ToString(), o => o.Count);
+        return ContextHelper.ReadToDictionaryAsync(query, o => o.Key.ToString(), o => o.Count);
     }
 
-    private async Task<Dictionary<string, long>> GetStatisticsByDateAsync()
+    private Task<Dictionary<string, long>> GetStatisticsByDateAsync()
     {
         var query = DbContext.LogItems.AsNoTracking()
-            .GroupBy(o => o.LogDate)
-            .Select(o => new { o.Key, Count = o.LongCount() });
+            .GroupBy(o => new { o.LogDate.Year, o.LogDate.Month })
+            .OrderBy(o => o.Key.Year)
+            .ThenBy(o => o.Key.Month)
+            .Select(o => new
+            {
+                Key = o.Key.Year + "-" + o.Key.Month.ToString().PadLeft(2, '0'),
+                Count = o.LongCount()
+            });
 
-        var stats = await ContextHelper.ReadEntitiesAsync(query);
-
-        return stats
-            .GroupBy(o => new { o.Key.Year, o.Key.Month })
-            .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
-            .ToDictionary(o => $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", o => o.Sum(x => x.Count));
+        return ContextHelper.ReadToDictionaryAsync(query, o => o.Key, o => o.Count);
     }
 
     private async Task<List<FileExtensionStatistic>> GetFileExtensionStatisticsAsync()

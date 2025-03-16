@@ -45,7 +45,7 @@ public partial class CreateArchivationDataAction
 
         return new JsonObject
         {
-            ["SourceAppName"] = item.LogMessage.SourceAppName,
+            ["AppName"] = item.LogMessage.SourceAppName,
             ["Source"] = item.LogMessage.Source,
             ["Severity"] = item.LogMessage.Severity.ToString(),
             ["Message"] = item.LogMessage.Message
@@ -136,14 +136,14 @@ public partial class CreateArchivationDataAction
             ["TargetId"] = info.TargetId
         };
 
-        if (info.Target == PermissionTarget.User)
+        if (info.Target == PermissionTarget.User && !result.UserIds.Contains(info.TargetId))
             result.UserIds.Add(info.TargetId);
 
         var perms = new OverwritePermissions(info.AllowValue, info.DenyValue);
         if (perms.AllowValue > 0)
-            json["AllowList"] = new JsonArray(perms.ToAllowList().Select(o => JsonValue.Create(o.ToString())).ToArray());
+            json["Allow"] = new JsonArray(perms.ToAllowList().Select(o => JsonValue.Create(o.ToString())).ToArray());
         if (perms.DenyValue > 0)
-            json["DenyList"] = new JsonArray(perms.ToDenyList().Select(o => JsonValue.Create(o.ToString())).ToArray());
+            json["Deny"] = new JsonArray(perms.ToDenyList().Select(o => JsonValue.Create(o.ToString())).ToArray());
 
         return json;
     }
@@ -153,7 +153,9 @@ public partial class CreateArchivationDataAction
         if (item.Unban is null)
             return null;
 
-        result.UserIds.Add(item.Unban.UserId);
+        if (!result.UserIds.Contains(item.Unban.UserId))
+            result.UserIds.Add(item.Unban.UserId);
+
         return new JsonObject
         {
             ["UserId"] = item.Unban.UserId
@@ -180,7 +182,9 @@ public partial class CreateArchivationDataAction
             ["UserId"] = info.UserId
         };
 
-        result.UserIds.Add(info.UserId);
+        if (!result.UserIds.Contains(info.UserId))
+            result.UserIds.Add(info.UserId);
+
         if (!string.IsNullOrEmpty(info.Nickname))
             json["Nickname"] = info.Nickname;
         if (info.IsMuted is not null)
@@ -205,7 +209,8 @@ public partial class CreateArchivationDataAction
         var roles = new JsonArray();
         foreach (var role in item.MemberRolesUpdated)
         {
-            result.UserIds.Add(role.UserId);
+            if (!result.UserIds.Contains(role.UserId))
+                result.UserIds.Add(role.UserId);
 
             roles.Add(new JsonObject
             {
@@ -269,25 +274,29 @@ public partial class CreateArchivationDataAction
 
         if (!string.IsNullOrEmpty(info.PublicUpdatesChannelId))
         {
-            result.ChannelIds.Add(info.PublicUpdatesChannelId);
+            if (!result.ChannelIds.Contains(info.PublicUpdatesChannelId))
+                result.ChannelIds.Add(info.PublicUpdatesChannelId);
             json["PublicUpdatesChannelId"] = info.PublicUpdatesChannelId;
         }
 
         if (!string.IsNullOrEmpty(info.RulesChannelId))
         {
-            result.ChannelIds.Add(info.RulesChannelId);
+            if (!result.ChannelIds.Contains(info.RulesChannelId))
+                result.ChannelIds.Add(info.RulesChannelId);
             json["RulesChannelId"] = info.RulesChannelId;
         }
 
         if (!string.IsNullOrEmpty(info.SystemChannelId))
         {
-            result.ChannelIds.Add(info.SystemChannelId);
+            if (!result.ChannelIds.Contains(info.SystemChannelId))
+                result.ChannelIds.Add(info.SystemChannelId);
             json["SystemChannelId"] = info.SystemChannelId;
         }
 
         if (!string.IsNullOrEmpty(info.AfkChannelId))
         {
-            result.ChannelIds.Add(info.AfkChannelId);
+            if (!result.ChannelIds.Contains(info.AfkChannelId))
+                result.ChannelIds.Add(info.AfkChannelId);
             json["AfkChannelId"] = info.AfkChannelId;
         }
 
@@ -306,12 +315,14 @@ public partial class CreateArchivationDataAction
         if (item.UserLeft is null)
             return null;
 
-        result.UserIds.Add(item.UserLeft.UserId);
+        if (!result.UserIds.Contains(item.UserLeft.UserId))
+            result.UserIds.Add(item.UserLeft.UserId);
+
         var json = new JsonObject
         {
             ["UserId"] = item.UserLeft.UserId,
             ["MemberCount"] = item.UserLeft.MemberCount,
-            ["IsBan"] = item.UserLeft.IsBan.ToString()
+            ["IsBan"] = item.UserLeft.IsBan
         };
 
         if (!string.IsNullOrEmpty(item.UserLeft.BanReason))
@@ -338,8 +349,8 @@ public partial class CreateArchivationDataAction
         return new JsonObject
         {
             ["JumpUrl"] = item.MessageEdited.JumpUrl,
-            ["ContentBefore"] = item.MessageEdited.ContentBefore,
-            ["ContentAfter"] = item.MessageEdited.ContentAfter
+            ["Before"] = item.MessageEdited.ContentBefore,
+            ["After"] = item.MessageEdited.ContentAfter
         };
     }
 
@@ -348,7 +359,9 @@ public partial class CreateArchivationDataAction
         if (item.MessageDeleted is null)
             return null;
 
-        result.UserIds.Add(item.MessageDeleted.AuthorId);
+        if (!result.UserIds.Contains(item.MessageDeleted.AuthorId))
+            result.UserIds.Add(item.MessageDeleted.AuthorId);
+
         var json = new JsonObject
         {
             ["AuthorId"] = item.MessageDeleted.AuthorId,
@@ -365,7 +378,7 @@ public partial class CreateArchivationDataAction
             {
                 ["EmbedId"] = embed.Id.ToString(),
                 ["Type"] = embed.Type,
-                ["ContainsFooter"] = embed.ContainsFooter.ToString()
+                ["ContainsFooter"] = embed.ContainsFooter
             };
 
             if (!string.IsNullOrEmpty(embed.Title))
@@ -375,9 +388,9 @@ public partial class CreateArchivationDataAction
             if (!string.IsNullOrEmpty(embed.VideoInfo))
                 embedJson["VideoInfo"] = embed.VideoInfo;
             if (!string.IsNullOrEmpty(embed.AuthorName))
-                embedJson["AuthorName"] = embed.AuthorName;
+                embedJson["Author"] = embed.AuthorName;
             if (!string.IsNullOrEmpty(embed.ProviderName))
-                embedJson["ProviderName"] = embed.ProviderName;
+                embedJson["Provider"] = embed.ProviderName;
             if (!string.IsNullOrEmpty(embed.ThumbnailInfo))
                 embedJson["ThumbnailInfo"] = embed.ThumbnailInfo;
 
@@ -408,8 +421,8 @@ public partial class CreateArchivationDataAction
         var json = new JsonObject
         {
             ["Name"] = item.InteractionCommand.Name,
-            ["ModuleName"] = item.InteractionCommand.ModuleName,
-            ["MethodName"] = item.InteractionCommand.MethodName,
+            ["Module"] = item.InteractionCommand.ModuleName,
+            ["Method"] = item.InteractionCommand.MethodName,
             ["HasResponded"] = item.InteractionCommand.HasResponded,
             ["IsValidToken"] = item.InteractionCommand.IsValidToken,
             ["IsSuccess"] = item.InteractionCommand.IsSuccess,
@@ -466,9 +479,9 @@ public partial class CreateArchivationDataAction
             ["InfoId"] = info.Id.ToString(),
             ["Name"] = info.ThreadName,
             ["Type"] = info.Type.ToString(),
-            ["IsArchived"] = info.IsArchived.ToString(),
+            ["IsArchived"] = info.IsArchived,
             ["ArchiveDuration"] = info.ArchiveDuration.ToString(),
-            ["IsLocked"] = info.IsLocked.ToString()
+            ["IsLocked"] = info.IsLocked
         };
 
         if (info.SlowMode is not null)
@@ -490,7 +503,7 @@ public partial class CreateArchivationDataAction
             ["Result"] = item.Job.Result,
             ["StartAt"] = item.Job.StartAt.ToString("o"),
             ["EndAt"] = item.Job.EndAt.ToString("o"),
-            ["WasError"] = item.Job.WasError.ToString(),
+            ["WasError"] = item.Job.WasError,
             ["Duration"] = item.Job.Duration,
             ["JobDate"] = item.Job.JobDate.ToString("yyyy-MM-dd")
         };
@@ -498,7 +511,9 @@ public partial class CreateArchivationDataAction
         if (string.IsNullOrEmpty(item.Job.StartUserId))
             return json;
 
-        result.UserIds.Add(item.Job.StartUserId);
+        if (!result.UserIds.Contains(item.Job.StartUserId))
+            result.UserIds.Add(item.Job.StartUserId);
+
         json["StartUserId"] = item.Job.StartUserId;
         return json;
     }
@@ -510,15 +525,15 @@ public partial class CreateArchivationDataAction
 
         var json = new JsonObject
         {
-            ["ControllerName"] = item.ApiRequest.ControllerName,
-            ["ActionName"] = item.ApiRequest.ActionName,
+            ["Controller"] = item.ApiRequest.ControllerName,
+            ["Action"] = item.ApiRequest.ActionName,
             ["StartAt"] = item.ApiRequest.StartAt.ToString("o"),
             ["EndAt"] = item.ApiRequest.EndAt.ToString("o"),
             ["Method"] = item.ApiRequest.Method,
             ["TemplatePath"] = item.ApiRequest.TemplatePath,
             ["Path"] = item.ApiRequest.Path,
             ["Language"] = item.ApiRequest.Language,
-            ["ApiGroupName"] = item.ApiRequest.ApiGroupName,
+            ["ApiGroup"] = item.ApiRequest.ApiGroupName,
             ["Identification"] = item.ApiRequest.Identification,
             ["Ip"] = item.ApiRequest.Ip,
             ["Result"] = item.ApiRequest.Result,
@@ -587,8 +602,8 @@ public partial class CreateArchivationDataAction
             ["InfoId"] = info.Id.ToString(),
             ["RoleId"] = info.RoleId,
             ["Name"] = info.Name,
-            ["IsMentionable"] = info.IsMentionable.ToString(),
-            ["IsHoisted"] = info.IsHoisted.ToString()
+            ["IsMentionable"] = info.IsMentionable,
+            ["IsHoisted"] = info.IsHoisted
         };
 
         if (!string.IsNullOrEmpty(info.Color))
