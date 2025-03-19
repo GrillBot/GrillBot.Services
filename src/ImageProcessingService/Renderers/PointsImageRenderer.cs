@@ -1,4 +1,5 @@
 ﻿using ImageMagick;
+using ImageMagick.Drawing;
 using ImageProcessingService.Extensions;
 using ImageProcessingService.Resources;
 using System.Drawing;
@@ -8,10 +9,10 @@ namespace ImageProcessingService.Renderers;
 public static class PointsImageRenderer
 {
     private static readonly Size _size = new(512, 410);
-    private static readonly Size _profilePictureSize = new(200, 200);
     private static readonly (string name, int size) _usernameFont = ("Open Sans", 70);
     private static readonly (string name, int size) _positionFont = ("Open Sans", 35);
     private static readonly (string name, int size) _pointsFont = ("Open Sans", 40);
+    private const uint PROFILE_PICTURE_SIZE = 200;
     private const int BORDER = 25;
     private const int CORDER_RADIUS = 20;
 
@@ -20,7 +21,7 @@ public static class PointsImageRenderer
         var dominantColor = profilePicture.GetDominantColor();
         var textBackground = CreateDarkerBackgroundColor(dominantColor);
         var disposables = new List<IDisposable>(); // Objects for release after drawing.
-        var image = new MagickImage(dominantColor, _size.Width, _size.Height);
+        var image = new MagickImage(dominantColor, (uint)_size.Width, (uint)_size.Height);
 
         try
         {
@@ -55,7 +56,7 @@ public static class PointsImageRenderer
 
     private static void SetProfilePicture(IDrawables<byte> drawables, IMagickImage<byte> profilePicture, List<IDisposable> disposables)
     {
-        profilePicture.Resize(_profilePictureSize.Width, _profilePictureSize.Height);
+        profilePicture.Resize(PROFILE_PICTURE_SIZE, PROFILE_PICTURE_SIZE);
         profilePicture.RoundCorners(CORDER_RADIUS);
 
         var shadow = profilePicture.Clone();
@@ -72,7 +73,7 @@ public static class PointsImageRenderer
     {
         var maxLength = _size.Width - ((10 + BORDER) * 2);
         var printableUsername = username.CutToImageWidth(maxLength, _usernameFont.name, _usernameFont.size);
-        var textPosition = BORDER + 20 + _profilePictureSize.Height + _usernameFont.size;
+        var textPosition = BORDER + 20 + PROFILE_PICTURE_SIZE + _usernameFont.size;
 
         drawables
             .Font(_usernameFont.name)
@@ -88,7 +89,7 @@ public static class PointsImageRenderer
         var positionTextSize = positionText.MeasureText(_positionFont.name, _positionFont.size);
         var positionTextX = Math.Max(
             _size.Width - BORDER - 10 - positionTextSize.Width, // Expected position
-            BORDER + 15 + _profilePictureSize.Width // Start space.
+            BORDER + 15 + PROFILE_PICTURE_SIZE // Start space.
         );
         var positionTextY = BORDER + 5 + _positionFont.size;
 

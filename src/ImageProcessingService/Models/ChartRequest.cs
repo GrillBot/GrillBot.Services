@@ -8,5 +8,5 @@ public class ChartRequest
 {
     [Required]
     [RequireSomeItemInCollection(ErrorMessage = "Some request is required.")]
-    public List<ChartRequestData> Requests { get; set; } = new();
+    public List<ChartRequestData> Requests { get; set; } = [];
 }

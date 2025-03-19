@@ -1,4 +1,5 @@
 ﻿using ImageMagick;
+using ImageMagick.Drawing;
 using ImageProcessingService.Extensions;
 using ImageProcessingService.Resources;
 
@@ -13,7 +14,7 @@ public static class PeepoangryRenderer
 
         if (profilePictureFrames.Count > 1)
             return RenderAsGif(profilePictureFrames);
-        return new List<MagickImage> { RenderAsPng(profilePictureFrames[0]) };
+        return [RenderAsPng(profilePictureFrames[0])];
     }
 
     private static List<MagickImage> RenderAsGif(List<IMagickImage<byte>> profilePictureFrames)

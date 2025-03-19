@@ -7,15 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ImageProcessingService.Actions;
 
-public class PointsAction : ApiActionBase
+public class PointsAction(PointsCache _cache) : ApiActionBase
 {
-    private readonly PointsCache _cache;
-
-    public PointsAction(PointsCache cache)
-    {
-        _cache = cache;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = GetParameter<PointsRequest>(0);
@@ -32,8 +25,6 @@ public class PointsAction : ApiActionBase
         await _cache.WriteByPointsRequestAsync(request, imageData);
         return CreateResult(imageData);
     }
-
-
 
     private static ApiResult CreateResult(byte[] image)
         => ApiResult.Ok(new FileContentResult(image, "image/png"));

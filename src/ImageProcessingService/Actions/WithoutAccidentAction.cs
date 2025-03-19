@@ -7,15 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ImageProcessingService.Actions;
 
-public class WithoutAccidentAction : ApiActionBase
+public class WithoutAccidentAction(WithoutAccidentCache _cache) : ApiActionBase
 {
-    private readonly WithoutAccidentCache _cache;
-
-    public WithoutAccidentAction(WithoutAccidentCache cache)
-    {
-        _cache = cache;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = GetParameter<WithoutAccidentImageRequest>(0);

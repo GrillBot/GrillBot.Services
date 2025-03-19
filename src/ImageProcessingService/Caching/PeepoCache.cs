@@ -1,44 +1,33 @@
-﻿using ImageProcessingService.Caching.Models;
+﻿using GrillBot.Core.Redis.Extensions;
+using ImageProcessingService.Caching.Models;
 using ImageProcessingService.Models;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ImageProcessingService.Caching;
 
-public class PeepoCache : CacheBase
+public class PeepoCache(IDistributedCache _cache)
 {
-    public PeepoCache(IMemoryCache cache) : base(cache)
-    {
-    }
+    private static readonly TimeSpan _cacheExpiration = TimeSpan.FromDays(31);
 
-    public async Task<PeepoCacheData?> GetByPeepoRequestAsync(PeepoRequest request, string peepoImageType)
+    public async Task<ImageCacheData?> GetByPeepoRequestAsync(PeepoRequest request, string peepoImageType)
     {
-        var cacheData = await ReadCacheAsync<PeepoCacheData>();
-
-        // Remove all invalid records.
-        cacheData.RemoveAll(o => o.PeepoImageType == peepoImageType && o.UserId == request.UserId && o.AvatarId != request.AvatarInfo.AvatarId);
-        return cacheData.Find(o => o.PeepoImageType == peepoImageType && o.UserId == request.UserId && o.AvatarId == request.AvatarInfo.AvatarId);
+        var cacheKey = CreateCacheKey(request, peepoImageType);
+        return await _cache.GetAsync<ImageCacheData>(cacheKey);
     }
 
     public async Task WriteByPeepoRequest(PeepoRequest request, string peepoImageType, byte[] image, string contentType)
     {
-        var cacheData = await ReadCacheAsync<PeepoCacheData>();
-        var cacheItem = cacheData.Find(o => o.PeepoImageType == peepoImageType && o.UserId == request.UserId && o.AvatarId == request.AvatarInfo.AvatarId);
+        var cacheKey = CreateCacheKey(request, peepoImageType);
 
-        if (cacheItem is null)
+        var cacheData = new ImageCacheData
         {
-            cacheItem = new PeepoCacheData
-            {
-                AvatarId = request.AvatarInfo.AvatarId,
-                UserId = request.UserId,
-                PeepoImageType = peepoImageType
-            };
+            ContentType = contentType,
+            Image = image
+        };
 
-            cacheData.Add(cacheItem);
-        }
-
-        cacheItem.ValidTo = DateTime.UtcNow.AddMonths(1);
-        cacheItem.Image = image;
-        cacheItem.ContentType = contentType;
-        await UpdateCacheAsync(cacheData);
+        await _cache.SetAsync(cacheKey, cacheData, _cacheExpiration);
     }
+
+    private static string CreateCacheKey(PeepoRequest request, string peepoImageType)
+        => $"Peepo({peepoImageType}; {request.UserId}; {request.AvatarInfo.AvatarId})";
 }

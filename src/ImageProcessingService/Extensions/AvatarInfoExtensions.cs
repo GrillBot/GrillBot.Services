@@ -7,9 +7,10 @@ public static class AvatarInfoExtensions
 {
     public static IEnumerable<IMagickImage<byte>> GetProfilePictureFrames(this AvatarInfo avatar, long guildUploadLimit)
     {
+        var isAnimated = IsAnimated(avatar, guildUploadLimit);
         using var profilePicture = new MagickImageCollection(avatar.AvatarContent);
 
-        if (IsAnimated(avatar, guildUploadLimit))
+        if (isAnimated)
         {
             profilePicture.Coalesce();
 

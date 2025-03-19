@@ -6,12 +6,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace ImageProcessingService.Controllers;
 
-public class ImageController : ControllerBase
+public class ImageController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public ImageController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpPost("peepolove")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

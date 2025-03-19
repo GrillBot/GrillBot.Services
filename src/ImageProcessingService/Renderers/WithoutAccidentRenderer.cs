@@ -1,4 +1,5 @@
 ﻿using ImageMagick;
+using ImageMagick.Drawing;
 using ImageProcessingService.Extensions;
 using ImageProcessingService.Resources;
 using System.Drawing;

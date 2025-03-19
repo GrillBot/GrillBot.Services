@@ -7,15 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ImageProcessingService.Actions;
 
-public class PeepoAngryAction : ApiActionBase
+public class PeepoAngryAction(PeepoCache _cache) : ApiActionBase
 {
-    private readonly PeepoCache _cache;
-
-    public PeepoAngryAction(PeepoCache cache)
-    {
-        _cache = cache;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = (PeepoRequest)Parameters[0]!;

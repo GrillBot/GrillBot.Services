@@ -1,48 +1,33 @@
-﻿using ImageProcessingService.Caching.Models;
+﻿using GrillBot.Core.Redis.Extensions;
+using ImageProcessingService.Caching.Models;
 using ImageProcessingService.Models;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ImageProcessingService.Caching;
 
-public class PointsCache : CacheBase
+public class PointsCache(IDistributedCache _cache)
 {
-    public PointsCache(IMemoryCache cache) : base(cache)
+    private static readonly TimeSpan _cacheExpiration = TimeSpan.FromDays(1);
+
+    public async Task<ImageCacheData?> GetByPointsRequestAsync(PointsRequest request)
     {
+        var cacheKey = CreateCacheKey(request);
+        return await _cache.GetAsync<ImageCacheData>(cacheKey);
     }
-
-    public async Task<PointsCacheData?> GetByPointsRequestAsync(PointsRequest request)
-    {
-        var cacheData = await ReadCacheAsync<PointsCacheData>();
-
-        // Remove all invalid records.
-        cacheData.RemoveAll(o => o.UserId == request.UserId && CanDelete(o, request));
-        return cacheData.Find(o => o.UserId == request.UserId && !CanDelete(o, request));
-    }
-
-    private static bool CanDelete(PointsCacheData cache, PointsRequest request)
-        => cache.Username != request.Username || cache.Points != request.PointsValue || cache.Position != request.Position || cache.AvatarId != request.AvatarInfo.AvatarId;
 
     public async Task WriteByPointsRequestAsync(PointsRequest request, byte[] image)
     {
-        var cacheData = await ReadCacheAsync<PointsCacheData>();
-        var cacheItem = cacheData.Find(o => o.UserId == request.UserId && !CanDelete(o, request));
+        var cacheKey = CreateCacheKey(request);
 
-        if (cacheItem is null)
+        var cacheData = new ImageCacheData
         {
-            cacheItem = new PointsCacheData
-            {
-                UserId = request.UserId,
-                Position = request.Position,
-                Username = request.Username,
-                AvatarId = request.AvatarInfo.AvatarId,
-                Points = request.PointsValue
-            };
+            ContentType = "image/png",
+            Image = image
+        };
 
-            cacheData.Add(cacheItem);
-        }
-
-        cacheItem.ValidTo = DateTime.UtcNow.AddDays(1);
-        cacheItem.Image = image;
-        await UpdateCacheAsync(cacheData);
+        await _cache.SetAsync(cacheKey, cacheData, _cacheExpiration);
     }
+
+    private static string CreateCacheKey(PointsRequest request)
+        => $"Points({request.UserId}; {request.Username}; {request.PointsValue}; {request.Position}; {request.AvatarInfo.AvatarId})";
 }

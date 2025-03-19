@@ -10,7 +10,7 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
     args,
     (services, configuration) =>
     {
-        services.AddCaching();
+        services.AddCaching(configuration);
         services.AddExternalServices(configuration);
     },
     configureKestrel: options => options.Limits.MaxRequestBodySize = 1073741824, // 1GB

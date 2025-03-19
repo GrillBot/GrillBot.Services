@@ -1,10 +1,12 @@
-﻿namespace ImageProcessingService.Caching;
+﻿using GrillBot.Core.Redis;
+
+namespace ImageProcessingService.Caching;
 
 public static class CacheExtensions
 {
-    public static IServiceCollection AddCaching(this IServiceCollection services)
+    public static IServiceCollection AddCaching(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddMemoryCache();
+        services.AddRedisDistributedCache(configuration);
 
         return services
             .AddScoped<PeepoCache>()

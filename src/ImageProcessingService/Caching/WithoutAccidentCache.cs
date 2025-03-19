@@ -1,43 +1,33 @@
-﻿using ImageProcessingService.Caching.Models;
+﻿using GrillBot.Core.Redis.Extensions;
+using ImageProcessingService.Caching.Models;
 using ImageProcessingService.Models;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ImageProcessingService.Caching;
 
-public class WithoutAccidentCache : CacheBase
+public class WithoutAccidentCache(IDistributedCache _cache)
 {
-    public WithoutAccidentCache(IMemoryCache cache) : base(cache)
-    {
-    }
+    private static readonly TimeSpan _cacheExpiration = TimeSpan.FromDays(6 * 31);
 
-    public async Task<WithoutAccidentCacheData?> GetByRequestAsync(WithoutAccidentImageRequest request)
+    public async Task<ImageCacheData?> GetByRequestAsync(WithoutAccidentImageRequest request)
     {
-        var cacheData = await ReadCacheAsync<WithoutAccidentCacheData>();
-
-        // Remove all invalid items.
-        cacheData.RemoveAll(o => o.DaysCount == request.DaysCount && o.UserId == request.UserId && o.AvatarId != request.AvatarInfo.AvatarId);
-        return cacheData.Find(o => o.DaysCount == request.DaysCount && o.UserId == request.UserId && o.AvatarId == request.AvatarInfo.AvatarId);
+        var cacheKey = CreateCacheKey(request);
+        return await _cache.GetAsync<ImageCacheData>(cacheKey);
     }
 
     public async Task WriteByRequestAsync(WithoutAccidentImageRequest request, byte[] image)
     {
-        var cacheData = await ReadCacheAsync<WithoutAccidentCacheData>();
-        var cacheItem = cacheData.Find(o => o.DaysCount == request.DaysCount && o.UserId == request.UserId && o.AvatarId == request.AvatarInfo.AvatarId);
+        var cacheKey = CreateCacheKey(request);
 
-        if (cacheItem is null)
+        var cacheData = new ImageCacheData
         {
-            cacheItem = new WithoutAccidentCacheData
-            {
-                AvatarId = request.AvatarInfo.AvatarId,
-                DaysCount = request.DaysCount,
-                UserId = request.UserId
-            };
+            ContentType = "image/png",
+            Image = image
+        };
 
-            cacheData.Add(cacheItem);
-        }
-
-        cacheItem.Image = image;
-        cacheItem.ValidTo = DateTime.UtcNow.AddMonths(6);
-        await UpdateCacheAsync(cacheData);
+        await _cache.SetAsync(cacheKey, cacheData, _cacheExpiration);
     }
+
+    private static string CreateCacheKey(WithoutAccidentImageRequest request)
+        => $"WithoutAccident({request.DaysCount}; {request.UserId}; {request.AvatarInfo.AvatarId})";
 }

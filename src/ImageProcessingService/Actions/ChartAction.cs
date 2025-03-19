@@ -4,23 +4,17 @@ using GrillBot.Core.Services.Graphics;
 using ImageProcessingService.Models;
 using Microsoft.AspNetCore.Mvc;
 using GrillBot.Core.Services.Graphics.Models.Chart;
+using ImageMagick.Drawing;
 
 namespace ImageProcessingService.Actions;
 
-public class ChartAction : ApiActionBase
+public class ChartAction(IGraphicsClient _graphicsClient) : ApiActionBase
 {
-    private IGraphicsClient GraphicsClient { get; }
-
-    public ChartAction(IGraphicsClient graphicsClient)
-    {
-        GraphicsClient = graphicsClient;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = (ChartRequest)Parameters[0]!;
 
-        var imageTasks = request.Requests.ConvertAll(r => GraphicsClient.CreateChartAsync(r));
+        var imageTasks = request.Requests.ConvertAll(_graphicsClient.CreateChartAsync);
         var imagesData = await Task.WhenAll(imageTasks);
         var images = imagesData.Select(img => new MagickImage(img, MagickFormat.Jpg)).AsParallel().ToList();
 
@@ -37,8 +31,8 @@ public class ChartAction : ApiActionBase
 
     private static byte[] MergeChartsAndGetData(IReadOnlyList<MagickImage> charts, IReadOnlyList<ChartRequestData> requests)
     {
-        var finalHeight = requests.Sum(o => o.Options.Height);
-        var width = requests.Max(o => o.Options.Width);
+        var finalHeight = (uint)requests.Sum(o => o.Options.Height);
+        var width = (uint)requests.Max(o => o.Options.Width);
         var background = requests[0].Options.BackgroundColor;
 
         using var resultImage = new MagickImage(new MagickColor(background), width, finalHeight);
