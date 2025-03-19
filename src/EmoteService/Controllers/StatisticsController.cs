@@ -9,12 +9,8 @@ using EmoteService.Models.Response;
 
 namespace EmoteService.Controllers;
 
-public class StatisticsController : ControllerBase
+public class StatisticsController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public StatisticsController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpDelete("{guildId}/{emoteId}")]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

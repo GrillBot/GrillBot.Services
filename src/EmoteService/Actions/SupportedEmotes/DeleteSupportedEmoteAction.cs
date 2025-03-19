@@ -7,12 +7,11 @@ using GrillBot.Services.Common.Infrastructure.Api;
 
 namespace EmoteService.Actions.SupportedEmotes;
 
-public class DeleteSupportedEmoteAction : ApiAction<EmoteServiceContext>
+public class DeleteSupportedEmoteAction(
+    ICounterManager counterManager,
+    EmoteServiceContext dbContext
+) : ApiAction<EmoteServiceContext>(counterManager, dbContext)
 {
-    public DeleteSupportedEmoteAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = GetParameter<string>(0);

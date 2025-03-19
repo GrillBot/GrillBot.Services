@@ -6,5 +6,5 @@ public class EmoteInfoStatistics
     public DateTime LastOccurenceUtc { get; set; }
     public long UseCount { get; set; }
     public long UsersCount { get; set; }
-    public Dictionary<string, int> TopUsers { get; set; } = new();
+    public Dictionary<string, int> TopUsers { get; set; } = [];
 }

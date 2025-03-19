@@ -4,22 +4,19 @@ using EmoteService.Extensions.QueryExtensions;
 using EmoteService.Models.Response;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Services.Common.Infrastructure.Api;
 
 namespace EmoteService.Actions.Statistics;
 
-public class MergeStatisticsAction : ApiAction<EmoteServiceContext>
+public class MergeStatisticsAction(
+    ICounterManager counterManager,
+    EmoteServiceContext dbContext,
+    IRabbitPublisher _rabbitPublisher
+) : ApiAction<EmoteServiceContext>(counterManager, dbContext)
 {
-    private readonly IRabbitPublisher _rabbitPublisher;
-
-    public MergeStatisticsAction(ICounterManager counterManager, EmoteServiceContext dbContext, IRabbitPublisher rabbitPublisher) : base(counterManager, dbContext)
-    {
-        _rabbitPublisher = rabbitPublisher;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = GetParameter<string>(0);
@@ -91,7 +88,7 @@ public class MergeStatisticsAction : ApiAction<EmoteServiceContext>
             LogMessage = new LogMessageRequest(message, LogSeverity.Info, "EmoteService", nameof(MergeStatisticsAction))
         };
 
-        return _rabbitPublisher.PublishAsync(new CreateItemsPayload(logRequest));
+        return _rabbitPublisher.PublishAsync("AuditLog", new CreateItemsPayload(logRequest), "CreateItems");
     }
 
 }

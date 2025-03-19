@@ -4,21 +4,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Core.Providers;
 
-public class StatisticsProvider : IStatisticsProvider
+public class StatisticsProvider(EmoteServiceContext dbContext) : IStatisticsProvider
 {
-    private readonly EmoteServiceContext _dbContext;
-
-    public StatisticsProvider(EmoteServiceContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Dictionary<string, long>> GetTableStatisticsAsync()
     {
         return new Dictionary<string, long>
         {
-            { nameof(_dbContext.EmoteDefinitions), await _dbContext.EmoteDefinitions.LongCountAsync() },
-            { nameof(_dbContext.EmoteUserStatItems), await _dbContext.EmoteUserStatItems.LongCountAsync() }
+            { nameof(dbContext.EmoteDefinitions), await dbContext.EmoteDefinitions.LongCountAsync() },
+            { nameof(dbContext.EmoteUserStatItems), await dbContext.EmoteUserStatItems.LongCountAsync() }
         };
     }
 }

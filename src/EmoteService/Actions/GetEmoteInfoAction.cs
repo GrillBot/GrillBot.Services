@@ -9,12 +9,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Actions;
 
-public class GetEmoteInfoAction : ApiAction<EmoteServiceContext>
+public class GetEmoteInfoAction(
+    ICounterManager counterManager,
+    EmoteServiceContext dbContext
+) : ApiAction<EmoteServiceContext>(counterManager, dbContext)
 {
-    public GetEmoteInfoAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var currentGuildId = (string)Parameters[0]!;

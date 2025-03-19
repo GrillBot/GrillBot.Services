@@ -2,40 +2,45 @@
 using EmoteService.Core.Entity;
 using EmoteService.Extensions.QueryExtensions;
 using EmoteService.Models.Events;
+using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
 namespace EmoteService.Handlers;
 
-public class EmoteEventEventHandler : BaseEventHandlerWithDb<EmoteEventPayload, EmoteServiceContext>
+public class EmoteEventEventHandler(
+    ILoggerFactory loggerFactory,
+    EmoteServiceContext dbContext,
+    ICounterManager counterManager,
+    IRabbitPublisher rabbitPublisher
+) : BaseEventHandlerWithDb<EmoteEventPayload, EmoteServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
 {
-    public EmoteEventEventHandler(ILoggerFactory loggerFactory, EmoteServiceContext dbContext, ICounterManager counterManager,
-        IRabbitMQPublisher publisher) : base(loggerFactory, dbContext, counterManager, publisher)
-    {
-    }
+    public override string TopicName => "Emote";
+    public override string QueueName => "EmoteEvent";
 
-    protected override async Task HandleInternalAsync(EmoteEventPayload payload, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(EmoteEventPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
-        var emoteValue = Emote.Parse(payload.EmoteId);
-        if (payload.IsIncrement && !await IsSupportedEmoteAsync(emoteValue))
-            return;
+        var emoteValue = Emote.Parse(message.EmoteId);
+        if (message.IsIncrement && !await IsSupportedEmoteAsync(emoteValue))
+            return RabbitConsumptionResult.Success;
 
-        var entity = await GetEntityAsync(payload.GuildId, payload.UserId, emoteValue);
+        var entity = await GetEntityAsync(message.GuildId, message.UserId, emoteValue);
         if (entity is null)
         {
-            if (payload.IsIncrement)
-                entity = await CreateEntityAsync(payload.GuildId, payload.UserId, emoteValue);
+            if (message.IsIncrement)
+                entity = await CreateEntityAsync(message.GuildId, message.UserId, emoteValue);
             else
-                return;
+                return RabbitConsumptionResult.Success;
         }
 
-        if (payload.IsIncrement)
+        if (message.IsIncrement)
         {
             if (entity.FirstOccurence == DateTime.MinValue)
-                entity.FirstOccurence = payload.EventCreatedAt;
+                entity.FirstOccurence = message.EventCreatedAt;
 
-            entity.LastOccurence = payload.EventCreatedAt;
+            entity.LastOccurence = message.EventCreatedAt;
             entity.UseCount++;
         }
         else
@@ -47,6 +52,7 @@ public class EmoteEventEventHandler : BaseEventHandlerWithDb<EmoteEventPayload, 
         }
 
         await ContextHelper.SaveChagesAsync();
+        return RabbitConsumptionResult.Success;
     }
 
     private void ValidationFailed(string message)

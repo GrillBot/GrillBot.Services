@@ -3,22 +3,19 @@ using EmoteService.Core.Entity;
 using EmoteService.Extensions.QueryExtensions;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Services.Common.Infrastructure.Api;
 
 namespace EmoteService.Actions.Statistics;
 
-public class DeleteStatisticsAction : ApiAction<EmoteServiceContext>
+public class DeleteStatisticsAction(
+    ICounterManager counterManager,
+    EmoteServiceContext dbContext,
+    IRabbitPublisher _rabbitPublisher
+) : ApiAction<EmoteServiceContext>(counterManager, dbContext)
 {
-    private readonly IRabbitPublisher _rabbitPublisher;
-
-    public DeleteStatisticsAction(ICounterManager counterManager, EmoteServiceContext dbContext, IRabbitPublisher rabbitPublisher) : base(counterManager, dbContext)
-    {
-        _rabbitPublisher = rabbitPublisher;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;
@@ -48,6 +45,6 @@ public class DeleteStatisticsAction : ApiAction<EmoteServiceContext>
             LogMessage = new(message, LogSeverity.Info, "EmoteService", nameof(DeleteStatisticsAction))
         };
 
-        return _rabbitPublisher.PublishAsync(new CreateItemsPayload(logRequest));
+        return _rabbitPublisher.PublishAsync("AuditLog", new CreateItemsPayload(logRequest), "CreateItems");
     }
 }

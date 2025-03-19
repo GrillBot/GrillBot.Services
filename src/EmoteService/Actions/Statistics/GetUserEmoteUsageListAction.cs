@@ -14,12 +14,11 @@ using System.Linq.Expressions;
 
 namespace EmoteService.Actions.Statistics;
 
-public class GetUserEmoteUsageListAction : ApiAction<EmoteServiceContext>
+public class GetUserEmoteUsageListAction(
+    ICounterManager counterManager,
+    EmoteServiceContext dbContext
+) : ApiAction<EmoteServiceContext>(counterManager, dbContext)
 {
-    public GetUserEmoteUsageListAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = (EmoteUserUsageListRequest)Parameters[0]!;
@@ -41,8 +40,8 @@ public class GetUserEmoteUsageListAction : ApiAction<EmoteServiceContext>
     {
         var expressions = parameters.OrderBy switch
         {
-            "FirstOccurence" => new Expression<Func<EmoteUserStatItem, object>>[] { entity => entity.FirstOccurence },
-            "LastOccurence" => new Expression<Func<EmoteUserStatItem, object>>[] { entity => entity.LastOccurence },
+            "FirstOccurence" => [entity => entity.FirstOccurence],
+            "LastOccurence" => [entity => entity.LastOccurence],
             _ => new Expression<Func<EmoteUserStatItem, object>>[] { entity => entity.UseCount },
         };
 

@@ -6,12 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Actions.SupportedEmotes;
 
-public class GetSupportedEmotesListAction : ApiAction<EmoteServiceContext>
+public class GetSupportedEmotesListAction(
+    ICounterManager counterManager,
+    EmoteServiceContext dbContext
+) : ApiAction<EmoteServiceContext>(counterManager, dbContext)
 {
-    public GetSupportedEmotesListAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = GetOptionalParameter<string>(0);

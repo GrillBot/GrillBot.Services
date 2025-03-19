@@ -5,12 +5,11 @@ using GrillBot.Services.Common.Infrastructure.Api;
 
 namespace EmoteService.Actions.Statistics;
 
-public class GetStatisticsCountInGuildAction : ApiAction<EmoteServiceContext>
+public class GetStatisticsCountInGuildAction(
+    ICounterManager counterManager,
+    EmoteServiceContext dbContext
+) : ApiAction<EmoteServiceContext>(counterManager, dbContext)
 {
-    public GetStatisticsCountInGuildAction(ICounterManager counterManager, EmoteServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = GetParameter<string>(0);

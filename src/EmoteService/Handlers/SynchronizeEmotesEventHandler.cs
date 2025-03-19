@@ -1,23 +1,30 @@
 ﻿using Discord;
 using EmoteService.Core.Entity;
 using EmoteService.Models.Events;
+using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
 namespace EmoteService.Handlers;
 
-public class SynchronizeEmotesEventHandler : BaseEventHandlerWithDb<SynchronizeEmotesPayload, EmoteServiceContext>
+public class SynchronizeEmotesEventHandler(
+    ILoggerFactory loggerFactory,
+    EmoteServiceContext dbContext,
+    ICounterManager counterManager,
+    IRabbitPublisher rabbitPublisher
+) : BaseEventHandlerWithDb<SynchronizeEmotesPayload, EmoteServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
 {
-    public SynchronizeEmotesEventHandler(ILoggerFactory loggerFactory, EmoteServiceContext dbContext, ICounterManager counterManager,
-        IRabbitMQPublisher publisher) : base(loggerFactory, dbContext, counterManager, publisher)
-    {
-    }
+    public override string TopicName => "Emote";
+    public override string QueueName => "SynchronizeEmotes";
 
-    protected override async Task HandleInternalAsync(SynchronizeEmotesPayload payload, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizeEmotesPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
-        await ClearEmotesAsync(payload.GuildId);
-        await InsertEmotesAsync(payload.GuildId, payload.Emotes);
+        await ClearEmotesAsync(message.GuildId);
+        await InsertEmotesAsync(message.GuildId, message.Emotes);
+
+        return RabbitConsumptionResult.Success;
     }
 
     private async Task ClearEmotesAsync(string guildId)

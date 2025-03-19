@@ -8,12 +8,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace EmoteService.Controllers;
 
-public class EmoteController : ControllerBase
+public class EmoteController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public EmoteController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpGet("supported")]
     [ProducesResponseType(typeof(List<EmoteDefinition>), StatusCodes.Status200OK)]
     public Task<IActionResult> GetSupportedEmotesListAsync(string? guildId = null)
