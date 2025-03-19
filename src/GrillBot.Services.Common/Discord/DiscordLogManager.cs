@@ -6,19 +6,17 @@ namespace GrillBot.Services.Common.Discord;
 
 public class DiscordLogManager
 {
-    private DiscordRestClient Client { get; }
-    private ILoggerFactory LoggerFactory { get; }
+    private readonly ILoggerFactory _loggerFactory;
 
     public DiscordLogManager(IDiscordClient client, ILoggerFactory loggerFactory)
     {
-        Client = (DiscordRestClient)client;
-        LoggerFactory = loggerFactory;
-        Client.Log += OnLogAsync;
+        _loggerFactory = loggerFactory;
+        ((DiscordRestClient)client).Log += OnLogAsync;
     }
 
     private Task OnLogAsync(LogMessage message)
     {
-        var logger = LoggerFactory.CreateLogger(message.Source);
+        var logger = _loggerFactory.CreateLogger(message.Source);
 
         switch (message.Severity)
         {

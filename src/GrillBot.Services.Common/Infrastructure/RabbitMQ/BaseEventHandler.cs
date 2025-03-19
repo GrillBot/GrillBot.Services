@@ -1,26 +1,21 @@
 ﻿using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ;
-using GrillBot.Core.RabbitMQ.Consumer;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using Microsoft.Extensions.Logging;
 
 namespace GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
-public abstract class BaseEventHandler<TPayload> : BaseRabbitMQHandler<TPayload> where TPayload : IPayload, new()
+public abstract class BaseEventHandler<TPayload> : RabbitMessageHandlerBase<TPayload> where TPayload : class
 {
-    public override string QueueName => new TPayload().QueueName;
-
     protected ICounterManager CounterManager { get; }
-    protected IRabbitMQPublisher Publisher { get; }
+    protected IRabbitPublisher Publisher { get; }
 
-    protected ILogger Logger { get; }
     protected string CounterKey { get; }
 
-    protected BaseEventHandler(ILoggerFactory loggerFactory, ICounterManager counterManager, IRabbitMQPublisher publisher) : base(loggerFactory)
+    protected BaseEventHandler(ILoggerFactory loggerFactory, ICounterManager counterManager, IRabbitPublisher publisher) : base(loggerFactory)
     {
         CounterManager = counterManager;
         Publisher = publisher;
-        Logger = loggerFactory.CreateLogger(GetType());
         CounterKey = $"RabbitMQ.{QueueName}.Consumer";
     }
 

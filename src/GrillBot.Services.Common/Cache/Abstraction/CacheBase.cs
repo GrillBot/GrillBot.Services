@@ -2,15 +2,8 @@
 
 namespace GrillBot.Services.Common.Cache.Abstraction;
 
-public abstract class CacheBase
+public abstract class CacheBase(ICounterManager _counterManager)
 {
-    private readonly ICounterManager _counterManager;
-
-    protected CacheBase(ICounterManager counterManager)
-    {
-        _counterManager = counterManager;
-    }
-
     protected CounterItem CreateCounterItem(string operation)
         => _counterManager.Create($"Cache.{GetType().Name}.{operation}");
 }

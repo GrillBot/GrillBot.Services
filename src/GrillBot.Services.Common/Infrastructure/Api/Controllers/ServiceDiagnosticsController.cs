@@ -8,15 +8,11 @@ namespace GrillBot.Services.Common.Infrastructure.Api.Controllers;
 
 [ApiController]
 [Route("api/diag")]
-public class ServiceDiagnosticsController : Core.Infrastructure.Actions.ControllerBase
+public class ServiceDiagnosticsController(
+    IDiagnosticsProvider _diagnosticsProvider,
+    IServiceProvider serviceProvider
+) : Core.Infrastructure.Actions.ControllerBase(serviceProvider)
 {
-    private readonly IDiagnosticsProvider _diagnosticsProvider;
-
-    public ServiceDiagnosticsController(IDiagnosticsProvider diagnosticsProvider, IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        _diagnosticsProvider = diagnosticsProvider;
-    }
-
     [HttpGet]
     [ProducesResponseType(typeof(DiagnosticInfo), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDiagnosticsAsync()

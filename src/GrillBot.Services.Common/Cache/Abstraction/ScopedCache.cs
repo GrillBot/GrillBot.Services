@@ -1,18 +1,16 @@
 ﻿using GrillBot.Core.Managers.Performance;
 using System.Diagnostics.CodeAnalysis;
 
+#pragma warning disable S3604 // Member initializer values should not be redundant
 namespace GrillBot.Services.Common.Cache.Abstraction;
 
-internal interface IScopedCache { }
+internal interface IScopedCache;
 
-public abstract class ScopedCache<TCacheKey, TCacheData> : CacheBase, IDisposable, IScopedCache where TCacheKey : notnull
+public abstract class ScopedCache<TCacheKey, TCacheData>(
+    ICounterManager counterManager
+) : CacheBase(counterManager), IDisposable, IScopedCache where TCacheKey : notnull
 {
-    private readonly Dictionary<TCacheKey, TCacheData> _data;
-
-    protected ScopedCache(ICounterManager counterManager) : base(counterManager)
-    {
-        _data = new Dictionary<TCacheKey, TCacheData>();
-    }
+    private readonly Dictionary<TCacheKey, TCacheData> _data = [];
 
     protected bool TryRead(TCacheKey key, [MaybeNullWhen(false)] out TCacheData data)
     {

@@ -4,12 +4,10 @@ using GrillBot.Services.Common.Cache.Abstraction;
 
 namespace GrillBot.Services.Common.Cache;
 
-public class AuditLogCache : ScopedCache<ulong, Dictionary<ActionType, IReadOnlyCollection<IAuditLogEntry>>>
+public class AuditLogCache(
+    ICounterManager counterManager
+) : ScopedCache<ulong, Dictionary<ActionType, IReadOnlyCollection<IAuditLogEntry>>>(counterManager)
 {
-    public AuditLogCache(ICounterManager counterManager) : base(counterManager)
-    {
-    }
-
     public IEnumerable<IAuditLogEntry>? GetAuditLogs(ulong guildId, ActionType actionType)
     {
         if (!TryRead(guildId, out var guildLogs))
@@ -24,7 +22,7 @@ public class AuditLogCache : ScopedCache<ulong, Dictionary<ActionType, IReadOnly
         using (CreateCounterItem("StoreLogs"))
         {
             if (!TryRead(guildId, out var guildLogs))
-                guildLogs = new Dictionary<ActionType, IReadOnlyCollection<IAuditLogEntry>>();
+                guildLogs = [];
 
             guildLogs[actionType] = logs;
             Write(guildId, guildLogs);

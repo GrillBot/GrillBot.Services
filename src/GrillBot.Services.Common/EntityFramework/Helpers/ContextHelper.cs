@@ -5,19 +5,12 @@ using System.Linq.Expressions;
 
 namespace GrillBot.Services.Common.EntityFramework.Helpers;
 
-public class ContextHelper<TDbContext> where TDbContext : DbContext
+public class ContextHelper<TDbContext>(
+    ICounterManager _counterManager,
+    TDbContext _dbContext,
+    string _counterKey
+) where TDbContext : DbContext
 {
-    private readonly TDbContext _dbContext;
-    private readonly ICounterManager _counterManager;
-    private readonly string _counterKey;
-
-    public ContextHelper(ICounterManager counterManager, TDbContext dbContext, string counterKey)
-    {
-        _dbContext = dbContext;
-        _counterManager = counterManager;
-        _counterKey = counterKey;
-    }
-
     private CounterItem CreateCounter(string operation)
         => _counterManager.Create($"{_counterKey}.{operation}");
 
@@ -54,7 +47,11 @@ public class ContextHelper<TDbContext> where TDbContext : DbContext
             return await query.CountAsync();
     }
 
-    public async Task<Dictionary<TKey, TValue>> ReadToDictionaryAsync<TEntity, TKey, TValue>(IQueryable<TEntity> query, Func<TEntity, TKey> keySelector, Func<TEntity, TValue> valueSelector) where TKey : notnull where TEntity : class
+    public async Task<Dictionary<TKey, TValue>> ReadToDictionaryAsync<TEntity, TKey, TValue>(
+        IQueryable<TEntity> query,
+        Func<TEntity, TKey> keySelector,
+        Func<TEntity, TValue> valueSelector
+    ) where TKey : notnull where TEntity : class
     {
         using (CreateCounter("Database"))
             return await query.ToDictionaryAsync(keySelector, valueSelector);

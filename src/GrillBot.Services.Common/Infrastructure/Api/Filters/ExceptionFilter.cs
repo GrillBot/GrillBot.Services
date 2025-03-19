@@ -1,5 +1,5 @@
 ﻿using Discord;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -8,16 +8,11 @@ using System.Reflection;
 
 namespace GrillBot.Services.Common.Infrastructure.Api.Filters;
 
-public class ExceptionFilter : IAsyncExceptionFilter
+public class ExceptionFilter(
+    IRabbitPublisher _rabbitPublisher
+) : IAsyncExceptionFilter
 {
-    private readonly IRabbitMQPublisher _rabbitPublisher;
-
-    public ExceptionFilter(IRabbitMQPublisher rabbitPublisher)
-    {
-        _rabbitPublisher = rabbitPublisher;
-    }
-
-    public async Task OnExceptionAsync(ExceptionContext context)
+    public Task OnExceptionAsync(ExceptionContext context)
     {
         var descriptor = (ControllerActionDescriptor)context.ActionDescriptor;
         var controllerName = descriptor.ControllerTypeInfo.Name;
@@ -34,7 +29,7 @@ public class ExceptionFilter : IAsyncExceptionFilter
             }
         };
 
-        await _rabbitPublisher.PublishAsync(new CreateItemsPayload(new List<LogRequest> { logRequest }));
+        return _rabbitPublisher.PublishAsync("AuditLog", new CreateItemsPayload(logRequest), "CreateItems");
     }
 
     private static string CreateErrorMessage(ExceptionContext context)

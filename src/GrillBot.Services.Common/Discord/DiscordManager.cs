@@ -5,32 +5,25 @@ using GrillBot.Services.Common.Cache;
 using Microsoft.Extensions.Configuration;
 
 #pragma warning disable S3928 // Parameter names used into ArgumentException constructors should match an existing one 
+#pragma warning disable S3604 // Member initializer values should not be redundant
 namespace GrillBot.Services.Common.Discord;
 
-public class DiscordManager
+public class DiscordManager(
+    IDiscordClient _discordClient,
+    IConfiguration _configuration,
+    ICounterManager _counterManager,
+    GuildCache _guildCache,
+    AuditLogCache _auditLogCache
+)
 {
-    private DiscordRestClient DiscordClient { get; }
-    private IConfiguration Configuration { get; }
-    private ICounterManager CounterManager { get; }
-
-    private AuditLogCache AuditLogCache { get; }
-    private GuildCache GuildCache { get; }
-
-    public DiscordManager(IDiscordClient discordClient, IConfiguration configuration, ICounterManager counterManager, GuildCache guildCache, AuditLogCache auditLogCache)
-    {
-        Configuration = configuration;
-        CounterManager = counterManager;
-        DiscordClient = (DiscordRestClient)discordClient;
-        GuildCache = guildCache;
-        AuditLogCache = auditLogCache;
-    }
+    private DiscordRestClient DiscordClient { get; } = (DiscordRestClient)_discordClient;
 
     public async Task LoginAsync()
     {
-        var token = Configuration.GetConnectionString("BotToken")
-            ?? throw new ArgumentNullException(nameof(Configuration));
+        var token = _configuration.GetConnectionString("BotToken")
+            ?? throw new ArgumentNullException(nameof(_configuration));
 
-        using (CounterManager.Create("Discord.API.Login"))
+        using (_counterManager.Create("Discord.API.Login"))
         {
             await DiscordClient.LoginAsync(TokenType.Bot, token);
         }
@@ -40,18 +33,18 @@ public class DiscordManager
     {
         if (!forceApi)
         {
-            var cachedGuild = GuildCache.GetGuild(guildId);
+            var cachedGuild = _guildCache.GetGuild(guildId);
             if (cachedGuild is not null)
                 return cachedGuild;
         }
 
-        using (CounterManager.Create("Discord.API.Guild"))
+        using (_counterManager.Create("Discord.API.Guild"))
         {
             var guild = await DiscordClient.GetGuildAsync(guildId);
             if (guild is null)
                 return null;
 
-            GuildCache.StoreGuild(guild);
+            _guildCache.StoreGuild(guild);
             return guild;
         }
     }
@@ -60,21 +53,21 @@ public class DiscordManager
     {
         if (actionType is not null)
         {
-            var cachedLogs = AuditLogCache.GetAuditLogs(guildId, actionType.Value);
+            var cachedLogs = _auditLogCache.GetAuditLogs(guildId, actionType.Value);
             if (cachedLogs is not null)
                 return cachedLogs;
         }
 
         var guild = await GetGuildAsync(guildId);
         if (guild is null)
-            return new List<IAuditLogEntry>();
+            return [];
 
-        using (CounterManager.Create("Discord.API.AuditLogs"))
+        using (_counterManager.Create("Discord.API.AuditLogs"))
         {
             var logs = await guild.GetAuditLogsAsync(limit, actionType: actionType);
 
             if (actionType is not null && logs.Count > 0)
-                AuditLogCache.StoreLogs(guildId, actionType.Value, logs);
+                _auditLogCache.StoreLogs(guildId, actionType.Value, logs);
             return logs;
         }
     }
@@ -85,7 +78,7 @@ public class DiscordManager
         if (guild is null)
             return null;
 
-        using (CounterManager.Create("Discord.API.Ban"))
+        using (_counterManager.Create("Discord.API.Ban"))
         {
             return await guild.GetBanAsync(userId);
         }

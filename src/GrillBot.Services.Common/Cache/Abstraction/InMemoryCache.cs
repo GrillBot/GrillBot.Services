@@ -4,17 +4,13 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace GrillBot.Services.Common.Cache.Abstraction;
 
-internal interface IInMemoryCache { }
+internal interface IInMemoryCache;
 
-public abstract class InMemoryCache<TCacheData> : CacheBase, IInMemoryCache
+public abstract class InMemoryCache<TCacheData>(
+    ICounterManager counterManager,
+    IMemoryCache _memoryCache
+) : CacheBase(counterManager), IInMemoryCache
 {
-    private readonly IMemoryCache _memoryCache;
-
-    protected InMemoryCache(ICounterManager counterManager, IMemoryCache memoryCache) : base(counterManager)
-    {
-        _memoryCache = memoryCache;
-    }
-
     protected bool TryReadData(string key, [MaybeNullWhen(false)] out TCacheData data)
     {
         using (CreateCounterItem("TryRead"))
