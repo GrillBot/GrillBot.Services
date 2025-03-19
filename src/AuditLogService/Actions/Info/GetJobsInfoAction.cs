@@ -6,12 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Info;
 
-public class GetJobsInfoAction : ApiAction<AuditLogStatisticsContext>
+public class GetJobsInfoAction(
+    AuditLogStatisticsContext statisticsContext,
+    ICounterManager counterManager
+) : ApiAction<AuditLogStatisticsContext>(counterManager, statisticsContext)
 {
-    public GetJobsInfoAction(AuditLogStatisticsContext statisticsContext, ICounterManager counterManager) : base(counterManager, statisticsContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var query = DbContext.JobInfos.AsNoTracking()

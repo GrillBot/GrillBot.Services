@@ -8,12 +8,8 @@ using MemberInfo = AuditLogService.Core.Entity.MemberInfo;
 
 namespace AuditLogService.Processors.Request;
 
-public class MemberUpdatedProcessor : RequestProcessorBase
+public class MemberUpdatedProcessor(IServiceProvider serviceProvider) : RequestProcessorBase(serviceProvider)
 {
-    public MemberUpdatedProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         if (request.MemberUpdated!.IsApiUpdate())

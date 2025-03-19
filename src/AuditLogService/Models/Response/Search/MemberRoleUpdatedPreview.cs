@@ -3,5 +3,5 @@
 public class MemberRoleUpdatedPreview
 {
     public string UserId { get; set; } = null!;
-    public Dictionary<string, bool> ModifiedRoles { get; set; } = new();
+    public Dictionary<string, bool> ModifiedRoles { get; set; } = [];
 }

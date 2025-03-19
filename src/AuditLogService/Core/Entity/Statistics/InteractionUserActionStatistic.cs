@@ -2,7 +2,7 @@
 
 public class InteractionUserActionStatistic : UserActionStatBase
 {
-    public InteractionUserActionStatistic() : base()
+    public InteractionUserActionStatistic()
     {
     }
 

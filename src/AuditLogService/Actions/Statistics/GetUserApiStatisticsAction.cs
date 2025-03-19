@@ -7,12 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Statistics;
 
-public class GetUserApiStatisticsAction : ApiAction<AuditLogStatisticsContext>
+public class GetUserApiStatisticsAction(
+    AuditLogStatisticsContext statisticsContext,
+    ICounterManager counterManager
+) : ApiAction<AuditLogStatisticsContext>(counterManager, statisticsContext)
 {
-    public GetUserApiStatisticsAction(AuditLogStatisticsContext statisticsContext, ICounterManager counterManager) : base(counterManager, statisticsContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var criteria = (string)Parameters[0]!;

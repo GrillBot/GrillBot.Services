@@ -18,5 +18,5 @@ public class ThreadInfo
     public bool IsLocked { get; set; }
 
     [Column(TypeName = "jsonb")]
-    public List<string> Tags { get; set; } = new();
+    public List<string> Tags { get; set; } = [];
 }

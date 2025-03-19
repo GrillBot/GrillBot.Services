@@ -1,25 +1,17 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
-using AuditLogService.Core.Migrations;
 using AuditLogService.Models.Events.Recalculation;
 using GrillBot.Core.Extensions;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 
 namespace AuditLogService.Managers;
 
-public class DataRecalculationManager
+public class DataRecalculationManager(IRabbitPublisher _publisher)
 {
-    private IRabbitMQPublisher Publisher { get; }
-
-    public DataRecalculationManager(IRabbitMQPublisher publisher)
-    {
-        Publisher = publisher;
-    }
-
     public async Task EnqueueRecalculationAsync(List<LogItem> items)
     {
         var batches = CreateBatches(items);
-        await Publisher.PublishBatchAsync(batches, new());
+        await _publisher.PublishAsync("AuditLog", batches, "Recalculation");
     }
 
     private static List<RecalculationPayload> CreateBatches(List<LogItem> items)

@@ -1,12 +1,8 @@
-﻿using GrillBot.Core.RabbitMQ;
+﻿namespace AuditLogService.Models.Events;
 
-namespace AuditLogService.Models.Events;
-
-public class BulkDeletePayload : IPayload
+public class BulkDeletePayload
 {
-    public string QueueName => "audit:bulk_delete";
-
-    public List<Guid> Ids { get; set; } = new();
+    public List<Guid> Ids { get; set; } = [];
 
     public BulkDeletePayload()
     {

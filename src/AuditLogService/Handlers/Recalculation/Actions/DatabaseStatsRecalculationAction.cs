@@ -6,12 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Handlers.Recalculation.Actions;
 
-public class DatabaseStatsRecalculationAction : RecalculationActionBase
+public class DatabaseStatsRecalculationAction(IServiceProvider serviceProvider) : RecalculationActionBase(serviceProvider)
 {
-    public DatabaseStatsRecalculationAction(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(RecalculationPayload payload)
     {
         await UpdateStatisticsRecord<LogItem>(nameof(DbContext.LogItems));

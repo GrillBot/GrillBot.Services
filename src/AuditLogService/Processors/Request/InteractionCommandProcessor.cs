@@ -4,12 +4,8 @@ using AuditLogService.Processors.Request.Abstractions;
 
 namespace AuditLogService.Processors.Request;
 
-public class InteractionCommandProcessor : RequestProcessorBase
+public class InteractionCommandProcessor(IServiceProvider serviceProvider) : RequestProcessorBase(serviceProvider)
 {
-    public InteractionCommandProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override Task ProcessAsync(LogItem entity, LogRequest request)
     {
         entity.InteractionCommand = new InteractionCommand

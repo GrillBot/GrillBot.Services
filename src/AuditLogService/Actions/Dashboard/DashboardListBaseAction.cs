@@ -8,12 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Dashboard;
 
-public abstract class DashboardListBaseAction<TEntity> : ApiAction<AuditLogServiceContext> where TEntity : ChildEntityBase
+public abstract class DashboardListBaseAction<TEntity>(
+    AuditLogServiceContext dbContext,
+    ICounterManager counterManager
+) : ApiAction<AuditLogServiceContext>(counterManager, dbContext) where TEntity : ChildEntityBase
 {
-    protected DashboardListBaseAction(AuditLogServiceContext context, ICounterManager counterManager) : base(counterManager, context)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var query = DbContext.Set<TEntity>()

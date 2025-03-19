@@ -9,16 +9,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Internal;
 
-public class TriggerRecalculationAction : ApiAction<AuditLogServiceContext>
+public class TriggerRecalculationAction(
+    ICounterManager counterManager,
+    AuditLogServiceContext dbContext,
+    DataRecalculationManager _recalculationManager
+) : ApiAction<AuditLogServiceContext>(counterManager, dbContext)
 {
-    private readonly DataRecalculationManager _recalculationManager;
-
-    public TriggerRecalculationAction(ICounterManager counterManager, AuditLogServiceContext dbContext,
-        DataRecalculationManager recalculationManager) : base(counterManager, dbContext)
-    {
-        _recalculationManager = recalculationManager;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var type = GetParameter<LogType>(0);

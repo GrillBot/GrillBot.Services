@@ -3,26 +3,29 @@ using AuditLogService.Core.Enums;
 using AuditLogService.Core.Extensions;
 using AuditLogService.Managers;
 using AuditLogService.Models.Events;
+using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Handlers;
 
-public class BulkDeleteEventHandler : BaseEventHandlerWithDb<BulkDeletePayload, AuditLogServiceContext>
+public class BulkDeleteEventHandler(
+    ILoggerFactory loggerFactory,
+    AuditLogServiceContext dbContext,
+    ICounterManager counterManager,
+    IRabbitPublisher publisher,
+    DataRecalculationManager _dataRecalculation
+) : BaseEventHandlerWithDb<BulkDeletePayload, AuditLogServiceContext>(loggerFactory, dbContext, counterManager, publisher)
 {
-    private DataRecalculationManager DataRecalculation { get; }
+    public override string TopicName => "AuditLog";
+    public override string QueueName => "BulkDelete";
 
-    public BulkDeleteEventHandler(ILoggerFactory loggerFactory, AuditLogServiceContext dbContext, ICounterManager counterManager,
-        IRabbitMQPublisher publisher, DataRecalculationManager dataRecalculation) : base(loggerFactory, dbContext, counterManager, publisher)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(BulkDeletePayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
-        DataRecalculation = dataRecalculation;
-    }
-
-    protected override async Task HandleInternalAsync(BulkDeletePayload payload, Dictionary<string, string> headers)
-    {
-        var logItems = await ReadLogItemsAsync(payload.Ids);
+        var logItems = await ReadLogItemsAsync(message.Ids);
         var filesForDeletion = new List<FileDeletePayload>();
 
         foreach (var chunk in logItems.Chunk(100))
@@ -34,10 +37,11 @@ public class BulkDeleteEventHandler : BaseEventHandlerWithDb<BulkDeletePayload, 
         }
 
         await ContextHelper.SaveChagesAsync();
-        await DataRecalculation.EnqueueRecalculationAsync(logItems);
+        await _dataRecalculation.EnqueueRecalculationAsync(logItems);
 
         if (filesForDeletion.Count > 0)
-            await Publisher.PublishBatchAsync(filesForDeletion, new());
+            await Publisher.PublishAsync("AuditLog", filesForDeletion, "DeleteFiles");
+        return RabbitConsumptionResult.Success;
     }
 
     private async Task<List<LogItem>> ReadLogItemsAsync(List<Guid> ids)

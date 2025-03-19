@@ -14,14 +14,14 @@ public class SearchRequest : IValidatableObject
     public string? GuildId { get; set; }
 
     [DiscordId]
-    public List<string> UserIds { get; set; } = new();
+    public List<string> UserIds { get; set; } = [];
 
     [DiscordId]
     [StringLength(32)]
     public string? ChannelId { get; set; }
 
-    public List<LogType> ShowTypes { get; set; } = new();
-    public List<LogType> IgnoreTypes { get; set; } = new();
+    public List<LogType> ShowTypes { get; set; } = [];
+    public List<LogType> IgnoreTypes { get; set; } = [];
     public DateTime? CreatedFrom { get; set; }
     public DateTime? CreatedTo { get; set; }
     public bool OnlyWithFiles { get; set; }

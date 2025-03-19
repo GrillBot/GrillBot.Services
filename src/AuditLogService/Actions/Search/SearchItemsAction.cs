@@ -6,12 +6,11 @@ using GrillBot.Services.Common.Infrastructure.Api;
 
 namespace AuditLogService.Actions.Search;
 
-public partial class SearchItemsAction : ApiAction<AuditLogServiceContext>
+public partial class SearchItemsAction(
+    AuditLogServiceContext context,
+    ICounterManager counterManager
+) : ApiAction<AuditLogServiceContext>(counterManager, context)
 {
-    public SearchItemsAction(AuditLogServiceContext context, ICounterManager counterManager) : base(counterManager, context)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = (SearchRequest)Parameters[0]!;

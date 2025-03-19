@@ -4,18 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Core.Providers;
 
-public class StatisticsProvider : IStatisticsProvider
+public class StatisticsProvider(AuditLogStatisticsContext _statisticsContext) : IStatisticsProvider
 {
-    private AuditLogStatisticsContext StatisticsContext { get; }
-
-    public StatisticsProvider(AuditLogStatisticsContext statisticsContext)
-    {
-        StatisticsContext = statisticsContext;
-    }
-
     public async Task<Dictionary<string, long>> GetTableStatisticsAsync()
     {
-        return await StatisticsContext.DatabaseStatistics.AsNoTracking()
+        return await _statisticsContext.DatabaseStatistics.AsNoTracking()
             .OrderBy(o => o.TableName)
             .Select(o => new { o.TableName, o.RecordsCount })
             .ToDictionaryAsync(o => o.TableName, o => o.RecordsCount);

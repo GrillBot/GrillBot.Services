@@ -6,12 +6,8 @@ using GuildInfo = AuditLogService.Core.Entity.GuildInfo;
 
 namespace AuditLogService.Processors.Request;
 
-public class GuildUpdatedProcessor : RequestProcessorBase
+public class GuildUpdatedProcessor(IServiceProvider serviceProvider) : RequestProcessorBase(serviceProvider)
 {
-    public GuildUpdatedProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var logItems = await FindAuditLogsAsync(request);

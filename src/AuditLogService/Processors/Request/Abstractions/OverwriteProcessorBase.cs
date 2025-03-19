@@ -5,12 +5,8 @@ using GrillBot.Core.Extensions;
 
 namespace AuditLogService.Processors.Request.Abstractions;
 
-public abstract class OverwriteProcessorBase : BatchRequestProcessorBase
+public abstract class OverwriteProcessorBase(IServiceProvider serviceProvider) : BatchRequestProcessorBase(serviceProvider)
 {
-    protected OverwriteProcessorBase(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
         => request.DiscordId.ToUlong() == entry.Id;
 

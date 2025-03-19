@@ -5,12 +5,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace AuditLogService.Controllers;
 
-public class DashboardController : ControllerBase
+public class DashboardController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public DashboardController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpGet("api/{apiGroup}")]
     [ProducesResponseType(typeof(List<DashboardInfoRow>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetApiDashboardAsync(string apiGroup)

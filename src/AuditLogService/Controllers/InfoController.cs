@@ -5,12 +5,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace AuditLogService.Controllers;
 
-public class InfoController : ControllerBase
+public class InfoController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public InfoController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpGet("jobs")]
     [ProducesResponseType(typeof(List<JobInfo>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetJobsInfoAsync()

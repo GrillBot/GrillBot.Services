@@ -7,12 +7,11 @@ using GrillBot.Core.Managers.Performance;
 #pragma warning disable SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
 namespace AuditLogService.Actions.Dashboard;
 
-public class GetApiDashboardAction : DashboardListBaseAction<ApiRequest>
+public class GetApiDashboardAction(
+    AuditLogServiceContext dbContext,
+    ICounterManager counterManager
+) : DashboardListBaseAction<ApiRequest>(dbContext, counterManager)
 {
-    public GetApiDashboardAction(AuditLogServiceContext context, ICounterManager counterManager) : base(context, counterManager)
-    {
-    }
-
     protected override Expression<Func<ApiRequest, DateTime>> CreateSorting()
         => entity => entity.EndAt;
 

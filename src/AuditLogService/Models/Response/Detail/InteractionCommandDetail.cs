@@ -3,7 +3,7 @@
 public class InteractionCommandDetail
 {
     public string FullName { get; set; } = null!;
-    public List<InteractionCommandParameter> Parameters { get; set; } = new();
+    public List<InteractionCommandParameter> Parameters { get; set; } = [];
     public bool HasResponded { get; set; }
     public bool IsValidToken { get; set; }
     public bool IsSuccess { get; set; }

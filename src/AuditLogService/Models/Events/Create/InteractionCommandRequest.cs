@@ -5,7 +5,7 @@ public class InteractionCommandRequest
     public string Name { get; set; } = null!;
     public string ModuleName { get; set; } = null!;
     public string MethodName { get; set; } = null!;
-    public List<InteractionCommandParameterRequest> Parameters { get; set; } = new();
+    public List<InteractionCommandParameterRequest> Parameters { get; set; } = [];
     public bool HasResponded { get; set; }
     public bool IsValidToken { get; set; }
     public bool IsSuccess { get; set; }

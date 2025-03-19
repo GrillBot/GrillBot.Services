@@ -5,12 +5,11 @@ using GrillBot.Services.Common.Infrastructure.Api;
 
 namespace AuditLogService.Actions.Delete;
 
-public class DeleteItemAction : ApiAction<AuditLogServiceContext>
+public class DeleteItemAction(
+    ICounterManager counterManager,
+    AuditLogServiceContext dbContext
+) : ApiAction<AuditLogServiceContext>(counterManager, dbContext)
 {
-    public DeleteItemAction(ICounterManager counterManager, AuditLogServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var id = GetParameter<Guid>(0);

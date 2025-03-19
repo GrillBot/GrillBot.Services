@@ -4,32 +4,34 @@ using AuditLogService.Managers;
 using AuditLogService.Models.Events.Create;
 using AuditLogService.Processors;
 using AuditLogService.Processors.Request.Abstractions;
+using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
+#pragma warning disable S3604 // Member initializer values should not be redundant
 namespace AuditLogService.Handlers;
 
-public class CreateItemsEventHandler : BaseEventHandlerWithDb<CreateItemsPayload, AuditLogServiceContext>
+public class CreateItemsEventHandler(
+    ILoggerFactory loggerFactory,
+    AuditLogServiceContext dbContext,
+    ICounterManager counterManager,
+    IRabbitPublisher publisher,
+    DataRecalculationManager _dataRecalculation,
+    RequestProcessorFactory _requestProcessorFactory
+) : BaseEventHandlerWithDb<CreateItemsPayload, AuditLogServiceContext>(loggerFactory, dbContext, counterManager, publisher)
 {
-    private DataRecalculationManager DataRecalculation { get; }
-    private RequestProcessorFactory RequestProcessorFactory { get; }
+    public override string TopicName => "AuditLog";
+    public override string QueueName => "CreateItems";
 
     private readonly CreateItemsPayload _processingInfoBatch = new();
 
-    public CreateItemsEventHandler(ILoggerFactory loggerFactory, AuditLogServiceContext dbContext, ICounterManager counterManager,
-        IRabbitMQPublisher publisher, DataRecalculationManager dataRecalculation, RequestProcessorFactory requestProcessorFactory)
-        : base(loggerFactory, dbContext, counterManager, publisher)
-    {
-        DataRecalculation = dataRecalculation;
-        RequestProcessorFactory = requestProcessorFactory;
-    }
-
-    protected override async Task HandleInternalAsync(CreateItemsPayload payload, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(CreateItemsPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var entities = new List<LogItem>();
 
-        foreach (var item in payload.Items)
+        foreach (var item in message.Items)
         {
             var entity = await CreateLogItemAsync(item);
             if (!entity.CanCreate)
@@ -40,10 +42,11 @@ public class CreateItemsEventHandler : BaseEventHandlerWithDb<CreateItemsPayload
         }
 
         await ContextHelper.SaveChagesAsync();
-        await DataRecalculation.EnqueueRecalculationAsync(entities);
+        await _dataRecalculation.EnqueueRecalculationAsync(entities);
 
         if (_processingInfoBatch.Items.Count > 0)
-            await Publisher.PublishAsync(_processingInfoBatch, new());
+            await Publisher.PublishAsync("AuditLog", _processingInfoBatch, "CreateItems");
+        return RabbitConsumptionResult.Success;
     }
 
     private async Task<LogItem> CreateLogItemAsync(LogRequest request)
@@ -62,7 +65,7 @@ public class CreateItemsEventHandler : BaseEventHandlerWithDb<CreateItemsPayload
             Files = request.Files.Select(CreateFile).ToHashSet()
         };
 
-        var requestProcessor = RequestProcessorFactory.Create(request.Type);
+        var requestProcessor = _requestProcessorFactory.Create(request.Type);
         using (CreateCounter(requestProcessor.GetType().Name))
             await requestProcessor.ProcessAsync(entity, request);
 

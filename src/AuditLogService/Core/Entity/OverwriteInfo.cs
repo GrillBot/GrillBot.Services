@@ -9,7 +9,7 @@ public class OverwriteInfo
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; }
-    
+
     public PermissionTarget Target { get; set; }
 
     [StringLength(32)]

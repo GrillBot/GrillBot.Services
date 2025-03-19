@@ -8,7 +8,7 @@ namespace AuditLogService.Actions.Archivation;
 
 public partial class CreateArchivationDataAction
 {
-    private static JsonNode? ProcessData(LogItem item, ArchivationResult result)
+    private static JsonObject? ProcessData(LogItem item, ArchivationResult result)
     {
         return item.Type switch
         {
@@ -38,7 +38,7 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode? CreateLogMessageItem(LogItem item)
+    private static JsonObject? CreateLogMessageItem(LogItem item)
     {
         if (item.LogMessage is null)
             return null;
@@ -52,10 +52,10 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode? CreateChannelCreatedItem(LogItem item)
-        => item.ChannelCreated is null ? null : (JsonNode)new JsonObject { ["ChannelInfo"] = CreateChannelInfoItems(item.ChannelCreated.ChannelInfo) };
+    private static JsonObject? CreateChannelCreatedItem(LogItem item)
+        => item.ChannelCreated is null ? null : new JsonObject { ["ChannelInfo"] = CreateChannelInfoItems(item.ChannelCreated.ChannelInfo) };
 
-    private static JsonNode? CreateChannelUpdatedItem(LogItem item)
+    private static JsonObject? CreateChannelUpdatedItem(LogItem item)
     {
         if (item.ChannelUpdated is null)
             return null;
@@ -67,10 +67,10 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode? CreateChannelDeletedItem(LogItem item)
+    private static JsonObject? CreateChannelDeletedItem(LogItem item)
         => item.ChannelDeleted is null ? null : new JsonObject { ["ChannelInfo"] = CreateChannelInfoItems(item.ChannelDeleted.ChannelInfo) };
 
-    private static JsonNode CreateChannelInfoItems(ChannelInfo info)
+    private static JsonObject CreateChannelInfoItems(ChannelInfo info)
     {
         var json = new JsonObject
         {
@@ -97,7 +97,7 @@ public partial class CreateArchivationDataAction
         return json;
     }
 
-    private static JsonNode? CreateDeletedEmoteItem(LogItem item)
+    private static JsonObject? CreateDeletedEmoteItem(LogItem item)
     {
         if (item.DeletedEmote is null)
             return null;
@@ -109,13 +109,13 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode? CreateOverwriteCreatedItem(LogItem item, ArchivationResult result)
+    private static JsonObject? CreateOverwriteCreatedItem(LogItem item, ArchivationResult result)
         => item.OverwriteCreated is null ? null : new JsonObject { ["OverwriteInfo"] = CreateOverwriteInfoItems(item.OverwriteCreated.OverwriteInfo, result) };
 
-    private static JsonNode? CreateOverwriteDeletedItem(LogItem item, ArchivationResult result)
+    private static JsonObject? CreateOverwriteDeletedItem(LogItem item, ArchivationResult result)
         => item.OverwriteDeleted is null ? null : new JsonObject { ["OverwriteInfo"] = CreateOverwriteInfoItems(item.OverwriteDeleted.OverwriteInfo, result) };
 
-    private static JsonNode? CreateOverwriteUpdatedItem(LogItem item, ArchivationResult result)
+    private static JsonObject? CreateOverwriteUpdatedItem(LogItem item, ArchivationResult result)
     {
         if (item.OverwriteUpdated is null)
             return null;
@@ -127,7 +127,7 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode CreateOverwriteInfoItems(OverwriteInfo info, ArchivationResult result)
+    private static JsonObject CreateOverwriteInfoItems(OverwriteInfo info, ArchivationResult result)
     {
         var json = new JsonObject
         {
@@ -148,7 +148,7 @@ public partial class CreateArchivationDataAction
         return json;
     }
 
-    private static JsonNode? CreateUnbanItem(LogItem item, ArchivationResult result)
+    private static JsonObject? CreateUnbanItem(LogItem item, ArchivationResult result)
     {
         if (item.Unban is null)
             return null;
@@ -162,7 +162,7 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode? CreateMemberUpdatedItem(LogItem item, ArchivationResult result)
+    private static JsonObject? CreateMemberUpdatedItem(LogItem item, ArchivationResult result)
     {
         if (item.MemberUpdated is null)
             return null;
@@ -174,7 +174,7 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode CreateMemberInfoItems(MemberInfo info, ArchivationResult result)
+    private static JsonObject CreateMemberInfoItems(MemberInfo info, ArchivationResult result)
     {
         var json = new JsonObject
         {
@@ -201,7 +201,7 @@ public partial class CreateArchivationDataAction
         return json;
     }
 
-    private static JsonNode? CreateMemberRoleUpdatedItems(LogItem item, ArchivationResult result)
+    private static JsonObject? CreateMemberRoleUpdatedItems(LogItem item, ArchivationResult result)
     {
         if (item.MemberRolesUpdated is null || item.MemberRolesUpdated.Count == 0)
             return null;
@@ -229,7 +229,7 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode? CreateGuildUpdatedItems(LogItem item, ArchivationResult result)
+    private static JsonObject? CreateGuildUpdatedItems(LogItem item, ArchivationResult result)
     {
         if (item.GuildUpdated is null)
             return null;
@@ -241,7 +241,7 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode CreateGuildUpdatedItems(GuildInfo info, ArchivationResult result)
+    private static JsonObject CreateGuildUpdatedItems(GuildInfo info, ArchivationResult result)
     {
         var json = new JsonObject
         {
@@ -310,7 +310,7 @@ public partial class CreateArchivationDataAction
         return json;
     }
 
-    private static JsonNode? CreateUserLeftItem(LogItem item, ArchivationResult result)
+    private static JsonObject? CreateUserLeftItem(LogItem item, ArchivationResult result)
     {
         if (item.UserLeft is null)
             return null;
@@ -330,7 +330,7 @@ public partial class CreateArchivationDataAction
         return json;
     }
 
-    private static JsonNode? CreateUserJoinedItem(LogItem item)
+    private static JsonObject? CreateUserJoinedItem(LogItem item)
     {
         if (item.UserJoined is null)
             return null;
@@ -341,7 +341,7 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode? CreateMessageEditedItem(LogItem item)
+    private static JsonObject? CreateMessageEditedItem(LogItem item)
     {
         if (item.MessageEdited is null)
             return null;
@@ -354,7 +354,7 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode? CreateMessageDeletedItem(LogItem item, ArchivationResult result)
+    private static JsonObject? CreateMessageDeletedItem(LogItem item, ArchivationResult result)
     {
         if (item.MessageDeleted is null)
             return null;
@@ -413,7 +413,7 @@ public partial class CreateArchivationDataAction
         return json;
     }
 
-    private static JsonNode? CreateInteractionItem(LogItem item)
+    private static JsonObject? CreateInteractionItem(LogItem item)
     {
         if (item.InteractionCommand is null)
             return null;
@@ -461,7 +461,7 @@ public partial class CreateArchivationDataAction
         return json;
     }
 
-    private static JsonNode? CreateThreadDeletedItem(LogItem item)
+    private static JsonObject? CreateThreadDeletedItem(LogItem item)
     {
         if (item.ThreadDeleted is null)
             return null;
@@ -472,7 +472,7 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode CreateThreadInfoItems(ThreadInfo info)
+    private static JsonObject CreateThreadInfoItems(ThreadInfo info)
     {
         var json = new JsonObject
         {
@@ -492,7 +492,7 @@ public partial class CreateArchivationDataAction
         return json;
     }
 
-    private static JsonNode? CreateJobCompletedItem(LogItem item, ArchivationResult result)
+    private static JsonObject? CreateJobCompletedItem(LogItem item, ArchivationResult result)
     {
         if (item.Job is null)
             return null;
@@ -518,7 +518,7 @@ public partial class CreateArchivationDataAction
         return json;
     }
 
-    private static JsonNode? CreateApiRequestItem(LogItem item)
+    private static JsonObject? CreateApiRequestItem(LogItem item)
     {
         if (item.ApiRequest is null)
             return null;
@@ -572,7 +572,7 @@ public partial class CreateArchivationDataAction
         return json;
     }
 
-    private static JsonNode? CreateThreadUpdatedItem(LogItem item)
+    private static JsonObject? CreateThreadUpdatedItem(LogItem item)
     {
         if (item.ThreadUpdated is null)
             return null;
@@ -584,7 +584,7 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode? CreateRoleDeletedItem(LogItem item)
+    private static JsonObject? CreateRoleDeletedItem(LogItem item)
     {
         if (item.RoleDeleted?.RoleInfo is null)
             return null;
@@ -595,7 +595,7 @@ public partial class CreateArchivationDataAction
         };
     }
 
-    private static JsonNode CreateRoleInfoItems(RoleInfo info)
+    private static JsonObject CreateRoleInfoItems(RoleInfo info)
     {
         var json = new JsonObject
         {

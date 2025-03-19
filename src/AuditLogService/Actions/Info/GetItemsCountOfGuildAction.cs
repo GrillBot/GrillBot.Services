@@ -5,12 +5,11 @@ using GrillBot.Services.Common.Infrastructure.Api;
 
 namespace AuditLogService.Actions.Info;
 
-public class GetItemsCountOfGuildAction : ApiAction<AuditLogServiceContext>
+public class GetItemsCountOfGuildAction(
+    AuditLogServiceContext context,
+    ICounterManager counterManager
+) : ApiAction<AuditLogServiceContext>(counterManager, context)
 {
-    public GetItemsCountOfGuildAction(AuditLogServiceContext context, ICounterManager counterManager) : base(counterManager, context)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;

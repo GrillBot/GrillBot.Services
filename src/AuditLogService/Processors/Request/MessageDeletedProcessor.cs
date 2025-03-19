@@ -8,12 +8,8 @@ using EmbedField = AuditLogService.Core.Entity.EmbedField;
 
 namespace AuditLogService.Processors.Request;
 
-public class MessageDeletedProcessor : RequestProcessorBase
+public class MessageDeletedProcessor(IServiceProvider serviceProvider) : RequestProcessorBase(serviceProvider)
 {
-    public MessageDeletedProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var auditLog = await FindAuditLogAsync(request);

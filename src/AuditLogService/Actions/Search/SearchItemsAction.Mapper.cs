@@ -328,8 +328,8 @@ public partial class SearchItemsAction
     {
         var info = await CreatePreviewAsync<ThreadUpdated, Tuple<List<string>, List<string>>>(result, entity => Tuple.Create(entity.Before.Tags, entity.After.Tags));
 
-        var tagsBefore = info?.Item1 ?? new List<string>();
-        var tagsAfter = info?.Item2 ?? new List<string>();
+        var tagsBefore = info?.Item1 ?? [];
+        var tagsAfter = info?.Item2 ?? [];
 
         result.IsDetailAvailable = true;
         result.Preview = new ThreadUpdatedPreview

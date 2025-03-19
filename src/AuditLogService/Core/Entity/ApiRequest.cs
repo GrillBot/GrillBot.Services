@@ -31,7 +31,7 @@ public class ApiRequest : ChildEntityBase
     public string Path { get; set; } = null!;
 
     [Column(TypeName = "jsonb")]
-    public Dictionary<string, string> Parameters { get; set; } = new();
+    public Dictionary<string, string> Parameters { get; set; } = [];
 
     [StringLength(10)]
     public string Language { get; set; } = null!;
@@ -40,7 +40,7 @@ public class ApiRequest : ChildEntityBase
     public string ApiGroupName { get; set; } = null!;
 
     [Column(TypeName = "jsonb")]
-    public Dictionary<string, string> Headers { get; set; } = new();
+    public Dictionary<string, string> Headers { get; set; } = [];
 
     [StringLength(512)]
     public string Identification { get; set; } = null!;

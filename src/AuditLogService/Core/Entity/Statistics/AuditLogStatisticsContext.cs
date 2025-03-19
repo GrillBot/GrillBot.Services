@@ -2,12 +2,8 @@
 
 namespace AuditLogService.Core.Entity.Statistics;
 
-public class AuditLogStatisticsContext : DbContext
+public class AuditLogStatisticsContext(DbContextOptions<AuditLogStatisticsContext> options) : DbContext(options)
 {
-    public AuditLogStatisticsContext(DbContextOptions<AuditLogStatisticsContext> options) : base(options)
-    {
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("statistics");

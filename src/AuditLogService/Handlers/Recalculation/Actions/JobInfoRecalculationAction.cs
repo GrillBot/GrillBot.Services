@@ -4,12 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Handlers.Recalculation.Actions;
 
-public class JobInfoRecalculationAction : RecalculationActionBase
+public class JobInfoRecalculationAction(IServiceProvider serviceProvider) : RecalculationActionBase(serviceProvider)
 {
-    public JobInfoRecalculationAction(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override bool CheckPreconditions(RecalculationPayload payload)
         => payload.Job is not null;
 

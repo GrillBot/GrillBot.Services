@@ -4,12 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AuditLogService.Controllers;
 
-public class InternalController : GrillBot.Core.Infrastructure.Actions.ControllerBase
+public class InternalController(IServiceProvider serviceProvider) : GrillBot.Core.Infrastructure.Actions.ControllerBase(serviceProvider)
 {
-    public InternalController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpGet("recalculation/{type}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public Task<IActionResult> TriggerRecalculationAsync(LogType type)

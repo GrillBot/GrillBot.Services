@@ -2,29 +2,38 @@
 using AuditLogService.Core.Enums;
 using AuditLogService.Handlers.Recalculation.Actions;
 using AuditLogService.Models.Events.Recalculation;
+using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
 namespace AuditLogService.Handlers.Recalculation;
 
-public class RecalculationHandler : BaseEventHandlerWithDb<RecalculationPayload, AuditLogServiceContext>
+public class RecalculationHandler(
+    ILoggerFactory loggerFactory,
+    AuditLogServiceContext dbContext,
+    ICounterManager counterManager,
+    IRabbitPublisher rabbitPublisher,
+    IServiceProvider _serviceProvider
+) : BaseEventHandlerWithDb<RecalculationPayload, AuditLogServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
 {
-    private IServiceProvider ServiceProvider { get; }
+    public override string TopicName => "AuditLog";
+    public override string QueueName => "Recalculation";
 
-    public RecalculationHandler(ILoggerFactory loggerFactory, AuditLogServiceContext dbContext, ICounterManager counterManager,
-        IRabbitMQPublisher publisher, IServiceProvider serviceProvider) : base(loggerFactory, dbContext, counterManager, publisher)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        RecalculationPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers
+    )
     {
-        ServiceProvider = serviceProvider;
-    }
-
-    protected override async Task HandleInternalAsync(RecalculationPayload payload, Dictionary<string, string> headers)
-    {
-        foreach (var action in GetRecalculationActions(payload).Where(a => a.CheckPreconditions(payload)))
+        foreach (var action in GetRecalculationActions(message).Where(a => a.CheckPreconditions(message)))
         {
             using (CreateCounter(action.GetType().Name))
-                await action.ProcessAsync(payload);
+                await action.ProcessAsync(message);
         }
+
+        return RabbitConsumptionResult.Success;
     }
 
     private IEnumerable<RecalculationActionBase> GetRecalculationActions(RecalculationPayload payload)
@@ -33,23 +42,23 @@ public class RecalculationHandler : BaseEventHandlerWithDb<RecalculationPayload,
         {
             if (payload.Type is LogType.Api)
             {
-                yield return new ApiRequestStatsRecalculationAction(ServiceProvider);
-                yield return new ApiUserStatsRecalculationAction(ServiceProvider);
+                yield return new ApiRequestStatsRecalculationAction(_serviceProvider);
+                yield return new ApiUserStatsRecalculationAction(_serviceProvider);
             }
 
-            yield return new DailyAvgTimesRecalculationAction(ServiceProvider);
+            yield return new DailyAvgTimesRecalculationAction(_serviceProvider);
 
             if (payload.Type is LogType.InteractionCommand)
             {
-                yield return new InteractionStatsRecalculationAction(ServiceProvider);
-                yield return new InteractionUserStatsRecalculationAction(ServiceProvider);
+                yield return new InteractionStatsRecalculationAction(_serviceProvider);
+                yield return new InteractionUserStatsRecalculationAction(_serviceProvider);
             }
 
             if (payload.Type is LogType.JobCompleted)
-                yield return new JobInfoRecalculationAction(ServiceProvider);
+                yield return new JobInfoRecalculationAction(_serviceProvider);
         }
 
-        yield return new DatabaseStatsRecalculationAction(ServiceProvider);
-        yield return new InvalidStatsRecalculationAction(ServiceProvider);
+        yield return new DatabaseStatsRecalculationAction(_serviceProvider);
+        yield return new InvalidStatsRecalculationAction(_serviceProvider);
     }
 }

@@ -8,16 +8,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Statistics;
 
-public class GetApiStatisticsAction : ApiAction<AuditLogServiceContext>
+public class GetApiStatisticsAction(
+    AuditLogStatisticsContext _statisticsContext,
+    AuditLogServiceContext dbContext,
+    ICounterManager counterManager
+) : ApiAction<AuditLogServiceContext>(counterManager, dbContext)
 {
-    private AuditLogStatisticsContext StatisticsContext { get; }
-
-    public GetApiStatisticsAction(AuditLogStatisticsContext statisticsContext, AuditLogServiceContext dbContext,
-        ICounterManager counterManager) : base(counterManager, dbContext)
-    {
-        StatisticsContext = statisticsContext;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var statistics = new ApiStatistics
@@ -64,7 +60,7 @@ public class GetApiStatisticsAction : ApiAction<AuditLogServiceContext>
 
     private async Task<List<StatisticItem>> GetEndpointStatisticsAsync()
     {
-        var query = StatisticsContext.RequestStats.AsNoTracking().Select(o => new StatisticItem
+        var query = _statisticsContext.RequestStats.AsNoTracking().Select(o => new StatisticItem
         {
             FailedCount = o.FailedCount,
             Key = o.Endpoint,
@@ -77,9 +73,9 @@ public class GetApiStatisticsAction : ApiAction<AuditLogServiceContext>
         });
 
         var stats = await ContextHelper.ReadEntitiesAsync(query);
-        return stats
+        return [.. stats
             .OrderByDescending(o => o.AvgDuration)
             .ThenBy(o => o.Key)
-            .ToList();
+        ];
     }
 }

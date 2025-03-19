@@ -8,16 +8,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Statistics;
 
-public class GetInteractionStatisticsAction : ApiAction<AuditLogServiceContext>
+public class GetInteractionStatisticsAction(
+    AuditLogStatisticsContext _statisticsContext,
+    AuditLogServiceContext dbContext,
+    ICounterManager counterManager
+) : ApiAction<AuditLogServiceContext>(counterManager, dbContext)
 {
-    private AuditLogStatisticsContext StatisticsContext { get; }
-
-    public GetInteractionStatisticsAction(AuditLogStatisticsContext statisticsContext, AuditLogServiceContext dbContext, ICounterManager counterManager)
-        : base(counterManager, dbContext)
-    {
-        StatisticsContext = statisticsContext;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var statistics = new InteractionStatistics
@@ -44,7 +40,7 @@ public class GetInteractionStatisticsAction : ApiAction<AuditLogServiceContext>
 
     private async Task<List<StatisticItem>> GetCommandStatisticsAsync()
     {
-        var statsQuery = StatisticsContext.InteractionStatistics.AsNoTracking().Select(o => new StatisticItem
+        var statsQuery = _statisticsContext.InteractionStatistics.AsNoTracking().Select(o => new StatisticItem
         {
             FailedCount = o.FailedCount,
             Key = o.Action,
@@ -57,10 +53,10 @@ public class GetInteractionStatisticsAction : ApiAction<AuditLogServiceContext>
         });
 
         var stats = await ContextHelper.ReadEntitiesAsync(statsQuery);
-        return stats
+        return [.. stats
             .OrderByDescending(o => o.AvgDuration)
             .ThenByDescending(o => o.SuccessCount + o.FailedCount)
             .ThenBy(o => o.Key)
-            .ToList();
+        ];
     }
 }

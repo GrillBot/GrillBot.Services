@@ -6,12 +6,8 @@ using Discord.Rest;
 
 namespace AuditLogService.Processors.Request;
 
-public class RoleDeletedProcessor : RequestProcessorBase
+public class RoleDeletedProcessor(IServiceProvider serviceProvider) : RequestProcessorBase(serviceProvider)
 {
-    public RoleDeletedProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var auditLog = await FindAuditLogAsync(request);

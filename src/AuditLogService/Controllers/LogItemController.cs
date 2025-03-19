@@ -9,12 +9,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace AuditLogService.Controllers;
 
-public class LogItemController : ControllerBase
+public class LogItemController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public LogItemController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpPost("search")]
     [ProducesResponseType(typeof(PaginatedResponse<LogListItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

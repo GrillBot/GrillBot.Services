@@ -4,22 +4,23 @@ using Discord;
 using GrillBot.Core.Extensions;
 using Microsoft.EntityFrameworkCore;
 
+#pragma warning disable IDE0290 // Use primary constructor
 namespace AuditLogService.Processors.Request.Abstractions;
 
 public abstract class BatchRequestProcessorBase : RequestProcessorBase
 {
-    private AuditLogServiceContext Context { get; }
+    private readonly AuditLogServiceContext _context;
 
     protected BatchRequestProcessorBase(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        Context = serviceProvider.GetRequiredService<AuditLogServiceContext>();
+        _context = serviceProvider.GetRequiredService<AuditLogServiceContext>();
     }
 
     private async Task<HashSet<ulong>> GetIgnoredDiscordIdsAsync(LogRequest logRequest)
     {
         var timeLimit = DateTime.UtcNow.AddMonths(-2);
 
-        var items = await Context.LogItems.AsNoTracking()
+        var items = await _context.LogItems.AsNoTracking()
             .Where(o => o.DiscordId != null && o.Type == logRequest.Type && o.GuildId == logRequest.GuildId && o.ChannelId == logRequest.ChannelId && o.CreatedAt >= timeLimit)
             .Select(o => o.DiscordId!)
             .ToListAsync();

@@ -8,12 +8,8 @@ using ChannelInfo = AuditLogService.Core.Entity.ChannelInfo;
 
 namespace AuditLogService.Processors.Request;
 
-public class ChannelCreatedProcessor : RequestProcessorBase
+public class ChannelCreatedProcessor(IServiceProvider serviceProvider) : RequestProcessorBase(serviceProvider)
 {
-    public ChannelCreatedProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var logItem = await FindAuditLogAsync(request);

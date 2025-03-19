@@ -7,12 +7,8 @@ using GrillBot.Core.Extensions;
 
 namespace AuditLogService.Processors.Request;
 
-public class UserLeftProcessor : RequestProcessorBase
+public class UserLeftProcessor(IServiceProvider serviceProvider) : RequestProcessorBase(serviceProvider)
 {
-    public UserLeftProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var ban = await DiscordManager.GetBanAsync(request.GuildId.ToUlong(), request.UserLeft!.UserId.ToUlong());

@@ -8,12 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Dashboard;
 
-public class GetTodayAvgTimesDashboard : ApiAction<AuditLogStatisticsContext>
+public class GetTodayAvgTimesDashboard(
+    AuditLogStatisticsContext statisticsContext,
+    ICounterManager counterManager
+) : ApiAction<AuditLogStatisticsContext>(counterManager, statisticsContext)
 {
-    public GetTodayAvgTimesDashboard(AuditLogStatisticsContext statisticsContext, ICounterManager counterManager) : base(counterManager, statisticsContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var data = await ReadTodayDailyStatsAsync();

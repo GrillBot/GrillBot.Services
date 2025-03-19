@@ -4,12 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Handlers.Recalculation.Actions;
 
-public class ApiUserStatsRecalculationAction : RecalculationActionBase
+public class ApiUserStatsRecalculationAction(IServiceProvider serviceProvider) : RecalculationActionBase(serviceProvider)
 {
-    public ApiUserStatsRecalculationAction(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override bool CheckPreconditions(RecalculationPayload payload)
         => payload.Api is not null;
 

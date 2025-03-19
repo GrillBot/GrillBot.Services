@@ -4,6 +4,7 @@ using AuditLogService.Models.Events.Recalculation;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
+#pragma warning disable IDE0290 // Use primary constructor
 namespace AuditLogService.Handlers.Recalculation.Actions;
 
 public abstract class RecalculationActionBase

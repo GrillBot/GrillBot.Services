@@ -7,12 +7,8 @@ using GrillBot.Core.Extensions;
 
 namespace AuditLogService.Processors.Request;
 
-public class UnbanProcessor : RequestProcessorBase
+public class UnbanProcessor(IServiceProvider serviceProvider) : RequestProcessorBase(serviceProvider)
 {
-    public UnbanProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var auditLog = await FindAuditLogAsync(request);

@@ -9,9 +9,9 @@ public class InteractionCommand : ChildEntityBase
     public string Name { get; set; } = null!;
     public string ModuleName { get; set; } = null!;
     public string MethodName { get; set; } = null!;
-    
+
     [Column(TypeName = "jsonb")]
-    public List<InteractionCommandParameter> Parameters { get; set; } = new();
+    public List<InteractionCommandParameter> Parameters { get; set; } = [];
 
     public bool HasResponded { get; set; }
     public bool IsValidToken { get; set; }

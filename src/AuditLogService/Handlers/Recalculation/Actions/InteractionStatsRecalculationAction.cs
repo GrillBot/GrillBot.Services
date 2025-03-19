@@ -4,12 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Handlers.Recalculation.Actions;
 
-public class InteractionStatsRecalculationAction : RecalculationActionBase
+public class InteractionStatsRecalculationAction(IServiceProvider serviceProvider) : RecalculationActionBase(serviceProvider)
 {
-    public InteractionStatsRecalculationAction(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override bool CheckPreconditions(RecalculationPayload payload)
         => payload.Interaction is not null;
 

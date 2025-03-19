@@ -29,7 +29,7 @@ public partial class CreateArchivationDataAction
         return result;
     }
 
-    private static JsonNode ProcessLogItem(LogItem item, ArchivationResult result)
+    private static JsonObject ProcessLogItem(LogItem item, ArchivationResult result)
     {
         result.Ids.Add(item.Id);
 
@@ -78,7 +78,7 @@ public partial class CreateArchivationDataAction
         return json;
     }
 
-    private static JsonNode ProcessFile(File file, ArchivationResult result)
+    private static JsonObject ProcessFile(File file, ArchivationResult result)
     {
         if (!result.Files.Contains(file.Filename))
             result.Files.Add(file.Filename);

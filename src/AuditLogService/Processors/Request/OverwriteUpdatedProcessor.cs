@@ -6,12 +6,8 @@ using Discord.Rest;
 
 namespace AuditLogService.Processors.Request;
 
-public class OverwriteUpdatedProcessor : OverwriteProcessorBase
+public class OverwriteUpdatedProcessor(IServiceProvider serviceProvider) : OverwriteProcessorBase(serviceProvider)
 {
-    public OverwriteUpdatedProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var logItem = await FindAuditLogAsync(request);

@@ -7,12 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Statistics;
 
-public class GetAvgTimesAction : ApiAction<AuditLogStatisticsContext>
+public class GetAvgTimesAction(
+    AuditLogStatisticsContext statisticsContext,
+    ICounterManager counterManager
+) : ApiAction<AuditLogStatisticsContext>(counterManager, statisticsContext)
 {
-    public GetAvgTimesAction(AuditLogStatisticsContext statisticsContext, ICounterManager counterManager) : base(counterManager, statisticsContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var result = new AvgExecutionTimes

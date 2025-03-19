@@ -7,12 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Actions.Detail;
 
-public partial class ReadDetailAction : ApiAction<AuditLogServiceContext>
+public partial class ReadDetailAction(
+    AuditLogServiceContext context,
+    ICounterManager counterManager
+) : ApiAction<AuditLogServiceContext>(counterManager, context)
 {
-    public ReadDetailAction(AuditLogServiceContext context, ICounterManager counterManager) : base(counterManager, context)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var id = (Guid)Parameters[0]!;

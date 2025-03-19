@@ -2,18 +2,12 @@
 using AuditLogService.Processors.Request;
 using AuditLogService.Processors.Request.Abstractions;
 
+#pragma warning disable S3604 // Member initializer values should not be redundant
 namespace AuditLogService.Processors;
 
-public sealed class RequestProcessorFactory : IDisposable
+public sealed class RequestProcessorFactory(IServiceProvider _serviceProvider) : IDisposable
 {
-    private IServiceProvider ServiceProvider { get; }
-
-    private readonly Dictionary<LogType, RequestProcessorBase> _cachedProcessors = new();
-
-    public RequestProcessorFactory(IServiceProvider serviceProvider)
-    {
-        ServiceProvider = serviceProvider;
-    }
+    private readonly Dictionary<LogType, RequestProcessorBase> _cachedProcessors = [];
 
     public RequestProcessorBase Create(LogType type)
     {
@@ -22,28 +16,28 @@ public sealed class RequestProcessorFactory : IDisposable
 
         processor = type switch
         {
-            LogType.Info or LogType.Warning or LogType.Error => new LogMessageProcessor(ServiceProvider),
-            LogType.ChannelCreated => new ChannelCreatedProcessor(ServiceProvider),
-            LogType.ChannelDeleted => new ChannelDeletedProcessor(ServiceProvider),
-            LogType.ChannelUpdated => new ChannelUpdatedProcessor(ServiceProvider),
-            LogType.EmoteDeleted => new DeletedEmoteProcessor(ServiceProvider),
-            LogType.OverwriteCreated => new OverwriteCreatedProcessor(ServiceProvider),
-            LogType.OverwriteDeleted => new OverwriteDeletedProcessor(ServiceProvider),
-            LogType.OverwriteUpdated => new OverwriteUpdatedProcessor(ServiceProvider),
-            LogType.Unban => new UnbanProcessor(ServiceProvider),
-            LogType.MemberUpdated => new MemberUpdatedProcessor(ServiceProvider),
-            LogType.MemberRoleUpdated => new MemberRoleUpdatedProcessor(ServiceProvider),
-            LogType.GuildUpdated => new GuildUpdatedProcessor(ServiceProvider),
-            LogType.UserLeft => new UserLeftProcessor(ServiceProvider),
-            LogType.UserJoined => new UserJoinedProcessor(ServiceProvider),
-            LogType.MessageEdited => new MessageEditedProcessor(ServiceProvider),
-            LogType.MessageDeleted => new MessageDeletedProcessor(ServiceProvider),
-            LogType.InteractionCommand => new InteractionCommandProcessor(ServiceProvider),
-            LogType.ThreadDeleted => new ThreadDeletedProcessor(ServiceProvider),
-            LogType.JobCompleted => new JobCompletedProcessor(ServiceProvider),
-            LogType.Api => new ApiRequestProcessor(ServiceProvider),
-            LogType.ThreadUpdated => new ThreadUpdatedProcessor(ServiceProvider),
-            LogType.RoleDeleted => new RoleDeletedProcessor(ServiceProvider),
+            LogType.Info or LogType.Warning or LogType.Error => new LogMessageProcessor(_serviceProvider),
+            LogType.ChannelCreated => new ChannelCreatedProcessor(_serviceProvider),
+            LogType.ChannelDeleted => new ChannelDeletedProcessor(_serviceProvider),
+            LogType.ChannelUpdated => new ChannelUpdatedProcessor(_serviceProvider),
+            LogType.EmoteDeleted => new DeletedEmoteProcessor(_serviceProvider),
+            LogType.OverwriteCreated => new OverwriteCreatedProcessor(_serviceProvider),
+            LogType.OverwriteDeleted => new OverwriteDeletedProcessor(_serviceProvider),
+            LogType.OverwriteUpdated => new OverwriteUpdatedProcessor(_serviceProvider),
+            LogType.Unban => new UnbanProcessor(_serviceProvider),
+            LogType.MemberUpdated => new MemberUpdatedProcessor(_serviceProvider),
+            LogType.MemberRoleUpdated => new MemberRoleUpdatedProcessor(_serviceProvider),
+            LogType.GuildUpdated => new GuildUpdatedProcessor(_serviceProvider),
+            LogType.UserLeft => new UserLeftProcessor(_serviceProvider),
+            LogType.UserJoined => new UserJoinedProcessor(_serviceProvider),
+            LogType.MessageEdited => new MessageEditedProcessor(_serviceProvider),
+            LogType.MessageDeleted => new MessageDeletedProcessor(_serviceProvider),
+            LogType.InteractionCommand => new InteractionCommandProcessor(_serviceProvider),
+            LogType.ThreadDeleted => new ThreadDeletedProcessor(_serviceProvider),
+            LogType.JobCompleted => new JobCompletedProcessor(_serviceProvider),
+            LogType.Api => new ApiRequestProcessor(_serviceProvider),
+            LogType.ThreadUpdated => new ThreadUpdatedProcessor(_serviceProvider),
+            LogType.RoleDeleted => new RoleDeletedProcessor(_serviceProvider),
             _ => throw new NotSupportedException($"Unsupported type {type}")
         };
 

@@ -7,11 +7,12 @@ using GrillBot.Core.Extensions;
 using GrillBot.Services.Common.Discord;
 using System.Net;
 
+#pragma warning disable IDE0290 // Use primary constructor
 namespace AuditLogService.Processors.Request.Abstractions;
 
 public abstract class RequestProcessorBase
 {
-    public Dictionary<LogSeverity, List<string>> ProcessingMessages { get; } = new();
+    public Dictionary<LogSeverity, List<string>> ProcessingMessages { get; } = [];
 
     protected DiscordManager DiscordManager { get; }
 
@@ -58,7 +59,7 @@ public abstract class RequestProcessorBase
         }
         catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.GatewayTimeout)
         {
-            return new List<IAuditLogEntry>();
+            return [];
         }
     }
 
@@ -76,7 +77,7 @@ public abstract class RequestProcessorBase
     private void AddProcessingMessage(LogSeverity severity, string message)
     {
         if (!ProcessingMessages.ContainsKey(severity))
-            ProcessingMessages.Add(severity, new List<string>());
+            ProcessingMessages.Add(severity, []);
         ProcessingMessages[severity].Add(message);
     }
 }

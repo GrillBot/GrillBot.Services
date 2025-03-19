@@ -11,7 +11,7 @@ public class LogRequest
     public string? DiscordId { get; set; }
     public LogType Type { get; set; }
 
-    public List<FileRequest> Files { get; set; } = new();
+    public List<FileRequest> Files { get; set; } = [];
 
     public ApiRequestRequest? ApiRequest { get; set; }
     public LogMessageRequest? LogMessage { get; set; }

@@ -1,15 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GrillBot.Core.Database.ValueConverters;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.Linq.Expressions;
 
 namespace AuditLogService.Core.Entity;
 
-public class AuditLogServiceContext : DbContext
+public class AuditLogServiceContext(DbContextOptions<AuditLogServiceContext> options) : DbContext(options)
 {
-    public AuditLogServiceContext(DbContextOptions<AuditLogServiceContext> options) : base(options)
-    {
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         static void WithForeignKeyReference<TEntity>(EntityTypeBuilder<LogItem> builder, Expression<Func<LogItem, TEntity?>> hasOneExpression) where TEntity : ChildEntityBase
@@ -81,8 +78,18 @@ public class AuditLogServiceContext : DbContext
             b.HasOne(o => o.After).WithMany().HasForeignKey(o => o.AfterId);
         });
 
-        modelBuilder.Entity<ApiRequest>(b => b.HasIndex(x => x.Role).HasFilter("\"Role\" IS NOT NULL"));
+        modelBuilder.Entity<ApiRequest>(b =>
+        {
+            b.HasIndex(x => x.Role).HasFilter("\"Role\" IS NOT NULL");
+
+            b.Property(o => o.Headers).HasConversion(new JsonValueConverter<Dictionary<string, string>>());
+            b.Property(o => o.Parameters).HasConversion(new JsonValueConverter<Dictionary<string, string>>());
+        });
+
         modelBuilder.Entity<RoleDeleted>(b => b.HasOne(o => o.RoleInfo).WithMany().HasForeignKey(o => o.RoleInfoId));
+        modelBuilder.Entity<InteractionCommand>(b => b.Property(o => o.Parameters).HasConversion(new JsonValueConverter<List<InteractionCommandParameter>>()));
+        modelBuilder.Entity<RoleInfo>(b => b.Property(o => o.Permissions).HasConversion(new JsonValueConverter<List<string>>()));
+        modelBuilder.Entity<ThreadInfo>(b => b.Property(o => o.Tags).HasConversion(new JsonValueConverter<List<string>>()));
     }
 
     public DbSet<ApiRequest> ApiRequests => Set<ApiRequest>();

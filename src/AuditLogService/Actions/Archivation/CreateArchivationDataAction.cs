@@ -7,19 +7,15 @@ using Microsoft.Extensions.Options;
 
 namespace AuditLogService.Actions.Archivation;
 
-public partial class CreateArchivationDataAction : ApiAction<AuditLogServiceContext>
+public partial class CreateArchivationDataAction(
+    IOptions<AppOptions> _options,
+    AuditLogServiceContext dbContext,
+    ICounterManager counterManager
+) : ApiAction<AuditLogServiceContext>(counterManager, dbContext)
 {
-    private AppOptions AppOptions { get; }
-
-    public CreateArchivationDataAction(IOptions<AppOptions> options, AuditLogServiceContext context, ICounterManager counterManager)
-        : base(counterManager, context)
-    {
-        AppOptions = options.Value;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
-        var expirationDate = DateTime.UtcNow.AddMonths(-AppOptions.ExpirationMonths);
+        var expirationDate = DateTime.UtcNow.AddMonths(-_options.Value.ExpirationMonths);
 
         if (!await ExistsItemsToArchiveAsync(expirationDate))
             return new ApiResult(StatusCodes.Status204NoContent);

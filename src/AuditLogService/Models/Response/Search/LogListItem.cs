@@ -11,7 +11,7 @@ public class LogListItem
     public Guid Id { get; set; }
     public LogType Type { get; set; }
     public bool IsDetailAvailable { get; set; }
-    
-    public List<File> Files { get; set; } = new();
+
+    public List<File> Files { get; set; } = [];
     public object? Preview { get; set; }
 }

@@ -5,12 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Handlers.Recalculation.Actions;
 
-public class DailyAvgTimesRecalculationAction : RecalculationActionBase
+public class DailyAvgTimesRecalculationAction(IServiceProvider serviceProvider) : RecalculationActionBase(serviceProvider)
 {
-    public DailyAvgTimesRecalculationAction(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override bool CheckPreconditions(RecalculationPayload payload)
         => payload.Api is not null || payload.Interaction is not null || payload.Job is not null;
 
@@ -21,8 +17,8 @@ public class DailyAvgTimesRecalculationAction : RecalculationActionBase
 
         if (payload.Type is LogType.Api && payload.Api is not null)
         {
-            await ProcessApiTimesAsync(new[] { "V1", "V3" }, payload, stats, date);
-            await ProcessApiTimesAsync(new[] { "V2" }, payload, stats, date);
+            await ProcessApiTimesAsync(["V1", "V3"], payload, stats, date);
+            await ProcessApiTimesAsync(["V2"], payload, stats, date);
         }
 
         if (payload.Type is LogType.InteractionCommand && payload.Interaction is not null)

@@ -6,12 +6,8 @@ using Discord.Rest;
 
 namespace AuditLogService.Processors.Request;
 
-public class DeletedEmoteProcessor : RequestProcessorBase
+public class DeletedEmoteProcessor(IServiceProvider serviceProvider) : RequestProcessorBase(serviceProvider)
 {
-    public DeletedEmoteProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var logItem = await FindAuditLogAsync(request);

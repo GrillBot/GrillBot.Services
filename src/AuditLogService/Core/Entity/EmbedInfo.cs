@@ -25,7 +25,7 @@ public class EmbedInfo
     public bool ContainsFooter { get; set; }
     public string? ProviderName { get; set; }
     public string? ThumbnailInfo { get; set; }
-    
+
     public ISet<EmbedField> Fields { get; set; }
 
     public EmbedInfo()

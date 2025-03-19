@@ -5,12 +5,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace AuditLogService.Controllers;
 
-public class ArchivationController : ControllerBase
+public class ArchivationController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public ArchivationController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpPost]
     [ProducesResponseType(typeof(ArchivationResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

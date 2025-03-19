@@ -22,7 +22,7 @@ public class RoleInfo
     public bool IsHoisted { get; set; }
 
     [Column(TypeName = "jsonb")]
-    public List<string> Permissions { get; set; } = new();
+    public List<string> Permissions { get; set; } = [];
 
     [StringLength(256)]
     public string? IconId { get; set; }

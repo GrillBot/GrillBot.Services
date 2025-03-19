@@ -5,12 +5,8 @@ using System.Net;
 
 namespace AuditLogService.Processors.Request;
 
-public class ApiRequestProcessor : RequestProcessorBase
+public class ApiRequestProcessor(IServiceProvider serviceProvider) : RequestProcessorBase(serviceProvider)
 {
-    public ApiRequestProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var successStatusCodes = Enum.GetValues<HttpStatusCode>()

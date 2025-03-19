@@ -4,12 +4,8 @@ using AuditLogService.Processors.Request.Abstractions;
 
 namespace AuditLogService.Processors.Request;
 
-public class JobCompletedProcessor : RequestProcessorBase
+public class JobCompletedProcessor(IServiceProvider serviceProvider) : RequestProcessorBase(serviceProvider)
 {
-    public JobCompletedProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var job = request.JobExecution!;

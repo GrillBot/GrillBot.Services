@@ -8,12 +8,8 @@ using ThreadInfo = AuditLogService.Core.Entity.ThreadInfo;
 
 namespace AuditLogService.Processors.Request;
 
-public class ThreadUpdatedProcessor : RequestProcessorBase
+public class ThreadUpdatedProcessor(IServiceProvider serviceProvider) : RequestProcessorBase(serviceProvider)
 {
-    public ThreadUpdatedProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var logItems = await FindAuditLogsAsync(request);
@@ -45,7 +41,7 @@ public class ThreadUpdatedProcessor : RequestProcessorBase
         }
         catch (NullReferenceException)
         {
-            return new List<IAuditLogEntry>();
+            return [];
         }
     }
 

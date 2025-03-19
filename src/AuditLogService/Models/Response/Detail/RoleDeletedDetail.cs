@@ -7,6 +7,6 @@ public class RoleDeletedDetail
     public string? Color { get; set; }
     public bool IsMentionable { get; set; }
     public bool IsHoisted { get; set; }
-    public List<string> Permissions { get; set; } = new();
+    public List<string> Permissions { get; set; } = [];
     public string? IconId { get; set; }
 }

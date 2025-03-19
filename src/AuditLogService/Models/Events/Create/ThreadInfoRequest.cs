@@ -10,5 +10,5 @@ public class ThreadInfoRequest
     public bool IsArchived { get; set; }
     public int ArchiveDuration { get; set; }
     public bool IsLocked { get; set; }
-    public List<string> Tags { get; set; } = new();
+    public List<string> Tags { get; set; } = [];
 }

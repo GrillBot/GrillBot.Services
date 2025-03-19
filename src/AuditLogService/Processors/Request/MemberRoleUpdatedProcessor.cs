@@ -8,12 +8,8 @@ using MemberRoleUpdated = AuditLogService.Core.Entity.MemberRoleUpdated;
 
 namespace AuditLogService.Processors.Request;
 
-public class MemberRoleUpdatedProcessor : BatchRequestProcessorBase
+public class MemberRoleUpdatedProcessor(IServiceProvider serviceProvider) : BatchRequestProcessorBase(serviceProvider)
 {
-    public MemberRoleUpdatedProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var auditLog = await FindAuditLogAsync(request);

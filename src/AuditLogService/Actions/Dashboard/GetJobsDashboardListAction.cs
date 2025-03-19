@@ -5,12 +5,11 @@ using GrillBot.Core.Managers.Performance;
 
 namespace AuditLogService.Actions.Dashboard;
 
-public class GetJobsDashboardListAction : DashboardListBaseAction<JobExecution>
+public class GetJobsDashboardListAction(
+    AuditLogServiceContext context,
+    ICounterManager counterManager
+) : DashboardListBaseAction<JobExecution>(context, counterManager)
 {
-    public GetJobsDashboardListAction(AuditLogServiceContext context, ICounterManager counterManager) : base(context, counterManager)
-    {
-    }
-
     protected override Expression<Func<JobExecution, DateTime>> CreateSorting()
         => entity => entity.EndAt;
 

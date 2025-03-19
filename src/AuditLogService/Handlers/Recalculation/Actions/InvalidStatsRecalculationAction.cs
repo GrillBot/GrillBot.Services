@@ -6,12 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Handlers.Recalculation.Actions;
 
-public class InvalidStatsRecalculationAction : RecalculationActionBase
+public class InvalidStatsRecalculationAction(IServiceProvider serviceProvider) : RecalculationActionBase(serviceProvider)
 {
-    public InvalidStatsRecalculationAction(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(RecalculationPayload payload)
     {
         if (payload.Type is LogType.Api or LogType.InteractionCommand or LogType.JobCompleted)

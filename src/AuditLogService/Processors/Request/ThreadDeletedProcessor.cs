@@ -8,12 +8,8 @@ using ThreadInfo = AuditLogService.Core.Entity.ThreadInfo;
 
 namespace AuditLogService.Processors.Request;
 
-public class ThreadDeletedProcessor : RequestProcessorBase
+public class ThreadDeletedProcessor(IServiceProvider serviceProvider) : RequestProcessorBase(serviceProvider)
 {
-    public ThreadDeletedProcessor(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     public override async Task ProcessAsync(LogItem entity, LogRequest request)
     {
         var auditLog = await FindAuditLogAsync(request);
