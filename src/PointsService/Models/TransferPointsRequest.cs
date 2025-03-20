@@ -27,6 +27,6 @@ public class TransferPointsRequest : IValidatableObject
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (FromUserId == ToUserId)
-            yield return new ValidationResult("Unable to transfer points between same accounts.", new[] { nameof(FromUserId), nameof(ToUserId) });
+            yield return new ValidationResult("Unable to transfer points between same accounts.", [nameof(FromUserId), nameof(ToUserId)]);
     }
 }

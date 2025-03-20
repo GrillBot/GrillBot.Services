@@ -6,12 +6,8 @@ namespace PointsService.Controllers;
 
 [ApiController]
 [Route("api/diag")]
-public class DiagnosticController : ControllerBase
+public class DiagnosticController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public DiagnosticController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpGet("status")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStatusInfoAsync()

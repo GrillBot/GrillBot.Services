@@ -5,12 +5,8 @@ using PointsService.Models.Users;
 
 namespace PointsService.Controllers;
 
-public class UserController : GrillBot.Core.Infrastructure.Actions.ControllerBase
+public class UserController(IServiceProvider serviceProvider) : GrillBot.Core.Infrastructure.Actions.ControllerBase(serviceProvider)
 {
-    public UserController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpPost("list")]
     [ProducesResponseType(typeof(PaginatedResponse<UserListItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

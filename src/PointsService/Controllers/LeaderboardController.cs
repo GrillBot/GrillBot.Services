@@ -7,12 +7,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace PointsService.Controllers;
 
-public class LeaderboardController : ControllerBase
+public class LeaderboardController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public LeaderboardController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpGet("{guildId}")]
     [ProducesResponseType(typeof(List<BoardItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

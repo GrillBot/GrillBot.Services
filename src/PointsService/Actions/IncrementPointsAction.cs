@@ -1,6 +1,6 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using PointsService.Core;
@@ -10,13 +10,12 @@ using PointsService.Models.Events;
 
 namespace PointsService.Actions;
 
-public class IncrementPointsAction : ApiAction
+public class IncrementPointsAction(
+    ICounterManager counterManager,
+    PointsServiceContext dbContext,
+    IRabbitPublisher publisher
+) : ApiAction(counterManager, dbContext, publisher)
 {
-    public IncrementPointsAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
-: base(counterManager, dbContext, publisher)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = GetParameter<IncrementPointsRequest>(0);
@@ -25,7 +24,7 @@ public class IncrementPointsAction : ApiAction
         if (validationErrors is not null)
             return new(StatusCodes.Status400BadRequest, validationErrors);
 
-        await Publisher.PublishAsync(new CreateTransactionAdminPayload(request.GuildId, request.UserId, request.Amount));
+        await Publisher.PublishAsync("Points", new CreateTransactionAdminPayload(request.GuildId, request.UserId, request.Amount), "CreateTransactionAdmin");
         return ApiResult.Ok();
     }
 

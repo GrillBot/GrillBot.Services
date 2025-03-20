@@ -5,28 +5,19 @@ using PointsService.Core.Entity;
 
 namespace PointsService.Core.Providers;
 
-public class StatisticsProvider : IStatisticsProvider
+public class StatisticsProvider(PointsServiceContext _dbContext, ICounterManager _counterManager) : IStatisticsProvider
 {
-    private PointsServiceContext DbContext { get; }
-    private ICounterManager CounterManager { get; }
-
-    public StatisticsProvider(PointsServiceContext dbContext, ICounterManager counterManager)
-    {
-        DbContext = dbContext;
-        CounterManager = counterManager;
-    }
-
     public async Task<Dictionary<string, long>> GetTableStatisticsAsync()
     {
-        using (CounterManager.Create("Database.Statistics"))
+        using (_counterManager.Create("Database.Statistics"))
         {
             return new Dictionary<string, long>
             {
-                { nameof(DbContext.Channels), await DbContext.Channels.LongCountAsync() },
-                { nameof(DbContext.Users), await DbContext.Users.LongCountAsync() },
-                { nameof(DbContext.Transactions), await DbContext.Transactions.LongCountAsync() },
-                { nameof(DbContext.Leaderboard), await DbContext.Leaderboard.LongCountAsync() },
-                { nameof(DbContext.DailyStats), await DbContext.DailyStats.LongCountAsync() }
+                { nameof(_dbContext.Channels), await _dbContext.Channels.LongCountAsync() },
+                { nameof(_dbContext.Users), await _dbContext.Users.LongCountAsync() },
+                { nameof(_dbContext.Transactions), await _dbContext.Transactions.LongCountAsync() },
+                { nameof(_dbContext.Leaderboard), await _dbContext.Leaderboard.LongCountAsync() },
+                { nameof(_dbContext.DailyStats), await _dbContext.DailyStats.LongCountAsync() }
             };
         }
     }

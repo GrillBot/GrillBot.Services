@@ -4,8 +4,6 @@ namespace PointsService.Models.Events;
 
 public class CreateTransactionPayload : CreateTransactionBasePayload
 {
-    public override string QueueName => "points:create_transaction_requests";
-
     public DateTime CreatedAtUtc { get; set; }
     public string ChannelId { get; set; } = null!;
     public MessageInfo Message { get; set; } = null!;

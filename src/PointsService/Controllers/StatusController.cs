@@ -7,12 +7,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace PointsService.Controllers;
 
-public class StatusController : ControllerBase
+public class StatusController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public StatusController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpGet("{guildId}/{userId}")]
     [ProducesResponseType(typeof(PointsStatus), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

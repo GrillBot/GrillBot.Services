@@ -7,12 +7,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace PointsService.Controllers;
 
-public class TransactionController : ControllerBase
+public class TransactionController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public TransactionController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpPost("transfer")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

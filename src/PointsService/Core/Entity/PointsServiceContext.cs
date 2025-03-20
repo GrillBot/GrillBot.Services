@@ -2,12 +2,8 @@
 
 namespace PointsService.Core.Entity;
 
-public class PointsServiceContext : DbContext
+public class PointsServiceContext(DbContextOptions options) : DbContext(options)
 {
-    public PointsServiceContext(DbContextOptions options) : base(options)
-    {
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Channel>(builder => builder.HasKey(o => new { o.Id, o.GuildId }));

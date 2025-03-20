@@ -7,12 +7,8 @@ using PointsService.Models.Channels;
 
 namespace PointsService.Actions.Channels;
 
-public class GetChannelInfoAction : ApiAction<PointsServiceContext>
+public class GetChannelInfoAction(ICounterManager counterManager, PointsServiceContext dbContext) : ApiAction<PointsServiceContext>(counterManager, dbContext)
 {
-    public GetChannelInfoAction(ICounterManager counterManager, PointsServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;

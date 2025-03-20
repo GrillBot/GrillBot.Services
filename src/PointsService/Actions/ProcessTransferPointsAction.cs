@@ -1,6 +1,6 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -11,13 +11,12 @@ using PointsService.Models.Events;
 
 namespace PointsService.Actions;
 
-public class ProcessTransferPointsAction : ApiAction
+public class ProcessTransferPointsAction(
+    ICounterManager counterManager,
+    PointsServiceContext dbContext,
+    IRabbitPublisher publisher
+) : ApiAction(counterManager, dbContext, publisher)
 {
-    public ProcessTransferPointsAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
-        : base(counterManager, dbContext, publisher)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = (TransferPointsRequest)Parameters[0]!;
@@ -71,5 +70,5 @@ public class ProcessTransferPointsAction : ApiAction
     }
 
     private Task EnqueueTransactionRequestAsync(string guildId, string userId, int amount)
-        => Publisher.PublishAsync(new CreateTransactionAdminPayload(guildId, userId, amount), new());
+        => Publisher.PublishAsync("Points", new CreateTransactionAdminPayload(guildId, userId, amount), "CreateTransactionAdmin");
 }

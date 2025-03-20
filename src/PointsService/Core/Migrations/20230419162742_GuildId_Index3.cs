@@ -13,7 +13,7 @@ namespace PointsService.Core.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_GuildId_UserId",
                 table: "Transactions",
-                columns: new[] { "GuildId", "UserId" });
+                columns: ["GuildId", "UserId"]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_UserId",

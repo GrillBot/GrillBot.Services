@@ -5,12 +5,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace PointsService.Controllers;
 
-public class ChartController : ControllerBase
+public class ChartController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public ChartController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpPost]
     [ProducesResponseType(typeof(List<PointsChartItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

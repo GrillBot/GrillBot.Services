@@ -1,19 +1,18 @@
 ﻿using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
 using PointsService.Models.Events;
 
 namespace PointsService.Core;
 
-public abstract class ApiAction : GrillBot.Services.Common.Infrastructure.Api.ApiAction<PointsServiceContext>
+public abstract class ApiAction(
+    ICounterManager counterManager,
+    PointsServiceContext dbContext,
+    IRabbitPublisher _publisher
+) : GrillBot.Services.Common.Infrastructure.Api.ApiAction<PointsServiceContext>(counterManager, dbContext)
 {
-    protected IRabbitMQPublisher Publisher { get; }
-
-    protected ApiAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher) : base(counterManager, dbContext)
-    {
-        Publisher = publisher;
-    }
+    protected IRabbitPublisher Publisher => _publisher;
 
     protected async Task<User?> FindUserAsync(string guildId, string userId)
     {
@@ -22,5 +21,5 @@ public abstract class ApiAction : GrillBot.Services.Common.Infrastructure.Api.Ap
     }
 
     protected Task EnqueueUserForRecalculationAsync(string guildId, string userId)
-        => Publisher.PublishAsync(new UserRecalculationPayload(guildId, userId), new());
+        => Publisher.PublishAsync("Points", new UserRecalculationPayload(guildId, userId), "UserRecalculation");
 }

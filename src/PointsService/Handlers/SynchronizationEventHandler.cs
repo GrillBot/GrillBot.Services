@@ -1,5 +1,7 @@
-﻿using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+﻿using GrillBot.Core.Infrastructure.Auth;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using PointsService.Core.Entity;
 using PointsService.Handlers.Abstractions;
 using PointsService.Models.Channels;
@@ -8,22 +10,24 @@ using PointsService.Models.Users;
 
 namespace PointsService.Handlers;
 
-public class SynchronizationEventHandler : BasePointsEvent<SynchronizationPayload>
+public class SynchronizationEventHandler(
+    ILoggerFactory loggerFactory,
+    PointsServiceContext dbContext,
+    ICounterManager counterManager, IRabbitPublisher publisher
+) : BasePointsEvent<SynchronizationPayload>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public SynchronizationEventHandler(ILoggerFactory loggerFactory, PointsServiceContext dbContext, ICounterManager counterManager, IRabbitMQPublisher publisher)
-        : base(loggerFactory, dbContext, counterManager, publisher)
-    {
-    }
+    public override string QueueName => "Synchronization";
 
-    protected override async Task HandleInternalAsync(SynchronizationPayload payload, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
-        foreach (var userInfo in payload.Users)
-            await SynchronizeUserAsync(payload.GuildId, userInfo);
+        foreach (var userInfo in message.Users)
+            await SynchronizeUserAsync(message.GuildId, userInfo);
 
-        foreach (var channelInfo in payload.Channels)
-            await SynchronizeChannelAsync(payload.GuildId, channelInfo);
+        foreach (var channelInfo in message.Channels)
+            await SynchronizeChannelAsync(message.GuildId, channelInfo);
 
         await ContextHelper.SaveChagesAsync();
+        return RabbitConsumptionResult.Success;
     }
 
     private async Task SynchronizeUserAsync(string guildId, UserSyncItem user)

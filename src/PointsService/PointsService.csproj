@@ -1,21 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>PointsService</RootNamespace>
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>PointsService</RootNamespace>
+	</PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.18">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.14">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\GrillBot.Services.Common\GrillBot.Services.Common.csproj" />
-    </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\GrillBot.Services.Common\GrillBot.Services.Common.csproj" />
+	</ItemGroup>
 
 </Project>

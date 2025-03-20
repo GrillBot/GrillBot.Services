@@ -5,12 +5,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace PointsService.Controllers;
 
-public class ChannelController : ControllerBase
+public class ChannelController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public ChannelController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpGet("{guildId}/{channelId}/info")]
     [ProducesResponseType(typeof(ChannelInfo), StatusCodes.Status200OK)]
     public Task<IActionResult> GetChannelInfoAsync(string guildId, string channelId)

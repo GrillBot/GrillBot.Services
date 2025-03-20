@@ -1,7 +1,7 @@
 ﻿using Discord;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Core;
 using PointsService.Core.Entity;
@@ -10,13 +10,12 @@ using System.Diagnostics;
 
 namespace PointsService.Actions.Merge;
 
-public abstract class MergeTransactionsBaseAction : ApiAction
+public abstract class MergeTransactionsBaseAction(
+    ICounterManager counterManager,
+    PointsServiceContext dbContext,
+    IRabbitPublisher publisher
+) : ApiAction(counterManager, dbContext, publisher)
 {
-    protected MergeTransactionsBaseAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
-        : base(counterManager, dbContext, publisher)
-    {
-    }
-
     protected abstract Task InitializeAsync();
     protected abstract Task<bool> CanProcessMergeAsync();
     protected abstract Task<List<Transaction>> GetTransactionsForMergeAsync();

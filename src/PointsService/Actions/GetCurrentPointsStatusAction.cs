@@ -1,6 +1,6 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Core;
 using PointsService.Core.Entity;
@@ -8,13 +8,12 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class GetCurrentPointsStatusAction : ApiAction
+public class GetCurrentPointsStatusAction(
+    ICounterManager counterManager,
+    PointsServiceContext dbContext,
+    IRabbitPublisher publisher
+) : ApiAction(counterManager, dbContext, publisher)
 {
-    public GetCurrentPointsStatusAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
-        : base(counterManager, dbContext, publisher)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;

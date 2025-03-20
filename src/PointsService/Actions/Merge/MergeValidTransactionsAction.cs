@@ -1,26 +1,23 @@
 ﻿using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using Microsoft.Extensions.Options;
 using PointsService.Core.Entity;
 using PointsService.Core.Options;
 
 namespace PointsService.Actions.Merge;
 
-public class MergeValidTransactionsAction : MergeTransactionsBaseAction
+public class MergeValidTransactionsAction(
+    ICounterManager counterManager,
+    PointsServiceContext dbContext,
+    IRabbitPublisher publisher,
+    IOptions<AppOptions> _options
+) : MergeTransactionsBaseAction(counterManager, dbContext, publisher)
 {
-    private AppOptions Options { get; }
-
     private DateTime ExpirationDate { get; set; }
-
-    public MergeValidTransactionsAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher, IOptions<AppOptions> options)
-        : base(counterManager, dbContext, publisher)
-    {
-        Options = options.Value;
-    }
 
     protected override Task InitializeAsync()
     {
-        ExpirationDate = DateTime.UtcNow.AddMonths(-Options.ExpirationMonths);
+        ExpirationDate = DateTime.UtcNow.AddMonths(-_options.Value.ExpirationMonths);
         return Task.CompletedTask;
     }
 
@@ -29,7 +26,7 @@ public class MergeValidTransactionsAction : MergeTransactionsBaseAction
         var query = DbContext.Transactions.Where(o => o.CreatedAt < ExpirationDate && o.MergedCount == 0);
         var expiredCount = await ContextHelper.ReadCountAsync(query);
 
-        return expiredCount >= Options.MinimalTransactionsForMerge;
+        return expiredCount >= _options.Value.MinimalTransactionsForMerge;
     }
 
     protected override async Task<List<Transaction>> GetTransactionsForMergeAsync()

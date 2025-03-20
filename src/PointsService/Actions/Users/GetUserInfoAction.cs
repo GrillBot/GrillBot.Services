@@ -7,12 +7,11 @@ using PointsService.Models.Users;
 
 namespace PointsService.Actions.Users;
 
-public class GetUserInfoAction : ApiAction<PointsServiceContext>
+public class GetUserInfoAction(
+    ICounterManager counterManager,
+    PointsServiceContext dbContext
+) : ApiAction<PointsServiceContext>(counterManager, dbContext)
 {
-    public GetUserInfoAction(ICounterManager counterManager, PointsServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;

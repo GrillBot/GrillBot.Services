@@ -17,7 +17,7 @@ namespace PointsService.Core.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_GuildId_MessageId",
                 table: "Transactions",
-                columns: new[] { "GuildId", "MessageId" });
+                columns: ["GuildId", "MessageId"]);
         }
 
         /// <inheritdoc />
@@ -30,7 +30,7 @@ namespace PointsService.Core.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_GuildId_MessageId_MergedCount",
                 table: "Transactions",
-                columns: new[] { "GuildId", "MessageId", "MergedCount" });
+                columns: ["GuildId", "MessageId", "MergedCount"]);
         }
     }
 }

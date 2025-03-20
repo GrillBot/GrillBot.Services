@@ -1,36 +1,41 @@
 ﻿using Discord;
+using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using PointsService.Core.Entity;
 using PointsService.Handlers.Abstractions;
 using PointsService.Models.Events;
 
 namespace PointsService.Handlers;
 
-public class CreateTransactionViaAdminEventHandler : CreateTransactionBaseEventHandler<CreateTransactionAdminPayload>
+public class CreateTransactionViaAdminEventHandler(
+    ILoggerFactory loggerFactory,
+    PointsServiceContext dbContext,
+    ICounterManager counterManager,
+    IRabbitPublisher publisher
+) : CreateTransactionBaseEventHandler<CreateTransactionAdminPayload>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public CreateTransactionViaAdminEventHandler(ILoggerFactory loggerFactory, PointsServiceContext dbContext, ICounterManager counterManager,
-        IRabbitMQPublisher publisher) : base(loggerFactory, dbContext, counterManager, publisher)
-    {
-    }
+    public override string QueueName => "CreateTransactionAdmin";
 
-    protected override async Task HandleInternalAsync(CreateTransactionAdminPayload payload, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(CreateTransactionAdminPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
-        if (!await CanCreateTransactionAsync(payload))
-            return;
+        if (!await CanCreateTransactionAsync(message))
+            return RabbitConsumptionResult.Success;
 
         var transaction = new Transaction
         {
-            GuildId = payload.GuildId,
-            UserId = payload.UserId,
+            GuildId = message.GuildId,
+            UserId = message.UserId,
             CreatedAt = DateTime.UtcNow,
-            Value = payload.Amount
+            Value = message.Amount
         };
 
         transaction.MessageId = SnowflakeUtils.ToSnowflake(transaction.CreatedAt).ToString();
 
         await CommitTransactionAsync(transaction);
-        await EnqueueUserForRecalculationAsync(payload.GuildId, payload.UserId);
+        await EnqueueUserForRecalculationAsync(message.GuildId, message.UserId);
+        return RabbitConsumptionResult.Success;
     }
 
     private async Task<bool> CanCreateTransactionAsync(CreateTransactionAdminPayload payload)

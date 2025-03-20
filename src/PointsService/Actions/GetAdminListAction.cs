@@ -1,7 +1,7 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Models.Pagination;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Core;
 using PointsService.Core.Entity;
@@ -9,13 +9,12 @@ using PointsService.Models;
 
 namespace PointsService.Actions;
 
-public class GetAdminListAction : ApiAction
+public class GetAdminListAction(
+    ICounterManager counterManager,
+    PointsServiceContext dbContext,
+    IRabbitPublisher publisher
+) : ApiAction(counterManager, dbContext, publisher)
 {
-    public GetAdminListAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
-        : base(counterManager, dbContext, publisher)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = (AdminListRequest)Parameters[0]!;

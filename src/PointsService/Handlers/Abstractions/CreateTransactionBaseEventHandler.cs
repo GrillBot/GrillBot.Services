@@ -1,6 +1,6 @@
 ﻿using Discord;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using PointsService.Core.Entity;
@@ -8,13 +8,13 @@ using PointsService.Models.Events;
 
 namespace PointsService.Handlers.Abstractions;
 
-public abstract class CreateTransactionBaseEventHandler<TPayload> : BasePointsEvent<TPayload> where TPayload : CreateTransactionBasePayload, new()
+public abstract class CreateTransactionBaseEventHandler<TPayload>(
+    ILoggerFactory loggerFactory,
+    PointsServiceContext dbContext,
+    ICounterManager counterManager,
+    IRabbitPublisher publisher
+) : BasePointsEvent<TPayload>(loggerFactory, dbContext, counterManager, publisher) where TPayload : CreateTransactionBasePayload, new()
 {
-    protected CreateTransactionBaseEventHandler(ILoggerFactory loggerFactory, PointsServiceContext dbContext, ICounterManager counterManager,
-        IRabbitMQPublisher publisher) : base(loggerFactory, dbContext, counterManager, publisher)
-    {
-    }
-
     protected async Task<bool> ValidationFailedAsync(TPayload payload, string? channelId, string message, bool suppressAudit = false)
     {
         Logger.LogWarning("{message}", message);
@@ -38,7 +38,7 @@ public abstract class CreateTransactionBaseEventHandler<TPayload> : BasePointsEv
             }
         };
 
-        await Publisher.PublishAsync(new CreateItemsPayload(new List<LogRequest> { logRequest }));
+        await Publisher.PublishAsync("AuditLog", new CreateItemsPayload(logRequest), "CreateItems");
     }
 
     protected async Task CommitTransactionAsync(Transaction transaction)

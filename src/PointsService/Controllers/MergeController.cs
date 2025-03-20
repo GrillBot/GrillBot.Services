@@ -5,12 +5,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace PointsService.Controllers;
 
-public class MergeController : ControllerBase
+public class MergeController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public MergeController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpPost]
     [ProducesResponseType(typeof(MergeResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

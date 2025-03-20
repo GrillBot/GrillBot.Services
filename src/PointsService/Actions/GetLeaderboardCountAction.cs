@@ -1,18 +1,17 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using PointsService.Core;
 using PointsService.Core.Entity;
 
 namespace PointsService.Actions;
 
-public class GetLeaderboardCountAction : ApiAction
+public class GetLeaderboardCountAction(
+    ICounterManager counterManager,
+    PointsServiceContext dbContext,
+    IRabbitPublisher publisher
+) : ApiAction(counterManager, dbContext, publisher)
 {
-    public GetLeaderboardCountAction(ICounterManager counterManager, PointsServiceContext dbContext, IRabbitMQPublisher publisher)
-        : base(counterManager, dbContext, publisher)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;

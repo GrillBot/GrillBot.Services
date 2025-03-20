@@ -17,8 +17,7 @@ public partial class UserRecalculationHandler
         user.PointsPosition = position;
 
         var samePositionUsers = await FindUsersWithSamePositionAsync(user, position);
-        foreach (var samePositionUser in samePositionUsers)
-            await EnqueueUserForRecalculationAsync(samePositionUser.GuildId, samePositionUser.Id);
+        await EnqueueUsersForRecalculationAsync(samePositionUsers.Select(o => (o.GuildId, o.Id)));
     }
 
     private async Task<int> ComputeActualPositionAsync(User user)

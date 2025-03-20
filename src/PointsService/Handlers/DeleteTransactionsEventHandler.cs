@@ -1,27 +1,32 @@
-﻿using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+﻿using GrillBot.Core.Infrastructure.Auth;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using PointsService.Core.Entity;
 using PointsService.Handlers.Abstractions;
 using PointsService.Models.Events;
 
 namespace PointsService.Handlers;
 
-public class DeleteTransactionsEventHandler : BasePointsEvent<DeleteTransactionsPayload>
+public class DeleteTransactionsEventHandler(
+    ILoggerFactory loggerFactory,
+    PointsServiceContext dbContext,
+    ICounterManager counterManager,
+    IRabbitPublisher publisher
+) : BasePointsEvent<DeleteTransactionsPayload>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public DeleteTransactionsEventHandler(ILoggerFactory loggerFactory, PointsServiceContext dbContext, ICounterManager counterManager, IRabbitMQPublisher publisher)
-        : base(loggerFactory, dbContext, counterManager, publisher)
-    {
-    }
+    public override string QueueName => "DeleteTransactions";
 
-    protected override async Task HandleInternalAsync(DeleteTransactionsPayload payload, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(DeleteTransactionsPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
-        var transactions = await ReadTransactionsAsync(payload);
+        var transactions = await ReadTransactionsAsync(message);
         if (transactions.Count == 0)
-            return;
+            return RabbitConsumptionResult.Success;
 
         DbContext.RemoveRange(transactions);
         await ContextHelper.SaveChagesAsync();
         await EnqueueUserForRecalculationAsync(transactions);
+        return RabbitConsumptionResult.Success;
     }
 
     private async Task<List<Transaction>> ReadTransactionsAsync(DeleteTransactionsPayload payload)
@@ -34,13 +39,12 @@ public class DeleteTransactionsEventHandler : BasePointsEvent<DeleteTransactions
         return await ContextHelper.ReadEntitiesAsync(query);
     }
 
-    private async Task EnqueueUserForRecalculationAsync(List<Transaction> transactions)
+    private Task EnqueueUserForRecalculationAsync(List<Transaction> transactions)
     {
         var users = transactions
             .GroupBy(o => new { o.GuildId, o.UserId })
-            .Select(o => o.First());
+            .Select(o => (o.Key.GuildId, o.Key.UserId));
 
-        foreach (var userTransaction in users)
-            await Publisher.PublishAsync(new UserRecalculationPayload(userTransaction.GuildId, userTransaction.UserId), new());
+        return EnqueueUsersForRecalculationAsync(users);
     }
 }

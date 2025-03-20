@@ -6,12 +6,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace PointsService.Controllers;
 
-public class AdminController : ControllerBase
+public class AdminController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public AdminController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpPost("list")]
     [ProducesResponseType(typeof(PaginatedResponse<TransactionItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
