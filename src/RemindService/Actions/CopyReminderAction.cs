@@ -10,15 +10,12 @@ using RemindService.Options;
 
 namespace RemindService.Actions;
 
-public class CopyReminderAction : ApiAction<RemindServiceContext>
+public class CopyReminderAction(
+    ICounterManager counterManager,
+    RemindServiceContext dbContext,
+    CreateReminderAction _createReminderAction
+) : ApiAction<RemindServiceContext>(counterManager, dbContext)
 {
-    private readonly CreateReminderAction _createReminderAction;
-
-    public CopyReminderAction(ICounterManager counterManager, RemindServiceContext dbContext, CreateReminderAction createReminderAction) : base(counterManager, dbContext)
-    {
-        _createReminderAction = createReminderAction;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = GetParameter<CopyReminderRequest>(0);
@@ -78,7 +75,7 @@ public class CopyReminderAction : ApiAction<RemindServiceContext>
             ToUserId = request.ToUserId
         };
 
-        _createReminderAction.Init(HttpContext, new[] { createRequest }, CurrentUser);
+        _createReminderAction.Init(HttpContext, [createRequest], CurrentUser);
         var result = await _createReminderAction.ProcessAsync();
 
         return (CreateReminderResult)result.Data!;

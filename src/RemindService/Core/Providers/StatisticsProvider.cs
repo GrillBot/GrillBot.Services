@@ -4,20 +4,13 @@ using RemindService.Core.Entity;
 
 namespace RemindService.Core.Providers;
 
-public class StatisticsProvider : IStatisticsProvider
+public class StatisticsProvider(RemindServiceContext dbContext) : IStatisticsProvider
 {
-    private readonly RemindServiceContext _dbContext;
-
-    public StatisticsProvider(RemindServiceContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Dictionary<string, long>> GetTableStatisticsAsync()
     {
         return new Dictionary<string, long>
         {
-            { nameof(_dbContext.RemindMessages), await _dbContext.RemindMessages.CountAsync() }
+            { nameof(dbContext.RemindMessages), await dbContext.RemindMessages.CountAsync() }
         };
     }
 }

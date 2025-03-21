@@ -7,12 +7,8 @@ using RemindService.Models.Response;
 
 namespace RemindService.Controllers;
 
-public class RemindController : GrillBot.Core.Infrastructure.Actions.ControllerBase
+public class RemindController(IServiceProvider serviceProvider) : GrillBot.Core.Infrastructure.Actions.ControllerBase(serviceProvider)
 {
-    public RemindController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpPost("process-pending")]
     [ProducesResponseType(typeof(ProcessPendingRemindersResult), StatusCodes.Status200OK)]
     public Task<IActionResult> ProcessPendingRemindersAsync()

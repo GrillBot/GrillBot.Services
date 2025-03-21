@@ -1,7 +1,7 @@
 ﻿using Discord;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Services.Common.Infrastructure.Api;
@@ -14,20 +14,18 @@ using RemindService.Options;
 
 namespace RemindService.Actions;
 
-public class CancelReminderAction : ApiAction<RemindServiceContext>
+public class CancelReminderAction(
+    ICounterManager counterManager,
+    RemindServiceContext dbContext,
+    IRabbitPublisher _publisher
+) : ApiAction<RemindServiceContext>(counterManager, dbContext)
 {
-    private readonly IRabbitMQPublisher _publisher;
-
-    public CancelReminderAction(ICounterManager counterManager, RemindServiceContext dbContext, IRabbitMQPublisher publisher) : base(counterManager, dbContext)
-    {
-        _publisher = publisher;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = GetParameter<CancelReminderRequest>(0);
 
-        var remind = await ContextHelper.ReadFirstOrDefaultEntityAsync(DbContext.RemindMessages.Where(o => o.Id == request.RemindId));
+        var query = DbContext.RemindMessages.Where(o => o.Id == request.RemindId);
+        var remind = await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
         var modelState = CheckRemindStatus(remind, request);
         if (!modelState.IsValid)
             return ApiResult.BadRequest(new ValidationProblemDetails(modelState));
@@ -64,20 +62,20 @@ public class CancelReminderAction : ApiAction<RemindServiceContext>
         return modelState;
     }
 
-    private async Task NotifyUserIfPossibleAsync(RemindMessage message, CancelReminderRequest request)
+    private Task NotifyUserIfPossibleAsync(RemindMessage message, CancelReminderRequest request)
     {
         if (!request.NotifyUser)
         {
             message.IsSendInProgress = false;
             message.NotificationMessageId = AppOptions.FinishedUnsentMessageId;
-            return;
+            return Task.CompletedTask;
         }
 
         var payload = new SendRemindNotificationPayload(request.RemindId, true);
-        await _publisher.PublishAsync(payload);
+        return _publisher.PublishAsync("Remind", payload, " ");
     }
 
-    private async Task WriteToAuditLogAsync(RemindMessage message, CancelReminderRequest request)
+    private Task WriteToAuditLogAsync(RemindMessage message, CancelReminderRequest request)
     {
         var messageTemplate = request.NotifyUser ?
             "The reminder with ID {0} has been canceled. A notification was sent to the user upon cancellation." :
@@ -88,6 +86,6 @@ public class CancelReminderAction : ApiAction<RemindServiceContext>
             LogMessage = new LogMessageRequest(string.Format(messageTemplate, message.Id), LogSeverity.Info, "RemindService", nameof(CancelReminderAction))
         };
 
-        await _publisher.PublishAsync(new CreateItemsPayload(logRequest));
+        return _publisher.PublishAsync("AuditLog", new CreateItemsPayload(logRequest), "CreateItems");
     }
 }

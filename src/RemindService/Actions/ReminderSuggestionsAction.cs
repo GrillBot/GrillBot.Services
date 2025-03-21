@@ -7,12 +7,11 @@ using RemindService.Models.Response;
 
 namespace RemindService.Actions;
 
-public class ReminderSuggestionsAction : ApiAction<RemindServiceContext>
+public class ReminderSuggestionsAction(
+    ICounterManager counterManager,
+    RemindServiceContext dbContext
+) : ApiAction<RemindServiceContext>(counterManager, dbContext)
 {
-    public ReminderSuggestionsAction(ICounterManager counterManager, RemindServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var userId = GetParameter<string>(0);

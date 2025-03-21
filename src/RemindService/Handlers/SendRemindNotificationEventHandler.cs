@@ -1,6 +1,8 @@
 ﻿using Discord;
+using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using RemindService.Core.Entity;
@@ -10,24 +12,28 @@ using Components = GrillBot.Core.Services.GrillBot.Models.Events.Messages.Compon
 
 namespace RemindService.Handlers;
 
-public class SendRemindNotificationEventHandler : BaseEventHandlerWithDb<SendRemindNotificationPayload, RemindServiceContext>
+public class SendRemindNotificationEventHandler(
+    ILoggerFactory loggerFactory,
+    RemindServiceContext dbContext,
+    ICounterManager counterManager,
+    IRabbitPublisher publisher
+) : BaseEventHandlerWithDb<SendRemindNotificationPayload, RemindServiceContext>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public SendRemindNotificationEventHandler(ILoggerFactory loggerFactory, RemindServiceContext dbContext,
-        ICounterManager counterManager, IRabbitMQPublisher publisher) : base(loggerFactory, dbContext, counterManager, publisher)
-    {
-    }
+    public override string TopicName => "Remind";
+    public override string QueueName => "RemindNotification";
 
-    protected override async Task HandleInternalAsync(SendRemindNotificationPayload payload, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SendRemindNotificationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
-        var remindMessage = await GetRemindMessageAsync(payload.RemindId);
+        var remindMessage = await GetRemindMessageAsync(message.RemindId);
         if (remindMessage is null)
-            return;
+            return RabbitConsumptionResult.Success;
 
-        var message = ProcessRemind(remindMessage, payload.IsEarly);
+        var discordMessage = ProcessRemind(remindMessage, message.IsEarly);
 
         remindMessage.IsSendInProgress = true;
         await ContextHelper.SaveChagesAsync();
-        await Publisher.PublishAsync(message);
+        await Publisher.PublishAsync("Internal", discordMessage, "SendMessage");
+        return RabbitConsumptionResult.Success;
     }
 
     private async Task<RemindMessage?> GetRemindMessageAsync(int id)

@@ -2,11 +2,7 @@
 
 namespace RemindService.Core.Entity;
 
-public class RemindServiceContext : DbContext
+public class RemindServiceContext(DbContextOptions options) : DbContext(options)
 {
-    public RemindServiceContext(DbContextOptions options) : base(options)
-    {
-    }
-
     public DbSet<RemindMessage> RemindMessages => Set<RemindMessage>();
 }

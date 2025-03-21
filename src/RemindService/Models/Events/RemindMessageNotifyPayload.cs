@@ -1,11 +1,7 @@
-﻿using GrillBot.Core.RabbitMQ;
+﻿namespace RemindService.Models.Events;
 
-namespace RemindService.Models.Events;
-
-public class RemindMessageNotifyPayload : IPayload
+public class RemindMessageNotifyPayload
 {
-    public string QueueName => "remind:message_notify";
-
     public long RemindId { get; set; }
     public string NotificationMessageId { get; set; } = null!;
 

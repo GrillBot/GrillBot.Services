@@ -1,6 +1,6 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.Api;
 using RemindService.Core.Entity;
 using RemindService.Models.Events;
@@ -8,15 +8,12 @@ using RemindService.Models.Response;
 
 namespace RemindService.Actions;
 
-public class ProcessPendingRemindersAction : ApiAction<RemindServiceContext>
+public class ProcessPendingRemindersAction(
+    ICounterManager counterManager,
+    RemindServiceContext dbContext,
+    IRabbitPublisher publisher
+) : ApiAction<RemindServiceContext>(counterManager, dbContext)
 {
-    private readonly IRabbitMQPublisher _publisher;
-
-    public ProcessPendingRemindersAction(ICounterManager counterManager, RemindServiceContext dbContext, IRabbitMQPublisher publisher) : base(counterManager, dbContext)
-    {
-        _publisher = publisher;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var now = DateTime.UtcNow;
@@ -30,7 +27,9 @@ public class ProcessPendingRemindersAction : ApiAction<RemindServiceContext>
         foreach (var message in pendingMessages)
         {
             AddRemindToReport(message, report);
-            await _publisher.PublishAsync(new SendRemindNotificationPayload(message.Id, false));
+
+            var payload = new SendRemindNotificationPayload(message.Id, false);
+            await publisher.PublishAsync("Remind", payload, "RemindNotification");
         }
 
         var result = new ProcessPendingRemindersResult(pendingMessages.Count, report);

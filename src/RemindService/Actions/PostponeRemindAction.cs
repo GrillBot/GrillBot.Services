@@ -5,12 +5,11 @@ using RemindService.Core.Entity;
 
 namespace RemindService.Actions;
 
-public class PostponeRemindAction : ApiAction<RemindServiceContext>
+public class PostponeRemindAction(
+    ICounterManager counterManager,
+    RemindServiceContext dbContext
+) : ApiAction<RemindServiceContext>(counterManager, dbContext)
 {
-    public PostponeRemindAction(ICounterManager counterManager, RemindServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var notificationMessageId = GetParameter<string>(0);

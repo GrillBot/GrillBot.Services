@@ -12,12 +12,11 @@ using System.Linq.Expressions;
 
 namespace RemindService.Actions;
 
-public class ReminderListAction : ApiAction<RemindServiceContext>
+public class ReminderListAction(
+    ICounterManager counterManager,
+    RemindServiceContext dbContext
+) : ApiAction<RemindServiceContext>(counterManager, dbContext)
 {
-    public ReminderListAction(ICounterManager counterManager, RemindServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = GetParameter<ReminderListRequest>(0);
@@ -72,16 +71,16 @@ public class ReminderListAction : ApiAction<RemindServiceContext>
     {
         var expressions = sort.OrderBy switch
         {
-            "NotifyAt" => new Expression<Func<RemindMessage, object>>[]
-            {
+            "NotifyAt" =>
+            [
                 entity => entity.NotifyAtUtc,
                 entity => entity.Id
-            },
-            "PostponeCount" => new Expression<Func<RemindMessage, object>>[]
-            {
+            ],
+            "PostponeCount" =>
+            [
                 entity => entity.PostponeCount,
                 entity => entity.Id
-            },
+            ],
             _ => new Expression<Func<RemindMessage, object>>[] { entity => entity.Id }
         };
 

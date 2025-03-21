@@ -7,12 +7,11 @@ using RemindService.Models.Response;
 
 namespace RemindService.Actions;
 
-public class CreateReminderAction : ApiAction<RemindServiceContext>
+public class CreateReminderAction(
+    ICounterManager counterManager,
+    RemindServiceContext dbContext
+) : ApiAction<RemindServiceContext>(counterManager, dbContext)
 {
-    public CreateReminderAction(ICounterManager counterManager, RemindServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = GetParameter<CreateReminderRequest>(0);
