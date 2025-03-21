@@ -6,12 +6,11 @@ using UserMeasuresService.Models.Measures;
 
 namespace UserMeasuresService.Actions.Measures;
 
-public class DeleteMeasureAction : ApiAction<UserMeasuresContext>
+public class DeleteMeasureAction(
+    ICounterManager counterManager,
+    UserMeasuresContext dbContext
+) : ApiAction<UserMeasuresContext>(counterManager, dbContext)
 {
-    public DeleteMeasureAction(ICounterManager counterManager, UserMeasuresContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = GetParameter<DeleteMeasuresRequest>(0);

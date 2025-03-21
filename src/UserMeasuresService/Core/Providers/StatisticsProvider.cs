@@ -4,15 +4,8 @@ using UserMeasuresService.Core.Entity;
 
 namespace UserMeasuresService.Core.Providers;
 
-public class StatisticsProvider : IStatisticsProvider
+public class StatisticsProvider(UserMeasuresContext _dbContext) : IStatisticsProvider
 {
-    private readonly UserMeasuresContext _dbContext;
-
-    public StatisticsProvider(UserMeasuresContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Dictionary<string, long>> GetTableStatisticsAsync()
     {
         var result = new Dictionary<string, long>

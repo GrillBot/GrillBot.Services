@@ -4,12 +4,8 @@ using UserMeasuresService.Models.Measures;
 
 namespace UserMeasuresService.Controllers;
 
-public class MeasuresController : GrillBot.Core.Infrastructure.Actions.ControllerBase
+public class MeasuresController(IServiceProvider serviceProvider) : GrillBot.Core.Infrastructure.Actions.ControllerBase(serviceProvider)
 {
-    public MeasuresController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpPost("list")]
     [ProducesResponseType(typeof(PaginatedResponse<MeasuresItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

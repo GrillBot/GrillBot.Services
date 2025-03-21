@@ -7,12 +7,11 @@ using UserMeasuresService.Models.Dashboard;
 
 namespace UserMeasuresService.Actions.Dashboard;
 
-public class GetDashboardData : ApiAction<UserMeasuresContext>
+public class GetDashboardData(
+    UserMeasuresContext dbContext,
+    ICounterManager counterManager
+) : ApiAction<UserMeasuresContext>(counterManager, dbContext)
 {
-    public GetDashboardData(UserMeasuresContext dbContext, ICounterManager counterManager) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var unverifies = await ReadRowsAsync<UnverifyItem>("Unverify");

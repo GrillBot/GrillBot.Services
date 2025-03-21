@@ -2,8 +2,6 @@
 
 public class UnverifyPayload : BasePayload
 {
-    public override string QueueName => "user_measures:unverify";
-
     public DateTime EndAtUtc { get; set; }
     public long LogSetId { get; set; }
 

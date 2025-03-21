@@ -8,12 +8,11 @@ using UserMeasuresService.Models.Measures;
 
 namespace UserMeasuresService.Actions.Measures;
 
-public class GetMeasuresList : ApiAction<UserMeasuresContext>
+public class GetMeasuresList(
+    UserMeasuresContext dbContext,
+    ICounterManager counterManager
+) : ApiAction<UserMeasuresContext>(counterManager, dbContext)
 {
-    public GetMeasuresList(UserMeasuresContext dbContext, ICounterManager counterManager) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var parameters = (MeasuresListParams)Parameters[0]!;
@@ -29,7 +28,7 @@ public class GetMeasuresList : ApiAction<UserMeasuresContext>
     private async Task<List<TEntity>> ReadEntitiesAsync<TEntity>(MeasuresListParams parameters, string type) where TEntity : UserMeasureBase
     {
         if (!string.IsNullOrEmpty(parameters.Type) && parameters.Type != type)
-            return new List<TEntity>();
+            return [];
 
         var query = DbContext.Set<TEntity>().AsNoTracking();
 

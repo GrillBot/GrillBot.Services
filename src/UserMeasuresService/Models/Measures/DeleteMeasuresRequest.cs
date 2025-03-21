@@ -24,7 +24,7 @@ public class DeleteMeasuresRequest : IValidatableObject
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (Id is null && ExternalId is null)
-            yield return new ValidationResult("Missing measure ID", new[] { nameof(Id), nameof(ExternalId) });
+            yield return new ValidationResult("Missing measure ID", [nameof(Id), nameof(ExternalId)]);
 
         if (!string.IsNullOrEmpty(ExternalIdType) && ExternalId is null)
             yield return new ValidationResult("Required ExternalId when ExternalIdType is filled.");

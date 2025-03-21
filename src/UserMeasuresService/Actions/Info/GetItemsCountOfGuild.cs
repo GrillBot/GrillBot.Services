@@ -5,12 +5,8 @@ using UserMeasuresService.Core.Entity;
 
 namespace UserMeasuresService.Actions.Info;
 
-public class GetItemsCountOfGuild : ApiAction<UserMeasuresContext>
+public class GetItemsCountOfGuild(UserMeasuresContext dbContext, ICounterManager counterManager) : ApiAction<UserMeasuresContext>(counterManager, dbContext)
 {
-    public GetItemsCountOfGuild(UserMeasuresContext dbContext, ICounterManager counterManager) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;

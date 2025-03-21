@@ -2,12 +2,8 @@
 
 namespace UserMeasuresService.Core.Entity;
 
-public class UserMeasuresContext : DbContext
+public class UserMeasuresContext(DbContextOptions options) : DbContext(options)
 {
-    public UserMeasuresContext(DbContextOptions options) : base(options)
-    {
-    }
-
     public DbSet<UnverifyItem> Unverifies => Set<UnverifyItem>();
     public DbSet<MemberWarningItem> MemberWarnings => Set<MemberWarningItem>();
     public DbSet<TimeoutItem> Timeouts => Set<TimeoutItem>();

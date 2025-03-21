@@ -2,8 +2,6 @@
 
 public class TimeoutPayload : BasePayload
 {
-    public override string QueueName => "user_measures:timeout";
-
     public long ExternalId { get; set; }
     public DateTime ValidToUtc { get; set; }
 

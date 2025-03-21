@@ -1,5 +1,3 @@
 ﻿namespace UserMeasuresService.Core.Entity;
 
-public class MemberWarningItem : UserMeasureBase
-{
-}
+public class MemberWarningItem : UserMeasureBase;

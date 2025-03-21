@@ -2,8 +2,6 @@
 
 public class MemberWarningPayload : BasePayload
 {
-    public override string QueueName => "user_measures:member_warning";
-
     public bool SendDmNotification { get; set; }
 
     public MemberWarningPayload()

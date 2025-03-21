@@ -29,6 +29,6 @@ public class MeasuresListParams : IValidatableObject
     {
         var possibleTypes = new[] { "Unverify", "Timeout", "Warning" };
         if (!string.IsNullOrEmpty(Type) && !possibleTypes.Contains(Type))
-            yield return new ValidationResult("Unsupported type.", new[] { nameof(Type) });
+            yield return new ValidationResult("Unsupported type.", [nameof(Type)]);
     }
 }

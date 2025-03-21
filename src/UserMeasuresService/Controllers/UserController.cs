@@ -5,12 +5,8 @@ using UserMeasuresService.Models.User;
 namespace UserMeasuresService.Controllers;
 
 [Route("api/user")]
-public class UserController : GrillBot.Core.Infrastructure.Actions.ControllerBase
+public class UserController(IServiceProvider serviceProvider) : GrillBot.Core.Infrastructure.Actions.ControllerBase(serviceProvider)
 {
-    public UserController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpGet("{guildId}/{userId}")]
     [ProducesResponseType(typeof(UserInfo), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserInfoAsync(string guildId, string userId)

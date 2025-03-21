@@ -1,11 +1,7 @@
-﻿using GrillBot.Core.RabbitMQ;
+﻿namespace UserMeasuresService.Models.Events;
 
-namespace UserMeasuresService.Models.Events;
-
-public abstract class BasePayload : IPayload
+public abstract class BasePayload
 {
-    public abstract string QueueName { get; }
-
     public DateTime CreatedAtUtc { get; set; }
     public string Reason { get; set; } = null!;
     public string GuildId { get; set; } = null!;

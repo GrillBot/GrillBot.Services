@@ -1,30 +1,35 @@
-﻿using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+﻿using GrillBot.Core.Infrastructure.Auth;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Handlers.Abstractions;
 using UserMeasuresService.Models.Events;
 
 namespace UserMeasuresService.Handlers;
 
-public class TimeoutEventHandler : BaseMeasuresHandler<TimeoutPayload>
+public class TimeoutEventHandler(
+    ILoggerFactory loggerFactory,
+    UserMeasuresContext dbContext,
+    ICounterManager counterManager,
+    IRabbitPublisher publisher
+) : BaseMeasuresHandler<TimeoutPayload>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public TimeoutEventHandler(ILoggerFactory loggerFactory, UserMeasuresContext dbContext, ICounterManager counterManager, IRabbitMQPublisher publisher)
-        : base(loggerFactory, dbContext, counterManager, publisher)
-    {
-    }
+    public override string QueueName => "CreateTimeout";
 
-    protected override async Task HandleInternalAsync(TimeoutPayload payload, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(TimeoutPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
-        var entity = await GetOrCreateEntityAsync(payload.ExternalId);
+        var entity = await GetOrCreateEntityAsync(message.ExternalId);
 
-        entity.CreatedAtUtc = payload.CreatedAtUtc;
-        entity.GuildId = payload.GuildId;
-        entity.ModeratorId = payload.ModeratorId;
-        entity.Reason = payload.Reason;
-        entity.UserId = payload.TargetUserId;
-        entity.ValidTo = payload.ValidToUtc;
+        entity.CreatedAtUtc = message.CreatedAtUtc;
+        entity.GuildId = message.GuildId;
+        entity.ModeratorId = message.ModeratorId;
+        entity.Reason = message.Reason;
+        entity.UserId = message.TargetUserId;
+        entity.ValidTo = message.ValidToUtc;
 
         await SaveEntityAsync(entity);
+        return RabbitConsumptionResult.Success;
     }
 
     private async Task<TimeoutItem> GetOrCreateEntityAsync(long externalId)

@@ -6,12 +6,8 @@ using UserMeasuresService.Models.User;
 
 namespace UserMeasuresService.Actions.User;
 
-public class GetUserInfo : ApiAction<UserMeasuresContext>
+public class GetUserInfo(UserMeasuresContext dbContext, ICounterManager counterManager) : ApiAction<UserMeasuresContext>(counterManager, dbContext)
 {
-    public GetUserInfo(UserMeasuresContext dbContext, ICounterManager counterManager) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;
