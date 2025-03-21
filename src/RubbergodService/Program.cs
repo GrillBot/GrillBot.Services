@@ -1,9 +1,9 @@
 using GrillBot.Core;
+using GrillBot.Core.Redis;
 using GrillBot.Services.Common;
 using Microsoft.EntityFrameworkCore;
 using RubbergodService.Core.Entity;
 using RubbergodService.Core.Providers;
-using RubbergodService.Core.Repository;
 using RubbergodService.DirectApi;
 using System.Reflection;
 
@@ -15,10 +15,10 @@ var application = await ServiceBuilder.CreateWebAppAsync(
         var connectionString = configuration.GetConnectionString("Default")!;
 
         services.AddDatabaseContext<RubbergodServiceContext>(b => b.UseNpgsql(connectionString));
-        services.AddScoped<RubbergodServiceRepository>();
-        services.AddRedisCaching(configuration);
+        services.AddRedis(configuration);
         services.AddStatisticsProvider<StatisticsProvider>();
         services.AddDirectApi();
+        services.AddHttpClient();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
     {

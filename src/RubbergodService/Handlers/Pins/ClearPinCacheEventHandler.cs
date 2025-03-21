@@ -1,25 +1,28 @@
-﻿using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+﻿using GrillBot.Core.Infrastructure.Auth;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using Microsoft.Extensions.Caching.Distributed;
 using RubbergodService.Models.Events.Pins;
 
 namespace RubbergodService.Handlers.Pins;
 
-public class ClearPinCacheEventHandler : BaseEventHandler<ClearPinCachePayload>
+public class ClearPinCacheEventHandler(
+    ILoggerFactory loggerFactory,
+    ICounterManager counterManager,
+    IRabbitPublisher publisher,
+    IDistributedCache _cache
+) : BaseEventHandler<ClearPinCachePayload>(loggerFactory, counterManager, publisher)
 {
-    private readonly IDistributedCache _cache;
+    public override string TopicName => "Rubbergod";
+    public override string QueueName => "ClearPinCache";
 
-    public ClearPinCacheEventHandler(ILoggerFactory loggerFactory, ICounterManager counterManager, IRabbitMQPublisher publisher, IDistributedCache cache)
-        : base(loggerFactory, counterManager, publisher)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(ClearPinCachePayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
-        _cache = cache;
-    }
-
-    protected override async Task HandleInternalAsync(ClearPinCachePayload payload, Dictionary<string, string> headers)
-    {
-        await RemoveItemAsync("md", payload);
-        await RemoveItemAsync("json", payload);
+        await RemoveItemAsync("md", message);
+        await RemoveItemAsync("json", message);
+        return RabbitConsumptionResult.Success;
     }
 
     private async Task RemoveItemAsync(string type, ClearPinCachePayload payload)

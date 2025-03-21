@@ -1,17 +1,16 @@
 ﻿using GrillBot.Core.Database;
-using RubbergodService.Core.Repository;
+using Microsoft.EntityFrameworkCore;
+using RubbergodService.Core.Entity;
 
 namespace RubbergodService.Core.Providers;
 
-public class StatisticsProvider : IStatisticsProvider
+public class StatisticsProvider(RubbergodServiceContext _dbContext) : IStatisticsProvider
 {
-    private RubbergodServiceRepository Repository { get; }
-
-    public StatisticsProvider(RubbergodServiceRepository repository)
-    {
-        Repository = repository;
-    }
-
     public async Task<Dictionary<string, long>> GetTableStatisticsAsync()
-        => await Repository.Statistics.GetStatisticsAsync();
+    {
+        return new Dictionary<string, long>
+        {
+            { nameof(_dbContext.Karma), await _dbContext.Karma.LongCountAsync() }
+        };
+    }
 }

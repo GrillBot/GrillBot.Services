@@ -6,20 +6,13 @@ using RubbergodService.Models;
 
 namespace RubbergodService.Actions.Pins;
 
-public class GetPinsAction : ApiActionBase
+public class GetPinsAction(
+    DirectApiManager _directApiManager,
+    IDistributedCache _cache
+) : ApiActionBase
 {
     private static readonly DistributedCacheEntryOptions _cacheOptions = new DistributedCacheEntryOptions()
         .SetAbsoluteExpiration(TimeSpan.FromDays(14));
-
-    private DirectApiManager DirectApiManager { get; }
-
-    private readonly IDistributedCache _cache;
-
-    public GetPinsAction(DirectApiManager directApiManager, IDistributedCache cache)
-    {
-        DirectApiManager = directApiManager;
-        _cache = cache;
-    }
 
     public override async Task<ApiResult> ProcessAsync()
     {
@@ -49,7 +42,7 @@ public class GetPinsAction : ApiActionBase
         command.Parameters.Add("type", markdown ? "markdown" : "json");
         command.Parameters.Add("channel", channelId.ToString());
 
-        var response = await DirectApiManager.SendAsync(command, "Rubbergod");
+        var response = await _directApiManager.SendAsync(command, "Rubbergod");
         return response.Content;
     }
 }

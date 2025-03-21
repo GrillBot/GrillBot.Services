@@ -8,5 +8,5 @@ public class Cog
     public ulong? Id { get; set; }
 
     [JsonPropertyName("children")]
-    public List<string> Children { get; set; } = new();
+    public List<string> Children { get; set; } = [];
 }

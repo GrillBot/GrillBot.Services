@@ -3,27 +3,27 @@ using Discord;
 using GrillBot.Core.Helpers;
 using RubbergodService.DirectApi.Models;
 
+#pragma warning disable IDE0290 // Use primary constructor
 namespace RubbergodService.DirectApi;
 
 public class DirectApiClient
 {
-    private IDiscordClient DiscordClient { get; }
+    private readonly IDiscordClient _discordClient;
+    private readonly SemaphoreSlim _semaphore = new(1);
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    private Dictionary<ulong, ITextChannel> CachedChannels { get; } = new();
-    private HashSet<ulong> AuthorizedServices { get; }
-    private SemaphoreSlim Semaphore { get; }
-    private HttpClient HttpClient { get; }
+    private readonly Dictionary<ulong, ITextChannel> _cachedChannels = [];
+    private readonly HashSet<ulong> _authorizedServices;
 
-    public DirectApiClient(IDiscordClient discordClient, IConfiguration configuration)
+    public DirectApiClient(IDiscordClient discordClient, IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
-        Semaphore = new SemaphoreSlim(1);
-        DiscordClient = discordClient;
-        HttpClient = new HttpClient();
-
-        AuthorizedServices = configuration.GetRequiredSection("DirectApi").AsEnumerable()
+        _authorizedServices = configuration.GetRequiredSection("DirectApi").AsEnumerable()
             .Where(o => o.Key.EndsWith(":Id") && !string.IsNullOrEmpty(o.Value))
             .Select(o => Convert.ToUInt64(o.Value))
             .ToHashSet();
+
+        _discordClient = discordClient;
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task<ApiResponse> SendAsync(ulong channelId, JsonDocument data, int timeout, int timeoutChecks)
@@ -37,22 +37,24 @@ public class DirectApiClient
 
     private async Task<ITextChannel> GetChannelAsync(ulong channelId)
     {
-        await Semaphore.WaitAsync();
+        await _semaphore.WaitAsync();
         try
         {
-            if (CachedChannels.TryGetValue(channelId, out var cachedChannel)) return cachedChannel;
+            if (_cachedChannels.TryGetValue(channelId, out var cachedChannel))
+                return cachedChannel;
 
-            var channel = await DiscordClient.GetChannelAsync(channelId)
+            var channel = await _discordClient.GetChannelAsync(channelId)
                 ?? throw new ArgumentException($"Unable to find channel with ID {channelId}");
+
             if (channel is not ITextChannel textChannel)
                 throw new ArgumentException("Communication channel is not text channel.");
 
-            CachedChannels.Add(channelId, textChannel);
+            _cachedChannels.Add(channelId, textChannel);
             return textChannel;
         }
         finally
         {
-            Semaphore.Release();
+            _semaphore.Release();
         }
     }
 
@@ -74,7 +76,8 @@ public class DirectApiClient
             throw new HttpRequestException("Unable to find response message");
 
         var attachment = response.Attachments.First();
-        var fileContent = await HttpClient.GetByteArrayAsync(attachment.Url);
+        var httpClient = _httpClientFactory.CreateClient();
+        var fileContent = await httpClient.GetByteArrayAsync(attachment.Url);
 
         return new ApiResponse
         {
@@ -85,7 +88,10 @@ public class DirectApiClient
 
     private bool IsValidResponse(IMessage? response, IUserMessage request)
     {
-        return response is not null && AuthorizedServices.Contains(response.Author.Id) && response.Reference is { MessageId.IsSpecified: true } &&
-               response.Attachments.Count == 1 && response.Reference.MessageId.Value == request.Id;
+        return response is not null &&
+            _authorizedServices.Contains(response.Author.Id) &&
+            response.Reference is { MessageId.IsSpecified: true } &&
+            response.Attachments.Count == 1 &&
+            response.Reference.MessageId.Value == request.Id;
     }
 }

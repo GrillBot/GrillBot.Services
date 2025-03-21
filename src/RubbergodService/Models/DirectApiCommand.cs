@@ -10,10 +10,5 @@ public class DirectApiCommand
     public string Method { get; set; } = null!;
 
     [JsonPropertyName("parameters")]
-    public Dictionary<string, object> Parameters { get; set; }
-
-    public DirectApiCommand()
-    {
-        Parameters = new Dictionary<string, object>();
-    }
+    public Dictionary<string, object> Parameters { get; set; } = [];
 }

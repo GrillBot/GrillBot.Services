@@ -1,26 +1,26 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Models.Pagination;
-using RubbergodService.Core.Repository;
+using GrillBot.Services.Common.Infrastructure.Api;
+using Microsoft.EntityFrameworkCore;
+using RubbergodService.Core.Entity;
 using RubbergodService.Models;
 
 namespace RubbergodService.Actions.Karma;
 
-public class GetKarmaPageAction : ApiActionBase
+public class GetKarmaPageAction(ICounterManager counterManager, RubbergodServiceContext dbContext) : ApiAction<RubbergodServiceContext>(counterManager, dbContext)
 {
-    private RubbergodServiceRepository Repository { get; }
-
-    public GetKarmaPageAction(RubbergodServiceRepository repository)
-    {
-        Repository = repository;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var parameters = (PaginatedParams)Parameters[0]!;
-        var karma = await Repository.Karma.GetKarmaPageAsync(parameters);
+
+        var query = DbContext.Karma.AsNoTracking()
+            .OrderByDescending(o => o.KarmaValue);
+
+        var data = await ContextHelper.ReadEntitiesWithPaginationAsync(query, parameters);
 
         var counter = 0;
-        var result = await PaginatedResponse<UserKarma>.CopyAndMapAsync(karma, entity =>
+        var result = await PaginatedResponse<UserKarma>.CopyAndMapAsync(data, entity =>
         {
             counter++;
             return Task.FromResult(new UserKarma

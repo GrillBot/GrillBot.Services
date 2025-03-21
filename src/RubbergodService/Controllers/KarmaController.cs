@@ -6,12 +6,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace RubbergodService.Controllers;
 
-public class KarmaController : ControllerBase
+public class KarmaController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public KarmaController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpGet]
     [ProducesResponseType(typeof(PaginatedResponse<UserKarma>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

@@ -4,12 +4,8 @@ using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace RubbergodService.Controllers;
 
-public class PinsController : ControllerBase
+public class PinsController(IServiceProvider serviceProvider) : ControllerBase(serviceProvider)
 {
-    public PinsController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpGet("{guildId}/{channelId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPinsAsync(ulong guildId, ulong channelId, bool markdown = false)

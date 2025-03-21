@@ -1,5 +1,5 @@
-﻿using GrillBot.Core.Caching;
-using GrillBot.Core.Infrastructure.Actions;
+﻿using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.Redis.Extensions;
 using Microsoft.Extensions.Caching.Distributed;
 using RubbergodService.DirectApi;
 using RubbergodService.Models;
@@ -8,19 +8,12 @@ using System.Text.Json;
 
 namespace RubbergodService.Actions.Help;
 
-public class GetSlashCommandsAction : ApiActionBase
+public class GetSlashCommandsAction(
+    DirectApiManager _directApiManager,
+    IDistributedCache _cache
+) : ApiActionBase
 {
     private const string CacheKey = "RubbergodService/HelpSlashCommands";
-
-    private DirectApiManager DirectApiManager { get; }
-
-    private readonly IDistributedCache _cache;
-
-    public GetSlashCommandsAction(DirectApiManager directApiManager, IDistributedCache cache)
-    {
-        DirectApiManager = directApiManager;
-        _cache = cache;
-    }
 
     public override async Task<ApiResult> ProcessAsync()
     {
@@ -38,7 +31,7 @@ public class GetSlashCommandsAction : ApiActionBase
         var command = new DirectApiCommand { Method = "Help" };
         command.Parameters.Add("command", "slash_commands");
 
-        var apiResponse = await DirectApiManager.SendAsync(command, "Rubbergod");
+        var apiResponse = await _directApiManager.SendAsync(command, "Rubbergod");
         var jsonData = Encoding.UTF8.GetString(apiResponse.Content);
         return JsonSerializer.Deserialize<Dictionary<string, Cog>>(jsonData)!;
     }
