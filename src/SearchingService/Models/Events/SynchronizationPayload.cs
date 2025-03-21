@@ -1,13 +1,10 @@
-﻿using GrillBot.Core.RabbitMQ;
-using SearchingService.Models.Events.Users;
+﻿using SearchingService.Models.Events.Users;
 
 namespace SearchingService.Models.Events;
 
-public class SynchronizationPayload : IPayload
+public class SynchronizationPayload
 {
-    public string QueueName => "searching:synchronization";
-
-    public List<UserSynchronizationItem> Users { get; set; } = new();
+    public List<UserSynchronizationItem> Users { get; set; } = [];
 
     public SynchronizationPayload()
     {

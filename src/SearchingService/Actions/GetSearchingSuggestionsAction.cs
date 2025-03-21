@@ -9,16 +9,12 @@ using SearchingService.Options;
 
 namespace SearchingService.Actions;
 
-public class GetSearchingSuggestionsAction : ApiAction<SearchingServiceContext>
+public class GetSearchingSuggestionsAction(
+    ICounterManager counterManager,
+    SearchingServiceContext dbContext,
+    IOptions<AppOptions> _options
+) : ApiAction<SearchingServiceContext>(counterManager, dbContext)
 {
-    private readonly AppOptions _options;
-
-    public GetSearchingSuggestionsAction(ICounterManager counterManager, SearchingServiceContext dbContext,
-        IOptions<AppOptions> options) : base(counterManager, dbContext)
-    {
-        _options = options.Value;
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = GetParameter<string>(0);
@@ -40,7 +36,7 @@ public class GetSearchingSuggestionsAction : ApiAction<SearchingServiceContext>
         if (!executingUser.IsAdministrator)
             query = query.Where(o => o.UserId == executingUser.UserId);
 
-        query = query.Take(_options.SuggestionsCount);
+        query = query.Take(_options.Value.SuggestionsCount);
 
         var dataQuery = query.Select(o => new SearchSuggestion(o.Id, o.UserId, o.Content.Substring(0, 20)));
         return ContextHelper.ReadEntitiesAsync(dataQuery);

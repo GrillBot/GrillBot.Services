@@ -8,12 +8,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SearchingService.Controllers;
 
-public class ItemsController : GrillBot.Core.Infrastructure.Actions.ControllerBase
+public class ItemsController(IServiceProvider serviceProvider) : GrillBot.Core.Infrastructure.Actions.ControllerBase(serviceProvider)
 {
-    public ItemsController(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     [HttpPost("list")]
     [ProducesResponseType(typeof(PaginatedResponse<SearchListItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]

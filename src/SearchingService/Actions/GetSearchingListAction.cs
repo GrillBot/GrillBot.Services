@@ -12,12 +12,11 @@ using System.Linq.Expressions;
 
 namespace SearchingService.Actions;
 
-public class GetSearchingListAction : ApiAction<SearchingServiceContext>
+public class GetSearchingListAction(
+    ICounterManager counterManager,
+    SearchingServiceContext dbContext
+) : ApiAction<SearchingServiceContext>(counterManager, dbContext)
 {
-    public GetSearchingListAction(ICounterManager counterManager, SearchingServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = GetParameter<SearchingListRequest>(0);
@@ -86,16 +85,16 @@ public class GetSearchingListAction : ApiAction<SearchingServiceContext>
     {
         var expressions = sort.OrderBy switch
         {
-            "CreatedAt" => new Expression<Func<SearchItem, object>>[]
-            {
+            "CreatedAt" =>
+            [
                 entity => entity.CreatedAt,
                 entity => entity.Id
-            },
-            "ValidTo" => new Expression<Func<SearchItem, object>>[]
-            {
+            ],
+            "ValidTo" =>
+            [
                 entity => entity.ValidTo,
                 entity => entity.Id
-            },
+            ],
             _ => new Expression<Func<SearchItem, object>>[] { entity => entity.Id }
         };
 

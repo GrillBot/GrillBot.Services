@@ -1,5 +1,7 @@
-﻿using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+﻿using GrillBot.Core.Infrastructure.Auth;
+using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using Microsoft.Extensions.Options;
 using SearchingService.Core.Entity;
@@ -8,17 +10,18 @@ using SearchingService.Options;
 
 namespace SearchingService.Handlers;
 
-public class CreateSearchItemEventHandler : BaseEventHandlerWithDb<SearchItemPayload, SearchingServiceContext>
+public class CreateSearchItemEventHandler(
+    ILoggerFactory loggerFactory,
+    SearchingServiceContext dbContext,
+    ICounterManager counterManager,
+    IRabbitPublisher publisher,
+    IOptions<AppOptions> _options
+) : BaseEventHandlerWithDb<SearchItemPayload, SearchingServiceContext>(loggerFactory, dbContext, counterManager, publisher)
 {
-    private readonly AppOptions _options;
+    public override string TopicName => "Searching";
+    public override string QueueName => "CreateSearchItem";
 
-    public CreateSearchItemEventHandler(ILoggerFactory loggerFactory, SearchingServiceContext dbContext, ICounterManager counterManager,
-        IRabbitMQPublisher publisher, IOptions<AppOptions> options) : base(loggerFactory, dbContext, counterManager, publisher)
-    {
-        _options = options.Value;
-    }
-
-    protected override async Task HandleInternalAsync(SearchItemPayload payload, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SearchItemPayload payload, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var created = DateTime.UtcNow;
         var entity = new SearchItem
@@ -28,10 +31,11 @@ public class CreateSearchItemEventHandler : BaseEventHandlerWithDb<SearchItemPay
             CreatedAt = created,
             GuildId = payload.GuildId,
             UserId = payload.UserId,
-            ValidTo = payload.ValidToUtc ?? DateTime.UtcNow.Add(_options.DefaultItemValidity)
+            ValidTo = payload.ValidToUtc ?? DateTime.UtcNow.Add(_options.Value.DefaultItemValidity)
         };
 
         await DbContext.AddAsync(entity);
         await ContextHelper.SaveChagesAsync();
+        return RabbitConsumptionResult.Success;
     }
 }

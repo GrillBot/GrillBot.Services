@@ -1,6 +1,8 @@
 ﻿using Discord;
+using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.Publisher;
+using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using SearchingService.Core.Entity;
 using SearchingService.Models.Events;
@@ -8,19 +10,23 @@ using SearchingService.Models.Events.Users;
 
 namespace SearchingService.Handlers;
 
-public class SynchronizationEventHandler : BaseEventHandlerWithDb<SynchronizationPayload, SearchingServiceContext>
+public class SynchronizationEventHandler(
+    ILoggerFactory loggerFactory,
+    SearchingServiceContext dbContext,
+    ICounterManager counterManager,
+    IRabbitPublisher publisher
+) : BaseEventHandlerWithDb<SynchronizationPayload, SearchingServiceContext>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public SynchronizationEventHandler(ILoggerFactory loggerFactory, SearchingServiceContext dbContext, ICounterManager counterManager,
-        IRabbitMQPublisher publisher) : base(loggerFactory, dbContext, counterManager, publisher)
-    {
-    }
+    public override string TopicName => "Searching";
+    public override string QueueName => "SearchingSynchronization";
 
-    protected override async Task HandleInternalAsync(SynchronizationPayload payload, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
-        foreach (var user in payload.Users)
+        foreach (var user in message.Users)
             await SynchonizeUserAsync(user);
 
         await ContextHelper.SaveChagesAsync();
+        return RabbitConsumptionResult.Success;
     }
 
     private async Task SynchonizeUserAsync(UserSynchronizationItem user)

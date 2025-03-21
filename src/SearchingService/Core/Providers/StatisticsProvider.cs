@@ -4,15 +4,8 @@ using SearchingService.Core.Entity;
 
 namespace SearchingService.Core.Providers;
 
-public class StatisticsProvider : IStatisticsProvider
+public class StatisticsProvider(SearchingServiceContext _dbContext) : IStatisticsProvider
 {
-    private readonly SearchingServiceContext _dbContext;
-
-    public StatisticsProvider(SearchingServiceContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Dictionary<string, long>> GetTableStatisticsAsync()
     {
         return new Dictionary<string, long>

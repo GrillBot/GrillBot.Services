@@ -7,12 +7,11 @@ using SearchingService.Core.Entity;
 
 namespace SearchingService.Actions;
 
-public class RemoveSearchingAction : ApiAction<SearchingServiceContext>
+public class RemoveSearchingAction(
+    ICounterManager counterManager,
+    SearchingServiceContext dbContext
+) : ApiAction<SearchingServiceContext>(counterManager, dbContext)
 {
-    public RemoveSearchingAction(ICounterManager counterManager, SearchingServiceContext dbContext) : base(counterManager, dbContext)
-    {
-    }
-
     public override async Task<ApiResult> ProcessAsync()
     {
         var id = GetParameter<long>(0);
