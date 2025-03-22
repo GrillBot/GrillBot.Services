@@ -115,7 +115,6 @@ public class CreateItemsEventHandler(
                     LogMessage = new LogMessageRequest
                     {
                         Message = message,
-                        Severity = type,
                         Source = "AuditLogService",
                         SourceAppName = processor.GetType().Name
                     }

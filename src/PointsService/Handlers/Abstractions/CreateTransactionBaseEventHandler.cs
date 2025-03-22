@@ -32,7 +32,6 @@ public abstract class CreateTransactionBaseEventHandler<TPayload>(
             LogMessage = new LogMessageRequest
             {
                 Message = message,
-                Severity = LogSeverity.Warning,
                 Source = GetType().Name,
                 SourceAppName = "PointsService"
             }

@@ -23,7 +23,6 @@ public class ExceptionFilter(
             LogMessage = new LogMessageRequest
             {
                 Message = CreateErrorMessage(context),
-                Severity = LogSeverity.Error,
                 SourceAppName = Assembly.GetEntryAssembly()!.GetName().Name!,
                 Source = $"{controllerName}.{actionName}"
             }
