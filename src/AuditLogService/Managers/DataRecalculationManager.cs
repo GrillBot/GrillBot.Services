@@ -11,7 +11,7 @@ public class DataRecalculationManager(IRabbitPublisher _publisher)
     public async Task EnqueueRecalculationAsync(List<LogItem> items)
     {
         var batches = CreateBatches(items);
-        await _publisher.PublishAsync("AuditLog", batches, "Recalculation");
+        await _publisher.PublishAsync(batches);
     }
 
     private static List<RecalculationPayload> CreateBatches(List<LogItem> items)

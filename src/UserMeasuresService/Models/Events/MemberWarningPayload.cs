@@ -2,6 +2,8 @@
 
 public class MemberWarningPayload : BasePayload
 {
+    public override string Queue => "MemberWarning";
+
     public bool SendDmNotification { get; set; }
 
     public MemberWarningPayload()

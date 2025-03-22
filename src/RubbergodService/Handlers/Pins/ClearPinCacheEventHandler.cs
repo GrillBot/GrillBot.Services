@@ -15,9 +15,6 @@ public class ClearPinCacheEventHandler(
     IDistributedCache _cache
 ) : BaseEventHandler<ClearPinCachePayload>(loggerFactory, counterManager, publisher)
 {
-    public override string TopicName => "Rubbergod";
-    public override string QueueName => "ClearPinCache";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(ClearPinCachePayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         await RemoveItemAsync("md", message);

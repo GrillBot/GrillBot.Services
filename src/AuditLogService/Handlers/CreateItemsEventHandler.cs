@@ -20,14 +20,11 @@ public class CreateItemsEventHandler(
     IRabbitPublisher publisher,
     DataRecalculationManager _dataRecalculation,
     RequestProcessorFactory _requestProcessorFactory
-) : BaseEventHandlerWithDb<CreateItemsPayload, AuditLogServiceContext>(loggerFactory, dbContext, counterManager, publisher)
+) : BaseEventHandlerWithDb<CreateItemsMessage, AuditLogServiceContext>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string TopicName => "AuditLog";
-    public override string QueueName => "CreateItems";
+    private readonly CreateItemsMessage _processingInfoBatch = new();
 
-    private readonly CreateItemsPayload _processingInfoBatch = new();
-
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(CreateItemsPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(CreateItemsMessage message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var entities = new List<LogItem>();
 
@@ -45,7 +42,7 @@ public class CreateItemsEventHandler(
         await _dataRecalculation.EnqueueRecalculationAsync(entities);
 
         if (_processingInfoBatch.Items.Count > 0)
-            await Publisher.PublishAsync("AuditLog", _processingInfoBatch, "CreateItems");
+            await Publisher.PublishAsync(_processingInfoBatch);
         return RabbitConsumptionResult.Success;
     }
 

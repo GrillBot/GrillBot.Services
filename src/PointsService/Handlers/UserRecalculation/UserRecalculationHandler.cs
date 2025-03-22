@@ -15,8 +15,6 @@ public partial class UserRecalculationHandler(
     IRabbitPublisher publisher
 ) : BasePointsEvent<UserRecalculationPayload>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string QueueName => "UserRecalculation";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(UserRecalculationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var user = await FindOrCreateUserAsync(message.GuildId, message.UserId);

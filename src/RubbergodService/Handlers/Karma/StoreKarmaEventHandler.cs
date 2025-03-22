@@ -15,9 +15,6 @@ public class StoreKarmaEventHandler(
     IRabbitPublisher publisher
 ) : BaseEventHandlerWithDb<KarmaBatchPayload, RubbergodServiceContext>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string TopicName => "Rubbergod";
-    public override string QueueName => "StoreKarma";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(KarmaBatchPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         foreach (var chunk in message.Users.Where(o => !string.IsNullOrEmpty(o.MemberId)).Chunk(50))

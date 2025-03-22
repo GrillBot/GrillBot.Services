@@ -1,7 +1,12 @@
-﻿namespace SearchingService.Models.Events;
+﻿using GrillBot.Core.RabbitMQ.V2.Messages;
 
-public class SearchItemPayload
+namespace SearchingService.Models.Events;
+
+public class SearchItemPayload : IRabbitMessage
 {
+    public string Topic => "Searching";
+    public string Queue => "CreateSearchItem";
+
     public string UserId { get; set; } = null!;
     public string GuildId { get; set; } = null!;
     public string ChannelId { get; set; } = null!;

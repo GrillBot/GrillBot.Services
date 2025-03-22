@@ -1,11 +1,12 @@
 ﻿using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
+using GrillBot.Core.RabbitMQ.V2.Messages;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
 using Microsoft.Extensions.Logging;
 
 namespace GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
-public abstract class BaseEventHandler<TPayload> : RabbitMessageHandlerBase<TPayload> where TPayload : class
+public abstract class BaseEventHandler<TMessage> : RabbitMessageHandlerBase<TMessage> where TMessage : class, IRabbitMessage, new()
 {
     protected ICounterManager CounterManager { get; }
     protected IRabbitPublisher Publisher { get; }
@@ -16,7 +17,7 @@ public abstract class BaseEventHandler<TPayload> : RabbitMessageHandlerBase<TPay
     {
         CounterManager = counterManager;
         Publisher = publisher;
-        CounterKey = $"RabbitMQ.{QueueName}.Consumer";
+        CounterKey = $"RabbitMQ.{TopicName}.{QueueName}.Consumer";
     }
 
     protected CounterItem CreateCounter(string operation)

@@ -29,7 +29,7 @@ public class ExceptionFilter(
             }
         };
 
-        return _rabbitPublisher.PublishAsync("AuditLog", new CreateItemsPayload(logRequest), "CreateItems");
+        return _rabbitPublisher.PublishAsync(new CreateItemsMessage(logRequest));
     }
 
     private static string CreateErrorMessage(ExceptionContext context)

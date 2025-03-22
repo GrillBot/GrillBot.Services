@@ -14,9 +14,6 @@ public class RemindMessageNotifyEventHandler(ILoggerFactory loggerFactory,
     IRabbitPublisher publisher
 ) : BaseEventHandlerWithDb<RemindMessageNotifyPayload, RemindServiceContext>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string TopicName => "Remind";
-    public override string QueueName => "RemindNotified";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(RemindMessageNotifyPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var messageQuery = DbContext.RemindMessages.Where(o => o.Id == message.RemindId);

@@ -20,9 +20,6 @@ public class BulkDeleteEventHandler(
     DataRecalculationManager _dataRecalculation
 ) : BaseEventHandlerWithDb<BulkDeletePayload, AuditLogServiceContext>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string TopicName => "AuditLog";
-    public override string QueueName => "BulkDelete";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(BulkDeletePayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var logItems = await ReadLogItemsAsync(message.Ids);
@@ -40,7 +37,7 @@ public class BulkDeleteEventHandler(
         await _dataRecalculation.EnqueueRecalculationAsync(logItems);
 
         if (filesForDeletion.Count > 0)
-            await Publisher.PublishAsync("AuditLog", filesForDeletion, "DeleteFiles");
+            await Publisher.PublishAsync(filesForDeletion);
         return RabbitConsumptionResult.Success;
     }
 

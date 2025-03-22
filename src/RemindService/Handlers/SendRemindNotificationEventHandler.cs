@@ -19,9 +19,6 @@ public class SendRemindNotificationEventHandler(
     IRabbitPublisher publisher
 ) : BaseEventHandlerWithDb<SendRemindNotificationPayload, RemindServiceContext>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string TopicName => "Remind";
-    public override string QueueName => "RemindNotification";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SendRemindNotificationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var remindMessage = await GetRemindMessageAsync(message.RemindId);
@@ -32,7 +29,7 @@ public class SendRemindNotificationEventHandler(
 
         remindMessage.IsSendInProgress = true;
         await ContextHelper.SaveChagesAsync();
-        await Publisher.PublishAsync("Internal", discordMessage, "SendMessage");
+        await Publisher.PublishAsync(discordMessage);
         return RabbitConsumptionResult.Success;
     }
 

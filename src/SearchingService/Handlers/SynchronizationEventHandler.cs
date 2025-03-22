@@ -17,9 +17,6 @@ public class SynchronizationEventHandler(
     IRabbitPublisher publisher
 ) : BaseEventHandlerWithDb<SynchronizationPayload, SearchingServiceContext>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string TopicName => "Searching";
-    public override string QueueName => "SearchingSynchronization";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         foreach (var user in message.Users)

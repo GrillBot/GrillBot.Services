@@ -45,6 +45,6 @@ public class DeleteStatisticsAction(
             LogMessage = new(message, LogSeverity.Info, "EmoteService", nameof(DeleteStatisticsAction))
         };
 
-        return _rabbitPublisher.PublishAsync("AuditLog", new CreateItemsPayload(logRequest), "CreateItems");
+        return _rabbitPublisher.PublishAsync(new CreateItemsMessage(logRequest));
     }
 }

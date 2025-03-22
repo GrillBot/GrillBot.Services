@@ -17,9 +17,6 @@ public class EmoteEventEventHandler(
     IRabbitPublisher rabbitPublisher
 ) : BaseEventHandlerWithDb<EmoteEventPayload, EmoteServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
 {
-    public override string TopicName => "Emote";
-    public override string QueueName => "EmoteEvent";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(EmoteEventPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var emoteValue = Emote.Parse(message.EmoteId);

@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.V2.Messages;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using UserMeasuresService.Core.Entity;
@@ -10,7 +11,7 @@ public abstract class BaseMeasuresHandler<TPayload>(
     UserMeasuresContext dbContext,
     ICounterManager counterManager,
     IRabbitPublisher publisher
-) : BaseEventHandlerWithDb<TPayload, UserMeasuresContext>(loggerFactory, dbContext, counterManager, publisher) where TPayload : class, new()
+) : BaseEventHandlerWithDb<TPayload, UserMeasuresContext>(loggerFactory, dbContext, counterManager, publisher) where TPayload : class, IRabbitMessage, new()
 {
     public override string TopicName => "UserMeasures";
 

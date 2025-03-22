@@ -16,8 +16,6 @@ public class SynchronizationEventHandler(
     ICounterManager counterManager, IRabbitPublisher publisher
 ) : BasePointsEvent<SynchronizationPayload>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string QueueName => "Synchronization";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         foreach (var userInfo in message.Users)

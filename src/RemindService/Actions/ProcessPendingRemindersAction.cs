@@ -29,7 +29,7 @@ public class ProcessPendingRemindersAction(
             AddRemindToReport(message, report);
 
             var payload = new SendRemindNotificationPayload(message.Id, false);
-            await publisher.PublishAsync("Remind", payload, "RemindNotification");
+            await publisher.PublishAsync(payload);
         }
 
         var result = new ProcessPendingRemindersResult(pendingMessages.Count, report);

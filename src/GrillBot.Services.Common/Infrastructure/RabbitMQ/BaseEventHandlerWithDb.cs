@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core.Managers.Performance;
+using GrillBot.Core.RabbitMQ.V2.Messages;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.EntityFramework.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ namespace GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
 public abstract class BaseEventHandlerWithDb<TPayload, TDbContext>
     : BaseEventHandler<TPayload>
-    where TPayload : class
+    where TPayload : class, IRabbitMessage, new()
     where TDbContext : DbContext
 {
     protected TDbContext DbContext { get; }

@@ -1,7 +1,12 @@
-﻿namespace AuditLogService.Models.Events;
+﻿using GrillBot.Core.RabbitMQ.V2.Messages;
 
-public class FileDeletePayload
+namespace AuditLogService.Models.Events;
+
+public class FileDeletePayload : IRabbitMessage
 {
+    public string Topic => "AuditLog";
+    public string Queue => "FileDelete";
+
     public string Filename { get; set; } = null!;
 
     public FileDeletePayload()

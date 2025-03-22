@@ -25,7 +25,7 @@ public abstract class CreateTransactionBaseEventHandler<TPayload>(
         return false;
     }
 
-    private async Task WriteValidationErrorToLogAsync(TPayload payload, string? channelId, string message)
+    private Task WriteValidationErrorToLogAsync(TPayload payload, string? channelId, string message)
     {
         var logRequest = new LogRequest(LogType.Warning, DateTime.UtcNow, payload.GuildId, null, channelId)
         {
@@ -38,7 +38,7 @@ public abstract class CreateTransactionBaseEventHandler<TPayload>(
             }
         };
 
-        await Publisher.PublishAsync("AuditLog", new CreateItemsPayload(logRequest), "CreateItems");
+        return Publisher.PublishAsync(new CreateItemsMessage(logRequest));
     }
 
     protected async Task CommitTransactionAsync(Transaction transaction)

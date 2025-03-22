@@ -18,9 +18,6 @@ public class CreateSearchItemEventHandler(
     IOptions<AppOptions> _options
 ) : BaseEventHandlerWithDb<SearchItemPayload, SearchingServiceContext>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string TopicName => "Searching";
-    public override string QueueName => "CreateSearchItem";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SearchItemPayload payload, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var created = DateTime.UtcNow;

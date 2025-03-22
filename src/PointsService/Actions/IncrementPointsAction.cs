@@ -24,7 +24,7 @@ public class IncrementPointsAction(
         if (validationErrors is not null)
             return new(StatusCodes.Status400BadRequest, validationErrors);
 
-        await Publisher.PublishAsync("Points", new CreateTransactionAdminPayload(request.GuildId, request.UserId, request.Amount), "CreateTransactionAdmin");
+        await Publisher.PublishAsync(new CreateTransactionAdminPayload(request.GuildId, request.UserId, request.Amount));
         return ApiResult.Ok();
     }
 

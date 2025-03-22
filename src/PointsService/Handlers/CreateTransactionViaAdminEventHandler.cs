@@ -16,8 +16,6 @@ public class CreateTransactionViaAdminEventHandler(
     IRabbitPublisher publisher
 ) : CreateTransactionBaseEventHandler<CreateTransactionAdminPayload>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string QueueName => "CreateTransactionAdmin";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(CreateTransactionAdminPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         if (!await CanCreateTransactionAsync(message))

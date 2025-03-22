@@ -62,6 +62,6 @@ public class MemberWarningEventHandler(
         );
 
         var message = new DiscordMessagePayload(null, item.UserId, null, [], "UserMeasures", null, null, embed);
-        await Publisher.PublishAsync("Internal", message, "SendMessage");
+        await Publisher.PublishAsync(message);
     }
 }

@@ -16,9 +16,6 @@ public class SynchronizeEmotesEventHandler(
     IRabbitPublisher rabbitPublisher
 ) : BaseEventHandlerWithDb<SynchronizeEmotesPayload, EmoteServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
 {
-    public override string TopicName => "Emote";
-    public override string QueueName => "SynchronizeEmotes";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizeEmotesPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         await ClearEmotesAsync(message.GuildId);

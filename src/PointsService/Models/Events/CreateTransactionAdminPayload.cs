@@ -2,6 +2,8 @@
 
 public class CreateTransactionAdminPayload : CreateTransactionBasePayload
 {
+    public override string Queue => "CreateTransactionAdmin";
+
     public string UserId { get; set; } = null!;
     public int Amount { get; set; }
 

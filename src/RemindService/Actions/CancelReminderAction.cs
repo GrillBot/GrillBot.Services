@@ -72,7 +72,7 @@ public class CancelReminderAction(
         }
 
         var payload = new SendRemindNotificationPayload(request.RemindId, true);
-        return _publisher.PublishAsync("Remind", payload, " ");
+        return _publisher.PublishAsync(payload);
     }
 
     private Task WriteToAuditLogAsync(RemindMessage message, CancelReminderRequest request)
@@ -86,6 +86,6 @@ public class CancelReminderAction(
             LogMessage = new LogMessageRequest(string.Format(messageTemplate, message.Id), LogSeverity.Info, "RemindService", nameof(CancelReminderAction))
         };
 
-        return _publisher.PublishAsync("AuditLog", new CreateItemsPayload(logRequest), "CreateItems");
+        return _publisher.PublishAsync(new CreateItemsMessage(logRequest));
     }
 }

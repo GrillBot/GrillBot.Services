@@ -15,8 +15,6 @@ public class DeleteTransactionsEventHandler(
     IRabbitPublisher publisher
 ) : BasePointsEvent<DeleteTransactionsPayload>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string QueueName => "DeleteTransactions";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(DeleteTransactionsPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var transactions = await ReadTransactionsAsync(message);

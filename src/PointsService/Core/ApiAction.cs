@@ -21,5 +21,5 @@ public abstract class ApiAction(
     }
 
     protected Task EnqueueUserForRecalculationAsync(string guildId, string userId)
-        => Publisher.PublishAsync("Points", new UserRecalculationPayload(guildId, userId), "UserRecalculation");
+        => Publisher.PublishAsync(new UserRecalculationPayload(guildId, userId));
 }

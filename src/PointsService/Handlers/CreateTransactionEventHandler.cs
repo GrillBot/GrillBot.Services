@@ -22,8 +22,6 @@ public class CreateTransactionEventHandler(
     IRandomManager _randomManager
 ) : CreateTransactionBaseEventHandler<CreateTransactionPayload>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string QueueName => "CreateTransaction";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(CreateTransactionPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var author = await FindOrCreateUserAsync(message.GuildId, message.Message.AuthorId);

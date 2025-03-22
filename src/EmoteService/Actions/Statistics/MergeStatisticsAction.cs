@@ -88,7 +88,7 @@ public class MergeStatisticsAction(
             LogMessage = new LogMessageRequest(message, LogSeverity.Info, "EmoteService", nameof(MergeStatisticsAction))
         };
 
-        return _rabbitPublisher.PublishAsync("AuditLog", new CreateItemsPayload(logRequest), "CreateItems");
+        return _rabbitPublisher.PublishAsync(new CreateItemsMessage(logRequest));
     }
 
 }

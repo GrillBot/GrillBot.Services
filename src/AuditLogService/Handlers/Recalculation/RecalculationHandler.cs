@@ -18,9 +18,6 @@ public class RecalculationHandler(
     IServiceProvider _serviceProvider
 ) : BaseEventHandlerWithDb<RecalculationPayload, AuditLogServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
 {
-    public override string TopicName => "AuditLog";
-    public override string QueueName => "Recalculation";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
         RecalculationPayload message,
         ICurrentUserProvider currentUser,
