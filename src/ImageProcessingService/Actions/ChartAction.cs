@@ -14,7 +14,7 @@ public class ChartAction(IGraphicsClient _graphicsClient) : ApiActionBase
     {
         var request = (ChartRequest)Parameters[0]!;
 
-        var imageTasks = request.Requests.ConvertAll(_graphicsClient.CreateChartAsync);
+        var imageTasks = request.Requests.ConvertAll(r => _graphicsClient.CreateChartAsync(r));
         var imagesData = await Task.WhenAll(imageTasks);
         var images = imagesData.Select(img => new MagickImage(img, MagickFormat.Jpg)).AsParallel().ToList();
 
