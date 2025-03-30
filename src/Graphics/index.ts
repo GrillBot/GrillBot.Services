@@ -4,6 +4,7 @@ import { loggerMiddleware } from './src/logging';
 import actuator from 'express-actuator';
 import * as chart from './src/chart';
 import * as common from './src/common';
+import * as diag from './src/diag';
 import { collectDefaultMetrics, register } from 'prom-client';
 
 collectDefaultMetrics({});
@@ -27,6 +28,7 @@ app.use(common.durationCounter);
 app.post('/chart', common.validate(chart.validators), (req, res, next) => new common.RequestProcessing(req, res, next).execute(chart.onRequest));
 app.get('/stats', common.statsEndpoint);
 app.get('/api/diag/uptime', common.uptimeEndpoint);
+app.get('/api/diag', diag.onRequest);
 app.get('/prom_metrics', async (_, res) => {
     const metrics = await register.metrics();
     res.status(200).contentType(register.contentType).end(metrics);

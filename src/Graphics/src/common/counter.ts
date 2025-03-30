@@ -16,7 +16,7 @@ interface Stats {
     cpuTime: number;
 }
 
-const stats: Stats = {
+export const stats: Stats = {
     requestsCount: 0,
     measuredFrom: null,
     endpoints: [],
@@ -45,7 +45,7 @@ export const requestsCounter = (request: express.Request, response: express.Resp
     }
 
     const cpuUsage = process.cpuUsage();
-    stats.cpuTime = Math.round((cpuUsage.system + cpuUsage.user) / 1000);
+    stats.cpuTime = Math.round((cpuUsage.system + cpuUsage.user) / 1000) * 1000;
 
     next();
 };
