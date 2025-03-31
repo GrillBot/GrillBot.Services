@@ -159,8 +159,8 @@ jobs:
       - name: InviteService
         if: needs.PathsFilter.outputs.InviteService == 'true'
         run: |
-          docker restore -r linux-x64 src/InviteService/
-          docker restore -c Release -r linux-x64 --no-self-contained --no-restore src/InviteService/
+          dotnet restore -r linux-x64 src/InviteService/
+          dotnet restore -c Release -r linux-x64 --no-self-contained --no-restore src/InviteService/
   CreateDockerImages:
     runs-on: ubuntu-latest
     needs: [PathsFilter, BuildServices]
