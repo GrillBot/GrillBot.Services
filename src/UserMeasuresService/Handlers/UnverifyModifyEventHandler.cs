@@ -15,8 +15,6 @@ public class UnverifyModifyEventHandler(
     IRabbitPublisher publisher
 ) : BaseMeasuresHandler<UnverifyModifyPayload>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string QueueName => "ModifyUnverify";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(UnverifyModifyPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var item = await ContextHelper.ReadFirstOrDefaultEntityAsync(DbContext.Unverifies.Where(o => o.LogSetId == message.LogSetId));

@@ -13,8 +13,6 @@ public abstract class BaseMeasuresHandler<TPayload>(
     IRabbitPublisher publisher
 ) : BaseEventHandlerWithDb<TPayload, UserMeasuresContext>(loggerFactory, dbContext, counterManager, publisher) where TPayload : class, IRabbitMessage, new()
 {
-    public override string TopicName => "UserMeasures";
-
     protected async Task SaveEntityAsync<TEntity>(TEntity entity) where TEntity : BaseEntity
     {
         if (entity is null)

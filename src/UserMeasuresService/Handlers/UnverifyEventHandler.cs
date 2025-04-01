@@ -15,8 +15,6 @@ public class UnverifyEventHandler(
     IRabbitPublisher publisher
 ) : BaseMeasuresHandler<UnverifyPayload>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string QueueName => "CreateUnverify";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(UnverifyPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var entity = new UnverifyItem

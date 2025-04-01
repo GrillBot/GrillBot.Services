@@ -20,8 +20,6 @@ public class MemberWarningEventHandler(
     DiscordManager _discordManager
 ) : BaseMeasuresHandler<MemberWarningPayload>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string QueueName => "CreateMemberWarning";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(MemberWarningPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var entity = new MemberWarningItem

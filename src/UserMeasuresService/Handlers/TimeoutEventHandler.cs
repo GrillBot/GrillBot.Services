@@ -15,8 +15,6 @@ public class TimeoutEventHandler(
     IRabbitPublisher publisher
 ) : BaseMeasuresHandler<TimeoutPayload>(loggerFactory, dbContext, counterManager, publisher)
 {
-    public override string QueueName => "CreateTimeout";
-
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(TimeoutPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         var entity = await GetOrCreateEntityAsync(message.ExternalId);
