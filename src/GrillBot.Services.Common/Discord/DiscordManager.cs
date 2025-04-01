@@ -3,6 +3,7 @@ using Discord.Rest;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.Cache;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 #pragma warning disable S3928 // Parameter names used into ArgumentException constructors should match an existing one 
 #pragma warning disable S3604 // Member initializer values should not be redundant
@@ -17,6 +18,8 @@ public class DiscordManager(
 )
 {
     private DiscordRestClient DiscordClient { get; } = (DiscordRestClient)_discordClient;
+
+    public IUser CurrentUser => _discordClient.CurrentUser;
 
     public async Task LoginAsync()
     {
@@ -82,5 +85,24 @@ public class DiscordManager(
         {
             return await guild.GetBanAsync(userId);
         }
+    }
+
+    public async Task<List<IInviteMetadata>> GetInvitesAsync(ulong guildId)
+    {
+        var guild = await GetGuildAsync(guildId);
+        if (guild is null)
+            return [];
+
+        var result = new List<IInviteMetadata>();
+
+        using (_counterManager.Create("Discord.API.Invites"))
+        {
+            if (!string.IsNullOrEmpty(guild.VanityURLCode))
+                result.Add(await guild.GetVanityInviteAsync());
+
+            result.AddRange(await guild.GetInvitesAsync());
+        }
+
+        return result;
     }
 }
