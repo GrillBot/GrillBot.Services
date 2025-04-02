@@ -31,9 +31,9 @@ public class GetUsedInvitesAction(
             query = query.Where(o => EF.Functions.ILike(o.Code, $"{request.Code.ToLower()}%"));
 
         if (request.CreatedFrom is not null)
-            query = query.Where(o => o.CreatedAt >= request.CreatedFrom);
+            query = query.Where(o => o.CreatedAt >= request.CreatedFrom.Value);
         if (request.CreatedTo is not null)
-            query = query.Where(o => o.CreatedAt <= request.CreatedTo);
+            query = query.Where(o => o.CreatedAt <= request.CreatedTo.Value);
 
         query = request.Sort.OrderBy?.ToLower() switch
         {
