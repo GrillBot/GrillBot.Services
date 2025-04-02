@@ -23,7 +23,7 @@ public class InviteListRequest : IValidatableObject
     public DateTime? CreatedTo { get; set; }
 
     /// <summary>
-    /// Available: Code, Created
+    /// Available: Code, Created, Uses
     /// Default: Code
     /// </summary>
     public SortParameters Sort { get; set; } = new() { OrderBy = "Code" };

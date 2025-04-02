@@ -12,4 +12,9 @@ public class InviteController(IServiceProvider serviceProvider) : GrillBot.Core.
     [ProducesResponseType<PaginatedResponse<Invite>>(StatusCodes.Status200OK)]
     public Task<IActionResult> GetCachedInvitesAsync([FromBody] InviteListRequest request)
         => ProcessAsync<GetCachedInvitesAction>(request);
+
+    [HttpPost("used/list")]
+    [ProducesResponseType<PaginatedResponse<Invite>>(StatusCodes.Status200OK)]
+    public Task<IActionResult> GetUsedInvitesAsync([FromBody] InviteListRequest request)
+        => ProcessAsync<GetUsedInvitesAction>(request);
 }

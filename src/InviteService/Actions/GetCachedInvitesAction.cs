@@ -49,9 +49,10 @@ public class GetCachedInvitesAction(
         }
         while (cursor != 0);
 
-        var sortedData = request.Sort.OrderBy switch
+        var sortedData = request.Sort.OrderBy?.ToLower() switch
         {
-            "Created" => request.Sort.Descending ? [.. result.OrderByDescending(o => o.metadata.CreatedAt)] : [.. result.OrderBy(o => o.metadata.CreatedAt)],
+            "created" => request.Sort.Descending ? [.. result.OrderByDescending(o => o.metadata.CreatedAt)] : [.. result.OrderBy(o => o.metadata.CreatedAt)],
+            "uses" => request.Sort.Descending ? [.. result.OrderByDescending(o => o.metadata.Uses)] : [.. result.OrderBy(o => o.metadata.Uses)],
             _ => request.Sort.Descending ? [.. result.OrderByDescending(o => o.metadata.Code)] : result.OrderBy(o => o.metadata.Code).ToList()
         };
 
