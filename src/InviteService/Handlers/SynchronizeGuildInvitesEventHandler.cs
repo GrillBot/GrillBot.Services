@@ -77,7 +77,7 @@ public class SynchronizeGuildInvitesEventHandler(
 
         foreach (var invite in invites)
         {
-            var metadata = new InviteMetadata(invite.Code, invite.Uses ?? 0, invite.Inviter.Id.ToString(), invite.CreatedAt?.UtcDateTime);
+            var metadata = new InviteMetadata(invite.Code, invite.Uses ?? 0, invite.Inviter?.Id.ToString(), invite.CreatedAt?.UtcDateTime);
             var key = $"InviteMetadata-{invite.GuildId}-{invite.Code}";
 
             await _cache.SetAsync(key, metadata, null);
