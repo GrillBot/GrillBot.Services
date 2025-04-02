@@ -25,4 +25,10 @@ public class InviteController(IServiceProvider serviceProvider) : GrillBot.Core.
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public Task<IActionResult> GetInviteUsesAsync([FromBody] InviteUseListRequest request)
         => ProcessAsync<GetInviteUsesAction>(request);
+
+    [HttpPost("invite-user-uses/list")]
+    [ProducesResponseType<PaginatedResponse<UserInviteUse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetUserInviteUsesAsync([FromBody] UserInviteUseListRequest request)
+        => await ProcessAsync<GetUserInviteUsesAction>(request);
 }
