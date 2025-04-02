@@ -9,6 +9,8 @@ public class InviteContext(DbContextOptions options) : DbContext(options)
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Invite>(b => b.HasMany(o => o.Uses).WithOne(o => o.Invite).HasForeignKey(o => new { o.GuildId, o.Code }));
+        modelBuilder.Entity<Invite>(b =>
+            b.HasMany(o => o.Uses).WithOne(o => o.Invite).HasForeignKey(o => new { o.Code, o.GuildId })
+        );
     }
 }

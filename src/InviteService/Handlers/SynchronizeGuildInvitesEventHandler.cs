@@ -31,7 +31,7 @@ public class SynchronizeGuildInvitesEventHandler(
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizeGuildInvitesPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
         await ClearInvitesForGuildAsync(message.GuildId);
-        await DownloadInvitesToCacheAsync(message.GuildId, currentUser);
+        await DownloadInvitesToCacheAsync(message.GuildId, currentUser, message.IgnoreLog);
 
         return RabbitConsumptionResult.Success;
     }
@@ -52,7 +52,7 @@ public class SynchronizeGuildInvitesEventHandler(
         while (cursor != 0);
     }
 
-    private async Task DownloadInvitesToCacheAsync(string guildId, ICurrentUserProvider currentUser)
+    private async Task DownloadInvitesToCacheAsync(string guildId, ICurrentUserProvider currentUser, bool ignoreLog)
     {
         var guild = await _discordManager.GetGuildAsync(guildId.ToUlong());
 
@@ -63,21 +63,24 @@ public class SynchronizeGuildInvitesEventHandler(
         if (invites.Count == 0)
             return;
 
-        var logRequest = new LogRequest(LogType.Info, DateTime.UtcNow, guildId, currentUser.Id, null, null)
+        if (!ignoreLog)
         {
-            LogMessage = new LogMessageRequest
+            var logRequest = new LogRequest(LogType.Info, DateTime.UtcNow, guildId, currentUser.Id, null, null)
             {
-                Message = $"Invites for guild \"{guild.Name}\" was loaded. Loaded invites: {invites.Count}",
-                Source = $"{CounterKey} ({nameof(SynchronizeGuildInvitesEventHandler)})",
-                SourceAppName = "InviteService"
-            }
-        };
+                LogMessage = new LogMessageRequest
+                {
+                    Message = $"Invites for guild \"{guild.Name}\" was loaded. Loaded invites: {invites.Count}",
+                    Source = $"{CounterKey} ({nameof(SynchronizeGuildInvitesEventHandler)})",
+                    SourceAppName = "InviteService"
+                }
+            };
 
-        await Publisher.PublishAsync(new CreateItemsMessage(logRequest));
+            await Publisher.PublishAsync(new CreateItemsMessage(logRequest));
+        }
 
         foreach (var invite in invites)
         {
-            var metadata = new InviteMetadata(invite.Code, invite.Uses ?? 0, invite.Inviter?.Id.ToString(), invite.CreatedAt?.UtcDateTime);
+            var metadata = InviteMetadata.Create(invite);
             var key = $"InviteMetadata-{invite.GuildId}-{invite.Code}";
 
             await _cache.SetAsync(key, metadata, null);
