@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core.Models.Pagination;
+using GrillBot.Core.Validation;
 using InviteService.Actions;
 using InviteService.Models.Request;
 using InviteService.Models.Response;
@@ -29,6 +30,12 @@ public class InviteController(IServiceProvider serviceProvider) : GrillBot.Core.
     [HttpPost("invite-user-uses/list")]
     [ProducesResponseType<PaginatedResponse<UserInviteUse>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetUserInviteUsesAsync([FromBody] UserInviteUseListRequest request)
-        => await ProcessAsync<GetUserInviteUsesAction>(request);
+    public Task<IActionResult> GetUserInviteUsesAsync([FromBody] UserInviteUseListRequest request)
+        => ProcessAsync<GetUserInviteUsesAction>(request);
+
+    [HttpGet("guild/{guildId}/count")]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public Task<IActionResult> GetInvitesCountOfGuildAsync([DiscordId] ulong guildId)
+        => ProcessAsync<GetInvitesCountOfGuildAction>(guildId);
 }
