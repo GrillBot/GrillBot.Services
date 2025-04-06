@@ -32,22 +32,14 @@ public class GetCachedInvitesAction(
 
     private async Task<PaginatedResponse<(string guildId, InviteMetadata metadata)>> ReadCachedInvitesAsync(InviteListRequest request)
     {
-        var cursor = 0L;
         var result = new List<(string guildId, InviteMetadata metadata)>();
 
-        do
+        await foreach (var key in _redisServer.KeysAsync(pattern: "InviteMetadata-*", pageSize: int.MaxValue))
         {
-            var keys = _redisServer.KeysAsync(pattern: "InviteMetadata-*", pageSize: 100, cursor: cursor);
-            await foreach (var key in keys)
-            {
-                var metadata = await ReadCachedInviteWithFilterAsync(key, request);
-                if (metadata is not null)
-                    result.Add(metadata.Value);
-            }
-
-            cursor = ((IScanningCursor)keys).Cursor;
+            var metadata = await ReadCachedInviteWithFilterAsync(key, request);
+            if (metadata is not null)
+                result.Add(metadata.Value);
         }
-        while (cursor != 0);
 
         var sortedData = request.Sort.OrderBy?.ToLower() switch
         {

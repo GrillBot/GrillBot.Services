@@ -139,22 +139,14 @@ public class UserJoinedEventHandler(
 
     private async Task<List<InviteMetadata>> GetCachedInvitesAsync(IGuild guild)
     {
-        var cursor = 0L;
         var result = new List<InviteMetadata>();
 
-        do
+        await foreach (var key in _redisServer.KeysAsync(pattern: $"InviteMetadata-{guild.Id}-*", pageSize: int.MaxValue))
         {
-            var keys = _redisServer.KeysAsync(pattern: $"InviteMetadata-{guild.Id}-*", pageSize: 100, cursor: cursor);
-            await foreach (var key in keys)
-            {
-                var item = await _cache.GetAsync<InviteMetadata>(key.ToString());
-                if (item is not null)
-                    result.Add(item);
-            }
-
-            cursor = ((IScanningCursor)keys).Cursor;
+            var item = await _cache.GetAsync<InviteMetadata>(key.ToString());
+            if (item is not null)
+                result.Add(item);
         }
-        while (cursor != 0);
 
         return result;
     }

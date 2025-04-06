@@ -25,7 +25,8 @@ public class SynchronizeGuildInvitesEventHandler(
     IServer _redisServer,
     IDatabase _redisDatabase,
     DiscordManager _discordManager,
-    IDistributedCache _cache
+    IDistributedCache _cache,
+    ILogger<SynchronizeGuildInvitesEventHandler> _logger
 ) : BaseEventHandlerWithDb<SynchronizeGuildInvitesPayload, InviteContext>(loggerFactory, dbContext, counterManager, publisher)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizeGuildInvitesPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
@@ -39,17 +40,12 @@ public class SynchronizeGuildInvitesEventHandler(
     private async Task ClearInvitesForGuildAsync(string guildId)
     {
         var prefix = $"InviteMetadata-{guildId}-*";
-        var cursor = 0L;
 
-        do
+        await foreach (var key in _redisServer.KeysAsync(pattern: prefix, pageSize: int.MaxValue))
         {
-            var keysResult = _redisServer.KeysAsync(pattern: prefix, pageSize: 100, cursor: cursor);
-            await foreach (var key in keysResult)
-                await _redisDatabase.KeyDeleteAsync(key);
-
-            cursor = ((IScanningCursor)keysResult).Cursor;
+            _logger.LogInformation("Removing invite metadata for key {Key}", key);
+            await _redisDatabase.KeyDeleteAsync(key);
         }
-        while (cursor != 0);
     }
 
     private async Task DownloadInvitesToCacheAsync(string guildId, ICurrentUserProvider currentUser, bool ignoreLog)
@@ -83,6 +79,7 @@ public class SynchronizeGuildInvitesEventHandler(
             var metadata = InviteMetadata.Create(invite);
             var key = $"InviteMetadata-{invite.GuildId}-{invite.Code}";
 
+            _logger.LogInformation("Storing invite metadata for key {Key}", key);
             await _cache.SetAsync(key, metadata, null);
         }
     }
