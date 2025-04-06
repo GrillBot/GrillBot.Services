@@ -26,6 +26,8 @@ jobs:
       RemindService: ${{ steps.filter.outputs.RemindService }}
       SearchingService: ${{ steps.filter.outputs.SearchingService }}
       InviteService: ${{ steps.filter.outputs.InviteService }}
+      DotnetServices: ${{ steps.filter.outputs.DotnetServices }}
+      NodeServices: ${{ steps.filter.outputs.NodeServices }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -63,6 +65,27 @@ jobs:
             InviteService:
               - 'src/InviteService/**'
               - 'src/InviteService.Dockerfile'
+            DotnetServices:
+              - 'src/RubbergodService/**'
+              - 'src/RubbergodService.Dockerfile'
+              - 'src/PointsService/**'
+              - 'src/PointsService.Dockerfile'
+              - 'src/ImageProcessingService/**'
+              - 'src/ImageProcessingService.Dockerfile'
+              - 'src/AuditLogService/**'
+              - 'src/AuditLogService.Dockerfile'
+              - 'src/UserMeasuresService/**'
+              - 'src/UserMeasuresService.Dockerfile'
+              - 'src/EmoteService/**'
+              - 'src/EmoteService.Dockerfile'
+              - 'src/RemindService/**'
+              - 'src/RemindService.Dockerfile'
+              - 'src/SearchingService/**'
+              - 'src/SearchingService.Dockerfile'
+              - 'src/InviteService/**'
+              - 'src/InviteService.Dockerfile'
+            NodeServices:
+              - 'src/Graphics/**'
   CheckStaticContent:
     runs-on: ubuntu-latest
     steps:
@@ -78,11 +101,13 @@ jobs:
         run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/json-lint/master/pipeline.sh)
   BuildCommonLibraries:
     runs-on: ubuntu-latest
+    needs: [PathsFilter]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4
+        if: needs.PathsFilter.outputs.DotnetServices == 'true'
         with:
           dotnet-version: 8.0.x
           source-url: https://nuget.pkg.github.com/GrillBot/index.json
@@ -90,8 +115,10 @@ jobs:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Restore dependencies
         run: dotnet restore -r linux-x64 src/GrillBot.Services.Common/
+        if: needs.PathsFilter.outputs.DotnetServices == 'true'
       - name: Build (RELEASE)
         run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/GrillBot.Services.Common
+        if: needs.PathsFilter.outputs.DotnetServices == 'true'
   BuildServices:
     runs-on: ubuntu-latest
     needs: [CheckStaticContent, PathsFilter, BuildCommonLibraries]
@@ -99,6 +126,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Setup dotnet
+        if: needs.PathsFilter.outputs.DotnetServices == 'true'
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
@@ -107,7 +135,7 @@ jobs:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Setup Node.JS
         uses: actions/setup-node@v4
-        if: needs.PathsFilter.outputs.Graphics == 'true'
+        if: needs.PathsFilter.outputs.NodeServices == 'true'
         with:
           node-version: 18.x
       - name: RubbergodService
