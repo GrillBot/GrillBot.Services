@@ -94,7 +94,7 @@ public class CreateItemsEventHandler(
             var logType = type switch
             {
                 Discord.LogSeverity.Warning => LogType.Warning,
-                Discord.LogSeverity.Error => LogType.Error,
+                Discord.LogSeverity.Critical or Discord.LogSeverity.Error => LogType.Error,
                 Discord.LogSeverity.Info or Discord.LogSeverity.Verbose or Discord.LogSeverity.Debug => LogType.Info,
                 _ => (LogType?)null
             };

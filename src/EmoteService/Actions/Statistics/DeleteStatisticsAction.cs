@@ -39,10 +39,14 @@ public class DeleteStatisticsAction(
 
     private Task WriteToAuditLogAsync(string emoteId, int deletedRows, string guildId, string? userId)
     {
-        var message = $"Deleted emote statistics. Emote: {emoteId}. Deleted rows: {deletedRows}. UserId: {userId ?? "<null>"}";
         var logRequest = new LogRequest(LogType.Info, DateTime.UtcNow, guildId, CurrentUser.Id, null, null)
         {
-            LogMessage = new(message, LogSeverity.Info, "EmoteService", nameof(DeleteStatisticsAction))
+            LogMessage = new LogMessageRequest
+            {
+                Message = $"Deleted emote statistics. Emote: {emoteId}. Deleted rows: {deletedRows}. UserId: {userId ?? "<null>"}",
+                Source = nameof(DeleteStatisticsAction),
+                SourceAppName = "EmoteService",
+            }
         };
 
         return _rabbitPublisher.PublishAsync(new CreateItemsMessage(logRequest));

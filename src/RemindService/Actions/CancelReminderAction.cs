@@ -83,7 +83,12 @@ public class CancelReminderAction(
 
         var logRequest = new LogRequest(LogType.Info, DateTime.UtcNow, null, request.ExecutingUserId)
         {
-            LogMessage = new LogMessageRequest(string.Format(messageTemplate, message.Id), LogSeverity.Info, "RemindService", nameof(CancelReminderAction))
+            LogMessage = new LogMessageRequest
+            {
+                Message = string.Format(messageTemplate, message.Id),
+                Source = nameof(CancelReminderAction),
+                SourceAppName = "RemindService"
+            }
         };
 
         return _publisher.PublishAsync(new CreateItemsMessage(logRequest));

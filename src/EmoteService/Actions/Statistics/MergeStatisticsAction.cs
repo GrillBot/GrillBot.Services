@@ -82,10 +82,14 @@ public class MergeStatisticsAction(
 
     private Task NotifyAuditLogServiceAsync(MergeStatisticsResult result, Emote sourceEmote, Emote destinationEmote, string guildId)
     {
-        var message = $"Merged emotes {sourceEmote} into {destinationEmote}. Created: {result.CreatedEmotesCount}. Deleted: {result.DeletedEmotesCount}. Total: {result.ModifiedEmotesCount}.";
         var logRequest = new LogRequest(LogType.Info, DateTime.UtcNow, guildId, CurrentUser.Id, null, null)
         {
-            LogMessage = new LogMessageRequest(message, LogSeverity.Info, "EmoteService", nameof(MergeStatisticsAction))
+            LogMessage = new LogMessageRequest
+            {
+                SourceAppName = "EmoteService",
+                Source = nameof(MergeStatisticsAction),
+                Message = $"Merged emotes {sourceEmote} into {destinationEmote}. Created: {result.CreatedEmotesCount}. Deleted: {result.DeletedEmotesCount}. Total: {result.ModifiedEmotesCount}."
+            }
         };
 
         return _rabbitPublisher.PublishAsync(new CreateItemsMessage(logRequest));
