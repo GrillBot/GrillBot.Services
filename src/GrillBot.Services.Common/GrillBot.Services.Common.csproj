@@ -7,9 +7,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="GrillBot.Core" Version="2.0.4" />
+		<PackageReference Include="GrillBot.Core" Version="2.0.5" />
 		<PackageReference Include="GrillBot.Core.RabbitMQ.V2" Version="2.1.2" />
-		<PackageReference Include="GrillBot.Core.Services" Version="2.2.4" />
+		<PackageReference Include="GrillBot.Core.Services" Version="2.3.0" />
 		<PackageReference Include="GrillBot.Core.Metrics" Version="1.0.0" />
 		<PackageReference Include="GrillBot.Core.Redis" Version="1.1.1" />
 		<PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="8.0.2" />

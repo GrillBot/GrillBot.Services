@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core;
+using GrillBot.Core.Metrics;
 using GrillBot.Services.Common.Discord;
 using GrillBot.Services.Common.Infrastructure.Api.Filters;
 using GrillBot.Services.Common.Registrators;
@@ -39,6 +40,9 @@ public static class ServiceBuilder
             if (configureKestrel is not null)
                 configureKestrel(opt);
         });
+
+        // Telemetry
+        builder.AddTelemetry();
 
         // GrillBot.Core
         builder.Services.AddDiagnostic();
@@ -104,6 +108,7 @@ public static class ServiceBuilder
         if (configureMiddleware is not null)
             configureMiddleware(app);
 
+        app.UseTelemetry();
         app.UseAuthorization();
         app.MapControllers();
         app.MapHealthChecks("/health");
