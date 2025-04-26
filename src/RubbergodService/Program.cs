@@ -1,6 +1,7 @@
 using GrillBot.Core;
 using GrillBot.Core.Redis;
 using GrillBot.Services.Common;
+using GrillBot.Services.Common.EntityFramework.Extensions;
 using Microsoft.EntityFrameworkCore;
 using RubbergodService.Core.Entity;
 using RubbergodService.Core.Providers;
@@ -14,7 +15,7 @@ var application = await ServiceBuilder.CreateWebAppAsync(
     {
         var connectionString = configuration.GetConnectionString("Default")!;
 
-        services.AddDatabaseContext<RubbergodServiceContext>(b => b.UseNpgsql(connectionString));
+        services.AddPostgresDatabaseContext<RubbergodServiceContext>(connectionString);
         services.AddRedis(configuration);
         services.AddStatisticsProvider<StatisticsProvider>();
         services.AddDirectApi();

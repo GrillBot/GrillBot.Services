@@ -6,6 +6,7 @@ using AuditLogService.Managers;
 using AuditLogService.Processors;
 using GrillBot.Core;
 using GrillBot.Services.Common;
+using GrillBot.Services.Common.EntityFramework.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -17,8 +18,8 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         var connectionString = configuration.GetConnectionString("Default")!;
 
         services
-            .AddDatabaseContext<AuditLogServiceContext>(b => b.UseNpgsql(connectionString))
-            .AddDatabaseContext<AuditLogStatisticsContext>(b => b.UseNpgsql(connectionString));
+            .AddPostgresDatabaseContext<AuditLogServiceContext>(connectionString)
+            .AddPostgresDatabaseContext<AuditLogStatisticsContext>(connectionString);
 
         services.AddStatisticsProvider<StatisticsProvider>();
         services.AddManagers();

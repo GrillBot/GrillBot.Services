@@ -1,6 +1,7 @@
 using GrillBot.Core;
 using GrillBot.Core.Redis;
 using GrillBot.Services.Common;
+using GrillBot.Services.Common.EntityFramework.Extensions;
 using InviteService.Core.Entity;
 using InviteService.Core.Providers;
 using InviteService.Options;
@@ -12,9 +13,9 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
     args,
     (services, configuration) =>
     {
-        var connectionString = configuration.GetConnectionString("Default");
+        var connectionString = configuration.GetConnectionString("Default")!;
 
-        services.AddDatabaseContext<InviteContext>(b => b.UseNpgsql(connectionString));
+        services.AddPostgresDatabaseContext<InviteContext>(connectionString);
         services.AddStatisticsProvider<StatisticsProvider>();
 
         services.AddRedisDistributedCache(configuration);

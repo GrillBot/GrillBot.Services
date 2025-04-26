@@ -1,5 +1,6 @@
 using GrillBot.Core;
 using GrillBot.Services.Common;
+using GrillBot.Services.Common.EntityFramework.Extensions;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
 using PointsService.Core.Options;
@@ -13,7 +14,7 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
     {
         var connectionString = configuration.GetConnectionString("Default")!;
 
-        services.AddDatabaseContext<PointsServiceContext>(b => b.UseNpgsql(connectionString));
+        services.AddPostgresDatabaseContext<PointsServiceContext>(connectionString);
         services.AddStatisticsProvider<StatisticsProvider>();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
