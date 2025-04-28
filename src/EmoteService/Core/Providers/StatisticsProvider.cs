@@ -11,7 +11,10 @@ public class StatisticsProvider(EmoteServiceContext dbContext) : IStatisticsProv
         return new Dictionary<string, long>
         {
             { nameof(dbContext.EmoteDefinitions), await dbContext.EmoteDefinitions.LongCountAsync() },
-            { nameof(dbContext.EmoteUserStatItems), await dbContext.EmoteUserStatItems.LongCountAsync() }
+            { nameof(dbContext.EmoteUserStatItems), await dbContext.EmoteUserStatItems.LongCountAsync() },
+            { nameof(dbContext.EmoteSuggestions), await dbContext.EmoteSuggestions.LongCountAsync() },
+            { nameof(dbContext.EmoteUserVotes), await dbContext.EmoteUserVotes.LongCountAsync() },
+            { nameof(dbContext.EmoteVoteSessions), await dbContext.EmoteVoteSessions.LongCountAsync() }
         };
     }
 }

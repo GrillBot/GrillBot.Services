@@ -1,0 +1,26 @@
+﻿using GrillBot.Core.Database.ValueObjects;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace EmoteService.Core.Entity.Suggestions;
+
+[Table("EmoteSuggestions", Schema = "suggestions")]
+public class EmoteSuggestion
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    public DiscordIdValueObject FromUserId { get; set; }
+
+    [StringLength(255)]
+    public string Name { get; set; } = null!;
+
+    public DateTime SuggestedAtUtc { get; set; }
+    public byte[] Image { get; set; } = null!;
+    public DiscordIdValueObject GuildId { get; set; }
+    public DiscordIdValueObject SuggestionMessageId { get; set; }
+    public bool ApprovedForVote { get; set; }
+
+    public EmoteVoteSession? VoteSession { get; set; }
+}
