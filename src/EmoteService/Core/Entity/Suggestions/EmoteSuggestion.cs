@@ -22,5 +22,10 @@ public class EmoteSuggestion
     public DiscordIdValueObject SuggestionMessageId { get; set; }
     public bool ApprovedForVote { get; set; }
 
+    [StringLength(4000)]
+    public string ReasonForAdd { get; set; } = null!;
+
+    public bool IsAnimated { get; set; }
+
     public EmoteVoteSession? VoteSession { get; set; }
 }
