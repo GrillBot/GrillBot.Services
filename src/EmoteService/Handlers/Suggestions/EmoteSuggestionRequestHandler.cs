@@ -1,4 +1,5 @@
-﻿using EmoteService.Core.Entity;
+﻿using Discord;
+using EmoteService.Core.Entity;
 using EmoteService.Core.Entity.Suggestions;
 using EmoteService.Models.Events.Suggestions;
 using GrillBot.Core.Extensions;
@@ -9,7 +10,6 @@ using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
-using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -21,7 +21,7 @@ public partial class EmoteSuggestionRequestHandler(
     EmoteServiceContext dbContext,
     ICounterManager counterManager,
     IRabbitPublisher rabbitPublisher
-) : BaseEventHandlerWithDb<EmoteSuggestionRequestPayload, EmoteServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
+) : EmoteSuggestionHandlerBase<EmoteSuggestionRequestPayload>(loggerFactory, dbContext, counterManager, rabbitPublisher)
 {
     [GeneratedRegex(@"\w+", RegexOptions.IgnoreCase)]
     private static partial Regex EmoteNameRegex();
@@ -36,8 +36,8 @@ public partial class EmoteSuggestionRequestHandler(
 
         var messages = new List<DiscordMessagePayload>
         {
-            await CreateAdminChannelNotificationAsync(entity, guild),
-            await CreateUserNotificationAsync(entity)
+            CreateAdminChannelNotification(entity, guild),
+            CreateUserNotification(entity, message.Locale)
         };
 
         await Publisher.PublishAsync(messages);
@@ -54,7 +54,7 @@ public partial class EmoteSuggestionRequestHandler(
                 throw new ArgumentException($"Emote name ({message.Name}) does not meet naming rules.", nameof(message));
 
             ArgumentException.ThrowIfNullOrEmpty(message.ReasonToAdd);
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(message.ReasonToAdd.Length, 4000);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(message.ReasonToAdd.Length, EmbedFieldBuilder.MaxFieldValueLength);
 
             ArgumentNullException.ThrowIfNull(message.Image);
             ArgumentOutOfRangeException.ThrowIfLessThan(message.Image.Length, 5);
@@ -119,13 +119,19 @@ public partial class EmoteSuggestionRequestHandler(
         return entity;
     }
 
-    private async Task<DiscordMessagePayload> CreateAdminChannelNotificationAsync(EmoteSuggestion suggestion, Guild guild)
+    private static DiscordMessagePayload CreateUserNotification(EmoteSuggestion suggestion, string locale)
     {
-        return new DiscordMessagePayload(); // TODO
-    }
+        var message = new DiscordMessagePayload(
+            null,
+            suggestion.FromUserId.ToString(),
+            "SuggestionModule/PrivateMessageSuggestionCreated",
+            [],
+            "Emote"
+        );
 
-    private async Task<DiscordMessagePayload> CreateUserNotificationAsync(EmoteSuggestion suggestion)
-    {
-        return new DiscordMessagePayload(); // TODO
+        message.ServiceData.Add("UseLocalizedContent", "true");
+        message.ServiceData.Add("Language", locale);
+
+        return message;
     }
 }

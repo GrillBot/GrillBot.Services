@@ -15,12 +15,22 @@ public class EmoteSuggestionRequestPayload : IRabbitMessage
     public string FromUserId { get; set; } = null!;
     public DateTime CreatedAtUtc { get; set; }
     public bool IsAnimated { get; set; }
+    public string Locale { get; set; } = null!;
 
     public EmoteSuggestionRequestPayload()
     {
     }
 
-    public EmoteSuggestionRequestPayload(string name, string reasonToAdd, byte[] image, string guildId, string fromUserId, DateTime createdAtUtc, bool isAnimated)
+    public EmoteSuggestionRequestPayload(
+        string name,
+        string reasonToAdd,
+        byte[] image,
+        string guildId,
+        string fromUserId,
+        DateTime createdAtUtc,
+        bool isAnimated,
+        string locale
+    )
     {
         Name = name;
         ReasonToAdd = reasonToAdd;
@@ -29,11 +39,19 @@ public class EmoteSuggestionRequestPayload : IRabbitMessage
         FromUserId = fromUserId;
         CreatedAtUtc = createdAtUtc;
         IsAnimated = isAnimated;
+        Locale = locale;
     }
 
-    public static EmoteSuggestionRequestPayload Create(string name, string reasonToAdd, byte[] image, string guildId, string fromUserId, bool isAnimated)
-        => new(name, reasonToAdd, image, guildId, fromUserId, DateTime.UtcNow, isAnimated);
+    public static EmoteSuggestionRequestPayload Create(
+        string name,
+        string reasonToAdd,
+        byte[] image,
+        string guildId,
+        string fromUserId,
+        bool isAnimated,
+        string locale
+    ) => new(name, reasonToAdd, image, guildId, fromUserId, DateTime.UtcNow, isAnimated, locale);
 
-    public static EmoteSuggestionRequestPayload Create(string name, string reasonToAdd, byte[] image, IGuild guild, IUser user, bool isAnimated)
-        => Create(name, reasonToAdd, image, guild.Id.ToString(), user.Id.ToString(), isAnimated);
+    public static EmoteSuggestionRequestPayload Create(string name, string reasonToAdd, byte[] image, IGuild guild, IUser user, bool isAnimated, string locale)
+        => Create(name, reasonToAdd, image, guild.Id.ToString(), user.Id.ToString(), isAnimated, locale);
 }
