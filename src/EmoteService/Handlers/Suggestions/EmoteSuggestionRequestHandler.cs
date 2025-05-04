@@ -2,7 +2,6 @@
 using EmoteService.Core.Entity;
 using EmoteService.Core.Entity.Suggestions;
 using EmoteService.Models.Events.Suggestions;
-using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
@@ -11,7 +10,6 @@ using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace EmoteService.Handlers.Suggestions;
@@ -55,27 +53,20 @@ public partial class EmoteSuggestionRequestHandler(
 
             ArgumentException.ThrowIfNullOrEmpty(message.ReasonToAdd);
             ArgumentOutOfRangeException.ThrowIfGreaterThan(message.ReasonToAdd.Length, EmbedFieldBuilder.MaxFieldValueLength);
-
             ArgumentNullException.ThrowIfNull(message.Image);
             ArgumentOutOfRangeException.ThrowIfLessThan(message.Image.Length, 5);
-
-            ArgumentException.ThrowIfNullOrEmpty(message.GuildId);
-            if (!ulong.TryParse(message.GuildId, CultureInfo.InvariantCulture, out var guildId))
-                throw new ArgumentException($"Provided GuildId ({message.GuildId}) is not valid guild ID.", nameof(message));
-
-            ArgumentException.ThrowIfNullOrEmpty(message.FromUserId);
-            if (!ulong.TryParse(message.FromUserId, CultureInfo.InvariantCulture, out _))
-                throw new ArgumentException($"Provided FromUserId ({message.FromUserId}) is not valid user ID.", nameof(message));
+            ArgumentOutOfRangeException.ThrowIfZero(message.GuildId);
+            ArgumentOutOfRangeException.ThrowIfZero(message.FromUserId);
 
             var guild = await DbContext.Guilds.AsNoTracking()
-                .FirstOrDefaultAsync(o => o.GuildId == guildId);
+                .FirstOrDefaultAsync(o => o.GuildId == message.GuildId);
 
             ValidateConfiguration(guild);
             return guild;
         }
         catch (ArgumentException ex)
         {
-            var logRequest = new LogRequest(LogType.Warning, message.CreatedAtUtc, message.GuildId, message.FromUserId)
+            var logRequest = new LogRequest(LogType.Warning, message.CreatedAtUtc, message.GuildId.ToString(), message.FromUserId.ToString())
             {
                 LogMessage = new LogMessageRequest
                 {
@@ -104,8 +95,8 @@ public partial class EmoteSuggestionRequestHandler(
         var entity = new EmoteSuggestion
         {
             ApprovedForVote = false,
-            FromUserId = message.FromUserId.ToUlong(),
-            GuildId = message.GuildId.ToUlong(),
+            FromUserId = message.FromUserId,
+            GuildId = message.GuildId,
             Image = message.Image,
             IsAnimated = message.IsAnimated,
             Name = message.Name,

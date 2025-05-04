@@ -11,8 +11,8 @@ public class EmoteSuggestionRequestPayload : IRabbitMessage
     public string Name { get; set; } = null!;
     public string ReasonToAdd { get; set; } = null!;
     public byte[] Image { get; set; } = null!;
-    public string GuildId { get; set; } = null!;
-    public string FromUserId { get; set; } = null!;
+    public ulong GuildId { get; set; }
+    public ulong FromUserId { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public bool IsAnimated { get; set; }
     public string Locale { get; set; } = null!;
@@ -25,8 +25,8 @@ public class EmoteSuggestionRequestPayload : IRabbitMessage
         string name,
         string reasonToAdd,
         byte[] image,
-        string guildId,
-        string fromUserId,
+        ulong guildId,
+        ulong fromUserId,
         DateTime createdAtUtc,
         bool isAnimated,
         string locale
@@ -46,12 +46,12 @@ public class EmoteSuggestionRequestPayload : IRabbitMessage
         string name,
         string reasonToAdd,
         byte[] image,
-        string guildId,
-        string fromUserId,
+        ulong guildId,
+        ulong fromUserId,
         bool isAnimated,
         string locale
     ) => new(name, reasonToAdd, image, guildId, fromUserId, DateTime.UtcNow, isAnimated, locale);
 
     public static EmoteSuggestionRequestPayload Create(string name, string reasonToAdd, byte[] image, IGuild guild, IUser user, bool isAnimated, string locale)
-        => Create(name, reasonToAdd, image, guild.Id.ToString(), user.Id.ToString(), isAnimated, locale);
+        => Create(name, reasonToAdd, image, guild.Id, user.Id, isAnimated, locale);
 }
