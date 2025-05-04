@@ -13,6 +13,7 @@ public class EmoteVoteSession
 
     public DateTime VoteStartedAtUtc { get; set; }
     public DateTime ExpectedVoteEndAtUtc { get; set; }
+    public DateTime? KilledAtUtc { get; set; }
 
     public IList<EmoteUserVote> UserVotes { get; set; } = [];
 }

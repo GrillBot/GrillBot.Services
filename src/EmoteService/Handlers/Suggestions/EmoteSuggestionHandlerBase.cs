@@ -17,7 +17,7 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
 ) : BaseEventHandlerWithDb<TPayload, EmoteServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
     where TPayload : class, IRabbitMessage, new()
 {
-    protected DiscordMessagePayload CreateAdminChannelNotification(EmoteSuggestion suggestion, Guild guild)
+    protected DiscordMessagePayload CreateAdminChannelNotification(EmoteSuggestion suggestion, Core.Entity.Guild guild)
     {
         var image = new DiscordMessageFile(
             $"{suggestion.Id}.{(suggestion.IsAnimated ? "gif" : "png")}",

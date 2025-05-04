@@ -42,7 +42,7 @@ public partial class EmoteSuggestionRequestHandler(
         return RabbitConsumptionResult.Success;
     }
 
-    private async Task<Guild?> ValidateInputAndGetGuildAsync(EmoteSuggestionRequestPayload message)
+    private async Task<Core.Entity.Guild?> ValidateInputAndGetGuildAsync(EmoteSuggestionRequestPayload message)
     {
         try
         {
@@ -81,7 +81,7 @@ public partial class EmoteSuggestionRequestHandler(
         }
     }
 
-    private static void ValidateConfiguration(Guild? guild)
+    private static void ValidateConfiguration(Core.Entity.Guild? guild)
     {
         if (guild is null)
             throw new ArgumentException("Missing guild configuration", nameof(guild));
