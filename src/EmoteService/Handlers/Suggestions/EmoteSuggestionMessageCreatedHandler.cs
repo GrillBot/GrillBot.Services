@@ -5,7 +5,6 @@ using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
-using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Handlers.Suggestions;
 
@@ -21,14 +20,14 @@ public class EmoteSuggestionMessageCreatedHandler(
         if (message.SuggestionId == Guid.Empty)
             return RabbitConsumptionResult.Reject;
 
-        var suggestion = await DbContext.EmoteSuggestions.FirstOrDefaultAsync(o => o.Id == message.SuggestionId);
+        var query = DbContext.EmoteSuggestions.Where(o => o.Id == message.SuggestionId);
+        var suggestion = await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
         if (suggestion is null)
             return RabbitConsumptionResult.Success;
 
         suggestion.SuggestionMessageId = message.MessageId;
 
-        return await DbContext.SaveChangesAsync() > 0 ?
-            RabbitConsumptionResult.Success :
-            RabbitConsumptionResult.Reject;
+        await ContextHelper.SaveChagesAsync();
+        return RabbitConsumptionResult.Success;
     }
 }

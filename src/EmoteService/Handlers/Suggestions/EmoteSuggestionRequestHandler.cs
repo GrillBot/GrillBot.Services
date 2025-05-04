@@ -58,10 +58,12 @@ public partial class EmoteSuggestionRequestHandler(
             ArgumentOutOfRangeException.ThrowIfZero(message.GuildId);
             ArgumentOutOfRangeException.ThrowIfZero(message.FromUserId);
 
-            var guild = await DbContext.Guilds.AsNoTracking()
-                .FirstOrDefaultAsync(o => o.GuildId == message.GuildId);
+            var guildQuery = DbContext.Guilds.AsNoTracking()
+                .Where(o => o.GuildId == message.GuildId)
 
+            var guild = await ContextHelper.ReadFirstOrDefaultEntityAsync(guildQuery);
             ValidateConfiguration(guild);
+
             return guild;
         }
         catch (ArgumentException ex)
@@ -105,7 +107,7 @@ public partial class EmoteSuggestionRequestHandler(
         };
 
         await DbContext.AddAsync(entity);
-        await DbContext.SaveChangesAsync();
+        await ContextHelper.SaveChagesAsync();
 
         return entity;
     }

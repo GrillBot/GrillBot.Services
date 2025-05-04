@@ -5,7 +5,6 @@ using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
-using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Handlers.Guild;
 
@@ -21,9 +20,10 @@ public class GuildChannelDeletedHandler(
         ArgumentOutOfRangeException.ThrowIfZero(message.GuildId);
         ArgumentOutOfRangeException.ThrowIfZero(message.ChannelId);
 
-        var guild = await DbContext.Guilds
-            .FirstOrDefaultAsync(o => o.GuildId == message.GuildId && (o.SuggestionChannelId == message.ChannelId || o.VoteChannelId == message.ChannelId));
+        var guildQuery = DbContext.Guilds
+            .Where(o => o.GuildId == message.GuildId && (o.SuggestionChannelId == message.ChannelId || o.VoteChannelId == message.ChannelId));
 
+        var guild = await ContextHelper.ReadFirstOrDefaultEntityAsync(guildQuery);
         if (guild is null)
             return RabbitConsumptionResult.Success;
 
@@ -36,15 +36,16 @@ public class GuildChannelDeletedHandler(
         {
             guild.VoteChannelId = 0;
 
-            var votes = await DbContext.EmoteVoteSessions
-                .Where(o => o.KilledAtUtc == null && o.ExpectedVoteEndAtUtc > DateTime.UtcNow)
-                .ToListAsync();
+            // Kill all active vote sessions for this guild.
+            var voteSessionsQuery = DbContext.EmoteVoteSessions
+                .Where(o => o.KilledAtUtc == null && o.ExpectedVoteEndAtUtc > DateTime.UtcNow && o.Suggestion.GuildId == message.GuildId);
 
+            var votes = await ContextHelper.ReadEntitiesAsync(voteSessionsQuery);
             foreach (var vote in votes)
                 vote.KilledAtUtc = DateTime.UtcNow;
         }
 
-        await DbContext.SaveChangesAsync();
+        await ContextHelper.SaveChagesAsync();
         return RabbitConsumptionResult.Success;
     }
 }
