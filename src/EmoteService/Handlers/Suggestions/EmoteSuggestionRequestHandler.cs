@@ -59,7 +59,7 @@ public partial class EmoteSuggestionRequestHandler(
             ArgumentOutOfRangeException.ThrowIfZero(message.FromUserId);
 
             var guildQuery = DbContext.Guilds.AsNoTracking()
-                .Where(o => o.GuildId == message.GuildId)
+                .Where(o => o.GuildId == message.GuildId);
 
             var guild = await ContextHelper.ReadFirstOrDefaultEntityAsync(guildQuery);
             ValidateConfiguration(guild);
