@@ -30,6 +30,8 @@ public class EmoteSuggestionMessageDeletedHandler(
             return RabbitConsumptionResult.Success;
 
         suggestion.ApprovedForVote = false;
+        suggestion.ApprovalSetAtUtc = null;
+        suggestion.ApprovalByUserId = null;
 
         if (suggestion.VoteSession is not null)
             suggestion.VoteSession.KilledAtUtc = DateTime.UtcNow;

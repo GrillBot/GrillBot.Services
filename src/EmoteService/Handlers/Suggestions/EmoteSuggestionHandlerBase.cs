@@ -18,7 +18,7 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
 ) : BaseEventHandlerWithDb<TPayload, EmoteServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
     where TPayload : class, IRabbitMessage, new()
 {
-    protected DiscordSendMessagePayload CreateAdminChannelNotification(EmoteSuggestion suggestion, Core.Entity.Guild guild)
+    protected DiscordMessagePayloadData CreateAdminChannelNotification(EmoteSuggestion suggestion, Core.Entity.Guild guild, ulong? suggestionMessageId)
     {
         var image = new DiscordMessageFile(
             $"{suggestion.Id}.{(suggestion.IsAnimated ? "gif" : "png")}",
@@ -26,6 +26,42 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
             suggestion.Image
         );
 
+        var embed = CreateNotificationEmbed(suggestion, image);
+
+        DiscordMessagePayloadData message;
+        if (suggestionMessageId is not null)
+        {
+            message = new DiscordEditMessagePayload(
+                guild.GuildId,
+                guild.SuggestionChannelId,
+                suggestionMessageId.Value,
+                null,
+                [image],
+                "Emote",
+                embed: embed
+            );
+        }
+        else
+        {
+            message = new DiscordSendMessagePayload(
+                guild.GuildId,
+                guild.SuggestionChannelId,
+                null,
+                [image],
+                "Emote",
+                embed: embed
+            );
+        }
+
+        message.WithLocalization(locale: "cs-CZ");
+        message.ServiceData.Add("SuggestionId", suggestion.Id.ToString());
+        // TODO Generate buttons for approval.
+
+        return message;
+    }
+
+    private static DiscordMessageEmbed CreateNotificationEmbed(EmoteSuggestion suggestion, DiscordMessageFile image)
+    {
         var embed = new DiscordMessageEmbed(
             url: null,
             title: "SuggestionModule/SuggestionEmbed/Title",
@@ -41,24 +77,14 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
             thumbnailUrl: null,
             fields: [
                 new("SuggestionModule/SuggestionEmbed/EmoteNameTitle", suggestion.Name, false),
-                new("SuggestionModule/SuggestionEmbed/EmoteReasonTitle", suggestion.ReasonForAdd, false)
+                new("SuggestionModule/SuggestionEmbed/EmoteReasonTitle", suggestion.ReasonForAdd, false),
+                new($"SuggestionModule/SuggestionEmbed/ApprovedForVote/{suggestion.ApprovedForVote}", $"User.Mention:{suggestion.ApprovalByUserId}", true),
+                new($"SuggestionModule/SuggestionEmbed/ApprovedForVote/{suggestion.ApprovedForVote}/At", $"DateTime:{suggestion.ApprovalSetAtUtc}", true)
             ],
             timestamp: suggestion.SuggestedAtUtc,
             useCurrentTimestamp: false
         );
 
-        var message = new DiscordSendMessagePayload(
-            guild.GuildId,
-            guild.SuggestionChannelId,
-            null,
-            [image],
-            "Emote",
-            embed: embed
-        );
-
-        message.WithLocalization(locale: "cs-CZ");
-        message.ServiceData.Add("SuggestionId", suggestion.Id.ToString());
-
-        return message;
+        return embed;
     }
 }

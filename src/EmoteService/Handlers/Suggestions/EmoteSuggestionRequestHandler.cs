@@ -34,7 +34,7 @@ public partial class EmoteSuggestionRequestHandler(
 
         var messages = new List<DiscordSendMessagePayload>
         {
-            CreateAdminChannelNotification(entity, guild),
+            (DiscordSendMessagePayload)CreateAdminChannelNotification(entity, guild, null),
             CreateUserNotification(entity, message.Locale)
         };
 

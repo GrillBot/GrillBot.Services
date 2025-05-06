@@ -21,6 +21,8 @@ public class EmoteSuggestion
     public DiscordIdValueObject GuildId { get; set; }
     public DiscordIdValueObject SuggestionMessageId { get; set; }
     public bool ApprovedForVote { get; set; }
+    public DiscordIdValueObject? ApprovalByUserId { get; set; }
+    public DateTime? ApprovalSetAtUtc { get; set; }
 
     [StringLength(4000)]
     public string ReasonForAdd { get; set; } = null!;
