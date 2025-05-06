@@ -32,7 +32,7 @@ public partial class EmoteSuggestionRequestHandler(
 
         var entity = await CreateSuggestionEntityAsync(message);
 
-        var messages = new List<DiscordMessagePayload>
+        var messages = new List<DiscordSendMessagePayload>
         {
             CreateAdminChannelNotification(entity, guild),
             CreateUserNotification(entity, message.Locale)
@@ -112,19 +112,17 @@ public partial class EmoteSuggestionRequestHandler(
         return entity;
     }
 
-    private static DiscordMessagePayload CreateUserNotification(EmoteSuggestion suggestion, string locale)
+    private static DiscordSendMessagePayload CreateUserNotification(EmoteSuggestion suggestion, string locale)
     {
-        var message = new DiscordMessagePayload(
+        var message = new DiscordSendMessagePayload(
             null,
-            suggestion.FromUserId.ToString(),
+            suggestion.FromUserId,
             "SuggestionModule/PrivateMessageSuggestionCreated",
             [],
             "Emote"
         );
 
-        message.ServiceData.Add("UseLocalizedContent", "true");
-        message.ServiceData.Add("Language", locale);
-
+        message.WithLocalization(locale: locale);
         return message;
     }
 }

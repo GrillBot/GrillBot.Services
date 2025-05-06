@@ -6,6 +6,7 @@ using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using GrillBot.Core.RabbitMQ.V2.Messages;
+using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Embeds;
 
 namespace EmoteService.Handlers.Suggestions;
 
@@ -17,7 +18,7 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
 ) : BaseEventHandlerWithDb<TPayload, EmoteServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
     where TPayload : class, IRabbitMessage, new()
 {
-    protected DiscordMessagePayload CreateAdminChannelNotification(EmoteSuggestion suggestion, Core.Entity.Guild guild)
+    protected DiscordSendMessagePayload CreateAdminChannelNotification(EmoteSuggestion suggestion, Core.Entity.Guild guild)
     {
         var image = new DiscordMessageFile(
             $"{suggestion.Id}.{(suggestion.IsAnimated ? "gif" : "png")}",
@@ -46,18 +47,17 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
             useCurrentTimestamp: false
         );
 
-        var message = new DiscordMessagePayload(
-            guild.GuildId.ToString(),
-            guild.SuggestionChannelId.ToString(),
+        var message = new DiscordSendMessagePayload(
+            guild.GuildId,
+            guild.SuggestionChannelId,
             null,
             [image],
             "Emote",
             embed: embed
         );
 
-        message.ServiceData.Add("UseLocalizedEmbeds", "true");
+        message.WithLocalization(locale: "cs-CZ");
         message.ServiceData.Add("SuggestionId", suggestion.Id.ToString());
-        message.ServiceData.Add("Language", "cs-CZ");
 
         return message;
     }

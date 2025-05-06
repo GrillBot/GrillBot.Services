@@ -1,9 +1,12 @@
 ﻿using Discord;
+using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
+using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Components;
+using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Embeds;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using RemindService.Core.Entity;
 using RemindService.Models.Events;
@@ -39,16 +42,15 @@ public class SendRemindNotificationEventHandler(
         return await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
     }
 
-    private static DiscordMessagePayload ProcessRemind(RemindMessage remindMessage, bool isEarly)
+    private static DiscordSendMessagePayload ProcessRemind(RemindMessage remindMessage, bool isEarly)
     {
         var embed = CreateRemindEmbed(remindMessage, isEarly);
         var postponeComponents = CreatePostponeComponents(isEarly);
         var attachments = Enumerable.Empty<DiscordMessageFile>();
-        var message = new DiscordMessagePayload(null, remindMessage.ToUserId, null, attachments, "Remind", null, null, embed, null, postponeComponents);
+        var message = new DiscordSendMessagePayload(null, remindMessage.ToUserId.ToUlong(), null, attachments, "Remind", null, null, embed, null, postponeComponents);
 
-        message.ServiceData.Add("UseLocalizedEmbeds", "true");
+        message.WithLocalization(locale: remindMessage.Language);
         message.ServiceData.Add("RemindId", remindMessage.Id.ToString());
-        message.ServiceData.Add("Language", remindMessage.Language);
         message.ServiceData.Add("PostponeCount", remindMessage.PostponeCount.ToString());
 
         return message;
