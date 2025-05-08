@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GrillBot.Core.Database.ValueObjects;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EmoteService.Core.Entity.Suggestions;
@@ -14,6 +15,7 @@ public class EmoteVoteSession
     public DateTime VoteStartedAtUtc { get; set; }
     public DateTime ExpectedVoteEndAtUtc { get; set; }
     public DateTime? KilledAtUtc { get; set; }
+    public DiscordIdValueObject? VoteMessageId { get; set; }
 
     public IList<EmoteUserVote> UserVotes { get; set; } = [];
 

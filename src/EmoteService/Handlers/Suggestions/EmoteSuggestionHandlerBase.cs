@@ -18,7 +18,7 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
 ) : BaseEventHandlerWithDb<TPayload, EmoteServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
     where TPayload : class, IRabbitMessage, new()
 {
-    protected DiscordMessagePayloadData CreateAdminChannelNotification(EmoteSuggestion suggestion, Core.Entity.Guild guild, ulong? suggestionMessageId)
+    protected static DiscordMessagePayloadData CreateAdminChannelNotification(EmoteSuggestion suggestion, Core.Entity.Guild guild, ulong? suggestionMessageId)
     {
         var image = new DiscordMessageFile(
             $"{suggestion.Id}.{(suggestion.IsAnimated ? "gif" : "png")}",
@@ -55,6 +55,7 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
 
         message.WithLocalization(locale: "cs-CZ");
         message.ServiceData.Add("SuggestionId", suggestion.Id.ToString());
+        message.ServiceData.Add("MessageType", "SuggestionMessage");
         // TODO Generate buttons for approval.
 
         return message;
