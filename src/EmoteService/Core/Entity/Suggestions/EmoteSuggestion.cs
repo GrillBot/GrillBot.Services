@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core.Database.ValueObjects;
+using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -30,4 +31,7 @@ public class EmoteSuggestion
     public bool IsAnimated { get; set; }
 
     public EmoteVoteSession? VoteSession { get; set; }
+
+    public DiscordMessageFile CreateImageFile()
+        => new($"{Id}.{(IsAnimated ? "gif" : "png")}", false, Image);
 }

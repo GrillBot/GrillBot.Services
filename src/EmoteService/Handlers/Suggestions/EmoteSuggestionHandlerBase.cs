@@ -20,12 +20,7 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
 {
     protected static DiscordMessagePayloadData CreateAdminChannelNotification(EmoteSuggestion suggestion, Core.Entity.Guild guild, ulong? suggestionMessageId)
     {
-        var image = new DiscordMessageFile(
-            $"{suggestion.Id}.{(suggestion.IsAnimated ? "gif" : "png")}",
-            false,
-            suggestion.Image
-        );
-
+        var image = suggestion.CreateImageFile();
         var embed = CreateNotificationEmbed(suggestion, image);
         var approvalButtons = CreateApprovalComponents(suggestion);
 

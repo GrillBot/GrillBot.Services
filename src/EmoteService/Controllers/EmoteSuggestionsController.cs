@@ -21,4 +21,9 @@ public class EmoteSuggestionsController(IServiceProvider serviceProvider) : Gril
     [ProducesResponseType<PaginatedResponse<EmoteSuggestionVoteItem>>(StatusCodes.Status200OK)]
     public Task<IActionResult> GetEmoteSuggestionVotesAsync([FromRoute] Guid suggestionId, [FromBody] EmoteSuggestionVoteListRequest request)
         => ProcessAsync<GetEmoteSuggestionVotesAction>(suggestionId, request);
+
+    [HttpPost("vote/{guildId}")]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    public Task<IActionResult> StartSuggestionsVotingAsync([FromRoute] ulong guildId)
+        => ProcessAsync<StartSuggestionsVotingAction>(guildId);
 }
