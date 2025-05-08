@@ -16,6 +16,7 @@ public class EmoteVoteSession
     public DateTime ExpectedVoteEndAtUtc { get; set; }
     public DateTime? KilledAtUtc { get; set; }
     public DiscordIdValueObject? VoteMessageId { get; set; }
+    public bool IsClosed { get; set; }
 
     public IList<EmoteUserVote> UserVotes { get; set; } = [];
 
