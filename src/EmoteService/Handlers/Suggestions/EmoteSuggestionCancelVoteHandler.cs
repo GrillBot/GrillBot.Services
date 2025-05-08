@@ -27,7 +27,8 @@ public class EmoteSuggestionCancelVoteHandler(
                 o.Id == message.SuggestionId &&
                 o.VoteSession != null &&
                 o.VoteSession.KilledAtUtc == null &&
-                o.VoteSession.ExpectedVoteEndAtUtc >= DateTime.UtcNow
+                o.VoteSession.ExpectedVoteEndAtUtc >= DateTime.UtcNow &&
+                !o.VoteSession.IsClosed
             );
 
         var suggestion = await ContextHelper.ReadFirstOrDefaultEntityAsync(suggestionQuery);

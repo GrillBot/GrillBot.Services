@@ -26,7 +26,12 @@ public class EmoteSuggestionUserVoteHandler(
 
         var suggestionQuery = DbContext.EmoteSuggestions
             .Include(o => o.VoteSession).ThenInclude(o => o!.UserVotes)
-            .Where(o => o.Id == message.SuggestionId && o.VoteSession != null && o.VoteSession.KilledAtUtc == null && o.VoteSession.ExpectedVoteEndAtUtc > DateTime.UtcNow);
+            .Where(o =>
+                o.Id == message.SuggestionId &&
+                o.VoteSession != null &&
+                o.VoteSession.KilledAtUtc == null &&
+                !o.VoteSession.IsClosed
+            );
 
         var suggestion = await ContextHelper.ReadFirstOrDefaultEntityAsync(suggestionQuery);
         if (suggestion == null)

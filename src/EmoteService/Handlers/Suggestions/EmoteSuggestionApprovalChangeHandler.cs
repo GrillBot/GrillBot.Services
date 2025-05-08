@@ -22,7 +22,7 @@ public class EmoteSuggestionApprovalChangeHandler(
 
         ArgumentOutOfRangeException.ThrowIfZero(message.ApprovedByUserId);
 
-        var suggestionQuery = DbContext.EmoteSuggestions.Where(o => o.Id == message.SuggestionId && (o.VoteSession == null || o.VoteSession.KilledAtUtc != null));
+        var suggestionQuery = DbContext.EmoteSuggestions.Where(o => o.Id == message.SuggestionId && o.VoteSession == null);
         var suggestion = await ContextHelper.ReadFirstOrDefaultEntityAsync(suggestionQuery);
 
         if (suggestion == null)
