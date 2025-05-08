@@ -1,12 +1,12 @@
 ﻿using EmoteService.Core.Entity.Suggestions;
 using EmoteService.Core.Entity;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
-using Discord;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using GrillBot.Core.RabbitMQ.V2.Messages;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Embeds;
+using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Components;
 
 namespace EmoteService.Handlers.Suggestions;
 
@@ -27,6 +27,7 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
         );
 
         var embed = CreateNotificationEmbed(suggestion, image);
+        var approvalButtons = CreateApprovalComponents(suggestion);
 
         DiscordMessagePayloadData message;
         if (suggestionMessageId is not null)
@@ -38,7 +39,8 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
                 null,
                 [image],
                 "Emote",
-                embed: embed
+                embed: embed,
+                components: approvalButtons
             );
         }
         else
@@ -49,15 +51,14 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
                 null,
                 [image],
                 "Emote",
-                embed: embed
+                embed: embed,
+                components: approvalButtons
             );
         }
 
         message.WithLocalization(locale: "cs-CZ");
         message.ServiceData.Add("SuggestionId", suggestion.Id.ToString());
         message.ServiceData.Add("MessageType", "SuggestionMessage");
-        // TODO Generate buttons for approval.
-
         return message;
     }
 
@@ -72,7 +73,7 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
                 IconUrl = $"User.AvatarUrl:{suggestion.FromUserId}",
                 Name = $"User.DisplayName:{suggestion.FromUserId}"
             },
-            color: Color.Blue.RawValue,
+            color: Discord.Color.Blue.RawValue,
             footer: null,
             imageUrl: $"attachment://{image.Filename}",
             thumbnailUrl: null,
@@ -103,7 +104,7 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
                     new("SuggestionModule/SuggestionEmbed/VoteEndAt", $"DateTime:{voteEndAt}", true)
                 ]);
 
-                embed.Color = (suggestion.VoteSession.IsCommunityApproved() ? Color.Green : Color.Red).RawValue;
+                embed.Color = (suggestion.VoteSession.IsCommunityApproved() ? Discord.Color.Green : Discord.Color.Red).RawValue;
             }
             else
             {
@@ -112,5 +113,19 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
         }
 
         return embed;
+    }
+
+    private static DiscordMessageComponent? CreateApprovalComponents(EmoteSuggestion suggestion)
+    {
+        if (suggestion.VoteSession is not null)
+            return null;
+
+        var component = new DiscordMessageComponent();
+        var customIdPrefix = $"suggestion_approve_for_vote:{suggestion.Id}";
+
+        component.AddButton(new ButtonComponent(null, $"{customIdPrefix}:True", Discord.ButtonStyle.Success, "👍"));
+        component.AddButton(new ButtonComponent(null, $"{customIdPrefix}:False", Discord.ButtonStyle.Danger, "👎"));
+
+        return component;
     }
 }
