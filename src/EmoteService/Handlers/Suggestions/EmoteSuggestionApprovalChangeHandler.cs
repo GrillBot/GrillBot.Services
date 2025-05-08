@@ -5,7 +5,6 @@ using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
-using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
 namespace EmoteService.Handlers.Suggestions;
 
@@ -23,7 +22,7 @@ public class EmoteSuggestionApprovalChangeHandler(
 
         ArgumentOutOfRangeException.ThrowIfZero(message.ApprovedByUserId);
 
-        var suggestionQuery = DbContext.EmoteSuggestions.Where(o => o.Id == message.SuggestionId && o.VoteSession == null);
+        var suggestionQuery = DbContext.EmoteSuggestions.Where(o => o.Id == message.SuggestionId && (o.VoteSession == null || o.VoteSession.KilledAtUtc != null));
         var suggestion = await ContextHelper.ReadFirstOrDefaultEntityAsync(suggestionQuery);
 
         if (suggestion == null)

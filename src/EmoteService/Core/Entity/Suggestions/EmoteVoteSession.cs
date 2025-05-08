@@ -16,4 +16,16 @@ public class EmoteVoteSession
     public DateTime? KilledAtUtc { get; set; }
 
     public IList<EmoteUserVote> UserVotes { get; set; } = [];
+
+    public bool Running()
+        => KilledAtUtc == null && ExpectedVoteEndAtUtc > DateTime.UtcNow;
+
+    public int UpVotes()
+        => UserVotes.Count(o => o.IsApproved);
+
+    public int DownVotes()
+        => UserVotes.Count(o => !o.IsApproved);
+
+    public bool IsCommunityApproved()
+        => KilledAtUtc is null && UpVotes() > DownVotes();
 }

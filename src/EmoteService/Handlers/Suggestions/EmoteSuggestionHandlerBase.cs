@@ -85,6 +85,31 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
             useCurrentTimestamp: false
         );
 
+        if (suggestion.VoteSession is not null)
+        {
+            if (!suggestion.VoteSession.Running())
+            {
+                var voteEndAt = suggestion.VoteSession.KilledAtUtc ?? suggestion.VoteSession.ExpectedVoteEndAtUtc;
+
+                embed.Title = suggestion.VoteSession.KilledAtUtc is not null ?
+                    "SuggestionModule/SuggestionEmbed/VoteKilledTitle" :
+                    "SuggestionModule/SuggestionEmbed/VoteFinishedTitle";
+
+                embed.Fields.AddRange([
+                    new("SuggestionModule/SuggestionEmbed/ApprovedVotes", suggestion.VoteSession.UpVotes().ToString(), true),
+                    new("SuggestionModule/SuggestionEmbed/ApprovedVotes", suggestion.VoteSession.DownVotes().ToString(), true),
+                    new("SuggestionModule/SuggestionEmbed/VoteStartedAt", $"DateTime:{suggestion.VoteSession.VoteStartedAtUtc}", true),
+                    new("SuggestionModule/SuggestionEmbed/VoteEndAt", $"DateTime:{voteEndAt}", true)
+                ]);
+
+                embed.Color = (suggestion.VoteSession.IsCommunityApproved() ? Color.Green : Color.Red).RawValue;
+            }
+            else
+            {
+                embed.Description = "SuggestionModule/SuggestionEmbed/VoteRunning";
+            }
+        }
+
         return embed;
     }
 }
