@@ -36,7 +36,7 @@ public abstract class MergeTransactionsBaseAction(
         DbContext.RemoveRange(transactions);
         DbContext.RemoveRange(dailyStatsToDelete);
         await DbContext.AddRangeAsync(mergedTransactions);
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         await EnqueueUserRecalculationsAsync(mergedTransactions);
 
         stopwatch.Stop();

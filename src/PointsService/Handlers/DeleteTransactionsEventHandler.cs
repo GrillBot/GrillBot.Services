@@ -17,7 +17,7 @@ public class DeleteTransactionsEventHandler(
             return RabbitConsumptionResult.Success;
 
         DbContext.RemoveRange(transactions);
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         await EnqueueUserForRecalculationAsync(transactions);
         return RabbitConsumptionResult.Success;
     }

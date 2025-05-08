@@ -54,7 +54,7 @@ public class DeleteMeasureAction(
             return false;
 
         DbContext.Remove(item);
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         return true;
     }
 }

@@ -40,7 +40,7 @@ public class GuildChannelDeletedHandler(
                 vote.KilledAtUtc = DateTime.UtcNow;
         }
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         return RabbitConsumptionResult.Success;
     }
 }

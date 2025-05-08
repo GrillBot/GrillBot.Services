@@ -63,7 +63,7 @@ public class ContextHelper<TDbContext>(
             return await query.AnyAsync();
     }
 
-    public async Task<int> SaveChagesAsync()
+    public async Task<int> SaveChangesAsync()
     {
         using (CreateCounter("Database"))
             return await _dbContext.SaveChangesAsync();

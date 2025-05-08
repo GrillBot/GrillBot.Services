@@ -27,7 +27,7 @@ public class StoreKarmaEventHandler(
             }
         }
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         return RabbitConsumptionResult.Success;
     }
 

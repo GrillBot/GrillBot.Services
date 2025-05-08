@@ -101,7 +101,7 @@ public partial class EmoteSuggestionRequestHandler(
         };
 
         await DbContext.AddAsync(entity);
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
 
         return entity;
     }

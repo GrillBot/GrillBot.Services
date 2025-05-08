@@ -17,7 +17,7 @@ public class SynchronizationEventHandler(
         foreach (var user in message.Users)
             await SynchonizeUserAsync(user);
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         return RabbitConsumptionResult.Success;
     }
 

@@ -49,7 +49,7 @@ public class EmoteSuggestionUserVoteHandler(
 
         userVote.IsApproved = message.IsApproved;
         userVote.UpdatedAtUtc = DateTime.UtcNow;
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
 
         var notificationMessage = CreateAdminChannelNotification(suggestion, guild, suggestion.SuggestionMessageId);
         await Publisher.PublishAsync((DiscordEditMessagePayload)notificationMessage);

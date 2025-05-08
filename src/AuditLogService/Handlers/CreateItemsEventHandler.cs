@@ -33,7 +33,7 @@ public class CreateItemsEventHandler(
             entities.Add(entity);
         }
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         await _dataRecalculation.EnqueueRecalculationAsync(entities);
 
         if (_processingInfoBatch.Items.Count > 0)

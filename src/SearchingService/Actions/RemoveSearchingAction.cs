@@ -25,7 +25,7 @@ public class RemoveSearchingAction(
             return ApiResult.BadRequest(new ValidationProblemDetails(modelState));
 
         search.IsDeleted = true;
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
 
         return ApiResult.Ok();
     }

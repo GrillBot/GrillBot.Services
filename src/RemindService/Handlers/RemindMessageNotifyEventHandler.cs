@@ -20,7 +20,7 @@ public class RemindMessageNotifyEventHandler(
         remindMessage.IsSendInProgress = false;
         remindMessage.NotificationMessageId = message.NotificationMessageId;
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         return RabbitConsumptionResult.Success;
     }
 }

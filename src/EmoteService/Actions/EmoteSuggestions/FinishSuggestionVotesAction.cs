@@ -41,7 +41,7 @@ public class FinishSuggestionVotesAction(
 
         if (messages.Count > 0)
             await _rabbitPublisher.PublishAsync(messages);
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
 
         return ApiResult.Ok(suggestions.Count);
     }

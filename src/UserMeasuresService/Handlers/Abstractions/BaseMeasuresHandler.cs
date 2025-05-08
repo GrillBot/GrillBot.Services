@@ -19,6 +19,6 @@ public abstract class BaseMeasuresHandler<TPayload>(
             await DbContext.AddAsync(entity);
         }
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
     }
 }

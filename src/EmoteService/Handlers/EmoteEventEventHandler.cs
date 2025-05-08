@@ -42,7 +42,7 @@ public class EmoteEventEventHandler(IServiceProvider serviceProvider)
                 DbContext.Remove(entity);
         }
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         return RabbitConsumptionResult.Success;
     }
 

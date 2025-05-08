@@ -129,7 +129,7 @@ public class UserJoinedEventHandler(
             UserId = user.Id.ToString()
         });
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
     }
 
     private async Task<List<InviteMetadata>> GetCachedInvitesAsync(IGuild guild)

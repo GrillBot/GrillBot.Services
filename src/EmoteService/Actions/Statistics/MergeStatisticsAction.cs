@@ -24,7 +24,7 @@ public class MergeStatisticsAction(
         var destinationEmote = Emote.Parse(GetParameter<string>(2));
 
         var (createdEmotesCount, deletedEmotesCount) = await ProcessMergeAsync(guildId, sourceEmote, destinationEmote);
-        var modifiedRowsCount = await ContextHelper.SaveChagesAsync();
+        var modifiedRowsCount = await ContextHelper.SaveChangesAsync();
 
         var result = new MergeStatisticsResult
         {

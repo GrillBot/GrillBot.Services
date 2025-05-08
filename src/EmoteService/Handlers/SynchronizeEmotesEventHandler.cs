@@ -27,7 +27,7 @@ public class SynchronizeEmotesEventHandler(
             return;
 
         DbContext.RemoveRange(emotes);
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
     }
 
     private async Task InsertEmotesAsync(string guildId, List<string> emotes)
@@ -46,6 +46,6 @@ public class SynchronizeEmotesEventHandler(
             });
 
         await DbContext.AddRangeAsync(emoteEntities);
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
     }
 }

@@ -30,7 +30,7 @@ public class CreateReminderAction(
         };
 
         await DbContext.AddAsync(reminder);
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
 
         var result = new CreateReminderResult(reminder.Id);
         return ApiResult.Ok(result);

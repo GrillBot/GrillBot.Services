@@ -22,7 +22,7 @@ public class EmoteSuggestionMessageCreatedHandler(
 
         suggestion.SuggestionMessageId = message.MessageId;
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         return RabbitConsumptionResult.Success;
     }
 }

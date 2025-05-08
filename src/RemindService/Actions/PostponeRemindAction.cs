@@ -24,7 +24,7 @@ public class PostponeRemindAction(
         remind.NotifyAtUtc = DateTime.UtcNow.AddHours(hours);
         remind.PostponeCount++;
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         return ApiResult.Ok();
     }
 }

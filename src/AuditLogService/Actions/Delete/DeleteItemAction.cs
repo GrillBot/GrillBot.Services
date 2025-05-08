@@ -20,7 +20,7 @@ public class DeleteItemAction(
             return ApiResult.NotFound();
 
         item.IsDeleted = true;
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
 
         return ApiResult.Ok();
     }

@@ -29,6 +29,6 @@ public partial class UserRecalculationHandler(
         using (CreateCounter(actionName))
             await action(user);
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
     }
 }

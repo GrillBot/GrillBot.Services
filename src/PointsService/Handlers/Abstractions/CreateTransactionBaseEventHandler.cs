@@ -37,6 +37,6 @@ public abstract class CreateTransactionBaseEventHandler<TPayload>(
     protected async Task CommitTransactionAsync(Transaction transaction)
     {
         await DbContext.AddAsync(transaction);
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
     }
 }

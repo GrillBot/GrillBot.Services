@@ -28,7 +28,7 @@ public class BulkDeleteEventHandler(
             filesForDeletion.AddRange(chunk.Where(o => o.Files.Count > 0).SelectMany(o => o.Files).Select(o => new FileDeletePayload(o.Filename)));
         }
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         await _dataRecalculation.EnqueueRecalculationAsync(logItems);
 
         if (filesForDeletion.Count > 0)

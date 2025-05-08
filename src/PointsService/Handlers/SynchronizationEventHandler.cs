@@ -20,7 +20,7 @@ public class SynchronizationEventHandler(
         foreach (var channelInfo in message.Channels)
             await SynchronizeChannelAsync(message.GuildId, channelInfo);
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         return RabbitConsumptionResult.Success;
     }
 

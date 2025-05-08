@@ -34,7 +34,7 @@ public class EmoteSuggestionApprovalChangeHandler(
         suggestion.ApprovedForVote = message.IsApprovedForVote;
         suggestion.ApprovalByUserId = message.ApprovedByUserId;
         suggestion.ApprovalSetAtUtc = DateTime.UtcNow;
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
 
         var notificationMesasge = CreateAdminChannelNotification(suggestion, guild, suggestion.SuggestionMessageId);
         await Publisher.PublishAsync((DiscordEditMessagePayload)notificationMesasge);

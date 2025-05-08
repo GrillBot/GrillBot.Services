@@ -31,7 +31,7 @@ public class EmoteSuggestionMessageDeletedHandler(
         if (suggestion.VoteSession is not null)
             suggestion.VoteSession.KilledAtUtc = DateTime.UtcNow;
 
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         return RabbitConsumptionResult.Success;
     }
 }

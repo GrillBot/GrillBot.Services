@@ -32,7 +32,7 @@ public class UpdateGuildAction(
         guild.SuggestionChannelId = request.SuggestionChannelId ?? 0;
         guild.VoteChannelId = request.VoteChannelId ?? 0;
         guild.VoteTime = request.VoteTime;
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
 
         return ApiResult.Ok();
     }

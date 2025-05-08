@@ -32,7 +32,7 @@ public class CancelReminderAction(
 
         await WriteToAuditLogAsync(remind!, request);
         await NotifyUserIfPossibleAsync(remind!, request);
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
 
         return ApiResult.Ok();
     }

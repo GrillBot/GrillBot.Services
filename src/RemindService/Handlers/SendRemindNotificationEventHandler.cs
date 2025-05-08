@@ -26,7 +26,7 @@ public class SendRemindNotificationEventHandler(
         var discordMessage = ProcessRemind(remindMessage, message.IsEarly);
 
         remindMessage.IsSendInProgress = true;
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         await Publisher.PublishAsync(discordMessage);
         return RabbitConsumptionResult.Success;
     }

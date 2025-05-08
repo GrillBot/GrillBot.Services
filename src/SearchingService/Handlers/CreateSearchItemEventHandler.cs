@@ -27,7 +27,7 @@ public class CreateSearchItemEventHandler(
         };
 
         await DbContext.AddAsync(entity);
-        await ContextHelper.SaveChagesAsync();
+        await ContextHelper.SaveChangesAsync();
         return RabbitConsumptionResult.Success;
     }
 }
