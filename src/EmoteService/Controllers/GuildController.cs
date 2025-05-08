@@ -11,4 +11,9 @@ public class GuildController(IServiceProvider serviceProvider) : GrillBot.Core.I
     [ProducesResponseType(StatusCodes.Status200OK)]
     public Task<IActionResult> UpdateGuildAsync([FromRoute, DiscordId] ulong guildId, [FromBody] GuildRequest request)
         => ProcessAsync<UpdateGuildAction>(guildId, request);
+
+    [HttpGet("{guildId}")]
+    [ProducesResponseType<GuildData>(StatusCodes.Status200OK)]
+    public Task<IActionResult> GetGuildAsync([FromRoute, DiscordId] ulong guildId)
+        => ProcessAsync<GetGuildAction>(guildId);
 }
