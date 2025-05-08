@@ -1,8 +1,6 @@
 ﻿using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Redis.Extensions;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
@@ -18,16 +16,13 @@ using StackExchange.Redis;
 namespace InviteService.Handlers;
 
 public class SynchronizeGuildInvitesEventHandler(
-    ILoggerFactory loggerFactory,
-    InviteContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher,
+    IServiceProvider serviceProvider,
     IServer _redisServer,
     IDatabase _redisDatabase,
     DiscordManager _discordManager,
     IDistributedCache _cache,
     ILogger<SynchronizeGuildInvitesEventHandler> _logger
-) : BaseEventHandlerWithDb<SynchronizeGuildInvitesPayload, InviteContext>(loggerFactory, dbContext, counterManager, publisher)
+) : BaseEventHandlerWithDb<SynchronizeGuildInvitesPayload, InviteContext>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizeGuildInvitesPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

@@ -1,9 +1,7 @@
 ﻿using Discord;
 using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Components;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Embeds;
@@ -16,11 +14,8 @@ using Components = GrillBot.Core.Services.GrillBot.Models.Events.Messages.Compon
 namespace RemindService.Handlers;
 
 public class SendRemindNotificationEventHandler(
-    ILoggerFactory loggerFactory,
-    RemindServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher
-) : BaseEventHandlerWithDb<SendRemindNotificationPayload, RemindServiceContext>(loggerFactory, dbContext, counterManager, publisher)
+    IServiceProvider serviceProvider
+) : BaseEventHandlerWithDb<SendRemindNotificationPayload, RemindServiceContext>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SendRemindNotificationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

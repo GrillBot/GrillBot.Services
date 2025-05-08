@@ -1,11 +1,8 @@
 ﻿using Discord;
-using EmoteService.Core.Entity;
 using EmoteService.Core.Entity.Suggestions;
 using EmoteService.Models.Events.Suggestions;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
@@ -15,11 +12,8 @@ using System.Text.RegularExpressions;
 namespace EmoteService.Handlers.Suggestions;
 
 public partial class EmoteSuggestionRequestHandler(
-    ILoggerFactory loggerFactory,
-    EmoteServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher rabbitPublisher
-) : EmoteSuggestionHandlerBase<EmoteSuggestionRequestPayload>(loggerFactory, dbContext, counterManager, rabbitPublisher)
+    IServiceProvider serviceProvider
+) : EmoteSuggestionHandlerBase<EmoteSuggestionRequestPayload>(serviceProvider)
 {
     [GeneratedRegex(@"\w+", RegexOptions.IgnoreCase)]
     private static partial Regex EmoteNameRegex();

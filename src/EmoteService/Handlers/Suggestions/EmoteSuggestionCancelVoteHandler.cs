@@ -1,20 +1,14 @@
-﻿using EmoteService.Core.Entity;
-using EmoteService.Models.Events.Suggestions;
+﻿using EmoteService.Models.Events.Suggestions;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
 using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Handlers.Suggestions;
 
 public class EmoteSuggestionCancelVoteHandler(
-    ILoggerFactory loggerFactory,
-    EmoteServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher rabbitPublisher
-) : EmoteSuggestionHandlerBase<EmoteSuggestionCancelVotePayload>(loggerFactory, dbContext, counterManager, rabbitPublisher)
+    IServiceProvider serviceProvider
+) : EmoteSuggestionHandlerBase<EmoteSuggestionCancelVotePayload>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(EmoteSuggestionCancelVotePayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

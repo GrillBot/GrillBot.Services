@@ -1,9 +1,7 @@
 ﻿using Discord;
 using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Embeds;
 using GrillBot.Services.Common.Discord;
@@ -14,12 +12,9 @@ using UserMeasuresService.Models.Events;
 namespace UserMeasuresService.Handlers;
 
 public class MemberWarningEventHandler(
-    ILoggerFactory loggerFactory,
-    UserMeasuresContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher,
+    IServiceProvider serviceProvider,
     DiscordManager _discordManager
-) : BaseMeasuresHandler<MemberWarningPayload>(loggerFactory, dbContext, counterManager, publisher)
+) : BaseMeasuresHandler<MemberWarningPayload>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(MemberWarningPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

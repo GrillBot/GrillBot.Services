@@ -1,19 +1,13 @@
 ﻿using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
-using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Handlers.Abstractions;
 using UserMeasuresService.Models.Events;
 
 namespace UserMeasuresService.Handlers;
 
 public class UnverifyModifyEventHandler(
-    ILoggerFactory loggerFactory,
-    UserMeasuresContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher
-) : BaseMeasuresHandler<UnverifyModifyPayload>(loggerFactory, dbContext, counterManager, publisher)
+    IServiceProvider serviceProvider
+) : BaseMeasuresHandler<UnverifyModifyPayload>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(UnverifyModifyPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

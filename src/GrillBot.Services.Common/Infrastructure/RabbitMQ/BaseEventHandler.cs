@@ -2,6 +2,7 @@
 using GrillBot.Core.RabbitMQ.V2.Consumer;
 using GrillBot.Core.RabbitMQ.V2.Messages;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace GrillBot.Services.Common.Infrastructure.RabbitMQ;
@@ -10,13 +11,16 @@ public abstract class BaseEventHandler<TMessage> : RabbitMessageHandlerBase<TMes
 {
     protected ICounterManager CounterManager { get; }
     protected IRabbitPublisher Publisher { get; }
+    protected IServiceProvider ServiceProvider { get; }
 
     protected string CounterKey { get; }
 
-    protected BaseEventHandler(ILoggerFactory loggerFactory, ICounterManager counterManager, IRabbitPublisher publisher) : base(loggerFactory)
+    protected BaseEventHandler(IServiceProvider serviceProvider) : base(serviceProvider.GetRequiredService<ILoggerFactory>())
     {
-        CounterManager = counterManager;
-        Publisher = publisher;
+        CounterManager = serviceProvider.GetRequiredService<ICounterManager>();
+        Publisher = serviceProvider.GetRequiredService<IRabbitPublisher>();
+        ServiceProvider = serviceProvider;
+
         CounterKey = $"RabbitMQ.{TopicName}.{QueueName}.Consumer";
     }
 

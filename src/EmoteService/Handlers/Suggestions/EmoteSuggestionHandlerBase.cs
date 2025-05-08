@@ -1,8 +1,6 @@
 ﻿using EmoteService.Core.Entity.Suggestions;
 using EmoteService.Core.Entity;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
-using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using GrillBot.Core.RabbitMQ.V2.Messages;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Embeds;
@@ -11,11 +9,8 @@ using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Components;
 namespace EmoteService.Handlers.Suggestions;
 
 public abstract class EmoteSuggestionHandlerBase<TPayload>(
-    ILoggerFactory loggerFactory,
-    EmoteServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher rabbitPublisher
-) : BaseEventHandlerWithDb<TPayload, EmoteServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
+    IServiceProvider serviceProvider
+) : BaseEventHandlerWithDb<TPayload, EmoteServiceContext>(serviceProvider)
     where TPayload : class, IRabbitMessage, new()
 {
     protected static DiscordMessagePayloadData CreateAdminChannelNotification(EmoteSuggestion suggestion, Core.Entity.Guild guild, ulong? suggestionMessageId)

@@ -1,7 +1,5 @@
 ﻿using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using Microsoft.Extensions.Options;
 using SearchingService.Core.Entity;
@@ -11,12 +9,9 @@ using SearchingService.Options;
 namespace SearchingService.Handlers;
 
 public class CreateSearchItemEventHandler(
-    ILoggerFactory loggerFactory,
-    SearchingServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher,
+    IServiceProvider serviceProvider,
     IOptions<AppOptions> _options
-) : BaseEventHandlerWithDb<SearchItemPayload, SearchingServiceContext>(loggerFactory, dbContext, counterManager, publisher)
+) : BaseEventHandlerWithDb<SearchItemPayload, SearchingServiceContext>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SearchItemPayload payload, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

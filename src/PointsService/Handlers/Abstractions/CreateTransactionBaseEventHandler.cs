@@ -1,7 +1,4 @@
-﻿using Discord;
-using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
-using GrillBot.Core.Services.AuditLog.Enums;
+﻿using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using PointsService.Core.Entity;
 using PointsService.Models.Events;
@@ -9,11 +6,8 @@ using PointsService.Models.Events;
 namespace PointsService.Handlers.Abstractions;
 
 public abstract class CreateTransactionBaseEventHandler<TPayload>(
-    ILoggerFactory loggerFactory,
-    PointsServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher
-) : BasePointsEvent<TPayload>(loggerFactory, dbContext, counterManager, publisher) where TPayload : CreateTransactionBasePayload, new()
+    IServiceProvider serviceProvider
+) : BasePointsEvent<TPayload>(serviceProvider) where TPayload : CreateTransactionBasePayload, new()
 {
     protected async Task<bool> ValidationFailedAsync(TPayload payload, string? channelId, string message, bool suppressAudit = false)
     {

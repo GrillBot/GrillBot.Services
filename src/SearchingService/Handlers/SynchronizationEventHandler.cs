@@ -1,8 +1,6 @@
 ﻿using Discord;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using SearchingService.Core.Entity;
 using SearchingService.Models.Events;
@@ -11,11 +9,8 @@ using SearchingService.Models.Events.Users;
 namespace SearchingService.Handlers;
 
 public class SynchronizationEventHandler(
-    ILoggerFactory loggerFactory,
-    SearchingServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher
-) : BaseEventHandlerWithDb<SynchronizationPayload, SearchingServiceContext>(loggerFactory, dbContext, counterManager, publisher)
+    IServiceProvider serviceProvider
+) : BaseEventHandlerWithDb<SynchronizationPayload, SearchingServiceContext>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

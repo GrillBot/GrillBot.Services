@@ -1,7 +1,5 @@
 ﻿using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using RubbergodService.Core.Entity;
 using RubbergodService.Models.Events.Karma;
@@ -9,11 +7,8 @@ using RubbergodService.Models.Events.Karma;
 namespace RubbergodService.Handlers.Karma;
 
 public class StoreKarmaEventHandler(
-    ILoggerFactory loggerFactory,
-    RubbergodServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher
-) : BaseEventHandlerWithDb<KarmaBatchPayload, RubbergodServiceContext>(loggerFactory, dbContext, counterManager, publisher)
+    IServiceProvider serviceProvider
+) : BaseEventHandlerWithDb<KarmaBatchPayload, RubbergodServiceContext>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(KarmaBatchPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

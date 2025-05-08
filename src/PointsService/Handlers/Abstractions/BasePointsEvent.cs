@@ -1,6 +1,4 @@
-﻿using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.V2.Messages;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
+﻿using GrillBot.Core.RabbitMQ.V2.Messages;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using PointsService.Core.Entity;
 using PointsService.Models.Events;
@@ -8,11 +6,8 @@ using PointsService.Models.Events;
 namespace PointsService.Handlers.Abstractions;
 
 public abstract class BasePointsEvent<TPayload>(
-    ILoggerFactory loggerFactory,
-    PointsServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher
-) : BaseEventHandlerWithDb<TPayload, PointsServiceContext>(loggerFactory, dbContext, counterManager, publisher) where TPayload : class, IRabbitMessage, new()
+    IServiceProvider serviceProvider
+) : BaseEventHandlerWithDb<TPayload, PointsServiceContext>(serviceProvider) where TPayload : class, IRabbitMessage, new()
 {
     protected async Task<User> FindOrCreateUserAsync(string guildId, string userId)
     {

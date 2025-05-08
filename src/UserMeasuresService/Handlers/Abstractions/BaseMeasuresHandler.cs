@@ -1,17 +1,12 @@
-﻿using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.RabbitMQ.V2.Messages;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
+﻿using GrillBot.Core.RabbitMQ.V2.Messages;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using UserMeasuresService.Core.Entity;
 
 namespace UserMeasuresService.Handlers.Abstractions;
 
 public abstract class BaseMeasuresHandler<TPayload>(
-    ILoggerFactory loggerFactory,
-    UserMeasuresContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher
-) : BaseEventHandlerWithDb<TPayload, UserMeasuresContext>(loggerFactory, dbContext, counterManager, publisher) where TPayload : class, IRabbitMessage, new()
+    IServiceProvider serviceProvider
+) : BaseEventHandlerWithDb<TPayload, UserMeasuresContext>(serviceProvider) where TPayload : class, IRabbitMessage, new()
 {
     protected async Task SaveEntityAsync<TEntity>(TEntity entity) where TEntity : BaseEntity
     {

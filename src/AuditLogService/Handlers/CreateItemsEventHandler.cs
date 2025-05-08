@@ -5,22 +5,17 @@ using AuditLogService.Models.Events.Create;
 using AuditLogService.Processors;
 using AuditLogService.Processors.Request.Abstractions;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
 #pragma warning disable S3604 // Member initializer values should not be redundant
 namespace AuditLogService.Handlers;
 
 public class CreateItemsEventHandler(
-    ILoggerFactory loggerFactory,
-    AuditLogServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher,
+    IServiceProvider serviceProvider,
     DataRecalculationManager _dataRecalculation,
     RequestProcessorFactory _requestProcessorFactory
-) : BaseEventHandlerWithDb<CreateItemsMessage, AuditLogServiceContext>(loggerFactory, dbContext, counterManager, publisher)
+) : BaseEventHandlerWithDb<CreateItemsMessage, AuditLogServiceContext>(serviceProvider)
 {
     private readonly CreateItemsMessage _processingInfoBatch = new();
 

@@ -1,7 +1,5 @@
 ﻿using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using Microsoft.Extensions.Caching.Distributed;
 using RubbergodService.Models.Events.Pins;
@@ -9,11 +7,9 @@ using RubbergodService.Models.Events.Pins;
 namespace RubbergodService.Handlers.Pins;
 
 public class ClearPinCacheEventHandler(
-    ILoggerFactory loggerFactory,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher,
+    IServiceProvider serviceProvider,
     IDistributedCache _cache
-) : BaseEventHandler<ClearPinCachePayload>(loggerFactory, counterManager, publisher)
+) : BaseEventHandler<ClearPinCachePayload>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(ClearPinCachePayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

@@ -1,19 +1,14 @@
 ﻿using EmoteService.Core.Entity;
 using EmoteService.Models.Events.Suggestions;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
 namespace EmoteService.Handlers.Suggestions;
 
 public class EmoteSuggestionMessageCreatedHandler(
-    ILoggerFactory loggerFactory,
-    EmoteServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher rabbitPublisher
-) : BaseEventHandlerWithDb<EmoteSuggestionMessageCreatedPayload, EmoteServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
+    IServiceProvider serviceProvider
+) : BaseEventHandlerWithDb<EmoteSuggestionMessageCreatedPayload, EmoteServiceContext>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(EmoteSuggestionMessageCreatedPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

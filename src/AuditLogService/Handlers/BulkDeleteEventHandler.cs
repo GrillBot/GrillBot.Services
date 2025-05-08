@@ -4,21 +4,16 @@ using AuditLogService.Core.Extensions;
 using AuditLogService.Managers;
 using AuditLogService.Models.Events;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Handlers;
 
 public class BulkDeleteEventHandler(
-    ILoggerFactory loggerFactory,
-    AuditLogServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher,
+    IServiceProvider serviceProvider,
     DataRecalculationManager _dataRecalculation
-) : BaseEventHandlerWithDb<BulkDeletePayload, AuditLogServiceContext>(loggerFactory, dbContext, counterManager, publisher)
+) : BaseEventHandlerWithDb<BulkDeletePayload, AuditLogServiceContext>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(BulkDeletePayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

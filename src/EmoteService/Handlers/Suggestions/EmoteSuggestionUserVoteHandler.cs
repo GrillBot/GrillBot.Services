@@ -1,21 +1,15 @@
-﻿using EmoteService.Core.Entity;
-using EmoteService.Core.Entity.Suggestions;
+﻿using EmoteService.Core.Entity.Suggestions;
 using EmoteService.Models.Events.Suggestions;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
 using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Handlers.Suggestions;
 
 public class EmoteSuggestionUserVoteHandler(
-    ILoggerFactory loggerFactory,
-    EmoteServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher rabbitPublisher
-) : EmoteSuggestionHandlerBase<EmoteSuggestionUserVotePayload>(loggerFactory, dbContext, counterManager, rabbitPublisher)
+    IServiceProvider serviceProvider
+) : EmoteSuggestionHandlerBase<EmoteSuggestionUserVotePayload>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(EmoteSuggestionUserVotePayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

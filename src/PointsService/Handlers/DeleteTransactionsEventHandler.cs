@@ -1,7 +1,5 @@
 ﻿using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using PointsService.Core.Entity;
 using PointsService.Handlers.Abstractions;
 using PointsService.Models.Events;
@@ -9,11 +7,8 @@ using PointsService.Models.Events;
 namespace PointsService.Handlers;
 
 public class DeleteTransactionsEventHandler(
-    ILoggerFactory loggerFactory,
-    PointsServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher
-) : BasePointsEvent<DeleteTransactionsPayload>(loggerFactory, dbContext, counterManager, publisher)
+    IServiceProvider serviceProvider
+) : BasePointsEvent<DeleteTransactionsPayload>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(DeleteTransactionsPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

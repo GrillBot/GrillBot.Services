@@ -3,20 +3,13 @@ using AuditLogService.Core.Enums;
 using AuditLogService.Handlers.Recalculation.Actions;
 using AuditLogService.Models.Events.Recalculation;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
 namespace AuditLogService.Handlers.Recalculation;
 
-public class RecalculationHandler(
-    ILoggerFactory loggerFactory,
-    AuditLogServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher rabbitPublisher,
-    IServiceProvider _serviceProvider
-) : BaseEventHandlerWithDb<RecalculationPayload, AuditLogServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
+public class RecalculationHandler(IServiceProvider serviceProvider)
+    : BaseEventHandlerWithDb<RecalculationPayload, AuditLogServiceContext>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
         RecalculationPayload message,
@@ -39,23 +32,23 @@ public class RecalculationHandler(
         {
             if (payload.Type is LogType.Api)
             {
-                yield return new ApiRequestStatsRecalculationAction(_serviceProvider);
-                yield return new ApiUserStatsRecalculationAction(_serviceProvider);
+                yield return new ApiRequestStatsRecalculationAction(ServiceProvider);
+                yield return new ApiUserStatsRecalculationAction(ServiceProvider);
             }
 
-            yield return new DailyAvgTimesRecalculationAction(_serviceProvider);
+            yield return new DailyAvgTimesRecalculationAction(ServiceProvider);
 
             if (payload.Type is LogType.InteractionCommand)
             {
-                yield return new InteractionStatsRecalculationAction(_serviceProvider);
-                yield return new InteractionUserStatsRecalculationAction(_serviceProvider);
+                yield return new InteractionStatsRecalculationAction(ServiceProvider);
+                yield return new InteractionUserStatsRecalculationAction(ServiceProvider);
             }
 
             if (payload.Type is LogType.JobCompleted)
-                yield return new JobInfoRecalculationAction(_serviceProvider);
+                yield return new JobInfoRecalculationAction(ServiceProvider);
         }
 
-        yield return new DatabaseStatsRecalculationAction(_serviceProvider);
-        yield return new InvalidStatsRecalculationAction(_serviceProvider);
+        yield return new DatabaseStatsRecalculationAction(ServiceProvider);
+        yield return new InvalidStatsRecalculationAction(ServiceProvider);
     }
 }

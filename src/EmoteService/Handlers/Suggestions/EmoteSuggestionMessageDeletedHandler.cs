@@ -1,20 +1,15 @@
 ﻿using EmoteService.Core.Entity;
 using EmoteService.Models.Events.Suggestions;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Handlers.Suggestions;
 
 public class EmoteSuggestionMessageDeletedHandler(
-    ILoggerFactory loggerFactory,
-    EmoteServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher rabbitPublisher
-) : BaseEventHandlerWithDb<EmoteSuggestionMessageDeletedPayload, EmoteServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
+    IServiceProvider serviceProvider
+) : BaseEventHandlerWithDb<EmoteSuggestionMessageDeletedPayload, EmoteServiceContext>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(EmoteSuggestionMessageDeletedPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

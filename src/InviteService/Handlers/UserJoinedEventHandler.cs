@@ -1,9 +1,7 @@
 ﻿using Discord;
 using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Redis.Extensions;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
@@ -20,14 +18,11 @@ using StackExchange.Redis;
 namespace InviteService.Handlers;
 
 public class UserJoinedEventHandler(
-    ILoggerFactory loggerFactory,
-    InviteContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher rabbitPublisher,
+    IServiceProvider serviceProvider,
     DiscordManager _discordManager,
     IServer _redisServer,
     IDistributedCache _cache
-) : BaseEventHandlerWithDb<UserJoinedPayload, InviteContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
+) : BaseEventHandlerWithDb<UserJoinedPayload, InviteContext>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(UserJoinedPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

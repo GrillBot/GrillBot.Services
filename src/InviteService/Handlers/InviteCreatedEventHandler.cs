@@ -1,7 +1,5 @@
 ﻿using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Redis.Extensions;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using InviteService.Core.Entity;
@@ -12,12 +10,9 @@ using Microsoft.Extensions.Caching.Distributed;
 namespace InviteService.Handlers;
 
 public class InviteCreatedEventHandler(
-    ILoggerFactory loggerFactory,
-    InviteContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher rabbitPublisher,
+    IServiceProvider serviceProvider,
     IDistributedCache _cache
-) : BaseEventHandlerWithDb<InviteCreatedPayload, InviteContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
+) : BaseEventHandlerWithDb<InviteCreatedPayload, InviteContext>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(InviteCreatedPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

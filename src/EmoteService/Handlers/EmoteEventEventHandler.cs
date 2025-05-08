@@ -3,19 +3,13 @@ using EmoteService.Core.Entity;
 using EmoteService.Extensions.QueryExtensions;
 using EmoteService.Models.Events;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
 namespace EmoteService.Handlers;
 
-public class EmoteEventEventHandler(
-    ILoggerFactory loggerFactory,
-    EmoteServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher rabbitPublisher
-) : BaseEventHandlerWithDb<EmoteEventPayload, EmoteServiceContext>(loggerFactory, dbContext, counterManager, rabbitPublisher)
+public class EmoteEventEventHandler(IServiceProvider serviceProvider)
+    : BaseEventHandlerWithDb<EmoteEventPayload, EmoteServiceContext>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(EmoteEventPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {

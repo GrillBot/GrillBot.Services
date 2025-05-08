@@ -1,8 +1,6 @@
 ﻿using Discord;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
 using PointsService.Core.Entity;
 using PointsService.Handlers.Abstractions;
 using PointsService.Models.Events;
@@ -10,11 +8,8 @@ using PointsService.Models.Events;
 namespace PointsService.Handlers;
 
 public class CreateTransactionViaAdminEventHandler(
-    ILoggerFactory loggerFactory,
-    PointsServiceContext dbContext,
-    ICounterManager counterManager,
-    IRabbitPublisher publisher
-) : CreateTransactionBaseEventHandler<CreateTransactionAdminPayload>(loggerFactory, dbContext, counterManager, publisher)
+    IServiceProvider serviceProvider
+) : CreateTransactionBaseEventHandler<CreateTransactionAdminPayload>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(CreateTransactionAdminPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
     {
