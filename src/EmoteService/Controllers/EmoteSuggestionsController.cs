@@ -16,4 +16,9 @@ public class EmoteSuggestionsController(IServiceProvider serviceProvider) : Gril
     [HttpPut("approve/{suggestionId:guid}")]
     public Task<IActionResult> SetSuggestionApprovalAsync([FromRoute] Guid suggestionId, [FromQuery] bool isApproved)
         => ProcessAsync<SetSuggestionApprovalAction>(suggestionId, isApproved);
+
+    [HttpPost("{suggestionId:guid}/votes")]
+    [ProducesResponseType<PaginatedResponse<EmoteSuggestionVoteItem>>(StatusCodes.Status200OK)]
+    public Task<IActionResult> GetEmoteSuggestionVotesAsync([FromRoute] Guid suggestionId, [FromBody] EmoteSuggestionVoteListRequest request)
+        => ProcessAsync<GetEmoteSuggestionVotesAction>(suggestionId, request);
 }
