@@ -71,7 +71,7 @@ public class StartSuggestionsVotingAction(
         var embed = CreateVoteEmbed(suggestion, image);
         var components = CreateVoteComponents(suggestion);
 
-        return new DiscordSendMessagePayload(
+        var message = new DiscordSendMessagePayload(
             guild.GuildId,
             guild.SuggestionChannelId,
             null,
@@ -82,6 +82,11 @@ public class StartSuggestionsVotingAction(
             embed: embed,
             components: components
         );
+
+        message.WithLocalization(locale: "cs-CZ");
+        message.ServiceData.Add("SuggestionId", suggestion.Id.ToString());
+        message.ServiceData.Add("MessageType", "VoteMessage");
+        return message;
     }
 
     private static DiscordMessageComponent CreateVoteComponents(EmoteSuggestion suggestion)
