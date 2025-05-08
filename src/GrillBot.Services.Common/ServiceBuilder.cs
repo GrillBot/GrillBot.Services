@@ -2,6 +2,7 @@
 using GrillBot.Core.Metrics;
 using GrillBot.Services.Common.Discord;
 using GrillBot.Services.Common.Infrastructure.Api.Filters;
+using GrillBot.Services.Common.Infrastructure.Api.OpenApi.Filters;
 using GrillBot.Services.Common.Registrators;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -66,7 +67,9 @@ public static class ServiceBuilder
             configureHealthChecks(healthChecks, builder.Configuration);
 
         // OpenAPI
-        builder.Services.AddEndpointsApiExplorer().AddSwaggerGen();
+        builder.Services
+            .AddEndpointsApiExplorer()
+            .AddSwaggerGen(opt => opt.AddOperationFilterInstance(new RequireAuthorizationFilter()));
 
         // Static configuration
         builder.Services.Configure<RouteOptions>(opt => opt.LowercaseUrls = true);

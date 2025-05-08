@@ -2,6 +2,7 @@
 using EmoteService.Models.Request.EmoteSuggestions;
 using EmoteService.Models.Response.EmoteSuggestions;
 using GrillBot.Core.Models.Pagination;
+using GrillBot.Services.Common.Infrastructure.Api.OpenApi.Attributes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmoteService.Controllers;
@@ -14,6 +15,7 @@ public class EmoteSuggestionsController(IServiceProvider serviceProvider) : Gril
         => ProcessAsync<GetEmoteSuggestionListAction>(request);
 
     [HttpPut("approve/{suggestionId:guid}")]
+    [SwaggerRequireAuthorization]
     public Task<IActionResult> SetSuggestionApprovalAsync([FromRoute] Guid suggestionId, [FromQuery] bool isApproved)
         => ProcessAsync<SetSuggestionApprovalAction>(suggestionId, isApproved);
 
