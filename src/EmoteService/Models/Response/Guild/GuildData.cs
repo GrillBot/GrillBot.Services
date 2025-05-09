@@ -1,4 +1,4 @@
-﻿namespace EmoteService.Models.Request.Guild;
+﻿namespace EmoteService.Models.Response.Guild;
 
 public record GuildData(
     ulong? SuggestionChannelId,

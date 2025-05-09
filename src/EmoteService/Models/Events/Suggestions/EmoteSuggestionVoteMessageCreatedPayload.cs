@@ -1,4 +1,5 @@
-﻿using GrillBot.Core.RabbitMQ.V2.Messages;
+﻿using Discord;
+using GrillBot.Core.RabbitMQ.V2.Messages;
 
 namespace EmoteService.Models.Events.Suggestions;
 
@@ -19,4 +20,7 @@ public class EmoteSuggestionVoteMessageCreatedPayload : IRabbitMessage
     public EmoteSuggestionVoteMessageCreatedPayload()
     {
     }
+
+    public static EmoteSuggestionVoteMessageCreatedPayload Create(Guid suggestionId, IMessage message)
+        => new(suggestionId, message.Id);
 }

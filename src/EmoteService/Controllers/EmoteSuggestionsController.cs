@@ -14,8 +14,10 @@ public class EmoteSuggestionsController(IServiceProvider serviceProvider) : Gril
     public Task<IActionResult> GetEmoteSuggestionsListAsync([FromBody] EmoteSuggestionsListRequest request)
         => ProcessAsync<GetEmoteSuggestionListAction>(request);
 
-    [HttpPut("approve/{suggestionId:guid}")]
     [SwaggerRequireAuthorization]
+    [HttpPut("approve/{suggestionId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public Task<IActionResult> SetSuggestionApprovalAsync([FromRoute] Guid suggestionId, [FromQuery] bool isApproved)
         => ProcessAsync<SetSuggestionApprovalAction>(suggestionId, isApproved);
 

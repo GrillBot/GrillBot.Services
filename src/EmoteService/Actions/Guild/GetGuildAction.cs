@@ -1,5 +1,5 @@
 ﻿using EmoteService.Core.Entity;
-using EmoteService.Models.Request.Guild;
+using EmoteService.Models.Response.Guild;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.Infrastructure.Api;
