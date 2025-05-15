@@ -69,13 +69,17 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
             thumbnailUrl: null,
             fields: [
                 new("SuggestionModule/SuggestionEmbed/EmoteNameTitle", suggestion.Name, false),
-                new("SuggestionModule/SuggestionEmbed/EmoteReasonTitle", suggestion.ReasonForAdd, false),
-                new($"SuggestionModule/SuggestionEmbed/ApprovedForVote/{suggestion.ApprovedForVote}/Title", $"User.Mention:{suggestion.ApprovalByUserId}", true),
-                new($"SuggestionModule/SuggestionEmbed/ApprovedForVote/{suggestion.ApprovedForVote}/At", $"DateTime:{suggestion.ApprovalSetAtUtc}", true)
+                new("SuggestionModule/SuggestionEmbed/EmoteReasonTitle", suggestion.ReasonForAdd, false)
             ],
             timestamp: suggestion.SuggestedAtUtc,
             useCurrentTimestamp: false
         );
+
+        if (suggestion.ApprovalByUserId is not null)
+        {
+            embed.Fields.Add(new($"SuggestionModule/SuggestionEmbed/ApprovedForVote/{suggestion.ApprovedForVote}/Title", $"User.Mention:{suggestion.ApprovalByUserId}", true));
+            embed.Fields.Add(new($"SuggestionModule/SuggestionEmbed/ApprovedForVote/{suggestion.ApprovedForVote}/At", $"DateTime:{suggestion.ApprovalSetAtUtc}", true));
+        }
 
         if (suggestion.VoteSession is not null)
         {
