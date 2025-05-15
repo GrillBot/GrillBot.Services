@@ -88,8 +88,8 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
                     "SuggestionModule/SuggestionEmbed/VoteFinishedTitle";
 
                 embed.Fields.AddRange([
-                    new("SuggestionModule/SuggestionEmbed/ApprovedVotes", suggestion.VoteSession.UpVotes().ToString(), true),
-                    new("SuggestionModule/SuggestionEmbed/ApprovedVotes", suggestion.VoteSession.DownVotes().ToString(), true),
+                    new("SuggestionModule/SuggestionEmbed/ApprovedVotes/UpVotes", suggestion.VoteSession.UpVotes().ToString(), true),
+                    new("SuggestionModule/SuggestionEmbed/ApprovedVotes/DownVotes", suggestion.VoteSession.DownVotes().ToString(), true),
                     new("SuggestionModule/SuggestionEmbed/VoteStartedAt", $"DateTime:{suggestion.VoteSession.VoteStartedAtUtc}", true),
                     new("SuggestionModule/SuggestionEmbed/VoteEndAt", $"DateTime:{voteEndAt}", true)
                 ]);
