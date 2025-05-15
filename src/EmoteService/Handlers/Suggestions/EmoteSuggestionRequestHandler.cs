@@ -1,5 +1,6 @@
 ﻿using Discord;
 using EmoteService.Core.Entity.Suggestions;
+using EmoteService.Core.Options;
 using EmoteService.Models.Events.Suggestions;
 using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
@@ -7,12 +8,14 @@ using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Text.RegularExpressions;
 
 namespace EmoteService.Handlers.Suggestions;
 
 public partial class EmoteSuggestionRequestHandler(
-    IServiceProvider serviceProvider
+    IServiceProvider serviceProvider,
+    IOptions<AppOptions> _options
 ) : EmoteSuggestionHandlerBase<EmoteSuggestionRequestPayload>(serviceProvider)
 {
     [GeneratedRegex(@"\w+", RegexOptions.IgnoreCase)]
@@ -57,6 +60,9 @@ public partial class EmoteSuggestionRequestHandler(
 
             var guild = await ContextHelper.ReadFirstOrDefaultEntityAsync(guildQuery);
             ValidateConfiguration(guild);
+
+            if (!await CheckUserQuotaAsync(message))
+                return null;
 
             return guild;
         }
@@ -118,5 +124,22 @@ public partial class EmoteSuggestionRequestHandler(
 
         message.WithLocalization(locale: locale);
         return message;
+    }
+
+    private async Task<bool> CheckUserQuotaAsync(EmoteSuggestionRequestPayload request)
+    {
+        var query = DbContext.EmoteSuggestions.AsNoTracking()
+            .Where(o => o.FromUserId == request.FromUserId && o.GuildId == request.GuildId && o.SuggestedAtUtc.Date == DateTime.UtcNow.Date);
+
+        var count = await ContextHelper.ReadCountAsync(query);
+        if (count < _options.Value.Suggestions.MaxSuggestionsPerUserPerDay)
+            return true;
+
+        var msg = new DiscordSendMessagePayload(request.GuildId, request.FromUserId, "SuggestionModule/CreateSuggestion/TooMuchSuggestions", [], "Emote");
+        msg.WithLocalization(locale: request.Locale);
+
+        await Publisher.PublishAsync(msg);
+
+        return false;
     }
 }
