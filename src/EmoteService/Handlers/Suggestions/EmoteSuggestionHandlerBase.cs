@@ -70,7 +70,7 @@ public abstract class EmoteSuggestionHandlerBase<TPayload>(
             fields: [
                 new("SuggestionModule/SuggestionEmbed/EmoteNameTitle", suggestion.Name, false),
                 new("SuggestionModule/SuggestionEmbed/EmoteReasonTitle", suggestion.ReasonForAdd, false),
-                new($"SuggestionModule/SuggestionEmbed/ApprovedForVote/{suggestion.ApprovedForVote}", $"User.Mention:{suggestion.ApprovalByUserId}", true),
+                new($"SuggestionModule/SuggestionEmbed/ApprovedForVote/{suggestion.ApprovedForVote}/Title", $"User.Mention:{suggestion.ApprovalByUserId}", true),
                 new($"SuggestionModule/SuggestionEmbed/ApprovedForVote/{suggestion.ApprovedForVote}/At", $"DateTime:{suggestion.ApprovalSetAtUtc}", true)
             ],
             timestamp: suggestion.SuggestedAtUtc,
