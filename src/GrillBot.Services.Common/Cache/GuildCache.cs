@@ -11,5 +11,5 @@ public class GuildCache(
 ) : InMemoryCache<IGuild>(counterManager, memoryCache)
 {
     public IGuild? GetGuild(ulong guildId) => TryReadData(guildId.ToString(), out var guild) ? guild : null;
-    public void StoreGuild(IGuild guild) => Write(guild.Id.ToString(), guild, DateTimeOffset.Now.AddHours(8));
+    public void StoreGuild(IGuild guild) => Write(guild.Id.ToString(), guild, DateTimeOffset.Now.AddHours(2));
 }

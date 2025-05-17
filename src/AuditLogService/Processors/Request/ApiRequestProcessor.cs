@@ -24,7 +24,7 @@ public class ApiRequestProcessor(IServiceProvider serviceProvider) : RequestProc
             Method = apiRequest.Method,
             Parameters = apiRequest.Parameters,
             Path = apiRequest.Path,
-            ActionName = apiRequest.ActionName,
+            ActionName = apiRequest.ActionName.Replace("Async", ""),
             ControllerName = apiRequest.ControllerName.Replace("Controller", ""),
             EndAt = apiRequest.EndAt,
             StartAt = apiRequest.StartAt,
