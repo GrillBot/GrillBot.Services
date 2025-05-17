@@ -74,7 +74,6 @@ public partial class CreateArchivationDataAction
     {
         var json = new JsonObject
         {
-            ["InfoId"] = info.Id.ToString(),
             ["Position"] = info.Position,
             ["Flags"] = info.Flags
         };
@@ -131,7 +130,6 @@ public partial class CreateArchivationDataAction
     {
         var json = new JsonObject
         {
-            ["InfoId"] = info.Id.ToString(),
             ["TargetType"] = info.Target.ToString(),
             ["TargetId"] = info.TargetId
         };
@@ -178,7 +176,6 @@ public partial class CreateArchivationDataAction
     {
         var json = new JsonObject
         {
-            ["InfoId"] = info.Id.ToString(),
             ["UserId"] = info.UserId
         };
 
@@ -214,7 +211,6 @@ public partial class CreateArchivationDataAction
 
             roles.Add(new JsonObject
             {
-                ["InfoId"] = role.Id.ToString(),
                 ["UserId"] = role.UserId,
                 ["RoleId"] = role.RoleId,
                 ["RoleName"] = role.RoleName,
@@ -245,7 +241,6 @@ public partial class CreateArchivationDataAction
     {
         var json = new JsonObject
         {
-            ["InfoId"] = info.Id.ToString(),
             ["DefaultMessageNotifications"] = info.DefaultMessageNotifications.ToString(),
             ["AfkTimeout"] = info.AfkTimeout,
             ["Name"] = info.Name,
@@ -365,7 +360,7 @@ public partial class CreateArchivationDataAction
         var json = new JsonObject
         {
             ["AuthorId"] = item.MessageDeleted.AuthorId,
-            ["MessageCreatedAt"] = item.MessageDeleted.MessageCreatedAt.ToString("o")
+            ["MessageCreatedAt"] = item.MessageDeleted.MessageCreatedAt
         };
 
         if (!string.IsNullOrEmpty(item.MessageDeleted.Content))
@@ -376,7 +371,6 @@ public partial class CreateArchivationDataAction
         {
             var embedJson = new JsonObject
             {
-                ["EmbedId"] = embed.Id.ToString(),
                 ["Type"] = embed.Type,
                 ["ContainsFooter"] = embed.ContainsFooter
             };
@@ -428,7 +422,7 @@ public partial class CreateArchivationDataAction
             ["IsSuccess"] = item.InteractionCommand.IsSuccess,
             ["Duration"] = item.InteractionCommand.Duration,
             ["Locale"] = item.InteractionCommand.Locale,
-            ["EndAt"] = item.InteractionCommand.EndAt.ToString("o"),
+            ["EndAt"] = item.InteractionCommand.EndAt,
             ["InteractionDate"] = item.InteractionCommand.InteractionDate.ToString("yyyy-MM-dd")
         };
 
@@ -476,7 +470,6 @@ public partial class CreateArchivationDataAction
     {
         var json = new JsonObject
         {
-            ["InfoId"] = info.Id.ToString(),
             ["Name"] = info.ThreadName,
             ["Type"] = info.Type.ToString(),
             ["IsArchived"] = info.IsArchived,
@@ -501,8 +494,8 @@ public partial class CreateArchivationDataAction
         {
             ["JobName"] = item.Job.JobName,
             ["Result"] = item.Job.Result,
-            ["StartAt"] = item.Job.StartAt.ToString("o"),
-            ["EndAt"] = item.Job.EndAt.ToString("o"),
+            ["StartAt"] = item.Job.StartAt,
+            ["EndAt"] = item.Job.EndAt,
             ["WasError"] = item.Job.WasError,
             ["Duration"] = item.Job.Duration,
             ["JobDate"] = item.Job.JobDate.ToString("yyyy-MM-dd")
@@ -527,8 +520,8 @@ public partial class CreateArchivationDataAction
         {
             ["Controller"] = item.ApiRequest.ControllerName,
             ["Action"] = item.ApiRequest.ActionName,
-            ["StartAt"] = item.ApiRequest.StartAt.ToString("o"),
-            ["EndAt"] = item.ApiRequest.EndAt.ToString("o"),
+            ["StartAt"] = item.ApiRequest.StartAt,
+            ["EndAt"] = item.ApiRequest.EndAt,
             ["Method"] = item.ApiRequest.Method,
             ["TemplatePath"] = item.ApiRequest.TemplatePath,
             ["Path"] = item.ApiRequest.Path,
@@ -543,23 +536,15 @@ public partial class CreateArchivationDataAction
 
         if (item.ApiRequest.Parameters.Count > 0)
         {
-            json["Parameters"] = new JsonArray(
-                item.ApiRequest.Parameters.Select(p => new JsonObject
-                {
-                    ["Name"] = p.Key,
-                    ["Value"] = p.Value
-                }).ToArray()
+            json["Parameters"] = new JsonObject(
+                item.ApiRequest.Parameters.Select(o => KeyValuePair.Create<string, JsonNode?>(o.Key, JsonValue.Create(o.Value)))
             );
         }
 
         if (item.ApiRequest.Headers.Count > 0)
         {
-            json["Headers"] = new JsonArray(
-                item.ApiRequest.Headers.Select(h => new JsonObject
-                {
-                    ["Name"] = h.Key,
-                    ["Value"] = h.Value
-                }).ToArray()
+            json["Headers"] = new JsonObject(
+                item.ApiRequest.Headers.Select(o => KeyValuePair.Create<string, JsonNode?>(o.Key, JsonValue.Create(o.Value)))
             );
         }
 
@@ -599,7 +584,6 @@ public partial class CreateArchivationDataAction
     {
         var json = new JsonObject
         {
-            ["InfoId"] = info.Id.ToString(),
             ["RoleId"] = info.RoleId,
             ["Name"] = info.Name,
             ["IsMentionable"] = info.IsMentionable,

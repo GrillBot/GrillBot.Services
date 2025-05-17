@@ -17,7 +17,7 @@ public partial class CreateArchivationDataAction
 
         var json = new JsonObject
         {
-            ["CreatedAt"] = DateTime.UtcNow.ToString("o"),
+            ["CreatedAt"] = DateTime.UtcNow,
             ["Count"] = items.Count,
             ["Items"] = jsonItems
         };
@@ -35,8 +35,8 @@ public partial class CreateArchivationDataAction
 
         var json = new JsonObject
         {
-            ["Id"] = item.Id.ToString(),
-            ["CreatedAt"] = item.CreatedAt.ToString("o"),
+            ["Id"] = item.Id,
+            ["CreatedAt"] = item.CreatedAt,
             ["Type"] = item.Type.ToString(),
             ["IsDeleted"] = item.IsDeleted
         };
@@ -66,7 +66,7 @@ public partial class CreateArchivationDataAction
             json["DiscordId"] = item.DiscordId;
 
         if (item.Files.Count > 0)
-            json["Files"] = new JsonArray(item.Files.Select(o => ProcessFile(o, result)).ToArray());
+            json["Files"] = new JsonArray([.. item.Files.Select(o => ProcessFile(o, result))]);
 
         var dataJson = ProcessData(item, result);
         if (dataJson is not null)
@@ -86,7 +86,6 @@ public partial class CreateArchivationDataAction
         result.TotalFilesSize += file.Size;
         var json = new JsonObject
         {
-            ["Id"] = file.Id.ToString(),
             ["Filename"] = file.Filename,
             ["Size"] = file.Size
         };

@@ -26,7 +26,7 @@ public partial class CreateArchivationDataAction
         var items = await ContextHelper.ReadEntitiesAsync(itemsQuery);
         foreach (var item in items.GroupBy(o => o.Type))
         {
-            foreach (var chunk in item.Chunk(50))
+            foreach (var chunk in item.Chunk(70))
                 await FillItemsAsync(chunk, item.Key);
         }
 
