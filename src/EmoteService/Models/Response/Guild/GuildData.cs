@@ -1,7 +1,7 @@
 ﻿namespace EmoteService.Models.Response.Guild;
 
 public record GuildData(
-    ulong? SuggestionChannelId,
-    ulong? VoteChannelId,
+    string? SuggestionChannelId,
+    string? VoteChannelId,
     TimeSpan VoteTime
 );

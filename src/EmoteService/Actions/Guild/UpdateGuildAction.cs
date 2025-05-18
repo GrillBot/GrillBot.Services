@@ -1,5 +1,6 @@
 ﻿using EmoteService.Core.Entity;
 using EmoteService.Models.Request.Guild;
+using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.Infrastructure.Api;
@@ -29,8 +30,8 @@ public class UpdateGuildAction(
             await DbContext.AddAsync(guild);
         }
 
-        guild.SuggestionChannelId = request.SuggestionChannelId ?? 0;
-        guild.VoteChannelId = request.VoteChannelId ?? 0;
+        guild.SuggestionChannelId = request.SuggestionChannelId?.ToUlong() ?? 0;
+        guild.VoteChannelId = request.VoteChannelId?.ToUlong() ?? 0;
         guild.VoteTime = request.VoteTime;
         await ContextHelper.SaveChangesAsync();
 

@@ -2,13 +2,13 @@
 
 public record EmoteSuggestionItem(
     Guid Id,
-    ulong FromUserId,
+    string FromUserId,
     string Name,
     DateTime SuggestedAtUtc,
-    ulong GuildId,
-    ulong? NotificationMessageId,
+    string GuildId,
+    string? NotificationMessageId,
     bool ApprovedForVote,
-    ulong? ApprovalUserId,
+    string? ApprovalUserId,
     DateTime? ApprovedAtUtc,
     string ReasonToAdd,
     DateTime? VoteStartAt,

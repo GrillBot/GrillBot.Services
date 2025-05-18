@@ -7,10 +7,10 @@ namespace EmoteService.Models.Request.EmoteSuggestions;
 public class EmoteSuggestionsListRequest
 {
     [DiscordId]
-    public ulong? GuildId { get; set; }
+    public string? GuildId { get; set; }
 
     [DiscordId]
-    public ulong? FromUserId { get; set; }
+    public string? FromUserId { get; set; }
     public DateTime? SuggestedFrom { get; set; }
     public DateTime? SuggestedTo { get; set; }
     public string? NameContains { get; set; }

@@ -2,6 +2,7 @@
 using EmoteService.Core.Entity.Suggestions;
 using EmoteService.Models.Request.EmoteSuggestions;
 using EmoteService.Models.Response.EmoteSuggestions;
+using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.EntityFramework.Extensions;
@@ -31,7 +32,7 @@ public class GetEmoteSuggestionVotesAction(
 
         var dataQuery = WithFilter(query, request)
             .WithSorting([e => e.UpdatedAtUtc], request.Sort.Descending)
-            .Select(o => new EmoteSuggestionVoteItem(o.UserId, o.IsApproved, o.UpdatedAtUtc));
+            .Select(o => new EmoteSuggestionVoteItem(o.UserId.ToString(), o.IsApproved, o.UpdatedAtUtc));
 
         var result = await ContextHelper.ReadEntitiesWithPaginationAsync(dataQuery, request.Pagination);
         return ApiResult.Ok(result);
@@ -40,7 +41,10 @@ public class GetEmoteSuggestionVotesAction(
     private static IQueryable<EmoteUserVote> WithFilter(IQueryable<EmoteUserVote> query, EmoteSuggestionVoteListRequest request)
     {
         if (request.UserId is not null)
-            query = query.Where(o => o.UserId == request.UserId);
+        {
+            var userId = request.UserId.ToUlong();
+            query = query.Where(o => o.UserId == userId);
+        }
 
         return query;
     }

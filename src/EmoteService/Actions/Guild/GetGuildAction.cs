@@ -19,8 +19,8 @@ public class GetGuildAction(
         var query = DbContext.Guilds.AsNoTracking()
             .Where(o => o.GuildId == guildId)
             .Select(o => new GuildData(
-                o.SuggestionChannelId,
-                o.VoteChannelId,
+                o.SuggestionChannelId.ToString(),
+                o.VoteChannelId.ToString(),
                 o.VoteTime
             ));
 

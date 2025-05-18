@@ -2,6 +2,7 @@
 using EmoteService.Core.Entity.Suggestions;
 using EmoteService.Models.Request.EmoteSuggestions;
 using EmoteService.Models.Response.EmoteSuggestions;
+using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Models;
@@ -37,9 +38,17 @@ public class GetEmoteSuggestionListAction(
     private static IQueryable<EmoteSuggestion> WithFilter(IQueryable<EmoteSuggestion> query, EmoteSuggestionsListRequest request)
     {
         if (request.GuildId is not null)
-            query = query.Where(o => o.GuildId == request.GuildId);
+        {
+            var guildId = request.GuildId.ToUlong();
+            query = query.Where(o => o.GuildId == guildId);
+        }
+
         if (request.FromUserId is not null)
-            query = query.Where(o => o.FromUserId == request.FromUserId);
+        {
+            var fromUserId = request.FromUserId.ToUlong();
+            query = query.Where(o => o.FromUserId == fromUserId);
+        }
+
         if (request.SuggestedFrom is not null)
             query = query.Where(o => o.SuggestedAtUtc >= request.SuggestedFrom);
         if (request.SuggestedTo is not null)
@@ -67,13 +76,13 @@ public class GetEmoteSuggestionListAction(
     {
         return query.Select(o => new EmoteSuggestionItem(
             o.Id,
-            o.FromUserId,
+            o.FromUserId.ToString(),
             o.Name,
             o.SuggestedAtUtc,
-            o.GuildId,
-            o.SuggestionMessageId,
+            o.GuildId.ToString(),
+            o.SuggestionMessageId.ToString(),
             o.ApprovedForVote,
-            o.ApprovalByUserId,
+            o.ApprovalByUserId.ToString(),
             o.ApprovalSetAtUtc,
             o.ReasonForAdd,
             o.VoteSession!.VoteStartedAtUtc,

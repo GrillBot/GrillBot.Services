@@ -1,7 +1,7 @@
 ﻿namespace EmoteService.Models.Response.EmoteSuggestions;
 
 public record EmoteSuggestionVoteItem(
-    ulong UserId,
+    string UserId,
     bool IsApproved,
     DateTime VotedAtUtc
 );

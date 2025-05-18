@@ -7,7 +7,7 @@ namespace EmoteService.Models.Request.EmoteSuggestions;
 public class EmoteSuggestionVoteListRequest
 {
     [DiscordId]
-    public ulong? UserId { get; set; }
+    public string? UserId { get; set; }
 
     public PaginatedParams Pagination { get; set; } = new();
     public SortParameters Sort { get; set; } = new();
