@@ -36,6 +36,7 @@ public class EmoteSuggestionCancelVoteHandler(
 
         suggestion.VoteSession!.KilledAtUtc = DateTime.UtcNow;
 
+        await ContextHelper.SaveChangesAsync();
         var notificationMessage = CreateAdminChannelNotification(suggestion, guild, suggestion.SuggestionMessageId);
         await Publisher.PublishAsync((DiscordEditMessagePayload)notificationMessage);
 
