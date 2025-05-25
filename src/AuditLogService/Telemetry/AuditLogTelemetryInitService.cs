@@ -35,7 +35,10 @@ public class AuditLogTelemetryInitService(
         var statistics = await dbContext.DatabaseStatistics.AsNoTracking()
             .Select(o => new
             {
-                TableName = string.Concat(o.TableName.Substring(0, 1).ToLower(), o.TableName.Substring(1)),
+                TableName =
+                    o.TableName.Contains('.') ?
+                    string.Concat(o.TableName.Substring(0, 1).ToLower(), o.TableName.Substring(1)) :
+                    o.TableName,
                 o.RecordsCount
             })
             .ToDictionaryAsync(o => o.TableName, o => o.RecordsCount);
