@@ -50,5 +50,6 @@ public class RecalculationHandler(IServiceProvider serviceProvider)
 
         yield return new DatabaseStatsRecalculationAction(ServiceProvider);
         yield return new InvalidStatsRecalculationAction(ServiceProvider);
+        yield return new TelemetryRecalculationAction(ServiceProvider);
     }
 }

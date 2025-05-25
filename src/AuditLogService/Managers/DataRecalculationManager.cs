@@ -69,12 +69,15 @@ public class DataRecalculationManager(IRabbitPublisher _publisher)
                 job.JobDate == payload.Job.JobDate;
         }
 
+        if (payload.FilesCount > 0)
+            return item.Files.Count == payload.FilesCount;
+
         return true;
     }
 
     private static RecalculationPayload CreateNewPayload(LogItem item)
     {
-        var payload = new RecalculationPayload(item.Type);
+        var payload = new RecalculationPayload(item.Type, filesCount: item.Files.Count);
 
         switch (item.Type)
         {
