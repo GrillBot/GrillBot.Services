@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GrillBot.Services.Common.EntityFramework;
+using GrillBot.Services.Common.Telemetry.Database;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Core.Entity.Statistics;
 
-public class AuditLogStatisticsContext(DbContextOptions<AuditLogStatisticsContext> options) : DbContext(options)
+public class AuditLogStatisticsContext(DbContextOptions<AuditLogStatisticsContext> options, DatabaseTelemetryCollector collector) : GrillBotServiceDbContext(options, collector)
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

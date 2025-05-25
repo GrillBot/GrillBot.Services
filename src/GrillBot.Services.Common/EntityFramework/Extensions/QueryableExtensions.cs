@@ -1,4 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace GrillBot.Services.Common.EntityFramework.Extensions;
 
@@ -25,5 +27,19 @@ public static class QueryableExtensions
         }
 
         return sortQuery;
+    }
+
+    public static async Task<int> CountAsync(this IQueryable query, CancellationToken cancellationToken = default)
+    {
+        var countAsyncMethod = typeof(EntityFrameworkQueryableExtensions)
+            .GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .First(m =>
+                m.Name == nameof(EntityFrameworkQueryableExtensions.CountAsync) &&
+                m.GetParameters().Length == 2 &&
+                m.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(IQueryable<>)
+            )
+            .MakeGenericMethod(query.ElementType);
+
+        return await (Task<int>)countAsyncMethod.Invoke(null, [query, cancellationToken])!;
     }
 }

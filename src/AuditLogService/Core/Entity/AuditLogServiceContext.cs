@@ -1,11 +1,13 @@
 ﻿using GrillBot.Core.Database.ValueConverters;
+using GrillBot.Services.Common.EntityFramework;
+using GrillBot.Services.Common.Telemetry.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.Linq.Expressions;
 
 namespace AuditLogService.Core.Entity;
 
-public class AuditLogServiceContext(DbContextOptions<AuditLogServiceContext> options) : DbContext(options)
+public class AuditLogServiceContext(DbContextOptions<AuditLogServiceContext> options, DatabaseTelemetryCollector collector) : GrillBotServiceDbContext(options, collector)
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
