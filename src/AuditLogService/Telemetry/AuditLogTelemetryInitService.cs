@@ -1,6 +1,6 @@
-﻿
-using AuditLogService.Core.Entity;
+﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Entity.Statistics;
+using AuditLogService.Telemetry.Collectors;
 using GrillBot.Services.Common.Telemetry.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +9,8 @@ namespace AuditLogService.Telemetry;
 public class AuditLogTelemetryInitService(
     IServiceProvider _serviceProvider,
     AuditLogTelemetryCollector _collector,
-    DatabaseTelemetryCollector _databaseCollector
+    DatabaseTelemetryCollector _databaseCollector,
+    AuditLogApiTelemetryCollector _apiCollector
 ) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -20,6 +21,7 @@ public class AuditLogTelemetryInitService(
 
         await InitializeFilesAsync(dbContext);
         await InitializeTablesAsync(statsContext);
+        await InitializeApiStatisticsAsync(statsContext);
     }
 
     private async Task InitializeFilesAsync(AuditLogServiceContext dbContext)
@@ -45,5 +47,20 @@ public class AuditLogTelemetryInitService(
 
         foreach (var (table, count) in statistics)
             _databaseCollector.Set(table, (int)count);
+    }
+
+    private async Task InitializeApiStatisticsAsync(AuditLogStatisticsContext context)
+    {
+        var statisticsQuery = context.RequestStats.AsNoTracking()
+            .Where(o => (o.SuccessCount + o.FailedCount) > 0)
+            .Select(o => new
+            {
+                o.Endpoint,
+                AvgDuration = (int)Math.Round(o.TotalDuration / (double)(o.SuccessCount + o.FailedCount))
+            });
+
+        var data = await statisticsQuery.ToListAsync();
+        foreach (var item in data)
+            _apiCollector.Set(item.Endpoint, item.AvgDuration);
     }
 }

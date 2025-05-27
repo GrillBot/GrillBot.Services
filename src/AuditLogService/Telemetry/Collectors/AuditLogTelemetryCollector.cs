@@ -1,6 +1,6 @@
 ﻿using GrillBot.Services.Common.Telemetry;
 
-namespace AuditLogService.Telemetry;
+namespace AuditLogService.Telemetry.Collectors;
 
 public class AuditLogTelemetryCollector
 {
