@@ -1,7 +1,7 @@
 ﻿using AuditLogService.Core.Enums;
 using AuditLogService.Core.Options;
 using AuditLogService.Models.Events.Recalculation;
-using AuditLogService.Telemetry.Collectors;
+using AuditLogService.Telemetry;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -11,12 +11,6 @@ public class TelemetryRecalculationAction(IServiceProvider serviceProvider) : Re
 {
     private readonly AuditLogTelemetryCollector _telemetryCollector
         = serviceProvider.GetRequiredService<AuditLogTelemetryCollector>();
-
-    private readonly AuditLogApiTelemetryCollector _apiTelemetryCollector
-        = serviceProvider.GetRequiredService<AuditLogApiTelemetryCollector>();
-
-    private readonly AuditLogJobsTelemetryCollector _jobsTelemetryCollector
-        = serviceProvider.GetRequiredService<AuditLogJobsTelemetryCollector>();
 
     private readonly AppOptions _options
         = serviceProvider.GetRequiredService<IOptions<AppOptions>>().Value;
@@ -52,7 +46,7 @@ public class TelemetryRecalculationAction(IServiceProvider serviceProvider) : Re
 
         var data = await query.FirstOrDefaultAsync();
         if (data is not null)
-            _apiTelemetryCollector.Set(endpoint, data.Value);
+            _telemetryCollector.SetApiAvgDuration(endpoint, data.Value);
     }
 
     private async Task RecalculateJobsAsync(RecalculationPayload payload)
@@ -63,7 +57,7 @@ public class TelemetryRecalculationAction(IServiceProvider serviceProvider) : Re
 
         var data = await query.FirstOrDefaultAsync();
         if (data is not null)
-            _jobsTelemetryCollector.Set(payload.Job!.JobName, data.Value);
+            _telemetryCollector.SetJobsAvgDuration(payload.Job!.JobName, data.Value);
     }
 
     private async Task RecalculateItemsToArchiveAsync(RecalculationPayload payload)
@@ -72,6 +66,6 @@ public class TelemetryRecalculationAction(IServiceProvider serviceProvider) : Re
         var query = DbContext.LogItems.Where(o => o.CreatedAt <= expirationDate || o.IsDeleted);
         var count = await query.CountAsync();
 
-        _telemetryCollector.ItemsToArchive.Set(count);
+        _telemetryCollector.ItemsOfArchive.Set(count);
     }
 }

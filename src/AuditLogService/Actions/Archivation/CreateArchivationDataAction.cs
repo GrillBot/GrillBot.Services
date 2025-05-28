@@ -13,14 +13,15 @@ public partial class CreateArchivationDataAction(
     ICounterManager counterManager
 ) : ApiAction<AuditLogServiceContext>(counterManager, dbContext)
 {
+    private DateTime ExpirationDate
+        => DateTime.UtcNow.AddMonths(-_options.Value.ExpirationMonths);
+
     public override async Task<ApiResult> ProcessAsync()
     {
-        var expirationDate = DateTime.UtcNow.AddMonths(-_options.Value.ExpirationMonths);
-
-        if (!await ExistsItemsToArchiveAsync(expirationDate))
+        if (!await ExistsItemsToArchiveAsync())
             return new ApiResult(StatusCodes.Status204NoContent);
 
-        var items = await ReadItemsToArchiveAsync(expirationDate);
+        var items = await ReadItemsToArchiveAsync();
         var result = CreateArchive(items);
 
         return ApiResult.Ok(result);

@@ -7,19 +7,23 @@ namespace AuditLogService.Actions.Archivation;
 
 public partial class CreateArchivationDataAction
 {
-    private async Task<bool> ExistsItemsToArchiveAsync(DateTime expirationDate)
+    public async Task<int> CountAsync()
     {
-        var query = DbContext.LogItems.Where(o => o.CreatedAt <= expirationDate || o.IsDeleted);
-        var countToArchive = await ContextHelper.ReadCountAsync(query);
-
-        return countToArchive >= _options.Value.MinimalItemsToArchive;
+        var query = DbContext.LogItems.Where(o => o.CreatedAt <= ExpirationDate || o.IsDeleted);
+        return await ContextHelper.ReadCountAsync(query);
     }
 
-    private async Task<List<LogItem>> ReadItemsToArchiveAsync(DateTime expirationDate)
+    private async Task<bool> ExistsItemsToArchiveAsync()
+    {
+        var count = await CountAsync();
+        return count >= _options.Value.MinimalItemsToArchive;
+    }
+
+    private async Task<List<LogItem>> ReadItemsToArchiveAsync()
     {
         var itemsQuery = DbContext.LogItems.AsNoTracking()
             .Include(o => o.Files)
-            .Where(o => o.CreatedAt <= expirationDate || o.IsDeleted)
+            .Where(o => o.CreatedAt <= ExpirationDate || o.IsDeleted)
             .OrderBy(o => o.CreatedAt)
             .Take(_options.Value.MaxItemsToArchivePerRun);
 

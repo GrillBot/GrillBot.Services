@@ -5,7 +5,7 @@ using AuditLogService.Core.Providers;
 using AuditLogService.Managers;
 using AuditLogService.Processors;
 using AuditLogService.Telemetry;
-using AuditLogService.Telemetry.Collectors;
+using AuditLogService.Telemetry.Initializers;
 using GrillBot.Core;
 using GrillBot.Core.Metrics;
 using GrillBot.Services.Common;
@@ -29,11 +29,12 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
 
         services.AddScoped<RequestProcessorFactory>();
 
-        services.AddHostedService<AuditLogTelemetryInitService>();
-        services.AddSingleton<AuditLogTelemetryCollector>();
-        services.AddSingleton<AuditLogApiTelemetryCollector>();
-        services.AddSingleton<AuditLogJobsTelemetryCollector>();
-        services.AddCustomTelemetryBuilder<AuditLogTelemetryBuilder>();
+        services.AddTelemetryCollector<AuditLogTelemetryCollector>();
+        services.AddTelemetryInitializer<FilesInitializer>();
+        services.AddTelemetryInitializer<DatabaseInitializer>();
+        services.AddTelemetryInitializer<ApiStatisticsInitializer>();
+        services.AddTelemetryInitializer<JobStatisticsInitializer>();
+        services.AddTelemetryInitializer<ArchivationInitializer>();
     },
     configureHealthChecks: (builder, configuration) =>
     {
