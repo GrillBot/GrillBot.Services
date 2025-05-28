@@ -4,6 +4,7 @@ using GrillBot.Services.Common.Discord;
 using GrillBot.Services.Common.Infrastructure.Api.Filters;
 using GrillBot.Services.Common.Infrastructure.Api.OpenApi.Filters;
 using GrillBot.Services.Common.Registrators;
+using GrillBot.Services.Common.Telemetry;
 using GrillBot.Services.Common.Telemetry.Database;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -44,9 +45,7 @@ public static class ServiceBuilder
         });
 
         // Telemetry
-        builder.AddTelemetry();
-        builder.Services.AddSingleton<DatabaseTelemetryCollector>();
-        builder.Services.AddCustomTelemetryBuilder<DatabaseTelemetryBuilder>();
+        builder.AddTelemetryFeatures();
 
         // GrillBot.Core
         builder.Services.AddDiagnostic();

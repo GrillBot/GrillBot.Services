@@ -10,7 +10,8 @@ public class AuditLogTelemetryInitService(
     IServiceProvider _serviceProvider,
     AuditLogTelemetryCollector _collector,
     DatabaseTelemetryCollector _databaseCollector,
-    AuditLogApiTelemetryCollector _apiCollector
+    AuditLogApiTelemetryCollector _apiCollector,
+    AuditLogJobsTelemetryCollector _jobsCollector
 ) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -22,6 +23,7 @@ public class AuditLogTelemetryInitService(
         await InitializeFilesAsync(dbContext);
         await InitializeTablesAsync(statsContext);
         await InitializeApiStatisticsAsync(statsContext);
+        await InitializeScheduledJobStatisticsAsync(statsContext);
     }
 
     private async Task InitializeFilesAsync(AuditLogServiceContext dbContext)
@@ -52,7 +54,6 @@ public class AuditLogTelemetryInitService(
     private async Task InitializeApiStatisticsAsync(AuditLogStatisticsContext context)
     {
         var statisticsQuery = context.RequestStats.AsNoTracking()
-            .Where(o => (o.SuccessCount + o.FailedCount) > 0)
             .Select(o => new
             {
                 o.Endpoint,
@@ -62,5 +63,19 @@ public class AuditLogTelemetryInitService(
         var data = await statisticsQuery.ToListAsync();
         foreach (var item in data)
             _apiCollector.Set(item.Endpoint, item.AvgDuration);
+    }
+
+    private async Task InitializeScheduledJobStatisticsAsync(AuditLogStatisticsContext context)
+    {
+        var statisticsQuery = context.JobInfos.AsNoTracking()
+            .Select(o => new
+            {
+                o.Name,
+                Avg = (int)Math.Round(o.TotalDuration / (double)o.StartCount)
+            });
+
+        var data = await statisticsQuery.ToListAsync();
+        foreach (var item in data)
+            _jobsCollector.Set(item.Name, item.Avg);
     }
 }

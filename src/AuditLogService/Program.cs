@@ -32,6 +32,7 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         services.AddHostedService<AuditLogTelemetryInitService>();
         services.AddSingleton<AuditLogTelemetryCollector>();
         services.AddSingleton<AuditLogApiTelemetryCollector>();
+        services.AddSingleton<AuditLogJobsTelemetryCollector>();
         services.AddCustomTelemetryBuilder<AuditLogTelemetryBuilder>();
     },
     configureHealthChecks: (builder, configuration) =>

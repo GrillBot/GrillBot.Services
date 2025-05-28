@@ -1,34 +1,11 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics.Metrics;
+﻿using GrillBot.Services.Common.Telemetry.Gauge;
 
 namespace GrillBot.Services.Common.Telemetry.Database;
 
-public class DatabaseTelemetryCollector
+public class DatabaseTelemetryCollector : TelemetryGaugeCollectorContainer<int>
 {
-    private readonly Dictionary<string, TelemetryGaugeCollector<int>> _databaseTables = [];
-    private readonly object _lock = new();
-
-    public void Set(string entity, int records)
+    protected override TelemetryGaugeCollector<int> CreateGauge(string key)
     {
-        lock (_lock)
-        {
-            if (!_databaseTables.ContainsKey(entity))
-            {
-                _databaseTables.TryAdd(
-                    entity,
-                    new([KeyValuePair.Create<string, object?>("table", entity)])
-                );
-            }
-
-            _databaseTables[entity].Set(records);
-        }
-    }
-
-    public IEnumerable<Measurement<int>> GetMeasurements()
-    {
-        lock (_lock)
-        {
-            return [.. _databaseTables.Select(o => o.Value.Get())];
-        }
+        return new([KeyValuePair.Create<string, object?>("table", key)]);
     }
 }

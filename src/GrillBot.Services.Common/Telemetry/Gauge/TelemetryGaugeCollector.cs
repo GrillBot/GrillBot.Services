@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.Metrics;
 
-namespace GrillBot.Services.Common.Telemetry;
+namespace GrillBot.Services.Common.Telemetry.Gauge;
 
 public class TelemetryGaugeCollector<TValue>(IEnumerable<KeyValuePair<string, object?>>? tags = null) where TValue : struct
 {

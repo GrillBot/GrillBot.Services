@@ -1,4 +1,4 @@
-﻿using GrillBot.Services.Common.Telemetry;
+﻿using GrillBot.Services.Common.Telemetry.Gauge;
 
 namespace AuditLogService.Telemetry.Collectors;
 
