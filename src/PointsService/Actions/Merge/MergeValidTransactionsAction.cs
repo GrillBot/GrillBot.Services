@@ -13,13 +13,10 @@ public class MergeValidTransactionsAction(
     IOptions<AppOptions> _options
 ) : MergeTransactionsBaseAction(counterManager, dbContext, publisher)
 {
-    private DateTime ExpirationDate { get; set; }
+    private DateTime ExpirationDate
+        => DateTime.UtcNow.AddMonths(-_options.Value.ExpirationMonths);
 
-    protected override Task InitializeAsync()
-    {
-        ExpirationDate = DateTime.UtcNow.AddMonths(-_options.Value.ExpirationMonths);
-        return Task.CompletedTask;
-    }
+    protected override Task InitializeAsync() => Task.CompletedTask;
 
     protected override async Task<bool> CanProcessMergeAsync()
     {

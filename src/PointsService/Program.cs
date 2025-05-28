@@ -2,11 +2,13 @@ using GrillBot.Core;
 using GrillBot.Core.Metrics;
 using GrillBot.Services.Common;
 using GrillBot.Services.Common.EntityFramework.Extensions;
+using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
 using PointsService.Core.Options;
 using PointsService.Core.Providers;
 using PointsService.Telemetry;
+using PointsService.Telemetry.Initializers;
 using System.Reflection;
 
 var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
@@ -19,9 +21,10 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         services.AddPostgresDatabaseContext<PointsServiceContext>(connectionString);
         services.AddStatisticsProvider<StatisticsProvider>();
 
-        services.AddHostedService<PointsTelemetryInitService>();
-        services.AddSingleton<PointsTelemetryCollector>();
-        services.AddCustomTelemetryBuilder<PointsTelemetryBuilder>();
+        services.AddTelemetryCollector<PointsTelemetryCollector>();
+        services.AddTelemetryInitializer<DefaultDatabaseInitializer<PointsServiceContext>>();
+        services.AddTelemetryInitializer<TransactionsToMergeInitializer>();
+        services.AddTelemetryInitializer<ActiveTransactionsInitializer>();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
     {

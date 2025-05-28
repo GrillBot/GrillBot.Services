@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GrillBot.Services.Common.EntityFramework;
+using GrillBot.Services.Common.Telemetry.Database;
+using Microsoft.EntityFrameworkCore;
 
 namespace PointsService.Core.Entity;
 
-public class PointsServiceContext(DbContextOptions options) : DbContext(options)
+public class PointsServiceContext(DbContextOptions options, DatabaseTelemetryCollector collector) : GrillBotServiceDbContext(options, collector)
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

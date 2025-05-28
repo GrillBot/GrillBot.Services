@@ -26,6 +26,6 @@ public partial class UserRecalculationHandler
         var yearBack = DateTime.UtcNow.AddYears(-1);
         var query = DbContext.Transactions.AsNoTracking().Where(o => o.CreatedAt >= yearBack && o.MergedCount == 0);
 
-        collector.ActiveTransactionsCount.Set(await query.CountAsync());
+        collector.ActiveTransactions.Set(await query.CountAsync());
     }
 }
