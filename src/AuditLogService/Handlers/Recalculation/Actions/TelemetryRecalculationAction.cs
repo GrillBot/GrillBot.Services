@@ -26,7 +26,7 @@ public class TelemetryRecalculationAction(IServiceProvider serviceProvider) : Re
         if (payload.Type is LogType.JobCompleted && payload.Job is not null)
             await RecalculateJobsAsync(payload);
 
-        await RecalculateItemsToArchiveAsync(payload);
+        await RecalculateItemsToArchiveAsync();
     }
 
     private async Task RecalculateFilesAsync()
@@ -60,7 +60,7 @@ public class TelemetryRecalculationAction(IServiceProvider serviceProvider) : Re
             _telemetryCollector.SetJobsAvgDuration(payload.Job!.JobName, data.Value);
     }
 
-    private async Task RecalculateItemsToArchiveAsync(RecalculationPayload payload)
+    private async Task RecalculateItemsToArchiveAsync()
     {
         var expirationDate = DateTime.UtcNow.AddMonths(-_options.ExpirationMonths);
         var query = DbContext.LogItems.Where(o => o.CreatedAt <= expirationDate || o.IsDeleted);
