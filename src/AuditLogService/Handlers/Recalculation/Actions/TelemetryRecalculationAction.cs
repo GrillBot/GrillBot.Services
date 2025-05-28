@@ -1,7 +1,9 @@
 ﻿using AuditLogService.Core.Enums;
+using AuditLogService.Core.Options;
 using AuditLogService.Models.Events.Recalculation;
 using AuditLogService.Telemetry.Collectors;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace AuditLogService.Handlers.Recalculation.Actions;
 
@@ -16,12 +18,8 @@ public class TelemetryRecalculationAction(IServiceProvider serviceProvider) : Re
     private readonly AuditLogJobsTelemetryCollector _jobsTelemetryCollector
         = serviceProvider.GetRequiredService<AuditLogJobsTelemetryCollector>();
 
-    public override bool CheckPreconditions(RecalculationPayload payload)
-    {
-        return payload.FilesCount > 0 ||
-            (payload.Type is LogType.Api && payload.Api is not null) ||
-            (payload.Type is LogType.JobCompleted && payload.Job is not null);
-    }
+    private readonly AppOptions _options
+        = serviceProvider.GetRequiredService<IOptions<AppOptions>>().Value;
 
     public override async Task ProcessAsync(RecalculationPayload payload)
     {
@@ -33,6 +31,8 @@ public class TelemetryRecalculationAction(IServiceProvider serviceProvider) : Re
 
         if (payload.Type is LogType.JobCompleted && payload.Job is not null)
             await RecalculateJobsAsync(payload);
+
+        await RecalculateItemsToArchiveAsync(payload);
     }
 
     private async Task RecalculateFilesAsync()
@@ -64,5 +64,14 @@ public class TelemetryRecalculationAction(IServiceProvider serviceProvider) : Re
         var data = await query.FirstOrDefaultAsync();
         if (data is not null)
             _jobsTelemetryCollector.Set(payload.Job!.JobName, data.Value);
+    }
+
+    private async Task RecalculateItemsToArchiveAsync(RecalculationPayload payload)
+    {
+        var expirationDate = DateTime.UtcNow.AddMonths(-_options.ExpirationMonths);
+        var query = DbContext.LogItems.Where(o => o.CreatedAt <= expirationDate || o.IsDeleted);
+        var count = await query.CountAsync();
+
+        _telemetryCollector.ItemsToArchive.Set(count);
     }
 }

@@ -1,8 +1,10 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Entity.Statistics;
+using AuditLogService.Core.Options;
 using AuditLogService.Telemetry.Collectors;
 using GrillBot.Services.Common.Telemetry.Database;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace AuditLogService.Telemetry;
 
@@ -11,7 +13,8 @@ public class AuditLogTelemetryInitService(
     AuditLogTelemetryCollector _collector,
     DatabaseTelemetryCollector _databaseCollector,
     AuditLogApiTelemetryCollector _apiCollector,
-    AuditLogJobsTelemetryCollector _jobsCollector
+    AuditLogJobsTelemetryCollector _jobsCollector,
+    IOptions<AppOptions> _options
 ) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -24,6 +27,7 @@ public class AuditLogTelemetryInitService(
         await InitializeTablesAsync(statsContext);
         await InitializeApiStatisticsAsync(statsContext);
         await InitializeScheduledJobStatisticsAsync(statsContext);
+        await InitializeItemsToArchivationAsync(dbContext);
     }
 
     private async Task InitializeFilesAsync(AuditLogServiceContext dbContext)
@@ -77,5 +81,14 @@ public class AuditLogTelemetryInitService(
         var data = await statisticsQuery.ToListAsync();
         foreach (var item in data)
             _jobsCollector.Set(item.Name, item.Avg);
+    }
+
+    private async Task InitializeItemsToArchivationAsync(AuditLogServiceContext context)
+    {
+        var expirationDate = DateTime.UtcNow.AddMonths(-_options.Value.ExpirationMonths);
+        var query = context.LogItems.Where(o => o.CreatedAt <= expirationDate || o.IsDeleted);
+        var count = await query.CountAsync();
+
+        _collector.ItemsToArchive.Set(count);
     }
 }
