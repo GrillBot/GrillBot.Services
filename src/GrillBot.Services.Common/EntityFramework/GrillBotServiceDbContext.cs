@@ -34,7 +34,7 @@ public class GrillBotServiceDbContext(
             var count = await set.CountAsync(cancellationToken);
             var entityName = string.IsNullOrEmpty(entity.Schema) ? entity.TableName : $"{entity.Schema}.{entity.TableName}";
 
-            _telemetryCollector.Set(entityName, count);
+            _telemetryCollector.SetTableCount(entityName, count);
         }
 
         return changedRows;
