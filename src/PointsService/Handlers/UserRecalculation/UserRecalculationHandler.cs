@@ -18,6 +18,7 @@ public partial class UserRecalculationHandler(
         await ProcessActionAsync(ComputeDailyStatsAsync, user, nameof(ComputeDailyStatsAsync));
         await ProcessActionAsync(ComputeLeaderboardAsync, user, nameof(ComputeLeaderboardAsync));
         await ProcessActionAsync(ComputePositionAsync, user, nameof(ComputePositionAsync));
+        await ProcessActionAsync(ComputeTelemetryAsync, user, nameof(ComputeTelemetryAsync));
 
         return RabbitConsumptionResult.Success;
     }

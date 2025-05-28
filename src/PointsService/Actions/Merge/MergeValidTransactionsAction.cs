@@ -23,9 +23,7 @@ public class MergeValidTransactionsAction(
 
     protected override async Task<bool> CanProcessMergeAsync()
     {
-        var query = DbContext.Transactions.Where(o => o.CreatedAt < ExpirationDate && o.MergedCount == 0);
-        var expiredCount = await ContextHelper.ReadCountAsync(query);
-
+        var expiredCount = await CountAsync();
         return expiredCount >= _options.Value.MinimalTransactionsForMerge;
     }
 
@@ -58,5 +56,11 @@ public class MergeValidTransactionsAction(
         }
 
         return result;
+    }
+
+    public override async Task<int> CountAsync()
+    {
+        var query = DbContext.Transactions.Where(o => o.CreatedAt < ExpirationDate && o.MergedCount == 0);
+        return await ContextHelper.ReadCountAsync(query);
     }
 }

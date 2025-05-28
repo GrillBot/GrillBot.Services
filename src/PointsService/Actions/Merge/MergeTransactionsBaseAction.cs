@@ -20,6 +20,7 @@ public abstract class MergeTransactionsBaseAction(
     protected abstract Task<bool> CanProcessMergeAsync();
     protected abstract Task<List<Transaction>> GetTransactionsForMergeAsync();
     protected abstract List<Transaction> ProcessMergeInternal(List<Transaction> transactions);
+    public abstract Task<int> CountAsync();
 
     public override async Task<ApiResult> ProcessAsync()
     {
