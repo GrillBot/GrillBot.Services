@@ -1,10 +1,11 @@
 ﻿using EmoteService.Core.Entity.Suggestions;
-using GrillBot.Core.Database;
+using GrillBot.Services.Common.EntityFramework;
+using GrillBot.Services.Common.Telemetry.Database;
 using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Core.Entity;
 
-public class EmoteServiceContext(DbContextOptions<EmoteServiceContext> options) : GrillBotBaseContext(options)
+public class EmoteServiceContext(DbContextOptions<EmoteServiceContext> options, DatabaseTelemetryCollector collector) : GrillBotServiceDbContext(options, collector)
 {
     public DbSet<EmoteDefinition> EmoteDefinitions => Set<EmoteDefinition>();
     public DbSet<EmoteUserStatItem> EmoteUserStatItems => Set<EmoteUserStatItem>();

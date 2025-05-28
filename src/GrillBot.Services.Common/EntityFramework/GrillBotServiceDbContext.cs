@@ -1,6 +1,7 @@
 ﻿using GrillBot.Core.Database;
 using GrillBot.Services.Common.EntityFramework.Extensions;
 using GrillBot.Services.Common.Telemetry.Database;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -38,6 +39,25 @@ public class GrillBotServiceDbContext(
         }
 
         return changedRows;
+    }
+
+    public async Task<Dictionary<string, long>> GetRecordsCountInTablesAsync()
+    {
+        var result = new Dictionary<string, long>();
+
+        foreach (var entityType in Model.GetEntityTypes())
+        {
+            var schema = entityType.GetSchema() ?? entityType.GetDefaultSchema();
+            var tableName = entityType.GetTableName()!;
+            var query = GetEntityQuery(entityType.ClrType);
+
+            result.Add(
+                string.IsNullOrEmpty(schema) ? tableName : $"{schema}.{tableName}",
+                await query.CountAsync()
+            );
+        }
+
+        return result;
     }
 
     private IQueryable GetEntityQuery(Type entityType)
