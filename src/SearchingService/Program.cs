@@ -1,5 +1,7 @@
 using GrillBot.Core;
+using GrillBot.Core.Metrics;
 using GrillBot.Services.Common;
+using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using Microsoft.EntityFrameworkCore;
 using SearchingService.Core.Entity;
 using SearchingService.Core.Providers;
@@ -15,6 +17,7 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
 
         services.AddDbContext<SearchingServiceContext>(opt => opt.UseNpgsql(connectionString));
         services.AddStatisticsProvider<StatisticsProvider>();
+        services.AddTelemetryInitializer<DefaultDatabaseInitializer<SearchingServiceContext>>();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
     {

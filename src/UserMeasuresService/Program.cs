@@ -1,6 +1,8 @@
 using GrillBot.Core;
+using GrillBot.Core.Metrics;
 using GrillBot.Services.Common;
 using GrillBot.Services.Common.EntityFramework.Extensions;
+using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using UserMeasuresService.Core.Entity;
@@ -16,6 +18,7 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
 
         services.AddPostgresDatabaseContext<UserMeasuresContext>(connectionString);
         services.AddStatisticsProvider<StatisticsProvider>();
+        services.AddTelemetryInitializer<DefaultDatabaseInitializer<UserMeasuresContext>>();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
     {

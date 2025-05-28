@@ -1,7 +1,9 @@
 using GrillBot.Core;
+using GrillBot.Core.Metrics;
 using GrillBot.Core.Redis;
 using GrillBot.Services.Common;
 using GrillBot.Services.Common.EntityFramework.Extensions;
+using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using Microsoft.EntityFrameworkCore;
 using RubbergodService.Core.Entity;
 using RubbergodService.Core.Providers;
@@ -20,6 +22,7 @@ var application = await ServiceBuilder.CreateWebAppAsync(
         services.AddStatisticsProvider<StatisticsProvider>();
         services.AddDirectApi();
         services.AddHttpClient();
+        services.AddTelemetryInitializer<DefaultDatabaseInitializer<RubbergodServiceContext>>();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
     {

@@ -1,5 +1,7 @@
 using GrillBot.Core;
+using GrillBot.Core.Metrics;
 using GrillBot.Services.Common;
+using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using Microsoft.EntityFrameworkCore;
 using RemindService.Core.Entity;
 using RemindService.Core.Providers;
@@ -15,6 +17,7 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
 
         services.AddDbContext<RemindServiceContext>(opt => opt.UseNpgsql(connectionString));
         services.AddStatisticsProvider<StatisticsProvider>();
+        services.AddTelemetryInitializer<DefaultDatabaseInitializer<RemindServiceContext>>();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
     {
