@@ -11,7 +11,7 @@ public class GetApiPeriodStatisticsAction(
 {
     protected override async Task<Dictionary<DateOnly, long>> GetRawDataAsync()
     {
-        var apiGroups = GetParameter<string>(1);
+        var apiGroups = GetParameter<string[]>(1);
 
         var query = DbContext.ApiRequests.AsNoTracking()
             .Where(o => apiGroups.Contains(o.ApiGroupName))
