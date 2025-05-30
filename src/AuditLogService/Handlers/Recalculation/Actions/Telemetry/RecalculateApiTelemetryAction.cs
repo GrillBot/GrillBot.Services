@@ -15,7 +15,6 @@ public class RecalculateApiTelemetryAction(IServiceProvider serviceProvider) : R
     public override async Task ProcessAsync(RecalculationPayload payload)
     {
         await RecalculateAvgDurationAsync(payload);
-        await RecalculateDailyCountsAsync(payload);
     }
 
     private async Task RecalculateAvgDurationAsync(RecalculationPayload payload)
@@ -28,14 +27,5 @@ public class RecalculateApiTelemetryAction(IServiceProvider serviceProvider) : R
         var data = await query.FirstOrDefaultAsync();
         if (data is not null)
             _telemetryCollector.SetApiAvgDuration(endpoint, data.Value);
-    }
-
-    private async Task RecalculateDailyCountsAsync(RecalculationPayload payload)
-    {
-        var query = DbContext.ApiRequests.AsNoTracking()
-            .Where(o => o.ApiGroupName == payload.Api!.ApiGroupName && o.RequestDate == payload.Api.RequestDate);
-
-        var count = await query.LongCountAsync();
-        _telemetryCollector.SetApiRequestCountsByDay(payload.Api!.ApiGroupName, payload.Api.RequestDate, count);
     }
 }
