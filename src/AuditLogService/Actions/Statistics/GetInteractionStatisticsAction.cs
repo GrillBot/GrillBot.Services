@@ -18,24 +18,10 @@ public class GetInteractionStatisticsAction(
     {
         var statistics = new InteractionStatistics
         {
-            ByDate = await GetStatisticsByDateAsync(),
             Commands = await GetCommandStatisticsAsync()
         };
 
         return ApiResult.Ok(statistics);
-    }
-
-    private async Task<Dictionary<string, long>> GetStatisticsByDateAsync()
-    {
-        var statsQuery = DbContext.InteractionCommands.AsNoTracking()
-            .GroupBy(o => o.InteractionDate)
-            .Select(o => new { o.Key, Count = o.LongCount() });
-        var stats = await ContextHelper.ReadEntitiesAsync(statsQuery);
-
-        return stats
-            .GroupBy(o => new { o.Key.Year, o.Key.Month })
-            .OrderBy(o => o.Key.Year).ThenBy(o => o.Key.Month)
-            .ToDictionary(o => $"{o.Key.Year}-{o.Key.Month.ToString().PadLeft(2, '0')}", o => o.Sum(x => x.Count));
     }
 
     private async Task<List<StatisticItem>> GetCommandStatisticsAsync()

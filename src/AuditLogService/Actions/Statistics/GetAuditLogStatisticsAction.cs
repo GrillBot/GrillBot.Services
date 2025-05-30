@@ -16,7 +16,6 @@ public class GetAuditLogStatisticsAction(
     {
         var result = new AuditLogStatistics
         {
-            ByDate = await GetStatisticsByDateAsync(),
             ByType = await GetStatisticsByTypeAsync(),
             FileExtensionStatistics = await GetFileExtensionStatisticsAsync()
         };
@@ -32,21 +31,6 @@ public class GetAuditLogStatisticsAction(
             .Select(o => new { o.Key, Count = o.LongCount() });
 
         return ContextHelper.ReadToDictionaryAsync(query, o => o.Key.ToString(), o => o.Count);
-    }
-
-    private Task<Dictionary<string, long>> GetStatisticsByDateAsync()
-    {
-        var query = DbContext.LogItems.AsNoTracking()
-            .GroupBy(o => new { o.LogDate.Year, o.LogDate.Month })
-            .OrderBy(o => o.Key.Year)
-            .ThenBy(o => o.Key.Month)
-            .Select(o => new
-            {
-                Key = o.Key.Year + "-" + o.Key.Month.ToString().PadLeft(2, '0'),
-                Count = o.LongCount()
-            });
-
-        return ContextHelper.ReadToDictionaryAsync(query, o => o.Key, o => o.Count);
     }
 
     private async Task<List<FileExtensionStatistic>> GetFileExtensionStatisticsAsync()

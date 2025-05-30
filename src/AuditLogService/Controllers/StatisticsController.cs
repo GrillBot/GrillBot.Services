@@ -1,6 +1,8 @@
 ﻿using AuditLogService.Actions.Statistics;
+using AuditLogService.Actions.Statistics.PeriodStatistics;
 using AuditLogService.Models.Response.Statistics;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using ControllerBase = GrillBot.Core.Infrastructure.Actions.ControllerBase;
 
 namespace AuditLogService.Controllers;
@@ -36,4 +38,19 @@ public class StatisticsController(IServiceProvider serviceProvider) : Controller
     [ProducesResponseType(typeof(AvgExecutionTimes), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAvgTimesAsync()
         => await ProcessAsync<GetAvgTimesAction>();
+
+    [HttpGet("api/periodStats")]
+    [ProducesResponseType<Dictionary<string, long>>(StatusCodes.Status200OK)]
+    public Task<IActionResult> GetApiPeriodStatisticsAsync([FromQuery(Name = "group")] string[] apiGroups, [Required] string groupingKey)
+        => ProcessAsync<GetApiPeriodStatisticsAction>(groupingKey, apiGroups);
+
+    [HttpGet("auditLog/periodStats")]
+    [ProducesResponseType<Dictionary<string, long>>(StatusCodes.Status200OK)]
+    public Task<IActionResult> GetAuditLogPeriodStatisticsasync([Required] string groupingKey)
+        => ProcessAsync<GetAuditLogPeriodStatisticsAction>(groupingKey);
+
+    [HttpGet("interactions/periodStats")]
+    [ProducesResponseType<Dictionary<string, long>>(StatusCodes.Status200OK)]
+    public Task<IActionResult> GetInteractionsPeriodStatisticsAsync([Required] string groupingKey)
+        => ProcessAsync<GetInteractionsPeriodStatisticsAction>(groupingKey);
 }
