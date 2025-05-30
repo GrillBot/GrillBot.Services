@@ -1,6 +1,7 @@
 ﻿using AuditLogService.Core.Entity;
 using AuditLogService.Core.Enums;
 using AuditLogService.Handlers.Recalculation.Actions;
+using AuditLogService.Handlers.Recalculation.Actions.Telemetry;
 using AuditLogService.Models.Events.Recalculation;
 using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
@@ -50,6 +51,19 @@ public class RecalculationHandler(IServiceProvider serviceProvider)
 
         yield return new DatabaseStatsRecalculationAction(ServiceProvider);
         yield return new InvalidStatsRecalculationAction(ServiceProvider);
-        yield return new TelemetryRecalculationAction(ServiceProvider);
+        yield return new RecalculateLogTelemetryAction(ServiceProvider);
+
+        if (payload.FilesCount > 0)
+            yield return new RecalculateFilesTelemetryAction(ServiceProvider);
+
+        if (payload.Type is LogType.Api)
+        {
+            yield return new RecalculateApiTelemetryAction(ServiceProvider);
+        }
+
+        if (payload.Type is LogType.JobCompleted)
+        {
+            yield return new RecalculateJobsTelemetryAction(ServiceProvider);
+        }
     }
 }

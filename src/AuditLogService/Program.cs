@@ -35,6 +35,7 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         services.AddTelemetryInitializer<ApiStatisticsInitializer>();
         services.AddTelemetryInitializer<JobStatisticsInitializer>();
         services.AddTelemetryInitializer<ArchivationInitializer>();
+        services.AddTelemetryInitializer<ApiRequestCountsByDayInitializer>();
     },
     configureHealthChecks: (builder, configuration) =>
     {
