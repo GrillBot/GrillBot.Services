@@ -35,4 +35,10 @@ public class EmoteSuggestionsController(IServiceProvider serviceProvider) : Gril
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     public Task<IActionResult> FinishSuggestionVotesAsync()
         => ProcessAsync<FinishSuggestionVotesAction>();
+
+    [HttpGet("preview/{suggestionId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public Task<IActionResult> GetEmoteSuggestionImagePreviewAsync(Guid suggestionId)
+        => ProcessAsync<GetEmoteSuggestionImagePreviewAction>(suggestionId);
 }
