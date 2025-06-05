@@ -1,6 +1,7 @@
 using GrillBot.Core;
 using GrillBot.Core.Metrics;
 using GrillBot.Services.Common;
+using GrillBot.Services.Common.EntityFramework.Extensions;
 using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using Microsoft.EntityFrameworkCore;
 using RemindService.Core.Entity;
@@ -15,7 +16,7 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
     {
         var connectionString = configuration.GetConnectionString("Default")!;
 
-        services.AddDbContext<RemindServiceContext>(opt => opt.UseNpgsql(connectionString));
+        services.AddPostgresDatabaseContext<RemindServiceContext>(connectionString);
         services.AddStatisticsProvider<StatisticsProvider>();
         services.AddTelemetryInitializer<DefaultDatabaseInitializer<RemindServiceContext>>();
     },

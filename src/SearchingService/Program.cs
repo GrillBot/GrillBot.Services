@@ -1,6 +1,7 @@
 using GrillBot.Core;
 using GrillBot.Core.Metrics;
 using GrillBot.Services.Common;
+using GrillBot.Services.Common.EntityFramework.Extensions;
 using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using Microsoft.EntityFrameworkCore;
 using SearchingService.Core.Entity;
@@ -15,7 +16,7 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
     {
         var connectionString = configuration.GetConnectionString("Default")!;
 
-        services.AddDbContext<SearchingServiceContext>(opt => opt.UseNpgsql(connectionString));
+        services.AddPostgresDatabaseContext<SearchingServiceContext>(connectionString);
         services.AddStatisticsProvider<StatisticsProvider>();
         services.AddTelemetryInitializer<DefaultDatabaseInitializer<SearchingServiceContext>>();
     },
