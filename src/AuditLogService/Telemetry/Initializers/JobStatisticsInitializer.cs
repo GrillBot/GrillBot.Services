@@ -1,5 +1,5 @@
 ﻿using AuditLogService.Core.Entity.Statistics;
-using GrillBot.Core.Metrics.Initializer;
+using GrillBot.Services.Common.Telemetry;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Telemetry.Initializers;
@@ -7,20 +7,20 @@ namespace AuditLogService.Telemetry.Initializers;
 public class JobStatisticsInitializer(
     IServiceProvider serviceProvider,
     AuditLogTelemetryCollector _collector
-) : TelemetryInitializer(serviceProvider)
+) : TelemetryInitializerBase(serviceProvider)
 {
     protected override async Task ExecuteInternalAsync(IServiceProvider provider, CancellationToken cancellationToken = default)
     {
-        var context = provider.GetRequiredService<AuditLogStatisticsContext>();
+        var contextHelper = CreateContextHelper<AuditLogStatisticsContext>(provider);
 
-        var statisticsQuery = context.JobInfos.AsNoTracking()
+        var statisticsQuery = contextHelper.DbContext.JobInfos.AsNoTracking()
             .Select(o => new
             {
                 o.Name,
                 Avg = (int)Math.Round(o.TotalDuration / (double)o.StartCount)
             });
 
-        var data = await statisticsQuery.ToListAsync(cancellationToken);
+        var data = await contextHelper.ReadEntitiesAsync(statisticsQuery);
         foreach (var item in data)
             _collector.SetJobsAvgDuration(item.Name, item.Avg);
     }

@@ -1,5 +1,5 @@
 ﻿using AuditLogService.Core.Entity;
-using GrillBot.Core.Metrics.Initializer;
+using GrillBot.Services.Common.Telemetry;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Telemetry.Initializers;
@@ -7,14 +7,14 @@ namespace AuditLogService.Telemetry.Initializers;
 public class FilesInitializer(
     IServiceProvider serviceProvider,
     AuditLogTelemetryCollector _collector
-) : TelemetryInitializer(serviceProvider)
+) : TelemetryInitializerBase(serviceProvider)
 {
     protected override async Task ExecuteInternalAsync(IServiceProvider provider, CancellationToken cancellationToken = default)
     {
-        var context = provider.GetRequiredService<AuditLogServiceContext>();
-        var query = context.Files.AsNoTracking();
+        var contextHelper = CreateContextHelper<AuditLogServiceContext>(provider);
+        var query = contextHelper.DbContext.Files.AsNoTracking();
 
-        _collector.CountOfFiles.Set(await query.CountAsync(cancellationToken));
-        _collector.SizeOfFiles.Set(await query.SumAsync(o => o.Size, cancellationToken));
+        _collector.CountOfFiles.Set(await contextHelper.ReadCountAsync(query));
+        _collector.SizeOfFiles.Set(await contextHelper.ReadSumAsync(query, o => o.Size));
     }
 }

@@ -1,5 +1,6 @@
 ﻿using GrillBot.Core.Metrics.Initializer;
 using GrillBot.Services.Common.EntityFramework;
+using GrillBot.Services.Common.EntityFramework.Helpers.Factory;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GrillBot.Services.Common.Telemetry.Database.Initializers;
@@ -7,12 +8,12 @@ namespace GrillBot.Services.Common.Telemetry.Database.Initializers;
 public class DefaultDatabaseInitializer<TDbContext>(
     IServiceProvider serviceProvider,
     DatabaseTelemetryCollector _collector
-) : TelemetryInitializer(serviceProvider) where TDbContext : GrillBotServiceDbContext
+) : TelemetryInitializerBase(serviceProvider) where TDbContext : GrillBotServiceDbContext
 {
     protected override async Task ExecuteInternalAsync(IServiceProvider provider, CancellationToken cancellationToken = default)
     {
-        var context = provider.GetRequiredService<TDbContext>();
-        var tables = await context.GetRecordsCountInTablesAsync();
+        var contextHelper = CreateContextHelper<TDbContext>(provider);
+        var tables = await contextHelper.DbContext.GetRecordsCountInTablesAsync();
 
         foreach (var (name, count) in tables)
             _collector.SetTableCount(name, count);

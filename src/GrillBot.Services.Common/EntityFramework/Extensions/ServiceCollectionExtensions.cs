@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core;
+using GrillBot.Services.Common.EntityFramework.Helpers.Factory;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
@@ -16,7 +17,7 @@ public static class ServiceCollectionExtensions
         Action<NpgsqlDbContextOptionsBuilder>? pgBuilder = null
     ) where TContext : DbContext
     {
-        return services.AddDatabaseContext<TContext>(b =>
+        services.AddDatabaseContext<TContext>(b =>
         {
             b = b.UseNpgsql(
                 connectionString,
@@ -32,5 +33,8 @@ public static class ServiceCollectionExtensions
 
             return b;
         });
+
+        services.AddScoped<IContextHelperFactory<TContext>, ContextHelperFactory<TContext>>();
+        return services;
     }
 }

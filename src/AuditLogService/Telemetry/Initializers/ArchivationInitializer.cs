@@ -1,12 +1,13 @@
 ﻿using AuditLogService.Actions.Archivation;
 using GrillBot.Core.Metrics.Initializer;
+using GrillBot.Services.Common.Telemetry;
 
 namespace AuditLogService.Telemetry.Initializers;
 
 public class ArchivationInitializer(
     IServiceProvider serviceProvider,
     AuditLogTelemetryCollector _collector
-) : TelemetryInitializer(serviceProvider)
+) : TelemetryInitializerBase(serviceProvider)
 {
     protected override async Task ExecuteInternalAsync(IServiceProvider provider, CancellationToken cancellationToken = default)
     {

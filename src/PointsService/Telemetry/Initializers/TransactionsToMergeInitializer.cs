@@ -1,4 +1,4 @@
-﻿using GrillBot.Core.Metrics.Initializer;
+﻿using GrillBot.Services.Common.Telemetry;
 using PointsService.Actions.Merge;
 
 namespace PointsService.Telemetry.Initializers;
@@ -6,7 +6,7 @@ namespace PointsService.Telemetry.Initializers;
 public class TransactionsToMergeInitializer(
     IServiceProvider serviceProvider,
     PointsTelemetryCollector _collector
-) : TelemetryInitializer(serviceProvider)
+) : TelemetryInitializerBase(serviceProvider)
 {
     protected override async Task ExecuteInternalAsync(IServiceProvider provider, CancellationToken cancellationToken = default)
     {

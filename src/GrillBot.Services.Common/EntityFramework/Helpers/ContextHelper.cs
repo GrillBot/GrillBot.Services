@@ -11,6 +11,8 @@ public class ContextHelper<TDbContext>(
     string _counterKey
 ) where TDbContext : DbContext
 {
+    public TDbContext DbContext => _dbContext;
+
     private CounterItem CreateCounter(string operation)
         => _counterManager.Create($"{_counterKey}.{operation}");
 
@@ -39,12 +41,18 @@ public class ContextHelper<TDbContext>(
     }
 
     public Task<TEntity?> ReadFirstOrDefaultEntityAsync<TEntity>(Expression<Func<TEntity, bool>> whereExpression) where TEntity : class
-        => ReadFirstOrDefaultEntityAsync(_dbContext.Set<TEntity>().Where(whereExpression));
+        => ReadFirstOrDefaultEntityAsync(DbContext.Set<TEntity>().Where(whereExpression));
 
     public async Task<int> ReadCountAsync<TEntity>(IQueryable<TEntity> query) where TEntity : class
     {
         using (CreateCounter("Database"))
             return await query.CountAsync();
+    }
+
+    public async Task<long> ReadSumAsync<TEntity>(IQueryable<TEntity> query, Expression<Func<TEntity, long>> selector) where TEntity : class
+    {
+        using (CreateCounter("Database"))
+            return await query.SumAsync(selector);
     }
 
     public async Task<Dictionary<TKey, TValue>> ReadToDictionaryAsync<TEntity, TKey, TValue>(
@@ -66,7 +74,7 @@ public class ContextHelper<TDbContext>(
     public async Task<int> SaveChangesAsync()
     {
         using (CreateCounter("Database"))
-            return await _dbContext.SaveChangesAsync();
+            return await DbContext.SaveChangesAsync();
     }
 
     public async Task<int> ExecuteBatchDeleteAsync<TEntity>(IQueryable<TEntity> query) where TEntity : class
