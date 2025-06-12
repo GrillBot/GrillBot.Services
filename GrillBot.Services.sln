@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SearchingService", "src\Sea
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InviteService", "src\InviteService\InviteService.csproj", "{866C7982-5F6E-4C68-A9FD-F3EA46B6DF4E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserManagementService", "src\UserManagementService\UserManagementService.csproj", "{C0962FCB-C573-4B82-91BF-852DCD2ABB1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{866C7982-5F6E-4C68-A9FD-F3EA46B6DF4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{866C7982-5F6E-4C68-A9FD-F3EA46B6DF4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{866C7982-5F6E-4C68-A9FD-F3EA46B6DF4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0962FCB-C573-4B82-91BF-852DCD2ABB1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0962FCB-C573-4B82-91BF-852DCD2ABB1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0962FCB-C573-4B82-91BF-852DCD2ABB1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0962FCB-C573-4B82-91BF-852DCD2ABB1A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
