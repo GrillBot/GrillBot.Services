@@ -12,4 +12,6 @@ public class GuildUser
 
     [StringLength(32)]
     public string? CurrentNickname { get; set; }
+
+    public IList<GuildUserNickname> Nicknames { get; set; } = [];
 }

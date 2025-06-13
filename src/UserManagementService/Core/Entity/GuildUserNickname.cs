@@ -17,4 +17,6 @@ public class GuildUserNickname
     public string Value { get; set; } = null!;
 
     public DateTime InsertedAtUtc { get; set; } = DateTime.UtcNow;
+
+    public GuildUser GuildUser { get; set; } = null!;
 }

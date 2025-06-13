@@ -8,4 +8,11 @@ public class UserManagementContext(DbContextOptions options, DatabaseTelemetryCo
 {
     public DbSet<GuildUserNickname> Nicknames => Set<GuildUserNickname>();
     public DbSet<GuildUser> GuildUsers => Set<GuildUser>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<GuildUser>(builder =>
+            builder.HasMany(o => o.Nicknames).WithOne(o => o.GuildUser).HasForeignKey(o => new { o.GuildId, o.UserId })
+        );
+    }
 }
