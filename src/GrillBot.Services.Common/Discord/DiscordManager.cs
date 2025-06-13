@@ -1,9 +1,9 @@
 ﻿using Discord;
+using Discord.Net;
 using Discord.Rest;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.Cache;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 
 #pragma warning disable S3928 // Parameter names used into ArgumentException constructors should match an existing one 
 #pragma warning disable S3604 // Member initializer values should not be redundant
@@ -104,5 +104,20 @@ public class DiscordManager(
         }
 
         return result;
+    }
+
+    public async Task<IUser?> GetUserAsync(ulong userId)
+    {
+        using (_counterManager.Create("Discord.API.User"))
+        {
+            try
+            {
+                return await DiscordClient.GetUserAsync(userId);
+            }
+            catch (HttpException ex) when (ex.DiscordCode is DiscordErrorCode.UserBanned or DiscordErrorCode.UnknownUser)
+            {
+                return null;
+            }
+        }
     }
 }

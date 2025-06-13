@@ -1,15 +1,19 @@
-﻿using GrillBot.Core.Infrastructure.Auth;
+﻿using GrillBot.Core.Extensions;
+using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
+using GrillBot.Services.Common.Discord;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
+using System.Text;
 using UserManagementService.Core.Entity;
 using UserManagementService.Models.Events;
 
 namespace UserManagementService.Handlers;
 
 public class NicknameChangedHandler(
-    IServiceProvider serviceProvider
+    IServiceProvider serviceProvider,
+    DiscordManager _discordManager
 ) : BaseEventHandlerWithDb<NicknameChangedMessage, UserManagementContext>(serviceProvider)
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
@@ -20,6 +24,14 @@ public class NicknameChangedHandler(
     {
         if (message.NicknameBefore == message.NicknameAfter)
             return RabbitConsumptionResult.Success;
+
+        var user = await _discordManager.GetUserAsync(message.UserId);
+        if (user is null)
+            return RabbitConsumptionResult.Reject;
+
+        var isUser = !(user.IsBot || user.IsWebhook);
+        message.NicknameBefore = SanitizeNickname(message.NicknameBefore, isUser);
+        message.NicknameAfter = SanitizeNickname(message.NicknameAfter, isUser);
 
         await UpdateNicknameHistoryAsync(message.GuildId, message.UserId, message.NicknameBefore);
         await UpdateNicknameHistoryAsync(message.GuildId, message.UserId, message.NicknameAfter);
@@ -74,5 +86,19 @@ public class NicknameChangedHandler(
         };
 
         return Publisher.PublishAsync(new CreateItemsMessage(logRequest));
+    }
+
+    private static string? SanitizeNickname(string? nickname, bool isUser)
+    {
+        if (string.IsNullOrEmpty(nickname))
+            return null;
+
+        var builder = new StringBuilder();
+        var nicknameValue = isUser ? nickname : nickname.Cut(32, true)!;
+
+        foreach (var character in nicknameValue.Where(ch => Rune.TryCreate(ch, out _)))
+            builder.Append(character);
+
+        return builder.ToString();
     }
 }
