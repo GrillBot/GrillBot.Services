@@ -23,10 +23,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final_image
 LABEL org.opencontainers.image.source=https://github.com/grillbot/grillbot.services
 
 WORKDIR /app
-EXPOSE 5052
+EXPOSE 5045
 
 ENV TZ=Europe/Prague
-ENV ASPNETCORE_URLS='http://+:5052'
+ENV ASPNETCORE_URLS='http://+:5045'
 ENV DOTNET_PRINT_TELEMETRY_MESSAGE='false'
 
 RUN apt update && apt install -y --no-install-recommends tzdata libc6-dev
