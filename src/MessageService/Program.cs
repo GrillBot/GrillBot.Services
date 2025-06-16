@@ -4,9 +4,9 @@ using GrillBot.Services.Common;
 using GrillBot.Services.Common.EntityFramework.Extensions;
 using GrillBot.Services.Common.Providers;
 using GrillBot.Services.Common.Telemetry.Database.Initializers;
+using MessageService.Core.Entity;
+using MessageService.Options;
 using System.Reflection;
-using UserManagementService.Core.Entity;
-using UserManagementService.Options;
 
 var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
     Assembly.GetExecutingAssembly(),
@@ -15,16 +15,16 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
     {
         var connectionString = configuration.GetConnectionString("Default")!;
 
-        services.AddPostgresDatabaseContext<UserManagementContext>(connectionString);
-        services.AddStatisticsProvider<DefaultStatisticsProvider<UserManagementContext>>();
-        services.AddTelemetryInitializer<DefaultDatabaseInitializer<UserManagementContext>>();
+        services.AddPostgresDatabaseContext<MessageContext>(connectionString);
+        services.AddStatisticsProvider<DefaultStatisticsProvider<MessageContext>>();
+        services.AddTelemetryInitializer<DefaultDatabaseInitializer<MessageContext>>();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
     {
         var connectionString = configuration.GetConnectionString("Default")!;
         healthCheckBuilder.AddNpgSql(connectionString);
     },
-    preRunInitialization: (app, _) => app.InitDatabaseAsync<UserManagementContext>()
+    preRunInitialization: (app, _) => app.InitDatabaseAsync<MessageContext>()
 );
 
 await application.RunAsync();
