@@ -14,7 +14,7 @@ public class DeleteAutoReplyDefinitionAction(
     {
         var id = GetParameter<Guid>(0);
 
-        var query = DbContext.AutoReplyDefinitions.Where(o => o.Id == id);
+        var query = DbContext.AutoReplyDefinitions.Where(o => !o.IsDeleted && o.Id == id);
         var definition = await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
 
         if (definition is null)
