@@ -15,7 +15,7 @@ public class UpdateAutoReplyDefinitionAction(
     public override async Task<ApiResult> ProcessAsync()
     {
         var id = GetParameter<Guid>(0);
-        var request = GetParameter<AutoReplyDefinitionRequest>(0);
+        var request = GetParameter<AutoReplyDefinitionRequest>(1);
 
         var query = DbContext.AutoReplyDefinitions.Where(o => !o.IsDeleted && o.Id == id);
         var definition = await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
