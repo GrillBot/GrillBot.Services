@@ -40,7 +40,12 @@ jobs:
           changed_files=$(echo "${{ steps.gitdiff.outputs.changed_files }}" | tr '\n' ' ')
 
           for file in $changed_files; do
-            if [[ "$file" =~ ^src/([^/]+)/ ]]; then
+            if [[ "$file" =~ ^src/([^/.]+)/ ]]; then
+              # Matches things like src/Service/Foo.cs
+              service="${BASH_REMATCH[1]}"
+              services["$service"]=1
+            elif [[ "$file" =~ ^src/([^.]+)\.Dockerfile$ ]]; then
+              # Matches things like src/Service.Dockerfile
               service="${BASH_REMATCH[1]}"
               services["$service"]=1
             fi

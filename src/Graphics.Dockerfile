@@ -5,9 +5,9 @@ FROM node:${NODE_VERSION} AS build
 WORKDIR /usr
 
 RUN apk add build-base g++ cairo-dev jpeg-dev pango-dev giflib-dev
-COPY package*.json ./
+COPY Graphics/package*.json ./
 RUN npm ci
-COPY . .
+COPY Graphics/ .
 RUN npm run build
 
 # Production phase
@@ -24,7 +24,7 @@ RUN apk add build-base g++ cairo-dev jpeg-dev pango-dev giflib-dev
 RUN apk add terminus-font ttf-inconsolata ttf-dejavu font-noto font-noto-cjk ttf-font-awesome font-noto-extra
 
 # Final build
-COPY package*.json ./
+COPY Graphics/package*.json ./
 RUN npm ci --omit=dev
 COPY --from=build /usr/dist .
 
