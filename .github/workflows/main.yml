@@ -28,6 +28,39 @@ jobs:
           echo "changed_files<<EOF" >> $GITHUB_OUTPUT
           git diff --name-only ${{ github.event.before }} ${{ github.sha }} >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+      - name: Detect changed services
+        id: filter
+        run: |
+          dotnet_changed=false;
+          node_changed=false;
+          declare -A services;
+          changed_files=$(echo "${{ steps.gitdiff.outputs.changed_files }}" | tr '\n' ' ')
+
+          for file in $changed_files; do
+            if [[ "$file" =~ ^src/([^/]+)/ ]]; then
+              service="${BASH_REMATCH[1]}"
+              services["$service"]=1
+            fi
+          done
+
+          service_list_json="["
+          for service in "${!services[@]}"; do
+            path="src/$service"
+            if [[ -f "$path/package.json" ]]; then
+              node_changed=true
+            fi
+            if ls "$path"/*.csproj &>/dev/null; then
+              dotnet_changed=true
+            fi
+            service_list_json="${service_list_json}\"$service\","
+          done
+
+          # Remove trailing comma and close array
+          service_list_json="${service_list_json%,}]"
+
+          echo "dotnet_changed=$dotnet_changed" >> $GITHUB_OUTPUT
+          echo "node_changed=$node_changed" >> $GITHUB_OUTPUT
+          echo "services=$service_list_json" >> $GITHUB_OUTPUT
   PathsFilter:
     runs-on: ubuntu-latest
     outputs:
