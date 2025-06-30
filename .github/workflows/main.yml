@@ -22,12 +22,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      
       - name: Detect changed files
         id: gitdiff
         run: |
-          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          changed=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | xargs)
+          echo "changed_files=$changed" >> $GITHUB_OUTPUT
 
       - name: Detect changed services
         id: filter
