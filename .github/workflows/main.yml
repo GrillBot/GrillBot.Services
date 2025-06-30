@@ -202,12 +202,15 @@ jobs:
         if: needs.ChangeDetection.outputs.DotnetServices == 'true'
   BuildServices:
     runs-on: ubuntu-latest
-    needs: [CheckStaticContent, PathsFilter, BuildCommonLibraries]
+    needs: [ChangeDetection, CheckStaticContent, BuildCommonLibraries]
+    if: ${{ needs.ChangeDetection.outputs.DeploymentMatrix != '{}' }}
+    strategy:
+      matrix: ${{ fromJson(needs.ChangeDetection.outputs.DeploymentMatrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Setup dotnet
-        if: needs.PathsFilter.outputs.DotnetServices == 'true'
+        if: needs.ChangeDetection.outputs.DotnetServices == 'true'
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
@@ -216,9 +219,11 @@ jobs:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Setup Node.JS
         uses: actions/setup-node@v4
-        if: needs.PathsFilter.outputs.NodeServices == 'true'
+        if: needs.ChangeDetection.outputs.NodeServices == 'true'
         with:
           node-version: 18.x
+      - name: Build ${{ matrix.service }}
+        run: echo "Building service ${{matrix.service}}"
       - name: RubbergodService
         if: needs.PathsFilter.outputs.RubbergodService == 'true'
         run: |
