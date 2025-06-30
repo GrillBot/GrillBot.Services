@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Detect changed files
         id: gitdiff
         run: |
@@ -69,6 +69,13 @@ jobs:
         id: generate
         run: |
           echo "matrix={\"service\": ${{ steps.filter.outputs.services }}}" >> $GITHUB_OUTPUT
+
+      - name: Print results
+        run: |
+          echo "DotnetServices: ${{ steps.filter.outputs.dotnet_changed }}"
+          echo "NodeServices: ${{ steps.filter.outputs.node_changed }}"
+          echo "Services list: ${{ steps.filter.outputs.services }}"
+          echo "Matrix: ${{ steps.generate.outputs.matrix }}"
 
   PathsFilter:
     runs-on: ubuntu-latest
