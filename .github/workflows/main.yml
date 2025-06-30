@@ -204,7 +204,7 @@ jobs:
     needs: [ChangeDetection, CheckStaticContent, BuildCommonLibraries]
     if: needs.ChangeDetection.outputs.DeploymentMatrix != '{}'
     strategy:
-      matrix: 
+      matrix:
         item: ${{ fromJson(needs.ChangeDetection.outputs.DeploymentMatrix) }}
     steps:
       - name: Checkout repository
@@ -223,7 +223,9 @@ jobs:
         with:
           node-version: 18.x
       - name: Build ${{ matrix.item }}
-        run: echo "Building service ${{matrix.item}}"
+        run: |
+          dotnet restore -r linux-x64 src/${{ matrix.item }}/
+          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/${{ matrix.item }}/
       - name: RubbergodService
         if: needs.PathsFilter.outputs.RubbergodService == 'true'
         run: |
