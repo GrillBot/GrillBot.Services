@@ -63,6 +63,11 @@ jobs:
           echo "node_changed=$node_changed" >> $GITHUB_OUTPUT
           echo "services=$service_list_json" >> $GITHUB_OUTPUT
 
+      - name: Build matrix
+        id: generate
+        run: |
+          echo "matrix={\"service\": ${{ steps.filter.outputs.services }}}" >> $GITHUB_OUTPUT
+
   PathsFilter:
     runs-on: ubuntu-latest
     outputs:
