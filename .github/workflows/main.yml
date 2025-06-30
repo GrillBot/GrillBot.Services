@@ -75,6 +75,7 @@ jobs:
         id: generate
         run: |
           services="${{ steps.filter.outputs.services }}"
+          echo $services;
           echo "matrix={\"service\": $services}" >> $GITHUB_OUTPUT
 
   CheckDetectionPrint:
