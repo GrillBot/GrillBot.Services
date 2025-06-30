@@ -73,7 +73,8 @@ jobs:
       - name: Build deployment matrix
         id: generate
         run: |
-          echo "matrix={\"service\": ${{ steps.filter.outputs.services }}}" >> $GITHUB_OUTPUT
+          services="${{ steps.filter.outputs.services }}"
+          echo "matrix={\"service\": $services}" >> $GITHUB_OUTPUT
 
       - name: Print results
         run: |
