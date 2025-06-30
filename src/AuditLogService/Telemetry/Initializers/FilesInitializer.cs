@@ -12,9 +12,20 @@ public class FilesInitializer(
     protected override async Task ExecuteInternalAsync(IServiceProvider provider, CancellationToken cancellationToken = default)
     {
         var contextHelper = CreateContextHelper<AuditLogServiceContext>(provider);
-        var query = contextHelper.DbContext.Files.AsNoTracking();
+        var query = contextHelper.DbContext.Files.AsNoTracking()
+            .GroupBy(o => o.Extension ?? ".NoExtension")
+            .Select(o => new
+            {
+                Key = o.Key.StartsWith('.') ? o.Key.Substring(1) : o.Key,
+                Count = o.Count(),
+                Size = o.Sum(x => x.Size)
+            });
 
-        _collector.CountOfFiles.Set(await contextHelper.ReadCountAsync(query));
-        _collector.SizeOfFiles.Set(await contextHelper.ReadSumAsync(query, o => o.Size));
+        var items = await query.ToListAsync();
+        foreach (var item in items)
+        {
+            _collector.SetFilesCount(item.Key, item.Count);
+            _collector.SetFileSizes(item.Key, item.Size);
+        }
     }
 }

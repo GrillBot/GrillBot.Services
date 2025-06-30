@@ -11,9 +11,20 @@ public class RecalculateFilesTelemetryAction(IServiceProvider serviceProvider) :
 
     public override async Task ProcessAsync(RecalculationPayload payload)
     {
-        var baseQuery = DbContext.Files.AsNoTracking();
+        var query = DbContext.Files.AsNoTracking()
+            .GroupBy(o => o.Extension ?? ".NoExtension")
+            .Select(o => new
+            {
+                Key = o.Key.StartsWith('.') ? o.Key.Substring(1) : o.Key,
+                Count = o.Count(),
+                Size = o.Sum(x => x.Size)
+            });
 
-        _telemetryCollector.CountOfFiles.Set(await baseQuery.CountAsync());
-        _telemetryCollector.SizeOfFiles.Set(await baseQuery.SumAsync(o => o.Size));
+        var items = await query.ToListAsync();
+        foreach (var item in items)
+        {
+            _telemetryCollector.SetFilesCount(item.Key, item.Count);
+            _telemetryCollector.SetFileSizes(item.Key, item.Size);
+        }
     }
 }
