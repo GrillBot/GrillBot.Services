@@ -28,12 +28,13 @@ jobs:
           echo "changed_files<<EOF" >> $GITHUB_OUTPUT
           git diff --name-only ${{ github.event.before }} ${{ github.sha }} >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Detect changed services
         id: filter
         run: |
-          dotnet_changed=false;
-          node_changed=false;
-          declare -A services;
+          dotnet_changed=false
+          node_changed=false
+          declare -A services
           changed_files=$(echo "${{ steps.gitdiff.outputs.changed_files }}" | tr '\n' ' ')
 
           for file in $changed_files; do
@@ -61,6 +62,7 @@ jobs:
           echo "dotnet_changed=$dotnet_changed" >> $GITHUB_OUTPUT
           echo "node_changed=$node_changed" >> $GITHUB_OUTPUT
           echo "services=$service_list_json" >> $GITHUB_OUTPUT
+
   PathsFilter:
     runs-on: ubuntu-latest
     outputs:
