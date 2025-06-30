@@ -204,7 +204,8 @@ jobs:
     needs: [ChangeDetection, CheckStaticContent, BuildCommonLibraries]
     if: needs.ChangeDetection.outputs.DeploymentMatrix != '{}'
     strategy:
-      matrix: ${{ fromJson(needs.ChangeDetection.outputs.DeploymentMatrix) }}
+      matrix: 
+        item: ${{ fromJson(needs.ChangeDetection.outputs.DeploymentMatrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
