@@ -226,67 +226,12 @@ jobs:
         run: |
           dotnet restore -r linux-x64 src/${{ matrix.item }}/
           dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/${{ matrix.item }}/
-      - name: RubbergodService
-        if: needs.PathsFilter.outputs.RubbergodService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/RubbergodService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/RubbergodService/
       - name: Graphics
-        if: needs.PathsFilter.outputs.Graphics == 'true'
+        if: matrix.item == 'Graphics'
         working-directory: src/Graphics/
         run: |
           npm ci
           npm run build
-      - name: PointsService
-        if: needs.PathsFilter.outputs.PointsService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/PointsService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/PointsService/
-      - name: ImageProcessingService
-        if: needs.PathsFilter.outputs.ImageProcessingService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/ImageProcessingService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/ImageProcessingService/
-      - name: AuditLogService
-        if: needs.PathsFilter.outputs.AuditLogService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/AuditLogService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/AuditLogService/
-      - name: UserMeasuresService
-        if: needs.PathsFilter.outputs.UserMeasuresService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/UserMeasuresService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/UserMeasuresService/
-      - name: EmoteService
-        if: needs.PathsFilter.outputs.EmoteService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/EmoteService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/EmoteService/
-      - name: RemindService
-        if: needs.PathsFilter.outputs.RemindService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/RemindService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/RemindService/
-      - name: SearchingService
-        if: needs.PathsFilter.outputs.SearchingService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/SearchingService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/SearchingService/
-      - name: InviteService
-        if: needs.PathsFilter.outputs.InviteService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/InviteService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/InviteService/
-      - name: UserManagementService
-        if: needs.PathsFilter.outputs.UserManagementService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/UserManagementService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/UserManagementService/
-      - name: MessageService
-        if: needs.PathsFilter.outputs.MessageService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/MessageService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/MessageService/
   CreateDockerImages:
     runs-on: ubuntu-latest
     needs: [PathsFilter, BuildServices]
