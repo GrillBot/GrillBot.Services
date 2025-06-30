@@ -70,6 +70,7 @@ jobs:
           echo "dotnet_changed=$dotnet_changed" >> $GITHUB_OUTPUT
           echo "node_changed=$node_changed" >> $GITHUB_OUTPUT
           echo "services=$service_list_json" >> $GITHUB_OUTPUT
+          echo "$service_list_json";
 
       - name: Build deployment matrix
         id: generate
