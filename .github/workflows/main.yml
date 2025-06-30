@@ -70,7 +70,6 @@ jobs:
           echo "dotnet_changed=$dotnet_changed" >> $GITHUB_OUTPUT
           echo "node_changed=$node_changed" >> $GITHUB_OUTPUT
           echo "services=$service_list_json" >> $GITHUB_OUTPUT
-          echo "$service_list_json";
 
       - name: Build deployment matrix
         id: generate
@@ -78,12 +77,15 @@ jobs:
           services="${{ steps.filter.outputs.services }}"
           echo "matrix={\"service\": $services}" >> $GITHUB_OUTPUT
 
+  CheckDetectionPrint:
+    runs-on: ubuntu-latest
+    needs: ChangeDetection
+    steps:
       - name: Print results
         run: |
-          echo "DotnetServices: ${{ steps.filter.outputs.dotnet_changed }}"
-          echo "NodeServices: ${{ steps.filter.outputs.node_changed }}"
-          echo "Services list: ${{ steps.filter.outputs.services }}"
-          echo "Matrix: ${{ steps.generate.outputs.matrix }}"
+          echo "DotnetServices: ${{ needs.ChangeDetection.outputs.DotnetServices }}"
+          echo "NodeServices: ${{ needs.ChangeDetection.outputs.NodeServices }}"
+          echo "Matrix: ${{ needs.ChangeDetection.outputs.DeploymentMatrix }}"
 
   PathsFilter:
     runs-on: ubuntu-latest
@@ -206,7 +208,7 @@ jobs:
   BuildServices:
     runs-on: ubuntu-latest
     needs: [ChangeDetection, CheckStaticContent, BuildCommonLibraries]
-    if: ${{ needs.ChangeDetection.outputs.DeploymentMatrix != '{}' }}
+    if: needs.ChangeDetection.outputs.DeploymentMatrix != '{}'
     strategy:
       matrix: ${{ fromJson(needs.ChangeDetection.outputs.DeploymentMatrix) }}
     steps:
