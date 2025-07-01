@@ -306,6 +306,33 @@ jobs:
           tags: ghcr.io/grillbot/grillbot.services:${{steps.prepare_image_tag.outputs.value}}
           build-args: |
             github_actions_token=${{secrets.GITHUB_TOKEN}}
+  ProductionDeploy:
+    runs-on: ubuntu-latest
+    environment: Production
+    needs: [ChangeDetection, CreateDockerImages]
+    if: |
+      always() && 
+      (!contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')) &&
+      needs.ChangeDetection.outputs.FullDeploymentMatrix != '[]'
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.ChangeDetection.outputs.FullDeploymentMatrix) }}
+    steps:
+      - name: Prepare image tag
+        id: prepare_image_tag
+        uses: ./.github/actions/prepare-image-tag
+        with:
+          input: ${{ matrix.item }}
+      - name: Dump image tag
+        run: echo ${{ steps.prepare_image_tag.outputs.value }}
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh ${{ steps.prepare_image_tag.outputs.value }}
   RubbergodService_Deploy_Production:
     runs-on: ubuntu-latest
     environment: "Production_RubbergodService"
