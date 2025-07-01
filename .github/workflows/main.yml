@@ -312,7 +312,7 @@ jobs:
           context: src/
           file: src/${{matrix.item}}.Dockerfile
           push: true
-          tags: ghcr.io/grillbot.grillbot.services:${{steps.prepare_image_tag.outputs.value}}
+          tags: ghcr.io/grillbot/grillbot.services:${{steps.prepare_image_tag.outputs.value}}
           build-args: |
             github_actions_token=${{secrets.GITHUB_TOKEN}}
       - name: RubbergodService
