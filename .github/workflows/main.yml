@@ -20,6 +20,7 @@ jobs:
       NodeServices: ${{ steps.filter.outputs.node_changed }}
       NodeDeploymentMatrix: ${{ steps.filter.outputs.node_services }}
       DotnetDeploymentMatrix: ${{ steps.filter.outputs.dotnet_services }}
+      FullDeploymentMatrix: ${{ steps.filter.outputs.all_changed_services }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,10 +42,14 @@ jobs:
           # Initialize separate arrays for .NET and Node.js services
           dotnet_service_list_array=()
           node_service_list_array=()
+          # Initialize array for all changed services
+          all_changed_service_list_array=()
 
           # Use associative arrays to keep track of unique services added to lists
           declare -A unique_dotnet_services
           declare -A unique_node_services
+          # Use associative array for all unique changed services
+          declare -A unique_all_services
 
           changed_files=$(echo "${{ steps.gitdiff.outputs.changed_files }}" | tr '\n' ' ')
 
@@ -75,6 +80,12 @@ jobs:
                   unique_dotnet_services["$service"]=1
                 fi
               fi
+
+              # Add to all_changed_service_list_array if not already present
+              if [ -z "${unique_all_services["$service"]}" ]; then
+                all_changed_service_list_array+=("\"$service\"")
+                unique_all_services["$service"]=1
+              fi
             fi
           done
 
@@ -82,11 +93,13 @@ jobs:
           # Handles cases for empty lists (outputs []) and single items (outputs ["Service"])
           dotnet_services_json="[$(IFS=,; echo "${dotnet_service_list_array[*]}")""]"
           node_services_json="[$(IFS=,; echo "${node_service_list_array[*]}")""]"
+          all_changed_services_json="[$(IFS=,; echo "${all_changed_service_list_array[*]}")""]"
 
           echo "dotnet_changed=$dotnet_changed" >> $GITHUB_OUTPUT
           echo "node_changed=$node_changed" >> $GITHUB_OUTPUT
           echo "dotnet_services=$dotnet_services_json" >> $GITHUB_OUTPUT # Output for .NET services
           echo "node_services=$node_services_json" >> $GITHUB_OUTPUT   # Output for Node.js services
+          echo "all_changed_services=$all_changed_services_json" >> $GITHUB_OUTPUT # New output for all changed services
 
   CheckDetectionPrint:
     runs-on: ubuntu-latest
@@ -98,6 +111,7 @@ jobs:
           echo "NodeServices: ${{ needs.ChangeDetection.outputs.NodeServices }}"
           echo "NodeMatrix: ${{ needs.ChangeDetection.outputs.NodeDeploymentMatrix }}"
           echo "DotnetMatrix: ${{ needs.ChangeDetection.outputs.DotnetDeploymentMatrix }}"
+          echo "FullMatrix: ${{ needs.ChangeDetection.outputs.FullDeploymentMatrix }}"
 
   PathsFilter:
     runs-on: ubuntu-latest
@@ -259,11 +273,14 @@ jobs:
           dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/${{ matrix.item }}/
   CreateDockerImages:
     runs-on: ubuntu-latest
-    needs: [PathsFilter, BuildNodeServices, BuildDotnetServices]
-    if: github.ref == 'refs/heads/master'
+    needs: [ChangeDetection, PathsFilter, BuildNodeServices, BuildDotnetServices]
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.ChangeDetection.outputs.FullDeploymentMatrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -273,6 +290,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build container image ${{ matrix.item }}
+        run: echo ${{matrix.item}}
       - name: RubbergodService
         if: needs.PathsFilter.outputs.RubbergodService == 'true'
         uses: docker/build-push-action@v5
