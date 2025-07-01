@@ -290,8 +290,31 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare image tag
+        id: prepare_image_tag
+        run: |
+          INPUT="${{matrix.item}}"
+
+          # Convert PascalCase to snake_case
+          SNAKE_CASE=$(echo "$INPUT" | sed -r 's/([A-Z])/_\L\1/g' | sed 's/^_//')
+
+          # Check if this is a PR
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+            SNAKE_CASE="${SNAKE_CASE}_pr_${PR_NUMBER}"
+          fi
+
+          echo "value=$SNAKE_CASE" >> "$GITHUB_OUTPUT"
+          echo "Final value: $SNAKE_CASE"
       - name: Build container image ${{ matrix.item }}
-        run: echo ${{matrix.item}}
+        uses: docker/build-push-action@v5
+        with:
+          context: src/
+          file: src/${{matrix.item}}.Dockerfile
+          push: true
+          tags: ghcr.io/grillbot.grillbot.services:${{steps.prepare_image_tag.outputs.value}}
+          build-args: |
+            github_actions_token=${{secrets.GITHUB_TOKEN}}
       - name: RubbergodService
         if: needs.PathsFilter.outputs.RubbergodService == 'true'
         uses: docker/build-push-action@v5
