@@ -338,7 +338,6 @@ jobs:
           script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh ${{ steps.prepare_image_tag.outputs.value }}
   VerifyProductionDeployment:
     runs-on: ubuntu-latest
-    environment: ProductionInternal
     needs: [ChangeDetection, ProductionDeploy]
     if: |
       always() && 
