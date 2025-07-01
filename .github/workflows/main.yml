@@ -318,6 +318,8 @@ jobs:
       matrix:
         item: ${{ fromJson(needs.ChangeDetection.outputs.FullDeploymentMatrix) }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Prepare image tag
         id: prepare_image_tag
         uses: ./.github/actions/prepare-image-tag
