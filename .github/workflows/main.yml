@@ -296,8 +296,7 @@ jobs:
         with:
           input: ${{ matrix.item }}
       - name: Dump image tag
-        run: |
-          echo ${{ steps.prepare_image_tag.outputs.value }}
+        run: echo ${{ steps.prepare_image_tag.outputs.value }}
       - name: Build container image ${{ matrix.item }}
         uses: docker/build-push-action@v5
         with:

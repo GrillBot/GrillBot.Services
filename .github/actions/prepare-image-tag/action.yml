@@ -6,11 +6,13 @@ inputs:
     required: true
 outputs:
   value:
-    description: The converted image tag
+    description: The final image tag
+    value: ${{ steps.set_tag.outputs.value }}
 runs:
   using: "composite"
   steps:
-    - shell: bash
+    - id: set_tag
+      shell: bash
       run: |
         INPUT="${{ inputs.input }}"
 
@@ -23,4 +25,4 @@ runs:
           SNAKE_CASE="${SNAKE_CASE}_pr_${PR_NUMBER}"
         fi
 
-        echo "value=$SNAKE_CASE" >> "$GITHUB_OUTPUT"
+        echo "value=${SNAKE_CASE}" >> "$GITHUB_OUTPUT"
