@@ -292,20 +292,9 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare image tag
         id: prepare_image_tag
-        run: |
-          INPUT="${{matrix.item}}"
-
-          # Convert PascalCase to snake_case
-          SNAKE_CASE=$(echo "$INPUT" | sed -r 's/([A-Z])/_\L\1/g' | sed 's/^_//')
-
-          # Check if this is a PR
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            PR_NUMBER="${{ github.event.pull_request.number }}"
-            SNAKE_CASE="${SNAKE_CASE}_pr_${PR_NUMBER}"
-          fi
-
-          echo "value=$SNAKE_CASE" >> "$GITHUB_OUTPUT"
-          echo "Final value: $SNAKE_CASE"
+        uses: ./.github/actions/prepare-image-tag
+        with:
+          input: ${{ matrix.item }}
       - name: Build container image ${{ matrix.item }}
         uses: docker/build-push-action@v5
         with:
