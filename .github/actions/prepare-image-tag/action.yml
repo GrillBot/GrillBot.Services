@@ -19,8 +19,8 @@ runs:
 
         # Check if this is a PR
         if [ "${{ github.event_name }}" = "pull_request" ]; then
-        PR_NUMBER="${{ github.event.pull_request.number }}"
-        SNAKE_CASE="${SNAKE_CASE}_pr_${PR_NUMBER}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          SNAKE_CASE="${SNAKE_CASE}_pr_${PR_NUMBER}"
         fi
 
         echo "value=$SNAKE_CASE" >> "$GITHUB_OUTPUT"
