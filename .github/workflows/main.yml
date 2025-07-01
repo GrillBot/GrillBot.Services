@@ -313,7 +313,8 @@ jobs:
     if: |
       always() && 
       (!contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')) &&
-      needs.ChangeDetection.outputs.FullDeploymentMatrix != '[]'
+      needs.ChangeDetection.outputs.FullDeploymentMatrix != '[]' &&
+      github.ref == 'refs/heads/master'
     strategy:
       matrix:
         item: ${{ fromJson(needs.ChangeDetection.outputs.FullDeploymentMatrix) }}
@@ -338,106 +339,28 @@ jobs:
   VerifyProductionDeployment:
     runs-on: ubuntu-latest
     environment: ProductionInternal
-    needs:
-      [
-        PathsFilter,
-        ProductionDeploy
-      ]
-    if: ${{ github.ref == 'refs/heads/master' && always() && !failure() && !cancelled() }}
+    needs: [ChangeDetection, ProductionDeploy]
+    if: |
+      always() && 
+      (!contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')) &&
+      needs.ChangeDetection.outputs.FullDeploymentMatrix != '[]'
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.ChangeDetection.outputs.FullDeploymentMatrix) }}
     steps:
-      - name: RubergodService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.RubbergodService == 'true' && needs.RubbergodService_Deploy_Production.result == 'success'
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Prepare image tag
+        id: prepare_image_tag
+        uses: ./.github/actions/prepare-image-tag
         with:
-          url: https://health.grillbot.eu/rubbergodService
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: GraphicsService
+          input: ${{ matrix.item }}
+      - name: Dump image tag
+        run: echo ${{ steps.prepare_image_tag.outputs.value }}
+      - name: Check service health
         uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.Graphics == 'true' && needs.Graphics_Deploy_Production.result == 'success'
         with:
-          url: https://health.grillbot.eu/graphics
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: PointsService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.PointsService == 'true' && needs.PointsService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/points
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: ImageProcessingService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.ImageProcessingService == 'true' && needs.ImageProcessingService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/imageProcessing
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: AuditLogService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.AuditLogService == 'true' && needs.AuditLogService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/auditLog
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: UserMeasuresService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.UserMeasuresService == 'true' && needs.UserMeasuresService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/userMeasures
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: EmoteService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.EmoteService == 'true' && needs.EmoteService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/emote
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: RemindService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.RemindService == 'true' && needs.RemindService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/remind
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: SearchingService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.SearchingService == 'true' && needs.SearchingService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/searching
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: InviteService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.InviteService == 'true' && needs.InviteService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/invite
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: UserManagementService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.UserManagementService == 'true' && needs.UserManagementService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/user_management
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: MessageService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.MessageService == 'true' && needs.MessageService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/message
+          url: https://health.grillbot.eu/${{ steps.prepare_image_tag.outputs.value }}
           follow-redirect: true
           max-attempts: 10
           retry-delay: 5s
