@@ -253,7 +253,7 @@ jobs:
   BuildDotnetServices:
     runs-on: ubuntu-latest
     needs: [ChangeDetection, CheckStaticContent, BuildCommonLibraries]
-    if: needs.ChangeDetection.outputs.DotnetDeploymentMatrix != '{}' && needs.ChangeDetection.outputs.DotnetServices == 'true'
+    if: needs.ChangeDetection.outputs.DotnetDeploymentMatrix != '[]' && needs.ChangeDetection.outputs.DotnetServices == 'true'
     strategy:
       matrix:
         item: ${{ fromJson(needs.ChangeDetection.outputs.DotnetDeploymentMatrix) }}
