@@ -13,91 +13,106 @@ env:
   DOTNET_NOLOGO: true
 
 jobs:
-  PathsFilter:
+  ChangeDetection:
     runs-on: ubuntu-latest
     outputs:
-      RubbergodService: ${{ steps.filter.outputs.RubbergodService }}
-      Graphics: ${{ steps.filter.outputs.Graphics }}
-      PointsService: ${{ steps.filter.outputs.PointsService }}
-      ImageProcessingService: ${{ steps.filter.outputs.ImageProcessingService }}
-      AuditLogService: ${{ steps.filter.outputs.AuditLogService }}
-      UserMeasuresService: ${{ steps.filter.outputs.UserMeasuresService }}
-      EmoteService: ${{ steps.filter.outputs.EmoteService }}
-      RemindService: ${{ steps.filter.outputs.RemindService }}
-      SearchingService: ${{ steps.filter.outputs.SearchingService }}
-      InviteService: ${{ steps.filter.outputs.InviteService }}
-      DotnetServices: ${{ steps.filter.outputs.DotnetServices }}
-      NodeServices: ${{ steps.filter.outputs.NodeServices }}
-      UserManagementService: ${{ steps.filter.outputs.UserManagementService }}
-      MessageService: ${{ steps.filter.outputs.MessageService }}
+      DotnetServices: ${{ steps.filter.outputs.dotnet_changed }}
+      NodeServices: ${{ steps.filter.outputs.node_changed }}
+      NodeDeploymentMatrix: ${{ steps.filter.outputs.node_services }}
+      DotnetDeploymentMatrix: ${{ steps.filter.outputs.dotnet_services }}
+      FullDeploymentMatrix: ${{ steps.filter.outputs.all_changed_services }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Paths filter
-        uses: dorny/paths-filter@v3
-        id: filter
         with:
-          filters: |
-            RubbergodService:
-              - 'src/RubbergodService/**'
-              - 'src/RubbergodService.Dockerfile'
-            Graphics:
-              - 'src/Graphics/**'
-            PointsService:
-              - 'src/PointsService/**'
-              - 'src/PointsService.Dockerfile'
-            ImageProcessingService:
-              - 'src/ImageProcessingService/**'
-              - 'src/ImageProcessingService.Dockerfile'
-            AuditLogService:
-              - 'src/AuditLogService/**'
-              - 'src/AuditLogService.Dockerfile'
-            UserMeasuresService:
-              - 'src/UserMeasuresService/**'
-              - 'src/UserMeasuresService.Dockerfile'
-            EmoteService:
-              - 'src/EmoteService/**'
-              - 'src/EmoteService.Dockerfile'
-            RemindService:
-              - 'src/RemindService/**'
-              - 'src/RemindService.Dockerfile'
-            SearchingService:
-              - 'src/SearchingService/**'
-              - 'src/SearchingService.Dockerfile'
-            InviteService:
-              - 'src/InviteService/**'
-              - 'src/InviteService.Dockerfile'
-            UserManagementService:
-              - 'src/UserManagementService/**'
-              - 'src/UserManagementService.Dockerfile'
-            MessageService:
-              - 'src/MessageService/**'
-              - 'src/MessageService.Dockerfile'
-            DotnetServices:
-              - 'src/RubbergodService/**'
-              - 'src/RubbergodService.Dockerfile'
-              - 'src/PointsService/**'
-              - 'src/PointsService.Dockerfile'
-              - 'src/ImageProcessingService/**'
-              - 'src/ImageProcessingService.Dockerfile'
-              - 'src/AuditLogService/**'
-              - 'src/AuditLogService.Dockerfile'
-              - 'src/UserMeasuresService/**'
-              - 'src/UserMeasuresService.Dockerfile'
-              - 'src/EmoteService/**'
-              - 'src/EmoteService.Dockerfile'
-              - 'src/RemindService/**'
-              - 'src/RemindService.Dockerfile'
-              - 'src/SearchingService/**'
-              - 'src/SearchingService.Dockerfile'
-              - 'src/InviteService/**'
-              - 'src/InviteService.Dockerfile'
-              - 'src/UserManagementService/**'
-              - 'src/UserManagementService.Dockerfile'
-              - 'src/MessageService/**'
-              - 'src/MessageService.Dockerfile'
-            NodeServices:
-              - 'src/Graphics/**'
+          fetch-depth: 0
+
+      - name: Detect changed files
+        id: gitdiff
+        run: |
+          changed=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | xargs)
+          echo "changed_files=$changed" >> $GITHUB_OUTPUT
+
+      - name: Detect changed services
+        id: filter
+        run: |
+          dotnet_changed=false
+          node_changed=false
+
+          # Initialize separate arrays for .NET and Node.js services
+          dotnet_service_list_array=()
+          node_service_list_array=()
+          # Initialize array for all changed services
+          all_changed_service_list_array=()
+
+          # Use associative arrays to keep track of unique services added to lists
+          declare -A unique_dotnet_services
+          declare -A unique_node_services
+          # Use associative array for all unique changed services
+          declare -A unique_all_services
+
+          changed_files=$(echo "${{ steps.gitdiff.outputs.changed_files }}" | tr '\n' ' ')
+
+          for file in $changed_files; do
+            service=""
+            if [[ "$file" =~ ^src/([^/.]+)/ ]]; then
+              service="${BASH_REMATCH[1]}"
+            elif [[ "$file" =~ ^src/([^.]+)\.Dockerfile$ ]]; then
+              service="${BASH_REMATCH[1]}"
+            fi
+
+            if [ -n "$service" ]; then
+              path="src/$service"
+              # Check for Node.js services (presence of package.json)
+              if [[ -f "$path/package.json" ]]; then
+                node_changed=true
+                if [ -z "${unique_node_services["$service"]}" ]; then # Add service only if not already present
+                  node_service_list_array+=("\"$service\"")
+                  unique_node_services["$service"]=1
+                fi
+              fi
+              # Check for .NET services (presence of .csproj files)
+              # This check is separate and after Node.js to ensure both can be detected if applicable
+              if ls "$path"/*.csproj &>/dev/null; then
+                dotnet_changed=true
+                if [ -z "${unique_dotnet_services["$service"]}" ]; then # Add service only if not already present
+                  dotnet_service_list_array+=("\"$service\"")
+                  unique_dotnet_services["$service"]=1
+                fi
+              fi
+
+              # Add to all_changed_service_list_array if not already present
+              if [ -z "${unique_all_services["$service"]}" ]; then
+                all_changed_service_list_array+=("\"$service\"")
+                unique_all_services["$service"]=1
+              fi
+            fi
+          done
+
+          # Convert arrays to JSON string format, ensuring proper escaping and comma separation
+          # Handles cases for empty lists (outputs []) and single items (outputs ["Service"])
+          dotnet_services_json="[$(IFS=,; echo "${dotnet_service_list_array[*]}")""]"
+          node_services_json="[$(IFS=,; echo "${node_service_list_array[*]}")""]"
+          all_changed_services_json="[$(IFS=,; echo "${all_changed_service_list_array[*]}")""]"
+
+          echo "dotnet_changed=$dotnet_changed" >> $GITHUB_OUTPUT
+          echo "node_changed=$node_changed" >> $GITHUB_OUTPUT
+          echo "dotnet_services=$dotnet_services_json" >> $GITHUB_OUTPUT # Output for .NET services
+          echo "node_services=$node_services_json" >> $GITHUB_OUTPUT   # Output for Node.js services
+          echo "all_changed_services=$all_changed_services_json" >> $GITHUB_OUTPUT # New output for all changed services
+
+  CheckDetectionPrint:
+    runs-on: ubuntu-latest
+    needs: ChangeDetection
+    steps:
+      - name: Print results
+        run: |
+          echo "DotnetServices: ${{ needs.ChangeDetection.outputs.DotnetServices }}"
+          echo "NodeServices: ${{ needs.ChangeDetection.outputs.NodeServices }}"
+          echo "NodeMatrix: ${{ needs.ChangeDetection.outputs.NodeDeploymentMatrix }}"
+          echo "DotnetMatrix: ${{ needs.ChangeDetection.outputs.DotnetDeploymentMatrix }}"
+          echo "FullMatrix: ${{ needs.ChangeDetection.outputs.FullDeploymentMatrix }}"
+
   CheckStaticContent:
     runs-on: ubuntu-latest
     steps:
@@ -113,13 +128,13 @@ jobs:
         run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/json-lint/master/pipeline.sh)
   BuildCommonLibraries:
     runs-on: ubuntu-latest
-    needs: [PathsFilter]
+    needs: [ChangeDetection]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4
-        if: needs.PathsFilter.outputs.DotnetServices == 'true'
+        if: needs.ChangeDetection.outputs.DotnetServices == 'true'
         with:
           dotnet-version: 8.0.x
           source-url: https://nuget.pkg.github.com/GrillBot/index.json
@@ -127,97 +142,60 @@ jobs:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Restore dependencies
         run: dotnet restore -r linux-x64 src/GrillBot.Services.Common/
-        if: needs.PathsFilter.outputs.DotnetServices == 'true'
+        if: needs.ChangeDetection.outputs.DotnetServices == 'true'
       - name: Build (RELEASE)
         run: dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/GrillBot.Services.Common
-        if: needs.PathsFilter.outputs.DotnetServices == 'true'
-  BuildServices:
+        if: needs.ChangeDetection.outputs.DotnetServices == 'true'
+  BuildNodeServices:
     runs-on: ubuntu-latest
-    needs: [CheckStaticContent, PathsFilter, BuildCommonLibraries]
+    needs: [ChangeDetection, CheckStaticContent, BuildCommonLibraries]
+    if: needs.ChangeDetection.outputs.NodeDeploymentMatrix != '[]' && needs.ChangeDetection.outputs.NodeServices == 'true'
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.ChangeDetection.outputs.NodeDeploymentMatrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.JS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+      - name: Build ${{ matrix.item }}
+        working-directory: src/${{ matrix.item }}/
+        run: |
+          npm ci
+          npm run build
+  BuildDotnetServices:
+    runs-on: ubuntu-latest
+    needs: [ChangeDetection, CheckStaticContent, BuildCommonLibraries]
+    if: needs.ChangeDetection.outputs.DotnetDeploymentMatrix != '[]' && needs.ChangeDetection.outputs.DotnetServices == 'true'
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.ChangeDetection.outputs.DotnetDeploymentMatrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Setup dotnet
-        if: needs.PathsFilter.outputs.DotnetServices == 'true'
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
           source-url: https://nuget.pkg.github.com/GrillBot/index.json
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - name: Setup Node.JS
-        uses: actions/setup-node@v4
-        if: needs.PathsFilter.outputs.NodeServices == 'true'
-        with:
-          node-version: 18.x
-      - name: RubbergodService
-        if: needs.PathsFilter.outputs.RubbergodService == 'true'
+      - name: Build ${{ matrix.item }}
         run: |
-          dotnet restore -r linux-x64 src/RubbergodService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/RubbergodService/
-      - name: Graphics
-        if: needs.PathsFilter.outputs.Graphics == 'true'
-        working-directory: src/Graphics/
-        run: |
-          npm ci
-          npm run build
-      - name: PointsService
-        if: needs.PathsFilter.outputs.PointsService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/PointsService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/PointsService/
-      - name: ImageProcessingService
-        if: needs.PathsFilter.outputs.ImageProcessingService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/ImageProcessingService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/ImageProcessingService/
-      - name: AuditLogService
-        if: needs.PathsFilter.outputs.AuditLogService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/AuditLogService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/AuditLogService/
-      - name: UserMeasuresService
-        if: needs.PathsFilter.outputs.UserMeasuresService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/UserMeasuresService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/UserMeasuresService/
-      - name: EmoteService
-        if: needs.PathsFilter.outputs.EmoteService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/EmoteService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/EmoteService/
-      - name: RemindService
-        if: needs.PathsFilter.outputs.RemindService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/RemindService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/RemindService/
-      - name: SearchingService
-        if: needs.PathsFilter.outputs.SearchingService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/SearchingService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/SearchingService/
-      - name: InviteService
-        if: needs.PathsFilter.outputs.InviteService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/InviteService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/InviteService/
-      - name: UserManagementService
-        if: needs.PathsFilter.outputs.UserManagementService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/UserManagementService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/UserManagementService/
-      - name: MessageService
-        if: needs.PathsFilter.outputs.MessageService == 'true'
-        run: |
-          dotnet restore -r linux-x64 src/MessageService/
-          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/MessageService/
+          dotnet restore -r linux-x64 src/${{ matrix.item }}/
+          dotnet build -c Release -r linux-x64 --no-self-contained --no-restore src/${{ matrix.item }}/
   CreateDockerImages:
     runs-on: ubuntu-latest
-    needs: [PathsFilter, BuildServices]
-    if: github.ref == 'refs/heads/master'
+    needs: [ChangeDetection, BuildNodeServices, BuildDotnetServices]
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && needs.ChangeDetection.outputs.FullDeploymentMatrix != '[]'
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.ChangeDetection.outputs.FullDeploymentMatrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -227,405 +205,72 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: RubbergodService
-        if: needs.PathsFilter.outputs.RubbergodService == 'true'
+      - name: Prepare image tag
+        id: prepare_image_tag
+        uses: ./.github/actions/prepare-image-tag
+        with:
+          input: ${{ matrix.item }}
+      - name: Dump image tag
+        run: echo ${{ steps.prepare_image_tag.outputs.value }}
+      - name: Build container image ${{ matrix.item }}
         uses: docker/build-push-action@v5
         with:
           context: src/
-          file: src/RubbergodService.Dockerfile
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:rubbergod_service
+          file: src/${{matrix.item}}.Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ghcr.io/grillbot/grillbot.services:${{steps.prepare_image_tag.outputs.value}}
           build-args: |
-            github_actions_token=${{ secrets.GITHUB_TOKEN }}
-      - name: Graphics
-        if: needs.PathsFilter.outputs.Graphics == 'true'
-        uses: docker/build-push-action@v5
-        with:
-          context: src/Graphics
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:graphics
-      - name: PointsService
-        if: needs.PathsFilter.outputs.PointsService == 'true'
-        uses: docker/build-push-action@v5
-        with:
-          context: src/
-          file: src/PointsService.Dockerfile
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:points_service
-          build-args: |
-            github_actions_token=${{ secrets.GITHUB_TOKEN }}
-      - name: ImageProcessingService
-        if: needs.PathsFilter.outputs.ImageProcessingService == 'true'
-        uses: docker/build-push-action@v5
-        with:
-          context: src/
-          file: src/ImageProcessingService.Dockerfile
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:image_processing_service
-          build-args: |
-            github_actions_token=${{ secrets.GITHUB_TOKEN }}
-      - name: AuditLogService
-        if: needs.PathsFilter.outputs.AuditLogService == 'true'
-        uses: docker/build-push-action@v5
-        with:
-          context: src/
-          file: src/AuditLogService.Dockerfile
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:audit_log_service
-          build-args: |
-            github_actions_token=${{ secrets.GITHUB_TOKEN }}
-      - name: UserMeasuresService
-        if: needs.PathsFilter.outputs.UserMeasuresService == 'true'
-        uses: docker/build-push-action@v5
-        with:
-          context: src/
-          file: src/UserMeasuresService.Dockerfile
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:user_measures_service
-          build-args: |
-            github_actions_token=${{ secrets.GITHUB_TOKEN }}
-      - name: EmoteService
-        if: needs.PathsFilter.outputs.EmoteService == 'true'
-        uses: docker/build-push-action@v5
-        with:
-          context: src/
-          file: src/EmoteService.Dockerfile
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:emote_service
-          build-args: |
-            github_actions_token=${{ secrets.GITHUB_TOKEN }}
-      - name: RemindService
-        if: needs.PathsFilter.outputs.RemindService == 'true'
-        uses: docker/build-push-action@v5
-        with:
-          context: src/
-          file: src/RemindService.Dockerfile
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:remind_service
-          build-args: |
-            github_actions_token=${{ secrets.GITHUB_TOKEN }}
-      - name: SearchingService
-        if: needs.PathsFilter.outputs.SearchingService == 'true'
-        uses: docker/build-push-action@v5
-        with:
-          context: src/
-          file: src/SearchingService.Dockerfile
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:searching_service
-          build-args: |
-            github_actions_token=${{ secrets.GITHUB_TOKEN }}
-      - name: InviteService
-        if: needs.PathsFilter.outputs.InviteService == 'true'
-        uses: docker/build-push-action@v5
-        with:
-          context: src/
-          file: src/InviteService.Dockerfile
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:invite_service
-          build-args: |
-            github_actions_token=${{ secrets.GITHUB_TOKEN }}
-      - name: UserManagementService
-        if: needs.PathsFilter.outputs.UserManagementService == 'true'
-        uses: docker/build-push-action@v5
-        with:
-          context: src/
-          file: src/UserManagementService.Dockerfile
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:user_management_service
-          build-args: |
-            github_actions_token=${{ secrets.GITHUB_TOKEN }}
-      - name: MessageService
-        if: needs.PathsFilter.outputs.MessageService == 'true'
-        uses: docker/build-push-action@v5
-        with:
-          context: src/
-          file: src/MessageService.Dockerfile
-          push: true
-          tags: ghcr.io/grillbot/grillbot.services:message_service
-          build-args: |
-            github_actions_token=${{ secrets.GITHUB_TOKEN }}
-  RubbergodService_Deploy_Production:
+            github_actions_token=${{secrets.GITHUB_TOKEN}}
+  ProductionDeploy:
     runs-on: ubuntu-latest
-    environment: "Production_RubbergodService"
-    needs: [PathsFilter, CreateDockerImages]
-    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.RubbergodService == 'true'
+    environment: Production
+    needs: [ChangeDetection, CreateDockerImages]
+    if: |
+      always() && 
+      (!contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')) &&
+      needs.ChangeDetection.outputs.FullDeploymentMatrix != '[]' &&
+      github.ref == 'refs/heads/master'
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.ChangeDetection.outputs.FullDeploymentMatrix) }}
     steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Prepare image tag
+        id: prepare_image_tag
+        uses: ./.github/actions/prepare-image-tag
+        with:
+          input: ${{ matrix.item }}
+      - name: Dump image tag
+        run: echo ${{ steps.prepare_image_tag.outputs.value }}
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
           port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh rubbergod_service
-  Graphics_Deploy_Production:
-    runs-on: ubuntu-latest
-    environment: "Production_Graphics"
-    needs: [PathsFilter, CreateDockerImages]
-    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.Graphics == 'true'
-    steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh graphics
-  PointsService_Deploy_Production:
-    runs-on: ubuntu-latest
-    environment: "Production_PointsService"
-    needs: [PathsFilter, CreateDockerImages]
-    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.PointsService == 'true'
-    steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh points
-  ImageProcessingService_Deploy_Production:
-    runs-on: ubuntu-latest
-    environment: "Production_ImageProcessingService"
-    needs: [PathsFilter, CreateDockerImages]
-    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.ImageProcessingService == 'true'
-    steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh image_processing
-  AuditLogService_Deploy_Production:
-    runs-on: ubuntu-latest
-    environment: "Production_AuditLogService"
-    needs: [PathsFilter, CreateDockerImages]
-    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.AuditLogService == 'true'
-    steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh auditlog
-  UserMeasuresService_Deploy_Production:
-    runs-on: ubuntu-latest
-    environment: "Production_UserMeasuresService"
-    needs: [PathsFilter, CreateDockerImages]
-    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.UserMeasuresService == 'true'
-    steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh user_measures
-  EmoteService_Deploy_Production:
-    runs-on: ubuntu-latest
-    environment: "Production_EmoteService"
-    needs: [PathsFilter, CreateDockerImages]
-    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.EmoteService == 'true'
-    steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh emote
-  RemindService_Deploy_Production:
-    runs-on: ubuntu-latest
-    environment: "Production_RemindService"
-    needs: [PathsFilter, CreateDockerImages]
-    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.RemindService == 'true'
-    steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh remind
-  SearchingService_Deploy_Production:
-    runs-on: ubuntu-latest
-    environment: "Production_SearchingService"
-    needs: [PathsFilter, CreateDockerImages]
-    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.SearchingService == 'true'
-    steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh searching
-  InviteService_Deploy_Production:
-    runs-on: ubuntu-latest
-    environment: Production_InviteService
-    needs: [PathsFilter, CreateDockerImages]
-    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.InviteService == 'true'
-    steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh invite
-  UserManagementService_Deploy_Production:
-    runs-on: ubuntu-latest
-    environment: Production_UserManagementService
-    needs: [PathsFilter, CreateDockerImages]
-    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.UserManagementService == 'true'
-    steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh user_management
-  MessageService_Deploy_Production:
-    runs-on: ubuntu-latest
-    environment: Production_MessageService
-    needs: [PathsFilter, CreateDockerImages]
-    if: github.ref == 'refs/heads/master' && needs.PathsFilter.outputs.MessageService == 'true'
-    steps:
-      - name: Execute deployment on SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_Username }}
-          password: ${{ secrets.SSH_Password }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh message
+          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh ${{ steps.prepare_image_tag.outputs.value }}
   VerifyProductionDeployment:
     runs-on: ubuntu-latest
-    environment: ProductionInternal
-    needs:
-      [
-        PathsFilter,
-        RubbergodService_Deploy_Production,
-        Graphics_Deploy_Production,
-        PointsService_Deploy_Production,
-        ImageProcessingService_Deploy_Production,
-        AuditLogService_Deploy_Production,
-        UserMeasuresService_Deploy_Production,
-        EmoteService_Deploy_Production,
-        RemindService_Deploy_Production,
-        SearchingService_Deploy_Production,
-        InviteService_Deploy_Production,
-        UserManagementService_Deploy_Production,
-        MessageService_Deploy_Production,
-      ]
-    if: ${{ github.ref == 'refs/heads/master' && always() && !failure() && !cancelled() }}
+    needs: [ChangeDetection, ProductionDeploy]
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.ChangeDetection.outputs.FullDeploymentMatrix) }}
     steps:
-      - name: RubergodService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.RubbergodService == 'true' && needs.RubbergodService_Deploy_Production.result == 'success'
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Prepare image tag
+        id: prepare_image_tag
+        uses: ./.github/actions/prepare-image-tag
         with:
-          url: https://health.grillbot.eu/rubbergodService
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: GraphicsService
+          input: ${{ matrix.item }}
+      - name: Dump image tag
+        run: echo ${{ steps.prepare_image_tag.outputs.value }}
+      - name: Check service health
         uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.Graphics == 'true' && needs.Graphics_Deploy_Production.result == 'success'
         with:
-          url: https://health.grillbot.eu/graphics
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: PointsService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.PointsService == 'true' && needs.PointsService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/points
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: ImageProcessingService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.ImageProcessingService == 'true' && needs.ImageProcessingService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/imageProcessing
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: AuditLogService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.AuditLogService == 'true' && needs.AuditLogService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/auditLog
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: UserMeasuresService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.UserMeasuresService == 'true' && needs.UserMeasuresService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/userMeasures
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: EmoteService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.EmoteService == 'true' && needs.EmoteService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/emote
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: RemindService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.RemindService == 'true' && needs.RemindService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/remind
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: SearchingService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.SearchingService == 'true' && needs.SearchingService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/searching
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: InviteService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.InviteService == 'true' && needs.InviteService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/invite
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: UserManagementService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.UserManagementService == 'true' && needs.UserManagementService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/user_management
-          follow-redirect: true
-          max-attempts: 10
-          retry-delay: 5s
-      - name: MessageService
-        uses: jtalk/url-health-check-action@v4
-        if: needs.PathsFilter.outputs.MessageService == 'true' && needs.MessageService_Deploy_Production.result == 'success'
-        with:
-          url: https://health.grillbot.eu/message
+          url: https://health.grillbot.eu/${{ steps.prepare_image_tag.outputs.value }}
           follow-redirect: true
           max-attempts: 10
           retry-delay: 5s
