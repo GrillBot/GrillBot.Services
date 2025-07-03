@@ -1,11 +1,11 @@
 ﻿using GrillBot.Core;
+using GrillBot.Core.HealthCheck;
 using GrillBot.Core.Metrics;
 using GrillBot.Services.Common.Discord;
 using GrillBot.Services.Common.Infrastructure.Api.Filters;
 using GrillBot.Services.Common.Infrastructure.Api.OpenApi.Filters;
 using GrillBot.Services.Common.Registrators;
 using GrillBot.Services.Common.Telemetry;
-using GrillBot.Services.Common.Telemetry.Database;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using StackExchange.Redis.Configuration;
 using System.Reflection;
 
 namespace GrillBot.Services.Common;
@@ -64,7 +65,7 @@ public static class ServiceBuilder
         mvcBuilder.RegisterCommonControllers();
 
         // HealthChecks
-        var healthChecks = builder.Services.AddHealthChecks();
+        var healthChecks = Core.HealthCheck.HealthCheckExtensions.AddHealthChecks(builder.Services);
         if (configureHealthChecks is not null)
             configureHealthChecks(healthChecks, builder.Configuration);
 
@@ -116,7 +117,7 @@ public static class ServiceBuilder
         app.UseTelemetry();
         app.UseAuthorization();
         app.MapControllers();
-        app.MapHealthChecks("/health");
+        app.MapHealthChecks();
 
         return app;
     }
