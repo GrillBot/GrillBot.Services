@@ -19,7 +19,6 @@
 
     <ItemGroup>
       <Folder Include="Controllers\" />
-      <Folder Include="Core\Entity\" />
       <Folder Include="Models\Events\" />
       <Folder Include="Models\Response\" />
       <Folder Include="Models\Request\" />
