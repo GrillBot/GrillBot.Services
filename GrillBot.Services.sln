@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserManagementService", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageService", "src\MessageService\MessageService.csproj", "{5A188916-1E02-47E2-B285-0DACBC31403E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnverifyService", "src\UnverifyService\UnverifyService.csproj", "{9023C8BD-8990-43A5-A2BD-2AF1427E621C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{5A188916-1E02-47E2-B285-0DACBC31403E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A188916-1E02-47E2-B285-0DACBC31403E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A188916-1E02-47E2-B285-0DACBC31403E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9023C8BD-8990-43A5-A2BD-2AF1427E621C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9023C8BD-8990-43A5-A2BD-2AF1427E621C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9023C8BD-8990-43A5-A2BD-2AF1427E621C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9023C8BD-8990-43A5-A2BD-2AF1427E621C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
