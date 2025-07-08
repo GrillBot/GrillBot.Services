@@ -1,7 +1,4 @@
-﻿using GrillBot.Core.Metrics.Initializer;
-using GrillBot.Services.Common.EntityFramework;
-using GrillBot.Services.Common.EntityFramework.Helpers.Factory;
-using Microsoft.Extensions.DependencyInjection;
+﻿using GrillBot.Services.Common.EntityFramework;
 
 namespace GrillBot.Services.Common.Telemetry.Database.Initializers;
 
