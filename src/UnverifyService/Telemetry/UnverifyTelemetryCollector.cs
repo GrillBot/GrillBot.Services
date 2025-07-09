@@ -5,13 +5,13 @@ namespace UnverifyService.Telemetry;
 
 public class UnverifyTelemetryCollector : ITelemetryCollector
 {
-    public TelemetryGauge LogsToArchive { get; } = new("logs_to_archive", null, "Count of logs to archive.");
+    public TelemetryGauge ItemsToArchive { get; } = new("items_to_archive", null, "Count of items pending to archivation.");
     public TelemetryGauge ActiveUnverify { get; } = new("active_unverify", null, "Count of active unverifies.");
     public TelemetryGauge ActiveSelfUnverify { get; } = new("active_self_unverify", null, "Count of active unverifies.");
 
     public IEnumerable<TelemetryCollectorComponent> GetComponents()
     {
-        yield return LogsToArchive;
+        yield return ItemsToArchive;
         yield return ActiveUnverify;
         yield return ActiveSelfUnverify;
     }
