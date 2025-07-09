@@ -7,7 +7,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="GrillBot.Core" Version="2.3.1" />
+		<PackageReference Include="GrillBot.Core" Version="2.3.2" />
 		<PackageReference Include="GrillBot.Core.RabbitMQ.V2" Version="2.3.9" />
 		<PackageReference Include="GrillBot.Core.Services" Version="2.9.4" />
 		<PackageReference Include="GrillBot.Core.Metrics" Version="1.2.6" />

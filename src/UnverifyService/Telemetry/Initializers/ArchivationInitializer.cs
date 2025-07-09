@@ -11,6 +11,8 @@ public class ArchivationInitializer(
     protected override async Task ExecuteInternalAsync(IServiceProvider provider, CancellationToken cancellationToken = default)
     {
         var action = provider.GetRequiredService<CreateArchivationDataAction>();
+        action.SetCancellationToken(cancellationToken);
+
         _collector.ItemsToArchive.Set(await action.CountAsync());
     }
 }
