@@ -19,7 +19,7 @@ public class CreateItemsEventHandler(
 {
     private readonly CreateItemsMessage _processingInfoBatch = new();
 
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(CreateItemsMessage message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(CreateItemsMessage message, ICurrentUserProvider currentUser, Dictionary<string, string> headers, CancellationToken cancellationToken = default)
     {
         var entities = new List<LogItem>();
 
@@ -29,15 +29,15 @@ public class CreateItemsEventHandler(
             if (!entity.CanCreate)
                 continue;
 
-            await DbContext.AddAsync(entity);
+            await DbContext.AddAsync(entity, cancellationToken);
             entities.Add(entity);
         }
 
-        await ContextHelper.SaveChangesAsync();
-        await _dataRecalculation.EnqueueRecalculationAsync(entities);
+        await ContextHelper.SaveChangesAsync(cancellationToken);
+        await _dataRecalculation.EnqueueRecalculationAsync(entities, cancellationToken);
 
         if (_processingInfoBatch.Items.Count > 0)
-            await Publisher.PublishAsync(_processingInfoBatch);
+            await Publisher.PublishAsync(_processingInfoBatch, cancellationToken: cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 

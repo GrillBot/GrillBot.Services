@@ -15,7 +15,8 @@ public class RecalculationHandler(IServiceProvider serviceProvider)
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
         RecalculationPayload message,
         ICurrentUserProvider currentUser,
-        Dictionary<string, string> headers
+        Dictionary<string, string> header,
+        CancellationToken cancellationToken = default
     )
     {
         foreach (var action in GetRecalculationActions(message).Where(a => a.CheckPreconditions(message)))

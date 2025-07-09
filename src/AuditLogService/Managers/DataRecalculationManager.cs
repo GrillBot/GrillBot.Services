@@ -8,10 +8,10 @@ namespace AuditLogService.Managers;
 
 public class DataRecalculationManager(IRabbitPublisher _publisher)
 {
-    public async Task EnqueueRecalculationAsync(List<LogItem> items)
+    public async Task EnqueueRecalculationAsync(List<LogItem> items, CancellationToken cancellationToken = default)
     {
         var batches = CreateBatches(items);
-        await _publisher.PublishAsync(batches);
+        await _publisher.PublishAsync(batches, cancellationToken: cancellationToken);
     }
 
     private static List<RecalculationPayload> CreateBatches(List<LogItem> items)

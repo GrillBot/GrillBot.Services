@@ -12,7 +12,8 @@ public static class LogItemExtensions
         IQueryable<TData> query,
         Action<LogItem, TData> setData,
         ContextHelper<AuditLogServiceContext> contextHelper,
-        bool disableTracking
+        bool disableTracking,
+        CancellationToken cancellationToken = default
     ) where TData : ChildEntityBase
     {
         var ids = headers.Select(o => o.Id).ToList();
@@ -21,7 +22,7 @@ public static class LogItemExtensions
         if (disableTracking)
             query = query.AsNoTracking();
 
-        var data = await contextHelper.ReadEntitiesAsync(query);
+        var data = await contextHelper.ReadEntitiesAsync(query, cancellationToken);
         foreach (var item in data)
         {
             var header = headers.First(o => o.Id == item.LogItemId);
