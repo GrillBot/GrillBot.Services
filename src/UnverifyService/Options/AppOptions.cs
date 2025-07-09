@@ -2,4 +2,5 @@
 
 public class AppOptions
 {
+    public ArchivationOptions Archivation { get; set; } = new();
 }

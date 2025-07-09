@@ -58,11 +58,12 @@ public class ContextHelper<TDbContext>(
     public async Task<Dictionary<TKey, TValue>> ReadToDictionaryAsync<TEntity, TKey, TValue>(
         IQueryable<TEntity> query,
         Func<TEntity, TKey> keySelector,
-        Func<TEntity, TValue> valueSelector
+        Func<TEntity, TValue> valueSelector,
+        CancellationToken cancellationToken = default
     ) where TKey : notnull where TEntity : class
     {
         using (CreateCounter("Database"))
-            return await query.ToDictionaryAsync(keySelector, valueSelector);
+            return await query.ToDictionaryAsync(keySelector, valueSelector, cancellationToken);
     }
 
     public async Task<bool> IsAnyAsync<TEntity>(IQueryable<TEntity> query) where TEntity : class

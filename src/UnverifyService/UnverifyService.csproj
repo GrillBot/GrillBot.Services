@@ -23,7 +23,6 @@
       <Folder Include="Models\Response\" />
       <Folder Include="Models\Request\" />
       <Folder Include="Handlers\" />
-      <Folder Include="Actions\" />
     </ItemGroup>
 
 </Project>

@@ -7,6 +7,8 @@ using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using System.Reflection;
 using UnverifyService.Core.Entity;
 using UnverifyService.Options;
+using UnverifyService.Telemetry;
+using UnverifyService.Telemetry.Initializers;
 
 var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
     Assembly.GetExecutingAssembly(),
@@ -18,6 +20,9 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         services.AddPostgresDatabaseContext<UnverifyContext>(connectionString);
         services.AddStatisticsProvider<DefaultStatisticsProvider<UnverifyContext>>();
         services.AddTelemetryInitializer<DefaultDatabaseInitializer<UnverifyContext>>();
+        services.AddTelemetryCollector<UnverifyTelemetryCollector>();
+        services.AddTelemetryInitializer<ArchivationInitializer>();
+        services.AddTelemetryInitializer<ActiveUnverifyInitializer>();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
     {
