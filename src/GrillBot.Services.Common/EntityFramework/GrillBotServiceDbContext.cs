@@ -41,7 +41,7 @@ public class GrillBotServiceDbContext(
         return changedRows;
     }
 
-    public async Task<Dictionary<string, long>> GetRecordsCountInTablesAsync()
+    public async Task<Dictionary<string, long>> GetRecordsCountInTablesAsync(CancellationToken cancellationToken = default)
     {
         var result = new Dictionary<string, long>();
 
@@ -53,7 +53,7 @@ public class GrillBotServiceDbContext(
 
             result.Add(
                 string.IsNullOrEmpty(schema) ? tableName : $"{schema}.{tableName}",
-                await query.CountAsync()
+                await query.CountAsync(cancellationToken)
             );
         }
 

@@ -6,7 +6,7 @@ using UnverifyService.Core.Enums;
 
 namespace UnverifyService.Actions.Statistics.PeriodStatistics;
 
-public class GetUnverifyPeriodStatistics(
+public class GetUnverifyPeriodStatisticsAction(
     UnverifyContext dbContext,
     ICounterManager counterManager
 ) : PeriodStatisticsActionBase<UnverifyContext>(dbContext, counterManager)
@@ -24,6 +24,6 @@ public class GetUnverifyPeriodStatistics(
                 Count = o.LongCount()
             });
 
-        return await ContextHelper.ReadToDictionaryAsync(query, o => o.Key, o => o.Count);
+        return await ContextHelper.ReadToDictionaryAsync(query, o => o.Key, o => o.Count, CancellationToken);
     }
 }
