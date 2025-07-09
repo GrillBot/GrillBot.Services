@@ -1,14 +1,15 @@
-﻿using AuditLogService.Core.Entity;
-using GrillBot.Core.Infrastructure.Actions;
+﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.Infrastructure.Api;
+using Microsoft.EntityFrameworkCore;
 
-namespace AuditLogService.Actions.Statistics.PeriodStatistics;
+namespace GrillBot.Services.Common.Actions.Statistics;
 
-public abstract class PeriodStatisticsActionBase(
-    AuditLogServiceContext dbContext,
+public abstract class PeriodStatisticsActionBase<TDbContext>(
+    TDbContext dbContext,
     ICounterManager counterManager
-) : ApiAction<AuditLogServiceContext>(counterManager, dbContext)
+) : ApiAction<TDbContext>(counterManager, dbContext)
+    where TDbContext : DbContext
 {
     protected abstract Task<Dictionary<DateOnly, long>> GetRawDataAsync();
 
