@@ -44,7 +44,8 @@ public class GetActiveUnverifyListAction(UnverifyContext dbContext, ICounterMana
             o.LogItem.SetOperation!.Roles.Count(r => !r.IsKept),
             o.LogItem.SetOperation!.Roles.Count(r => r.IsKept),
             o.LogItem.SetOperation!.Channels.Count(r => !r.IsKept),
-            o.LogItem.SetOperation!.Channels.Count(r => r.IsKept)
+            o.LogItem.SetOperation!.Channels.Count(r => r.IsKept),
+            (o.EndAtUtc - DateTime.UtcNow).TotalSeconds <= 30.0
         ));
 
         var result = await ContextHelper.ReadEntitiesWithPaginationAsync(mappedQuery, request.Pagination, CancellationToken);
