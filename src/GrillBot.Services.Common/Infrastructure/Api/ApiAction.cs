@@ -2,8 +2,29 @@
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.EntityFramework.Helpers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GrillBot.Services.Common.Infrastructure.Api;
+
+public abstract class ApiAction<TParentAction, TDbContext>(
+    IServiceProvider serviceProvider
+) : ApiAction<TDbContext>(
+    serviceProvider.GetRequiredService<ICounterManager>(),
+    serviceProvider.GetRequiredService<TDbContext>()
+)
+    where TDbContext : DbContext
+    where TParentAction : ApiActionBase
+{
+    protected TParentAction ParentApiAction { get; } = serviceProvider.GetRequiredService<TParentAction>();
+
+    protected Task<ApiResult> ExecuteParentAction(object?[]? parameters = null)
+    {
+        parameters ??= Parameters;
+        ParentApiAction.Init(HttpContext, parameters, CurrentUser);
+
+        return ParentApiAction.ProcessAsync();
+    }
+}
 
 public abstract class ApiAction<TDbContext> : ApiAction where TDbContext : DbContext
 {

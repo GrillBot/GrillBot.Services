@@ -18,6 +18,7 @@ public class GetActiveUnverifyListAction(UnverifyContext dbContext, ICounterMana
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = GetParameter<ActiveUnverifyListRequest>(0);
+        var userId = GetOptionalParameter<ulong>(1);
 
         var baseQuery = DbContext.ActiveUnverifies
             .Include(o => o.LogItem.SetOperation)
@@ -28,6 +29,9 @@ public class GetActiveUnverifyListAction(UnverifyContext dbContext, ICounterMana
             var guildId = request.GuildId.ToUlong();
             baseQuery = baseQuery.Where(o => o.LogItem.GuildId == guildId);
         }
+
+        if (userId != default)
+            baseQuery = baseQuery.Where(o => o.LogItem.ToUserId == userId);
 
         baseQuery = WithSorting(baseQuery, request.Sort);
 
