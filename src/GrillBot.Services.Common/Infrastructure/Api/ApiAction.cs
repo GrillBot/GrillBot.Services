@@ -6,12 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GrillBot.Services.Common.Infrastructure.Api;
 
-public abstract class ApiAction<TParentAction, TDbContext>(
-    IServiceProvider serviceProvider
-) : ApiAction<TDbContext>(
-    serviceProvider.GetRequiredService<ICounterManager>(),
-    serviceProvider.GetRequiredService<TDbContext>()
-)
+public abstract class ApiAction<TParentAction, TDbContext>(IServiceProvider serviceProvider) : ApiAction<TDbContext>(serviceProvider)
     where TDbContext : DbContext
     where TParentAction : ApiActionBase
 {
@@ -36,11 +31,17 @@ public abstract class ApiAction<TDbContext> : ApiAction where TDbContext : DbCon
         DbContext = dbContext;
         ContextHelper = new ContextHelper<TDbContext>(counterManager, dbContext, CounterKey);
     }
+
+    protected ApiAction(IServiceProvider serviceProvider) : base(serviceProvider)
+    {
+        DbContext = serviceProvider.GetRequiredService<TDbContext>();
+        ContextHelper = new ContextHelper<TDbContext>(CounterManager, DbContext, CounterKey);
+    }
 }
 
 public abstract class ApiAction : ApiActionBase
 {
-    private ICounterManager CounterManager { get; }
+    protected ICounterManager CounterManager { get; }
 
     protected string CounterKey { get; }
 
@@ -48,6 +49,10 @@ public abstract class ApiAction : ApiActionBase
     {
         CounterManager = counterManager;
         CounterKey = CreateCounterKey();
+    }
+
+    protected ApiAction(IServiceProvider serviceProvider) : this(serviceProvider.GetRequiredService<ICounterManager>())
+    {
     }
 
     private string CreateCounterKey()

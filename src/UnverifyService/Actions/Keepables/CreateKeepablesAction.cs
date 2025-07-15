@@ -4,7 +4,7 @@ using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using UnverifyService.Core.Entity;
-using UnverifyService.Models.Request;
+using UnverifyService.Models.Request.Keepables;
 
 namespace UnverifyService.Actions.Keepables;
 
