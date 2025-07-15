@@ -1,5 +1,4 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -8,7 +7,7 @@ using UnverifyService.Models.Request.Keepables;
 
 namespace UnverifyService.Actions.Keepables;
 
-public class CreateKeepablesAction(UnverifyContext dbContext, ICounterManager counterManager) : ApiAction<UnverifyContext>(counterManager, dbContext)
+public class CreateKeepablesAction(IServiceProvider serviceProvider) : ApiAction<UnverifyContext>(serviceProvider)
 {
     public override async Task<ApiResult> ProcessAsync()
     {

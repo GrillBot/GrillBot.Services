@@ -1,15 +1,11 @@
-﻿using GrillBot.Core.Managers.Performance;
-using GrillBot.Services.Common.Actions.Statistics;
+﻿using GrillBot.Services.Common.Actions.Statistics;
 using Microsoft.EntityFrameworkCore;
 using UnverifyService.Core.Entity;
 using UnverifyService.Core.Enums;
 
 namespace UnverifyService.Actions.Statistics.PeriodStatistics;
 
-public class GetUnverifyPeriodStatisticsAction(
-    UnverifyContext dbContext,
-    ICounterManager counterManager
-) : PeriodStatisticsActionBase<UnverifyContext>(dbContext, counterManager)
+public class GetUnverifyPeriodStatisticsAction(IServiceProvider serviceProvider) : PeriodStatisticsActionBase<UnverifyContext>(serviceProvider)
 {
     protected override async Task<Dictionary<DateOnly, long>> GetRawDataAsync()
     {

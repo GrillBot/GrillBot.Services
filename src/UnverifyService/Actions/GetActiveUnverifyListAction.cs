@@ -1,6 +1,5 @@
 ﻿using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Actions;
-using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Models;
 using GrillBot.Services.Common.EntityFramework.Extensions;
 using GrillBot.Services.Common.Infrastructure.Api;
@@ -13,7 +12,7 @@ using UnverifyService.Models.Response;
 
 namespace UnverifyService.Actions;
 
-public class GetActiveUnverifyListAction(UnverifyContext dbContext, ICounterManager counterManager) : ApiAction<UnverifyContext>(counterManager, dbContext)
+public class GetActiveUnverifyListAction(IServiceProvider serviceProvider) : ApiAction<UnverifyContext>(serviceProvider)
 {
     public override async Task<ApiResult> ProcessAsync()
     {

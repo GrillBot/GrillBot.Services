@@ -5,12 +5,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GrillBot.Services.Common.Actions.Statistics;
 
-public abstract class PeriodStatisticsActionBase<TDbContext>(
-    TDbContext dbContext,
-    ICounterManager counterManager
-) : ApiAction<TDbContext>(counterManager, dbContext)
+public abstract class PeriodStatisticsActionBase<TDbContext> : ApiAction<TDbContext>
     where TDbContext : DbContext
 {
+    protected PeriodStatisticsActionBase(ICounterManager counterManager, TDbContext dbContext) : base(counterManager, dbContext)
+    {
+    }
+
+    protected PeriodStatisticsActionBase(IServiceProvider serviceProvider) : base(serviceProvider)
+    {
+    }
+
     protected abstract Task<Dictionary<DateOnly, long>> GetRawDataAsync();
 
     public override async Task<ApiResult> ProcessAsync()
