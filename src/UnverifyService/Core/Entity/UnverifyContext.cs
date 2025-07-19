@@ -23,6 +23,7 @@ public class UnverifyContext(DbContextOptions options, DatabaseTelemetryCollecto
             b.HasOne(o => o.SetOperation).WithOne(o => o.LogItem).HasForeignKey<UnverifyLogSetOperation>(o => o.LogItemId);
             b.HasOne(o => o.RemoveOperation).WithOne(o => o.LogItem).HasForeignKey<UnverifyLogRemoveOperation>(o => o.LogItemId);
             b.HasOne(o => o.UpdateOperation).WithOne(o => o.LogItem).HasForeignKey<UnverifyLogUpdateOperation>(o => o.LogItemId);
+            b.HasOne(o => o.ParentLogItem).WithMany(o => o.ChildLogItems).HasForeignKey(o => o.ParentLogItemId);
         });
 
         modelBuilder.Entity<UnverifyLogRemoveChannel>(b =>

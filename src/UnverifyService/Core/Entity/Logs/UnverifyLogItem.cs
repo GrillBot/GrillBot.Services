@@ -17,6 +17,10 @@ public class UnverifyLogItem
     public DiscordIdValueObject ToUserId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public Guid? ParentLogItemId { get; set; }
+    public UnverifyLogItem? ParentLogItem { get; set; }
+    public IList<UnverifyLogItem> ChildLogItems { get; set; } = [];
+
     public UnverifyLogSetOperation? SetOperation { get; set; }
     public UnverifyLogRemoveOperation? RemoveOperation { get; set; }
     public UnverifyLogUpdateOperation? UpdateOperation { get; set; }
