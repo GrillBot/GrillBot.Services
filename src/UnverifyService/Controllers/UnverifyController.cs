@@ -25,6 +25,6 @@ public class UnverifyController(IServiceProvider serviceProvider) : GrillBot.Cor
     [HttpPost("validate")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType<LocalizedMessageResponse>(StatusCodes.Status400BadRequest)]
-    public Task<IActionResult> CheckRequiredUnverifyAsync([FromBody] UnverifyRequest request)
-        => ProcessAsync<CheckRequiredUnverifyAction>(request);
+    public Task<IActionResult> CheckUnverifyRequirementsAsync([FromBody] UnverifyRequest request)
+        => ProcessAsync<CheckUnverifyRequirementsAction>(request);
 }
