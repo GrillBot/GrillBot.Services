@@ -22,8 +22,7 @@ public class CheckUnverifyRequirementsAction(
     {
         var request = GetParameter<UnverifyRequest>(0);
 
-        var errorResponse = ValidateRequestUsers(request);
-        errorResponse ??= await ValidateKeepablesAsync(request);
+        var errorResponse = await ValidateKeepablesAsync(request);
         errorResponse ??= await ValidateGuildOwnerAsync(request);
         errorResponse ??= await ValidateAdministratorsAsync(request);
         errorResponse ??= await ValidateActiveUnverifyAsync(request);
@@ -34,12 +33,6 @@ public class CheckUnverifyRequirementsAction(
         return errorResponse is null ?
             ApiResult.Ok() :
             new ApiResult(StatusCodes.Status400BadRequest, errorResponse);
-    }
-
-    private static LocalizedMessageResponse? ValidateRequestUsers(UnverifyRequest request)
-    {
-        var usersCount = request.Users.Values.SelectMany(o => o).Distinct().Count();
-        return usersCount == 0 ? new LocalizedMessageResponse("Unverify/Validation/NoUsers", []) : null;
     }
 
     private async Task<LocalizedMessageResponse?> ValidateKeepablesAsync(UnverifyRequest request)
@@ -70,17 +63,13 @@ public class CheckUnverifyRequirementsAction(
 
     private async Task<LocalizedMessageResponse?> ValidateGuildOwnerAsync(UnverifyRequest request)
     {
-        foreach (var guildGroup in request.Users)
-        {
-            var guildOwner = await _discordManager.GetGuildOwnerAsync(guildGroup.Key, CancellationToken);
-            if (guildOwner is null)
-                return new LocalizedMessageResponse("Unverify/Validation/UnknownGuild", [guildGroup.Key.ToString()]);
+        var guildOwner = await _discordManager.GetGuildOwnerAsync(request.GuildId, CancellationToken);
+        if (guildOwner is null)
+            return new LocalizedMessageResponse("Unverify/Validation/UnknownGuild", [request.GuildId.ToString()]);
 
-            if (guildGroup.Value.Contains(guildOwner.Id))
-                return new LocalizedMessageResponse("Unverify/Validation/GuildOwner", [guildOwner.GetFullName()]);
-        }
-
-        return null;
+        return guildOwner.Id == request.UserId
+            ? new LocalizedMessageResponse("Unverify/Validation/GuildOwner", [guildOwner.GetFullName()])
+            : null;
     }
 
     private async Task<LocalizedMessageResponse?> ValidateAdministratorsAsync(UnverifyRequest request)
@@ -88,43 +77,29 @@ public class CheckUnverifyRequirementsAction(
         if (_environment.IsDevelopment() || request.IsSelfUnverify)
             return null;
 
-        foreach (var guildGroup in request.Users)
-        {
-            var guild = await _discordManager.GetGuildAsync(guildGroup.Key, cancellationToken: CancellationToken);
-            if (guild is null)
-                return new LocalizedMessageResponse("Unverify/Validation/UnknownGuild", [guildGroup.Key.ToString()]);
+        var guild = await _discordManager.GetGuildAsync(request.GuildId, cancellationToken: CancellationToken);
+        if (guild is null)
+            return new LocalizedMessageResponse("Unverify/Validation/UnknownGuild", [request.GuildId.ToString()]);
 
-            foreach (var userId in guildGroup.Value)
-            {
-                var userQuery = DbContext.Users.AsNoTracking().Where(o => o.Id == userId).Select(o => o.IsBotAdmin);
-                var isBotAdmin = await ContextHelper.ReadFirstOrDefaultEntityAsync(userQuery, CancellationToken);
+        var userQuery = DbContext.Users.AsNoTracking().Where(o => o.Id == request.UserId).Select(o => o.IsBotAdmin);
+        var isBotAdmin = await ContextHelper.ReadFirstOrDefaultEntityAsync(userQuery, CancellationToken);
 
-                var userEntity = (await _discordManager.GetGuildUserAsync(guildGroup.Key, userId, CancellationToken))!;
-                if (isBotAdmin || userEntity.GuildPermissions.Administrator)
-                    return new LocalizedMessageResponse("Unverify/Validation/Administrator", [userEntity.GetFullName()]);
-            }
-        }
+        var userEntity = (await _discordManager.GetGuildUserAsync(request.GuildId, request.UserId, CancellationToken))!;
+        if (isBotAdmin || userEntity.GuildPermissions.Administrator)
+            return new LocalizedMessageResponse("Unverify/Validation/Administrator", [userEntity.GetFullName()]);
 
         return null;
     }
 
     private async Task<LocalizedMessageResponse?> ValidateActiveUnverifyAsync(UnverifyRequest request)
     {
-        foreach (var guildGroup in request.Users)
-        {
-            foreach (var userId in guildGroup.Value)
-            {
-                var unverifyQuery = DbContext.ActiveUnverifies.AsNoTracking().Where(o => o.LogItem.GuildId == guildGroup.Key && o.LogItem.ToUserId == userId);
-                var activeUnverify = await ContextHelper.ReadFirstOrDefaultEntityAsync(unverifyQuery, CancellationToken);
-                if (activeUnverify is null)
-                    continue;
+        var unverifyQuery = DbContext.ActiveUnverifies.AsNoTracking().Where(o => o.LogItem.GuildId == request.GuildId && o.LogItem.ToUserId == request.UserId);
+        var activeUnverify = await ContextHelper.ReadFirstOrDefaultEntityAsync(unverifyQuery, CancellationToken);
+        if (activeUnverify is null)
+            return null;
 
-                var userEntity = (await _discordManager.GetGuildUserAsync(guildGroup.Key, userId, CancellationToken))!;
-                return new LocalizedMessageResponse("Unverify/Validation/MultipleUnverify", [userEntity.GetFullName(), $"DateTime:{activeUnverify.EndAtUtc:o}"]);
-            }
-        }
-
-        return null;
+        var userEntity = (await _discordManager.GetGuildUserAsync(request.GuildId, request.UserId, CancellationToken))!;
+        return new LocalizedMessageResponse("Unverify/Validation/MultipleUnverify", [userEntity.GetFullName(), $"DateTime:{activeUnverify.EndAtUtc:o}"]);
     }
 
     private async Task<LocalizedMessageResponse?> ValidateUnverifyEnd(UnverifyRequest request)
@@ -136,15 +111,12 @@ public class CheckUnverifyRequirementsAction(
 
         if (request.IsSelfUnverify)
         {
-            foreach (var userId in request.Users.Values.SelectMany(o => o).Distinct())
-            {
-                var userQuery = DbContext.Users.AsNoTracking().Where(o => o.Id == userId).Select(o => o.SelfUnverifyMinimalTime);
-                var minimalTime = await ContextHelper.ReadFirstOrDefaultEntityAsync(userQuery, CancellationToken);
-                minimalTime ??= _options.Value.SelfUnverifyMinimalTime;
+            var userQuery = DbContext.Users.AsNoTracking().Where(o => o.Id == request.UserId).Select(o => o.SelfUnverifyMinimalTime);
+            var minimalTime = await ContextHelper.ReadFirstOrDefaultEntityAsync(userQuery, CancellationToken);
+            minimalTime ??= _options.Value.SelfUnverifyMinimalTime;
 
-                if (diff < minimalTime)
-                    return new LocalizedMessageResponse("Unverify/Validation/MinimalTime", [_options.Value.UnverifyMinimalTime.ToString("c")]);
-            }
+            if (diff < minimalTime)
+                return new LocalizedMessageResponse("Unverify/Validation/MinimalTime", [_options.Value.UnverifyMinimalTime.ToString("c")]);
         }
 
         if (diff < _options.Value.UnverifyMinimalTime)
@@ -158,35 +130,27 @@ public class CheckUnverifyRequirementsAction(
         if (request.IsSelfUnverify)
             return null;
 
-        foreach (var guildGroup in request.Users)
-        {
-            var botUser = await _discordManager.GetGuildUserAsync(guildGroup.Key, _discordManager.CurrentUser.Id, CancellationToken);
-            if (botUser is null)
-                continue;
+        var botUser = await _discordManager.GetGuildUserAsync(request.GuildId, _discordManager.CurrentUser.Id, CancellationToken);
+        if (botUser is null)
+            return null;
 
-            var botRolePosition = botUser.GetRoles().Max(o => o.Position);
+        var botRolePosition = botUser.GetRoles().Max(o => o.Position);
 
-            foreach (var userId in guildGroup.Value)
-            {
-                var discordUser = await _discordManager.GetGuildUserAsync(guildGroup.Key, userId, CancellationToken);
-                if (discordUser is null)
-                    return new LocalizedMessageResponse("Unverify/Validation/UnknownUser", [userId.ToString()]);
+        var discordUser = await _discordManager.GetGuildUserAsync(request.GuildId, request.UserId, CancellationToken);
+        if (discordUser is null)
+            return new LocalizedMessageResponse("Unverify/Validation/UnknownUser", [request.UserId.ToString()]);
 
-                var userRoles = discordUser.GetRoles().ToList();
-                if (userRoles.Count == 0 || userRoles.Max(o => o.Position) <= botRolePosition)
-                    continue;
+        var userRoles = discordUser.GetRoles().ToList();
+        if (userRoles.Count == 0 || userRoles.Max(o => o.Position) <= botRolePosition)
+            return null;
 
-                return new LocalizedMessageResponse(
-                    "Unverify/Validation/HigherRoles",
-                    [
-                        discordUser.GetFullName(),
-                        string.Join(", ", userRoles.Where(o => o.Position > botRolePosition).Select(o => o.Name))
-                    ]
-                );
-            }
-        }
-
-        return null;
+        return new LocalizedMessageResponse(
+            "Unverify/Validation/HigherRoles",
+            [
+                discordUser.GetFullName(),
+                string.Join(", ", userRoles.Where(o => o.Position > botRolePosition).Select(o => o.Name))
+            ]
+        );
     }
 
     private static LocalizedMessageResponse? ValidateReason(UnverifyRequest request)
