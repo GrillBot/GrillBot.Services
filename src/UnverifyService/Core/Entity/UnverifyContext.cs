@@ -68,6 +68,5 @@ public class UnverifyContext(DbContextOptions options, DatabaseTelemetryCollecto
 
         modelBuilder.Entity<UnverifyLogUpdateOperation>(b => b.WithSchema("logs"));
         modelBuilder.Entity<ActiveUnverify>(b => b.HasOne(o => o.LogItem).WithOne().HasForeignKey<ActiveUnverify>(o => o.LogSetId));
-        modelBuilder.Entity<SelfUnverifyKeepable>(b => b.HasKey(o => new { o.Group, o.Name }));
     }
 }
