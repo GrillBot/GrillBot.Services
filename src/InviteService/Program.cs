@@ -3,9 +3,9 @@ using GrillBot.Core.Metrics;
 using GrillBot.Core.Redis;
 using GrillBot.Services.Common;
 using GrillBot.Services.Common.EntityFramework.Extensions;
+using GrillBot.Services.Common.Providers;
 using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using InviteService.Core.Entity;
-using InviteService.Core.Providers;
 using InviteService.Options;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -18,7 +18,7 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         var connectionString = configuration.GetConnectionString("Default")!;
 
         services.AddPostgresDatabaseContext<InviteContext>(connectionString);
-        services.AddStatisticsProvider<StatisticsProvider>();
+        services.AddStatisticsProvider<DefaultStatisticsProvider<InviteContext>>();
         services.AddRedisDistributedCache(configuration);
         services.AddTelemetryInitializer<DefaultDatabaseInitializer<InviteContext>>();
     },

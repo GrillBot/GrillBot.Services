@@ -25,41 +25,46 @@ public class UserJoinedEventHandler(
     IDistributedCache _cache
 ) : BaseEventHandlerWithDb<UserJoinedPayload, InviteContext>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(UserJoinedPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        UserJoinedPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
-        var guild = await _discordManager.GetGuildAsync(message.GuildId.ToUlong());
-        if (guild is null || !await guild.CanManageInvitesAsync(_discordManager.CurrentUser))
+        var guild = await _discordManager.GetGuildAsync(message.GuildId.ToUlong(), cancellationToken: cancellationToken);
+        if (guild is null || !await guild.CanManageInvitesAsync(_discordManager.CurrentUser, cancellationToken))
             return RabbitConsumptionResult.Success;
 
-        var user = await guild.GetUserAsync(message.UserId.ToUlong());
+        var user = await _discordManager.GetGuildUserAsync(guild.Id, message.UserId.ToUlong(), cancellationToken);
         if (user?.IsUser() != true)
             return RabbitConsumptionResult.Success;
 
-        var latestInvites = await _discordManager.GetInvitesAsync(message.GuildId.ToUlong());
+        var latestInvites = await _discordManager.GetInvitesAsync(message.GuildId.ToUlong(), cancellationToken);
 
-        var usedInvite = await FindUserInviteAsync(user, latestInvites);
+        var usedInvite = await FindUserInviteAsync(user, latestInvites, cancellationToken);
 
         if (usedInvite is null)
         {
-            await ProcessUnknownInviteAsync(user);
+            await ProcessUnknownInviteAsync(user, cancellationToken);
         }
         else
         {
-            await ProcessInviteAsync(user, usedInvite);
-            await SyncCacheAsync(guild);
+            await ProcessInviteAsync(user, usedInvite, cancellationToken);
+            await SyncCacheAsync(guild, cancellationToken);
         }
 
         return RabbitConsumptionResult.Success;
     }
 
-    private async Task<InviteMetadata?> FindUserInviteAsync(IGuildUser user, List<IInviteMetadata> metadata)
+    private async Task<InviteMetadata?> FindUserInviteAsync(IGuildUser user, List<IInviteMetadata> metadata, CancellationToken cancellationToken = default)
     {
         var possibleInvites = metadata
             .Select(InviteMetadata.Create)
             .Where(o => o.CreatedAt.GetValueOrDefault().ToUniversalTime() <= user.JoinedAt.GetValueOrDefault().UtcDateTime)
             .ToList();
 
-        var cachedInvites = await GetCachedInvitesAsync(user.Guild);
+        var cachedInvites = await GetCachedInvitesAsync(user.Guild, cancellationToken);
 
         // Try find invite with limited count of usage. If invite was used as last, discord will automatically remove this invite.
         var missingInvite = cachedInvites
@@ -81,7 +86,7 @@ public class UserJoinedEventHandler(
         return result?.Current;
     }
 
-    private Task ProcessUnknownInviteAsync(IGuildUser user)
+    private Task ProcessUnknownInviteAsync(IGuildUser user, CancellationToken cancellationToken = default)
     {
         var guildId = user.GuildId.ToString();
         var userId = user.Id.ToString();
@@ -97,10 +102,10 @@ public class UserJoinedEventHandler(
             }
         };
 
-        return Publisher.PublishAsync(new CreateItemsMessage(logRequest));
+        return Publisher.PublishAsync(new CreateItemsMessage(logRequest), cancellationToken: cancellationToken);
     }
 
-    private async Task ProcessInviteAsync(IGuildUser user, InviteMetadata invite)
+    private async Task ProcessInviteAsync(IGuildUser user, InviteMetadata invite, CancellationToken cancellationToken = default)
     {
         var guildId = user.GuildId.ToString();
 
@@ -108,7 +113,7 @@ public class UserJoinedEventHandler(
             .Include(o => o.Uses)
             .Where(o => o.GuildId == guildId && o.Code == invite.Code);
 
-        var inviteEntity = await ContextHelper.ReadFirstOrDefaultEntityAsync(inviteEntityQuery);
+        var inviteEntity = await ContextHelper.ReadFirstOrDefaultEntityAsync(inviteEntityQuery, cancellationToken);
         if (inviteEntity is null)
         {
             inviteEntity = new Invite
@@ -119,7 +124,7 @@ public class UserJoinedEventHandler(
                 GuildId = guildId
             };
 
-            await DbContext.AddAsync(inviteEntity);
+            await DbContext.AddAsync(inviteEntity, cancellationToken);
         }
 
         inviteEntity.Uses.Add(new InviteUse
@@ -130,16 +135,16 @@ public class UserJoinedEventHandler(
             UserId = user.Id.ToString()
         });
 
-        await ContextHelper.SaveChangesAsync();
+        await ContextHelper.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task<List<InviteMetadata>> GetCachedInvitesAsync(IGuild guild)
+    private async Task<List<InviteMetadata>> GetCachedInvitesAsync(IGuild guild, CancellationToken cancellationToken = default)
     {
         var result = new List<InviteMetadata>();
 
         await foreach (var key in _redisServer.KeysAsync(pattern: $"InviteMetadata-{guild.Id}-*", pageSize: int.MaxValue))
         {
-            var item = await _cache.GetAsync<InviteMetadata>(key.ToString());
+            var item = await _cache.GetAsync<InviteMetadata>(key.ToString(), cancellationToken);
             if (item is not null)
                 result.Add(item);
         }
@@ -147,9 +152,9 @@ public class UserJoinedEventHandler(
         return result;
     }
 
-    private Task SyncCacheAsync(IGuild guild)
+    private Task SyncCacheAsync(IGuild guild, CancellationToken cancellationToken = default)
     {
         var message = new SynchronizeGuildInvitesPayload(guild.Id.ToString(), true);
-        return Publisher.PublishAsync(message);
+        return Publisher.PublishAsync(message, cancellationToken: cancellationToken);
     }
 }

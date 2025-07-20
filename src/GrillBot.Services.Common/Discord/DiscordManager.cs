@@ -112,9 +112,9 @@ public class DiscordManager(
         }
     }
 
-    public async Task<List<IInviteMetadata>> GetInvitesAsync(ulong guildId)
+    public async Task<List<IInviteMetadata>> GetInvitesAsync(ulong guildId, CancellationToken cancellationToken = default)
     {
-        var guild = await GetGuildAsync(guildId);
+        var guild = await GetGuildAsync(guildId, false, cancellationToken);
         if (guild is null)
             return [];
 
@@ -123,9 +123,9 @@ public class DiscordManager(
         using (_counterManager.Create("Discord.API.Invites"))
         {
             if (!string.IsNullOrEmpty(guild.VanityURLCode))
-                result.Add(await guild.GetVanityInviteAsync());
+                result.Add(await guild.GetVanityInviteAsync(options: new() { CancelToken = cancellationToken }));
 
-            result.AddRange(await guild.GetInvitesAsync());
+            result.AddRange(await guild.GetInvitesAsync(options: new() { CancelToken = cancellationToken }));
         }
 
         return result;

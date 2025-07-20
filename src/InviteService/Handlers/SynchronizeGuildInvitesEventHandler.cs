@@ -24,33 +24,39 @@ public class SynchronizeGuildInvitesEventHandler(
     ILogger<SynchronizeGuildInvitesEventHandler> _logger
 ) : BaseEventHandlerWithDb<SynchronizeGuildInvitesPayload, InviteContext>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizeGuildInvitesPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        SynchronizeGuildInvitesPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
-        await ClearInvitesForGuildAsync(message.GuildId);
+        await ClearInvitesForGuildAsync(message.GuildId, cancellationToken);
         await DownloadInvitesToCacheAsync(message.GuildId, currentUser, message.IgnoreLog);
 
         return RabbitConsumptionResult.Success;
     }
 
-    private async Task ClearInvitesForGuildAsync(string guildId)
+    private async Task ClearInvitesForGuildAsync(string guildId, CancellationToken cancellationToken = default)
     {
         var prefix = $"InviteMetadata-{guildId}-*";
 
         await foreach (var key in _redisServer.KeysAsync(pattern: prefix, pageSize: int.MaxValue))
         {
             _logger.LogInformation("Removing invite metadata for key {Key}", key);
+            cancellationToken.ThrowIfCancellationRequested();
             await _redisDatabase.KeyDeleteAsync(key);
         }
     }
 
-    private async Task DownloadInvitesToCacheAsync(string guildId, ICurrentUserProvider currentUser, bool ignoreLog)
+    private async Task DownloadInvitesToCacheAsync(string guildId, ICurrentUserProvider currentUser, bool ignoreLog, CancellationToken cancellationToken = default)
     {
-        var guild = await _discordManager.GetGuildAsync(guildId.ToUlong());
+        var guild = await _discordManager.GetGuildAsync(guildId.ToUlong(), cancellationToken: cancellationToken);
 
-        if (guild is null || !await guild.CanManageInvitesAsync(_discordManager.CurrentUser))
+        if (guild is null || !await guild.CanManageInvitesAsync(_discordManager.CurrentUser, cancellationToken))
             return;
 
-        var invites = await _discordManager.GetInvitesAsync(guildId.ToUlong());
+        var invites = await _discordManager.GetInvitesAsync(guildId.ToUlong(), cancellationToken);
         if (invites.Count == 0)
             return;
 
@@ -66,7 +72,7 @@ public class SynchronizeGuildInvitesEventHandler(
                 }
             };
 
-            await Publisher.PublishAsync(new CreateItemsMessage(logRequest));
+            await Publisher.PublishAsync(new CreateItemsMessage(logRequest), cancellationToken: cancellationToken);
         }
 
         foreach (var invite in invites)
@@ -75,7 +81,7 @@ public class SynchronizeGuildInvitesEventHandler(
             var key = $"InviteMetadata-{invite.GuildId}-{invite.Code}";
 
             _logger.LogInformation("Storing invite metadata for key {Key}", key);
-            await _cache.SetAsync(key, metadata, null);
+            await _cache.SetAsync(key, metadata, null, cancellationToken);
         }
     }
 }
