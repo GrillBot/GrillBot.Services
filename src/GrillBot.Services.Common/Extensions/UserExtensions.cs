@@ -1,6 +1,6 @@
 ﻿using Discord;
 
-namespace InviteService.Extensions;
+namespace GrillBot.Services.Common.Extensions;
 
 public static class UserExtensions
 {

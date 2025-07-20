@@ -10,5 +10,6 @@ public class Guild
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public DiscordIdValueObject GuildId { get; set; }
 
+    public DiscordIdValueObject OwnerUserId { get; set; }
     public DiscordIdValueObject? MuteRoleId { get; set; }
 }

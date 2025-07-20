@@ -32,7 +32,7 @@ public class DiscordManager(
         }
     }
 
-    public async Task<IGuild?> GetGuildAsync(ulong guildId, bool forceApi = false)
+    public async Task<IGuild?> GetGuildAsync(ulong guildId, bool forceApi = false, CancellationToken cancellationToken = default)
     {
         if (!forceApi)
         {
@@ -43,7 +43,7 @@ public class DiscordManager(
 
         using (_counterManager.Create("Discord.API.Guild"))
         {
-            var guild = await DiscordClient.GetGuildAsync(guildId);
+            var guild = await DiscordClient.GetGuildAsync(guildId, new() { CancelToken = cancellationToken });
             if (guild is null)
                 return null;
 
@@ -73,6 +73,31 @@ public class DiscordManager(
                 _auditLogCache.StoreLogs(guildId, actionType.Value, logs);
             return logs;
         }
+    }
+
+    public async Task<IGuildUser?> GetGuildUserAsync(ulong guildId, ulong userId, CancellationToken cancellationToken = default)
+    {
+        var guild = await GetGuildAsync(guildId, false, cancellationToken);
+        if (guild is null)
+            return null;
+
+        try
+        {
+            return await guild.GetUserAsync(userId, options: new() { CancelToken = cancellationToken });
+        }
+        catch (HttpException ex) when (ex.DiscordCode is DiscordErrorCode.UserBanned or DiscordErrorCode.UnknownUser)
+        {
+            return null;
+        }
+    }
+
+    public async Task<IGuildUser?> GetGuildOwnerAsync(ulong guildId, CancellationToken cancellationToken = default)
+    {
+        var guild = await GetGuildAsync(guildId, false, cancellationToken);
+        if (guild is null)
+            return null;
+
+        return await guild.GetOwnerAsync(options: new() { CancelToken = cancellationToken });
     }
 
     public async Task<IBan?> GetBanAsync(ulong guildId, ulong userId)
@@ -106,13 +131,13 @@ public class DiscordManager(
         return result;
     }
 
-    public async Task<IUser?> GetUserAsync(ulong userId)
+    public async Task<IUser?> GetUserAsync(ulong userId, CancellationToken cancellationToken = default)
     {
         using (_counterManager.Create("Discord.API.User"))
         {
             try
             {
-                return await DiscordClient.GetUserAsync(userId);
+                return await DiscordClient.GetUserAsync(userId, new() { CancelToken = cancellationToken });
             }
             catch (HttpException ex) when (ex.DiscordCode is DiscordErrorCode.UserBanned or DiscordErrorCode.UnknownUser)
             {

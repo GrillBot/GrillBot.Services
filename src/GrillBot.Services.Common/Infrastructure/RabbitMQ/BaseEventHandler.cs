@@ -2,8 +2,12 @@
 using GrillBot.Core.RabbitMQ.V2.Consumer;
 using GrillBot.Core.RabbitMQ.V2.Messages;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
+using GrillBot.Core.Services.AuditLog.Enums;
+using GrillBot.Core.Services.AuditLog.Models.Events.Create;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 namespace GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
@@ -26,4 +30,18 @@ public abstract class BaseEventHandler<TMessage> : RabbitMessageHandlerBase<TMes
 
     protected CounterItem CreateCounter(string operation)
         => CounterManager.Create($"{CounterKey}.{operation}");
+
+    protected Task NotifyUnauthorizedExecution(IRabbitMessage message, CancellationToken cancellationToken = default)
+    {
+        var request = new LogRequest(LogType.Warning, DateTime.UtcNow)
+        {
+            LogMessage = new LogMessageRequest(
+                $"Unauthorized usage of event handler. Missing Authorization token. Topic: {message.Topic}, Queue: {message.Queue}",
+                Assembly.GetEntryAssembly()!.GetName().Name!,
+                GetType().Name
+            )
+        };
+
+        return Publisher.PublishAsync(new CreateItemsMessage(request), cancellationToken: cancellationToken);
+    }
 }

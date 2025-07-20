@@ -1,4 +1,5 @@
 ﻿using GrillBot.Core.Models.Pagination;
+using GrillBot.Core.Services.GrillBot.Models;
 using Microsoft.AspNetCore.Mvc;
 using UnverifyService.Actions;
 using UnverifyService.Models.Request;
@@ -20,4 +21,10 @@ public class UnverifyController(IServiceProvider serviceProvider) : GrillBot.Cor
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public Task<IActionResult> GetCurrentUserUnverifyListAsync([FromBody] ActiveUnverifyListRequest request)
         => ProcessAsync<GetCurrentUserUnverifyListAction>(request);
+
+    [HttpPost("validate")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<LocalizedMessageResponse>(StatusCodes.Status400BadRequest)]
+    public Task<IActionResult> ValidateRequiredUnverifyAsync([FromBody] UnverifyRequest request)
+        => ProcessAsync<ValidateRequiredUnverifyAction>(request);
 }

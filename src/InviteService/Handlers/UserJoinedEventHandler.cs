@@ -6,6 +6,7 @@ using GrillBot.Core.Redis.Extensions;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Services.Common.Discord;
+using GrillBot.Services.Common.Extensions;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using InviteService.Core.Entity;
 using InviteService.Extensions;
