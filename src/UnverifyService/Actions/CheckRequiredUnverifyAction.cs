@@ -11,7 +11,7 @@ using UnverifyService.Options;
 
 namespace UnverifyService.Actions;
 
-public class ValidateRequiredUnverifyAction(
+public class CheckRequiredUnverifyAction(
     IServiceProvider serviceProvider,
     IOptions<AppOptions> _options,
     DiscordManager _discordManager,
