@@ -39,6 +39,7 @@ public partial class SetUnverifyHandler
             serviceId: "Unverify"
         );
 
+        discordMessage.WithLocalization(locale: session.TargetUserEntity?.Language ?? "en-US");
         return Publisher.PublishAsync(discordMessage, cancellationToken: cancellationToken);
     }
 
