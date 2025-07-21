@@ -10,19 +10,24 @@ public class EmoteSuggestionMessageCreatedHandler(
     IServiceProvider serviceProvider
 ) : BaseEventHandlerWithDb<EmoteSuggestionMessageCreatedPayload, EmoteServiceContext>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(EmoteSuggestionMessageCreatedPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        EmoteSuggestionMessageCreatedPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         if (message.SuggestionId == Guid.Empty)
             return RabbitConsumptionResult.Reject;
 
         var query = DbContext.EmoteSuggestions.Where(o => o.Id == message.SuggestionId);
-        var suggestion = await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
+        var suggestion = await ContextHelper.ReadFirstOrDefaultEntityAsync(query, cancellationToken);
         if (suggestion is null)
             return RabbitConsumptionResult.Success;
 
         suggestion.SuggestionMessageId = message.MessageId;
 
-        await ContextHelper.SaveChangesAsync();
+        await ContextHelper.SaveChangesAsync(cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 }

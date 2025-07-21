@@ -10,7 +10,12 @@ public class UnverifyEventHandler(
     IServiceProvider serviceProvider
 ) : BaseMeasuresHandler<UnverifyPayload>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(UnverifyPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        UnverifyPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         var entity = new UnverifyItem
         {

@@ -12,12 +12,17 @@ public class SynchronizationEventHandler(
     IServiceProvider serviceProvider
 ) : BaseEventHandlerWithDb<SynchronizationPayload, SearchingServiceContext>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        SynchronizationPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         foreach (var user in message.Users)
             await SynchonizeUserAsync(user);
 
-        await ContextHelper.SaveChangesAsync();
+        await ContextHelper.SaveChangesAsync(cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 

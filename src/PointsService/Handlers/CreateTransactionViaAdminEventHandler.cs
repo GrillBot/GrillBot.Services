@@ -11,7 +11,12 @@ public class CreateTransactionViaAdminEventHandler(
     IServiceProvider serviceProvider
 ) : CreateTransactionBaseEventHandler<CreateTransactionAdminPayload>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(CreateTransactionAdminPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        CreateTransactionAdminPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         if (!await CanCreateTransactionAsync(message))
             return RabbitConsumptionResult.Success;

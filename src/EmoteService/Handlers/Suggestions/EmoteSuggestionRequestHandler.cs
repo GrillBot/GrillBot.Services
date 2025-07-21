@@ -21,7 +21,12 @@ public partial class EmoteSuggestionRequestHandler(
     [GeneratedRegex(@"\w+", RegexOptions.IgnoreCase)]
     private static partial Regex EmoteNameRegex();
 
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(EmoteSuggestionRequestPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        EmoteSuggestionRequestPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         var guild = await ValidateInputAndGetGuildAsync(message);
         if (guild is null)
@@ -35,7 +40,7 @@ public partial class EmoteSuggestionRequestHandler(
             CreateUserNotification(entity, message.Locale)
         };
 
-        await Publisher.PublishAsync(messages);
+        await Publisher.PublishAsync(messages, cancellationToken: cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 

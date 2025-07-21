@@ -17,7 +17,12 @@ public class SendRemindNotificationEventHandler(
     IServiceProvider serviceProvider
 ) : BaseEventHandlerWithDb<SendRemindNotificationPayload, RemindServiceContext>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SendRemindNotificationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        SendRemindNotificationPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         var remindMessage = await GetRemindMessageAsync(message.RemindId);
         if (remindMessage is null)
@@ -26,8 +31,8 @@ public class SendRemindNotificationEventHandler(
         var discordMessage = ProcessRemind(remindMessage, message.IsEarly);
 
         remindMessage.IsSendInProgress = true;
-        await ContextHelper.SaveChangesAsync();
-        await Publisher.PublishAsync(discordMessage);
+        await ContextHelper.SaveChangesAsync(cancellationToken);
+        await Publisher.PublishAsync(discordMessage, cancellationToken: cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 

@@ -9,12 +9,17 @@ namespace MessageService.Handlers;
 
 public class SynchronizationEventHandler(IServiceProvider serviceProvider) : BaseEventHandlerWithDb<SynchronizationPayload, MessageContext>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        SynchronizationPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         foreach (var channel in message.Channels)
             await SynchronizeChannelAsync(channel);
 
-        await ContextHelper.SaveChangesAsync();
+        await ContextHelper.SaveChangesAsync(cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 

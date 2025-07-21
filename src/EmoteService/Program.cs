@@ -1,10 +1,10 @@
 using EmoteService.Core.Entity;
 using EmoteService.Core.Options;
-using EmoteService.Core.Providers;
 using GrillBot.Core;
 using GrillBot.Core.Metrics;
 using GrillBot.Services.Common;
 using GrillBot.Services.Common.EntityFramework.Extensions;
+using GrillBot.Services.Common.Providers;
 using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -17,7 +17,7 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         var connectionString = configuration.GetConnectionString("Default")!;
 
         services.AddPostgresDatabaseContext<EmoteServiceContext>(connectionString);
-        services.AddStatisticsProvider<StatisticsProvider>();
+        services.AddStatisticsProvider<DefaultStatisticsProvider<EmoteServiceContext>>();
         services.AddTelemetryInitializer<DefaultDatabaseInitializer<EmoteServiceContext>>();
     },
     configureHealthChecks: (builder, configuration) =>

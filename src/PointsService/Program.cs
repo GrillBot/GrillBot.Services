@@ -2,11 +2,11 @@ using GrillBot.Core;
 using GrillBot.Core.Metrics;
 using GrillBot.Services.Common;
 using GrillBot.Services.Common.EntityFramework.Extensions;
+using GrillBot.Services.Common.Providers;
 using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using Microsoft.EntityFrameworkCore;
 using PointsService.Core.Entity;
 using PointsService.Core.Options;
-using PointsService.Core.Providers;
 using PointsService.Telemetry;
 using PointsService.Telemetry.Initializers;
 using System.Reflection;
@@ -19,7 +19,7 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         var connectionString = configuration.GetConnectionString("Default")!;
 
         services.AddPostgresDatabaseContext<PointsServiceContext>(connectionString);
-        services.AddStatisticsProvider<StatisticsProvider>();
+        services.AddStatisticsProvider<DefaultStatisticsProvider<PointsServiceContext>>();
 
         services.AddTelemetryCollector<PointsTelemetryCollector>();
         services.AddTelemetryInitializer<DefaultDatabaseInitializer<PointsServiceContext>>();

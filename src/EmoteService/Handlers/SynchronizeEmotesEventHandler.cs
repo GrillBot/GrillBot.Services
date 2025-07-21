@@ -11,7 +11,12 @@ public class SynchronizeEmotesEventHandler(
     IServiceProvider serviceProvider
 ) : BaseEventHandlerWithDb<SynchronizeEmotesPayload, EmoteServiceContext>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizeEmotesPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        SynchronizeEmotesPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         await ClearEmotesAsync(message.GuildId);
         await InsertEmotesAsync(message.GuildId, message.Emotes);

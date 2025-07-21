@@ -7,11 +7,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Handlers.Suggestions;
 
-public class EmoteSuggestionMessageDeletedHandler(
-    IServiceProvider serviceProvider
-) : BaseEventHandlerWithDb<EmoteSuggestionMessageDeletedPayload, EmoteServiceContext>(serviceProvider)
+public class EmoteSuggestionMessageDeletedHandler(IServiceProvider serviceProvider) : BaseEventHandlerWithDb<EmoteSuggestionMessageDeletedPayload, EmoteServiceContext>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(EmoteSuggestionMessageDeletedPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        EmoteSuggestionMessageDeletedPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         ArgumentOutOfRangeException.ThrowIfZero(message.GuildId);
         ArgumentOutOfRangeException.ThrowIfZero(message.MessageId);
@@ -20,7 +23,7 @@ public class EmoteSuggestionMessageDeletedHandler(
             .Include(o => o.VoteSession)
             .Where(o => o.GuildId == message.GuildId && o.SuggestionMessageId == message.MessageId);
 
-        var suggestion = await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
+        var suggestion = await ContextHelper.ReadFirstOrDefaultEntityAsync(query, cancellationToken);
         if (suggestion == null)
             return RabbitConsumptionResult.Success;
 
@@ -31,7 +34,7 @@ public class EmoteSuggestionMessageDeletedHandler(
         if (suggestion.VoteSession is not null)
             suggestion.VoteSession.KilledAtUtc = DateTime.UtcNow;
 
-        await ContextHelper.SaveChangesAsync();
+        await ContextHelper.SaveChangesAsync(cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 }

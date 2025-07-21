@@ -19,13 +19,14 @@ public class NicknameChangedHandler(
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
         NicknameChangedMessage message,
         ICurrentUserProvider currentUser,
-        Dictionary<string, string> headers
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
     )
     {
         if (message.NicknameBefore == message.NicknameAfter)
             return RabbitConsumptionResult.Success;
 
-        var user = await _discordManager.GetUserAsync(message.UserId);
+        var user = await _discordManager.GetUserAsync(message.UserId, cancellationToken);
         if (user is null)
             return RabbitConsumptionResult.Reject;
 
@@ -36,7 +37,7 @@ public class NicknameChangedHandler(
         await UpdateNicknameHistoryAsync(message.GuildId, message.UserId, message.NicknameBefore);
         await UpdateNicknameHistoryAsync(message.GuildId, message.UserId, message.NicknameAfter);
         await UpdateCurrentNicknameAsync(message);
-        await ContextHelper.SaveChangesAsync();
+        await ContextHelper.SaveChangesAsync(cancellationToken);
         await NotifyAuditLogAsync(message);
 
         return RabbitConsumptionResult.Success;

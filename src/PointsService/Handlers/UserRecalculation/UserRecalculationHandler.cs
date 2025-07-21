@@ -10,7 +10,12 @@ public partial class UserRecalculationHandler(
     IServiceProvider serviceProvider
 ) : BasePointsEvent<UserRecalculationPayload>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(UserRecalculationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        UserRecalculationPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         var user = await FindOrCreateUserAsync(message.GuildId, message.UserId);
 

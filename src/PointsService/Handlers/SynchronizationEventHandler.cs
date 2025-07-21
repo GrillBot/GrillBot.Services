@@ -12,7 +12,12 @@ public class SynchronizationEventHandler(
     IServiceProvider serviceProvider
 ) : BasePointsEvent<SynchronizationPayload>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SynchronizationPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        SynchronizationPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         foreach (var userInfo in message.Users)
             await SynchronizeUserAsync(message.GuildId, userInfo);
@@ -20,7 +25,7 @@ public class SynchronizationEventHandler(
         foreach (var channelInfo in message.Channels)
             await SynchronizeChannelAsync(message.GuildId, channelInfo);
 
-        await ContextHelper.SaveChangesAsync();
+        await ContextHelper.SaveChangesAsync(cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 

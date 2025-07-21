@@ -10,7 +10,12 @@ public class TimeoutEventHandler(
     IServiceProvider serviceProvider
 ) : BaseMeasuresHandler<TimeoutPayload>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(TimeoutPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        TimeoutPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         var entity = await GetOrCreateEntityAsync(message.ExternalId);
 

@@ -5,11 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EmoteService.Handlers.Suggestions;
 
-public class EmoteSuggestionVoteMessageCreatedHandler(
-    IServiceProvider serviceProvider
-) : EmoteSuggestionHandlerBase<EmoteSuggestionVoteMessageCreatedPayload>(serviceProvider)
+public class EmoteSuggestionVoteMessageCreatedHandler(IServiceProvider serviceProvider) : EmoteSuggestionHandlerBase<EmoteSuggestionVoteMessageCreatedPayload>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(EmoteSuggestionVoteMessageCreatedPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        EmoteSuggestionVoteMessageCreatedPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         if (message.SuggestionId == Guid.Empty)
             return RabbitConsumptionResult.Reject;
@@ -18,12 +21,12 @@ public class EmoteSuggestionVoteMessageCreatedHandler(
             .Include(o => o.VoteSession)
             .Where(o => o.Id == message.SuggestionId && o.VoteSession != null);
 
-        var suggestion = await ContextHelper.ReadFirstOrDefaultEntityAsync(suggestionQuery);
+        var suggestion = await ContextHelper.ReadFirstOrDefaultEntityAsync(suggestionQuery, cancellationToken);
         if (suggestion == null)
             return RabbitConsumptionResult.Reject;
 
         suggestion.VoteSession!.VoteMessageId = message.MessageId;
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(cancellationToken);
 
         return RabbitConsumptionResult.Success;
     }

@@ -9,9 +9,14 @@ public class UnverifyModifyEventHandler(
     IServiceProvider serviceProvider
 ) : BaseMeasuresHandler<UnverifyModifyPayload>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(UnverifyModifyPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        UnverifyModifyPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
-        var item = await ContextHelper.ReadFirstOrDefaultEntityAsync(DbContext.Unverifies.Where(o => o.LogSetId == message.LogSetId));
+        var item = await ContextHelper.ReadFirstOrDefaultEntityAsync(DbContext.Unverifies.Where(o => o.LogSetId == message.LogSetId), cancellationToken);
         if (item is null)
             return RabbitConsumptionResult.Success;
 

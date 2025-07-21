@@ -16,7 +16,12 @@ public class MemberWarningEventHandler(
     DiscordManager _discordManager
 ) : BaseMeasuresHandler<MemberWarningPayload>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(MemberWarningPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        MemberWarningPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         var entity = new MemberWarningItem
         {

@@ -3,10 +3,10 @@ using GrillBot.Core.Metrics;
 using GrillBot.Core.Redis;
 using GrillBot.Services.Common;
 using GrillBot.Services.Common.EntityFramework.Extensions;
+using GrillBot.Services.Common.Providers;
 using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using Microsoft.EntityFrameworkCore;
 using RubbergodService.Core.Entity;
-using RubbergodService.Core.Providers;
 using RubbergodService.DirectApi;
 using System.Reflection;
 
@@ -19,7 +19,7 @@ var application = await ServiceBuilder.CreateWebAppAsync(
 
         services.AddPostgresDatabaseContext<RubbergodServiceContext>(connectionString);
         services.AddRedis(configuration);
-        services.AddStatisticsProvider<StatisticsProvider>();
+        services.AddStatisticsProvider<DefaultStatisticsProvider<RubbergodServiceContext>>();
         services.AddDirectApi();
         services.AddHttpClient();
         services.AddTelemetryInitializer<DefaultDatabaseInitializer<RubbergodServiceContext>>();

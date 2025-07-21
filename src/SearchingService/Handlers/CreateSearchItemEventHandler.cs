@@ -13,7 +13,12 @@ public class CreateSearchItemEventHandler(
     IOptions<AppOptions> _options
 ) : BaseEventHandlerWithDb<SearchItemPayload, SearchingServiceContext>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(SearchItemPayload payload, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        SearchItemPayload payload,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         var created = DateTime.UtcNow;
         var entity = new SearchItem
@@ -26,8 +31,8 @@ public class CreateSearchItemEventHandler(
             ValidTo = payload.ValidToUtc ?? DateTime.UtcNow.Add(_options.Value.DefaultItemValidity)
         };
 
-        await DbContext.AddAsync(entity);
-        await ContextHelper.SaveChangesAsync();
+        await DbContext.AddAsync(entity, cancellationToken);
+        await ContextHelper.SaveChangesAsync(cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 }

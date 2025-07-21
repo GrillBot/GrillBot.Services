@@ -10,14 +10,19 @@ public class DeleteTransactionsEventHandler(
     IServiceProvider serviceProvider
 ) : BasePointsEvent<DeleteTransactionsPayload>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(DeleteTransactionsPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        DeleteTransactionsPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         var transactions = await ReadTransactionsAsync(message);
         if (transactions.Count == 0)
             return RabbitConsumptionResult.Success;
 
         DbContext.RemoveRange(transactions);
-        await ContextHelper.SaveChangesAsync();
+        await ContextHelper.SaveChangesAsync(cancellationToken);
         await EnqueueUserForRecalculationAsync(transactions);
         return RabbitConsumptionResult.Success;
     }

@@ -10,7 +10,12 @@ public class StoreKarmaEventHandler(
     IServiceProvider serviceProvider
 ) : BaseEventHandlerWithDb<KarmaBatchPayload, RubbergodServiceContext>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(KarmaBatchPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        KarmaBatchPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         foreach (var chunk in message.Users.Where(o => !string.IsNullOrEmpty(o.MemberId)).Chunk(50))
         {
@@ -27,7 +32,7 @@ public class StoreKarmaEventHandler(
             }
         }
 
-        await ContextHelper.SaveChangesAsync();
+        await ContextHelper.SaveChangesAsync(cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 

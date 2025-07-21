@@ -11,7 +11,12 @@ public class ClearPinCacheEventHandler(
     IDistributedCache _cache
 ) : BaseEventHandler<ClearPinCachePayload>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(ClearPinCachePayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        ClearPinCachePayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         await RemoveItemAsync("md", message);
         await RemoveItemAsync("json", message);

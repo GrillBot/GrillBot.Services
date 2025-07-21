@@ -2,10 +2,10 @@ using GrillBot.Core;
 using GrillBot.Core.Metrics;
 using GrillBot.Services.Common;
 using GrillBot.Services.Common.EntityFramework.Extensions;
+using GrillBot.Services.Common.Providers;
 using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using Microsoft.EntityFrameworkCore;
 using SearchingService.Core.Entity;
-using SearchingService.Core.Providers;
 using SearchingService.Options;
 using System.Reflection;
 
@@ -17,8 +17,8 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
         var connectionString = configuration.GetConnectionString("Default")!;
 
         services.AddPostgresDatabaseContext<SearchingServiceContext>(connectionString);
-        services.AddStatisticsProvider<StatisticsProvider>();
         services.AddTelemetryInitializer<DefaultDatabaseInitializer<SearchingServiceContext>>();
+        services.AddStatisticsProvider<DefaultStatisticsProvider<SearchingServiceContext>>();
     },
     configureHealthChecks: (healthCheckBuilder, configuration) =>
     {

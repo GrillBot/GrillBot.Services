@@ -8,10 +8,14 @@ using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 
 namespace EmoteService.Handlers;
 
-public class EmoteEventEventHandler(IServiceProvider serviceProvider)
-    : BaseEventHandlerWithDb<EmoteEventPayload, EmoteServiceContext>(serviceProvider)
+public class EmoteEventEventHandler(IServiceProvider serviceProvider) : BaseEventHandlerWithDb<EmoteEventPayload, EmoteServiceContext>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(EmoteEventPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers)
+    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+        EmoteEventPayload message,
+        ICurrentUserProvider currentUser,
+        Dictionary<string, string> headers,
+        CancellationToken cancellationToken = default
+    )
     {
         var emoteValue = Emote.Parse(message.EmoteId);
         if (message.IsIncrement && !await IsSupportedEmoteAsync(emoteValue))
@@ -42,7 +46,7 @@ public class EmoteEventEventHandler(IServiceProvider serviceProvider)
                 DbContext.Remove(entity);
         }
 
-        await ContextHelper.SaveChangesAsync();
+        await ContextHelper.SaveChangesAsync(cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 
