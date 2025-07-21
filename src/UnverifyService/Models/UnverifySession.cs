@@ -1,9 +1,11 @@
 ﻿using Discord;
+using UnverifyService.Core.Entity;
 
 namespace UnverifyService.Models;
 
 public record UnverifySession(
     IGuildUser TargetUser,
+    User? TargetUserEntity,
     DateTime StartAtUtc,
     DateTime EndAtUtc,
     string? Reason,
@@ -14,5 +16,7 @@ public record UnverifySession(
     public List<IRole> RolesToKeep { get; } = [];
     public List<(IGuildChannel, OverwritePermissions)> ChannelsToRemove { get; } = [];
     public List<(IGuildChannel, OverwritePermissions)> ChannelsToKeep { get; } = [];
-    public bool KeepMutedRole { get; set; }
+    public IRole? MutedRole { get; set; }
+
+    public bool KeepMutedRole => MutedRole is not null && RolesToKeep.Exists(o => o.Id == MutedRole.Id);
 }

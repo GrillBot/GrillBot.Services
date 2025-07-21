@@ -4,7 +4,6 @@ using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
 using GrillBot.Services.Common.Discord;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +15,7 @@ using UnverifyService.Models.Events;
 
 namespace UnverifyService.Handlers;
 
-public class SetUnverifyHandler(
+public partial class SetUnverifyHandler(
     IServiceProvider serviceProvider,
     CheckUnverifyRequirementsAction _unverifyCheck,
     DiscordManager _discordManager
@@ -44,11 +43,36 @@ public class SetUnverifyHandler(
         var session = await CreateSessionAsync(message, cancellationToken);
         if (message.TestRun)
         {
-            await SendUnverifyMessageToChannelAsync(session, message, cancellationToken);
+            await SendUnverifyMessageToChannelAsync(session, message, currentUser, cancellationToken);
             return RabbitConsumptionResult.Success;
         }
 
-        return RabbitConsumptionResult.Success;
+        var dbStrategy = DbContext.Database.CreateExecutionStrategy();
+        return await dbStrategy.ExecuteAsync(async cancelToken =>
+        {
+            await using var transaction = await DbContext.Database.BeginTransactionAsync(cancelToken);
+
+            var logItem = await LogUnverifyAsync(session, currentUser, cancelToken);
+            await NotifyUserMeasuresAsync(session, logItem, currentUser, cancelToken);
+
+            try
+            {
+                await ProcessUnverifySetAsync(session, logItem, cancelToken);
+                await SendSuccessSetDMAsync(session, cancelToken);
+                await SendUnverifyMessageToChannelAsync(session, message, currentUser, cancelToken);
+
+                await transaction.CommitAsync(cancelToken);
+                return RabbitConsumptionResult.Success;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "An error occured while removing access to {FullName}", session.TargetUser.GetFullName());
+                await RollbackAccessAsync(session, cancelToken);
+                await transaction.RollbackAsync(cancelToken);
+
+                return RabbitConsumptionResult.Retry;
+            }
+        }, cancellationToken);
     }
 
     private async Task<bool> CheckUnverifyRequirementsAsync(SetUnverifyMessage message, ICurrentUserProvider currentUser, CancellationToken cancellationToken = default)
@@ -79,14 +103,15 @@ public class SetUnverifyHandler(
         var guild = (await _discordManager.GetGuildAsync(message.GuildId, false, cancellationToken))!;
         var targetUser = (await _discordManager.GetGuildUserAsync(message.GuildId, message.UserId, cancellationToken))!;
         var reason = message.IsSelfUnverify ? null : (message.Reason ?? "").Trim();
-        var session = new UnverifySession(targetUser, DateTime.UtcNow, message.EndAtUtc, reason, message.IsSelfUnverify);
-
         var keepablesQuery = DbContext.SelfUnverifyKeepables.AsNoTracking().GroupBy(o => o.Group);
         var keepables = await ContextHelper.ReadToDictionaryAsync(keepablesQuery, o => o.Key, o => o.Select(x => x.Name).ToList(), cancellationToken);
-
         var guildQuery = DbContext.Guilds.AsNoTracking().Where(o => o.GuildId == message.GuildId);
         var guildEntity = await ContextHelper.ReadFirstOrDefaultEntityAsync(guildQuery, cancellationToken);
         var mutedRole = guildEntity?.MuteRoleId == null ? null : guild.GetRole(guildEntity.MuteRoleId.Value);
+        var dbUserQuery = DbContext.Users.AsNoTracking().Where(o => o.Id == targetUser.Id);
+        var dbUser = await ContextHelper.ReadFirstOrDefaultEntityAsync(dbUserQuery, cancellationToken);
+
+        var session = new UnverifySession(targetUser, dbUser, DateTime.UtcNow, message.EndAtUtc, reason, message.IsSelfUnverify);
 
         await ProcessRolesAsync(session, keepables, mutedRole, message.RequiredKeepables, cancellationToken);
         await ProcessChannelsAsync(session, message.RequiredKeepables, cancellationToken);
@@ -126,7 +151,7 @@ public class SetUnverifyHandler(
             session.RolesToRemove.RemoveAll(o => unavailableRoles.Exists(x => x.Id == o.Id));
 
             // Keep muting role while access returning.
-            session.KeepMutedRole = mutedRole is not null && unavailableRoles.Exists(x => x.Id == mutedRole.Id);
+            session.MutedRole = mutedRole;
         }
 
         foreach (var keepable in requiredKeepables)
@@ -177,14 +202,5 @@ public class SetUnverifyHandler(
                 session.ChannelsToRemove.RemoveAll(o => o.Item1.Id == overwrite.Item1.Id);
             }
         }
-    }
-
-    private async Task SendUnverifyMessageToChannelAsync(UnverifySession session, SetUnverifyMessage message, CancellationToken cancellationToken = default)
-    {
-        var discordMessage = new DiscordSendMessagePayload(
-            message.GuildId,
-            message.UserId,
-            session.IsSelfUnverify ? "Unverify/Message/UnverifyToChannelWithoutReason" : "Unverify/Message/UnverifyToChannelWithReason"
-        );
     }
 }

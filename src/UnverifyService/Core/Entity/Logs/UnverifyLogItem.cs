@@ -1,15 +1,18 @@
 ﻿using GrillBot.Core.Database.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using UnverifyService.Core.Enums;
 
 namespace UnverifyService.Core.Entity.Logs;
 
+[Index(nameof(LogNumber), IsUnique = true)]
 public class UnverifyLogItem
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; } = Guid.NewGuid();
+    public long LogNumber { get; set; }
 
     public UnverifyOperationType OperationType { get; set; }
     public DiscordIdValueObject GuildId { get; set; }

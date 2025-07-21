@@ -2,6 +2,7 @@
 using GrillBot.Services.Common.EntityFramework.Extensions;
 using GrillBot.Services.Common.Telemetry.Database;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using UnverifyService.Core.Entity.Logs;
 
 namespace UnverifyService.Core.Entity;
@@ -24,6 +25,11 @@ public class UnverifyContext(DbContextOptions options, DatabaseTelemetryCollecto
             b.HasOne(o => o.RemoveOperation).WithOne(o => o.LogItem).HasForeignKey<UnverifyLogRemoveOperation>(o => o.LogItemId);
             b.HasOne(o => o.UpdateOperation).WithOne(o => o.LogItem).HasForeignKey<UnverifyLogUpdateOperation>(o => o.LogItemId);
             b.HasOne(o => o.ParentLogItem).WithMany(o => o.ChildLogItems).HasForeignKey(o => o.ParentLogItemId);
+
+            b.Property(o => o.LogNumber)
+                .UseIdentityByDefaultColumn()
+                .ValueGeneratedOnAdd()
+                .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Throw);
         });
 
         modelBuilder.Entity<UnverifyLogRemoveChannel>(b =>
