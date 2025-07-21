@@ -1,7 +1,7 @@
-﻿using GrillBot.Core.Infrastructure.Actions;
+﻿using GrillBot.Core.Extensions.Discord;
+using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Services.GrillBot.Models;
 using GrillBot.Services.Common.Discord;
-using GrillBot.Services.Common.Extensions;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
