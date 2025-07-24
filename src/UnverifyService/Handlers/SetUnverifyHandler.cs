@@ -5,11 +5,9 @@ using GrillBot.Core.RabbitMQ.V2.Consumer;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Services.Common.Discord;
-using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using UnverifyService.Actions;
-using UnverifyService.Core.Entity;
 using UnverifyService.Models;
 using UnverifyService.Models.Events;
 
@@ -19,23 +17,17 @@ public partial class SetUnverifyHandler(
     IServiceProvider serviceProvider,
     CheckUnverifyRequirementsAction _unverifyCheck,
     DiscordManager _discordManager
-) : BaseEventHandlerWithDb<SetUnverifyMessage, UnverifyContext>(serviceProvider)
+) : UnverifyServiceBaseHandler<SetUnverifyMessage>(serviceProvider)
 {
     private static readonly JsonSerializerOptions _serializerOptions = new() { WriteIndented = false };
 
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+    protected override async Task<RabbitConsumptionResult> ProcessHandlerAsync(
         SetUnverifyMessage message,
         ICurrentUserProvider currentUser,
         Dictionary<string, string> headers,
         CancellationToken cancellationToken = default
     )
     {
-        if (!currentUser.IsLogged)
-        {
-            await NotifyUnauthorizedExecution(message, cancellationToken);
-            return RabbitConsumptionResult.Reject;
-        }
-
         var isValidUnverify = await CheckUnverifyRequirementsAsync(message, currentUser, cancellationToken);
         if (!isValidUnverify)
             return RabbitConsumptionResult.Reject;

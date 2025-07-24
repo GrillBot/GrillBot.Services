@@ -5,36 +5,25 @@ using GrillBot.Core.RabbitMQ.V2.Consumer;
 using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Services.Common.Discord;
-using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Serialization;
-using System.Runtime.InteropServices;
-using UnverifyService.Core.Entity;
 using UnverifyService.Core.Entity.Logs;
 using UnverifyService.Core.Enums;
 using UnverifyService.Models.Events;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace UnverifyService.Handlers;
 
 public class RecoverAccessHandler(
     IServiceProvider serviceProvider,
     DiscordManager _discordManager
-) : BaseEventHandlerWithDb<RecoverAccessMessage, UnverifyContext>(serviceProvider)
+) : UnverifyServiceBaseHandler<RecoverAccessMessage>(serviceProvider)
 {
-    protected override async Task<RabbitConsumptionResult> HandleInternalAsync(
+    protected override async Task<RabbitConsumptionResult> ProcessHandlerAsync(
         RecoverAccessMessage message,
         ICurrentUserProvider currentUser,
         Dictionary<string, string> headers,
         CancellationToken cancellationToken = default
     )
     {
-        if (!currentUser.IsLogged)
-        {
-            await NotifyUnauthorizedExecution(message, cancellationToken);
-            return RabbitConsumptionResult.Reject;
-        }
-
         var logItem = await FindLogItemAsync(message, cancellationToken);
         if (logItem is null)
         {
