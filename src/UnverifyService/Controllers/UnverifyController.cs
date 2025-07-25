@@ -1,5 +1,7 @@
 ﻿using GrillBot.Core.Models.Pagination;
 using GrillBot.Core.Services.GrillBot.Models;
+using GrillBot.Core.Validation;
+using GrillBot.Services.Common.Infrastructure.Api.OpenApi.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using UnverifyService.Actions;
 using UnverifyService.Models.Request;
@@ -27,4 +29,16 @@ public class UnverifyController(IServiceProvider serviceProvider) : GrillBot.Cor
     [ProducesResponseType<LocalizedMessageContent>(StatusCodes.Status400BadRequest)]
     public Task<IActionResult> CheckUnverifyRequirementsAsync([FromBody] UnverifyRequest request)
         => ProcessAsync<CheckUnverifyRequirementsAction>(request);
+
+    [SwaggerRequireAuthorization]
+    [HttpDelete("{guildId}/{userId}")]
+    [ProducesResponseType<RemoveUnverifyResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<RemoveUnverifyResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public Task<IActionResult> RemoveUnverifyAsync(
+        [FromRoute, DiscordId] ulong guildId,
+        [FromRoute, DiscordId] ulong userId,
+        [FromQuery] bool isForceRemove
+    ) => ProcessAsync<RemoveUnverifyAction>(guildId, userId, isForceRemove);
 }
