@@ -59,6 +59,8 @@ public class RecoverAccessHandler(
         if (targetUser is null)
         {
             // There is nothing to return when the user is no longer on the server.
+            // Only send metrics recalculation to refresh prometheus data.
+            await RecalculateMetricsAsync(cancellationToken);
             return RabbitConsumptionResult.Success;
         }
 
@@ -66,6 +68,8 @@ public class RecoverAccessHandler(
         if (discordGuild is null)
         {
             // There is nothing to return when bot is no longer on the server.
+            // Only send metrics recalculation to refresh prometheus data.
+            await RecalculateMetricsAsync(cancellationToken);
             return RabbitConsumptionResult.Success;
         }
 
@@ -100,6 +104,7 @@ public class RecoverAccessHandler(
         if (muteRole is not null && !logItem.SetOperation!.KeepMutedRole)
             await targetUser.RemoveRoleAsync(muteRole, new() { CancelToken = cancellationToken });
 
+        await RecalculateMetricsAsync(cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 
@@ -181,4 +186,7 @@ public class RecoverAccessHandler(
         await ContextHelper.DbContext.AddAsync(logItem, cancellationToken);
         await ContextHelper.SaveChangesAsync(cancellationToken);
     }
+
+    private Task RecalculateMetricsAsync(CancellationToken cancellationToken = default)
+        => Publisher.PublishAsync(new RecalculateMetricsMessage(), cancellationToken: cancellationToken);
 }

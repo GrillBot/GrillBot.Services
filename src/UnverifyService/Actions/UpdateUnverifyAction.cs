@@ -1,21 +1,18 @@
 ﻿using GrillBot.Core.Extensions;
 using GrillBot.Core.Extensions.Discord;
 using GrillBot.Core.Infrastructure.Actions;
-using GrillBot.Core.RabbitMQ.V2.Messages;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Core.Services.GrillBot.Models;
 using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
 using GrillBot.Core.Services.UserMeasures.Models.Events;
 using GrillBot.Services.Common.Discord;
 using GrillBot.Services.Common.Infrastructure.Api;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.InteropServices;
 using UnverifyService.Core.Entity;
 using UnverifyService.Core.Entity.Logs;
 using UnverifyService.Core.Enums;
+using UnverifyService.Models.Events;
 using UnverifyService.Models.Request;
 
 namespace UnverifyService.Actions;
@@ -53,6 +50,7 @@ public class UpdateUnverifyAction(
         await ContextHelper.SaveChangesAsync(CancellationToken);
         await NotifyUserMeasuresAsync(unverify);
         await SendUserNotificationAsync(unverify, logItem);
+        await RecalculateMetricsAsync();
         return await CreateResultAsync(unverify, logItem);
     }
 
@@ -149,4 +147,7 @@ public class UpdateUnverifyAction(
 
         return ApiResult.Ok(new LocalizedMessageContent(localizationKey, [.. localizationArgs]));
     }
+
+    private Task RecalculateMetricsAsync()
+        => _rabbitPublisher.PublishAsync(new RecalculateMetricsMessage(), cancellationToken: CancellationToken);
 }

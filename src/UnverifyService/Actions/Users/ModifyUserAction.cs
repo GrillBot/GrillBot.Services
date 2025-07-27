@@ -4,6 +4,7 @@ using GrillBot.Core.Services.AuditLog.Enums;
 using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Services.Common.Infrastructure.Api;
 using UnverifyService.Core.Entity;
+using UnverifyService.Models.Events;
 using UnverifyService.Models.Request.Users;
 
 namespace UnverifyService.Actions.Users;
@@ -39,8 +40,12 @@ public class ModifyUserAction(
         userEntity.IsBotAdmin = request.IsBotAdmin;
 
         var changedRows = await ContextHelper.SaveChangesAsync(CancellationToken);
+
         if (changedRows > 0)
+        {
             await NotifyAuditLogAsync(userEntity, oldSelfUnverifyTime);
+            await RecalculateMetricsAsync();
+        }
 
         return ApiResult.Ok();
     }
@@ -62,4 +67,7 @@ public class ModifyUserAction(
 
         return _rabbitPublisher.PublishAsync(new CreateItemsMessage(logRequest), cancellationToken: CancellationToken);
     }
+
+    private Task RecalculateMetricsAsync()
+        => _rabbitPublisher.PublishAsync(new RecalculateMetricsMessage(), cancellationToken: CancellationToken);
 }

@@ -10,12 +10,12 @@ public abstract class BaseEventHandlerWithDb<TPayload, TDbContext>
     where TPayload : class, IRabbitMessage, new()
     where TDbContext : DbContext
 {
-    protected TDbContext DbContext { get; }
+    protected TDbContext DbContext => ContextHelper.DbContext;
     protected ContextHelper<TDbContext> ContextHelper { get; }
 
     protected BaseEventHandlerWithDb(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        DbContext = serviceProvider.GetRequiredService<TDbContext>();
-        ContextHelper = new ContextHelper<TDbContext>(CounterManager, DbContext, CounterKey);
+        var dbContext = serviceProvider.GetRequiredService<TDbContext>();
+        ContextHelper = new ContextHelper<TDbContext>(CounterManager, dbContext, CounterKey);
     }
 }

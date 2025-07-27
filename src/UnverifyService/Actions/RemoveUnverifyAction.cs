@@ -16,6 +16,7 @@ using UnverifyService.Core.Entity;
 using UnverifyService.Core.Entity.Logs;
 using UnverifyService.Core.Enums;
 using UnverifyService.Models;
+using UnverifyService.Models.Events;
 using UnverifyService.Models.Response;
 
 namespace UnverifyService.Actions;
@@ -102,6 +103,10 @@ public class RemoveUnverifyAction(
             );
 
             return new ApiResult(StatusCodes.Status500InternalServerError, response);
+        }
+        finally
+        {
+            await RecalculateMetricsAsync();
         }
     }
 
@@ -209,7 +214,7 @@ public class RemoveUnverifyAction(
         );
     }
 
-    private async Task SendNotificationToUserAsync(UnverifySession session)
+    private Task SendNotificationToUserAsync(UnverifySession session)
     {
         var message = new DiscordSendMessagePayload(
             guildId: null,
@@ -223,6 +228,9 @@ public class RemoveUnverifyAction(
         );
 
         message.WithLocalization(locale: session.TargetUserEntity?.Language ?? "cs");
-        await _rabbitPublisher.PublishAsync(message, cancellationToken: CancellationToken);
+        return _rabbitPublisher.PublishAsync(message, cancellationToken: CancellationToken);
     }
+
+    private Task RecalculateMetricsAsync()
+        => _rabbitPublisher.PublishAsync(new RecalculateMetricsMessage(), cancellationToken: CancellationToken);
 }

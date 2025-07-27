@@ -35,6 +35,7 @@ public partial class SetUnverifyHandler(
         var session = await CreateSessionAsync(message, cancellationToken);
         if (message.TestRun)
         {
+            await RecalculateMetricsAsync(cancellationToken);
             await SendUnverifyMessageToChannelAsync(session, message, currentUser, cancellationToken);
             return RabbitConsumptionResult.Success;
         }
@@ -63,6 +64,11 @@ public partial class SetUnverifyHandler(
                 await transaction.RollbackAsync(cancelToken);
 
                 return RabbitConsumptionResult.Retry;
+            }
+            finally
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                    await RecalculateMetricsAsync(cancellationToken);
             }
         }, cancellationToken);
     }
@@ -195,4 +201,7 @@ public partial class SetUnverifyHandler(
             }
         }
     }
+
+    private Task RecalculateMetricsAsync(CancellationToken cancellationToken = default)
+        => Publisher.PublishAsync(new RecalculateMetricsMessage(), cancellationToken: cancellationToken);
 }
