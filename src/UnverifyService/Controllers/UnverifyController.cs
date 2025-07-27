@@ -41,4 +41,13 @@ public class UnverifyController(IServiceProvider serviceProvider) : GrillBot.Cor
         [FromRoute, DiscordId] ulong userId,
         [FromQuery] bool isForceRemove
     ) => ProcessAsync<RemoveUnverifyAction>(guildId, userId, isForceRemove);
+
+    [SwaggerRequireAuthorization]
+    [HttpPut]
+    [ProducesResponseType<LocalizedMessageContent>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<LocalizedMessageContent>(StatusCodes.Status404NotFound)]
+    public Task<IActionResult> UpdateUnverifyAsync([FromBody] UpdateUnverifyRequest request)
+        => ProcessAsync<UpdateUnverifyAction>(request);
 }

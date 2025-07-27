@@ -14,5 +14,5 @@ public record ActiveUnverifyListItemResponse(
     int KeepedRolesCount,
     int RemovedChannelsCount,
     int KeepedChannelsCount,
-    bool CanRemoveUnverify
+    bool IsReadOnly
 );
