@@ -50,4 +50,9 @@ public class UnverifyController(IServiceProvider serviceProvider) : GrillBot.Cor
     [ProducesResponseType<LocalizedMessageContent>(StatusCodes.Status404NotFound)]
     public Task<IActionResult> UpdateUnverifyAsync([FromBody] UpdateUnverifyRequest request)
         => ProcessAsync<UpdateUnverifyAction>(request);
+
+    [HttpGet("to-remove")]
+    [ProducesResponseType<List<ScheduleUnverifyRemoveItem>>(StatusCodes.Status200OK)]
+    public Task<IActionResult> GetUnverifiesToRemoveAsync()
+        => ProcessAsync<GetUnverifiesToRemoveAction>();
 }
