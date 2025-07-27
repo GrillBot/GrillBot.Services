@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using UnverifyService.Actions.Users;
 using UnverifyService.Models.Request.Users;
+using UnverifyService.Models.Response.Users;
 
 namespace UnverifyService.Controllers;
 
@@ -15,4 +16,12 @@ public class UserController(IServiceProvider serviceProvider) : GrillBot.Core.In
         [FromRoute, DiscordId] ulong userId,
         [FromBody] ModifyUserRequest request
     ) => ProcessAsync<ModifyUserAction>(userId, request);
+
+    [HttpGet("{userId}")]
+    [ProducesResponseType<UserInfo>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public Task<IActionResult> GetUserInfoAsync(
+        [FromRoute, DiscordId] ulong userId
+    ) => ProcessAsync<GetUserInfoAction>(userId);
 }

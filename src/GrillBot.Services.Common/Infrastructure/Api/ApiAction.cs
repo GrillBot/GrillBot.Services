@@ -23,19 +23,18 @@ public abstract class ApiAction<TParentAction, TDbContext>(IServiceProvider serv
 
 public abstract class ApiAction<TDbContext> : ApiAction where TDbContext : DbContext
 {
-    protected TDbContext DbContext { get; }
     protected ContextHelper<TDbContext> ContextHelper { get; }
+    protected TDbContext DbContext => ContextHelper.DbContext;
 
     protected ApiAction(ICounterManager counterManager, TDbContext dbContext) : base(counterManager)
     {
-        DbContext = dbContext;
         ContextHelper = new ContextHelper<TDbContext>(counterManager, dbContext, CounterKey);
     }
 
     protected ApiAction(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        DbContext = serviceProvider.GetRequiredService<TDbContext>();
-        ContextHelper = new ContextHelper<TDbContext>(CounterManager, DbContext, CounterKey);
+        var dbContext = serviceProvider.GetRequiredService<TDbContext>();
+        ContextHelper = new ContextHelper<TDbContext>(CounterManager, dbContext, CounterKey);
     }
 }
 
