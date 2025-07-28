@@ -14,8 +14,14 @@ public partial class CreateArchivationDataAction(
     private DateTime ExpirationDate =>
         DateTime.UtcNow.Add(-_options.Value.Archivation.ExpirationMilestone);
 
-    public override Task<ApiResult> ProcessAsync()
+    public override async Task<ApiResult> ProcessAsync()
     {
-        throw new NotImplementedException();
+        if (!await ExistsItemtoArchiveAsync())
+            return new ApiResult(StatusCodes.Status204NoContent);
+
+        var items = await ReadItemsToArchiveAsync();
+        var archive = CreateArchive(items);
+
+        return ApiResult.Ok(archive);
     }
 }

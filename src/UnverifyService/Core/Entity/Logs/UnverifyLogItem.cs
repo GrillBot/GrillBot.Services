@@ -23,6 +23,7 @@ public class UnverifyLogItem
     public Guid? ParentLogItemId { get; set; }
     public UnverifyLogItem? ParentLogItem { get; set; }
     public IList<UnverifyLogItem> ChildLogItems { get; set; } = [];
+    public ActiveUnverify? ActiveUnverify { get; set; }
 
     public UnverifyLogSetOperation? SetOperation { get; set; }
     public UnverifyLogRemoveOperation? RemoveOperation { get; set; }
