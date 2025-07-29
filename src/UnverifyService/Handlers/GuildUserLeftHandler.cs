@@ -32,10 +32,7 @@ public class GuildUserLeftHandler(
         finally
         {
             if (!cancellationToken.IsCancellationRequested)
-                await RecalculateMetricsAsync(cancellationToken);
+                await Publisher.PublishAsync(new RecalculateMetricsMessage(), cancellationToken: cancellationToken);
         }
     }
-
-    private Task RecalculateMetricsAsync(CancellationToken cancellationToken = default)
-        => Publisher.PublishAsync(new RecalculateMetricsMessage(), cancellationToken: cancellationToken);
 }

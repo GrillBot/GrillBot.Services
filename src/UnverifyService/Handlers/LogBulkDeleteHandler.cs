@@ -28,6 +28,7 @@ public class LogBulkDeleteHandler(
 
         DbContext.RemoveRange(logItems);
         await ContextHelper.SaveChangesAsync(cancellationToken);
+        await Publisher.PublishAsync(new RecalculateMetricsMessage(), cancellationToken: cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 
