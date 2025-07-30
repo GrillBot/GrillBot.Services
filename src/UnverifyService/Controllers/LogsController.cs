@@ -1,6 +1,8 @@
 ﻿using GrillBot.Core.Models.Pagination;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Nodes;
 using UnverifyService.Actions.Archivation;
+using UnverifyService.Actions.Import;
 using UnverifyService.Actions.Logs;
 using UnverifyService.Models.Request.Logs;
 using UnverifyService.Models.Response;
@@ -28,4 +30,9 @@ public class LogsController(IServiceProvider serviceProvider) : GrillBot.Core.In
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public Task<IActionResult> CreateArchivationDataAsync()
         => ProcessAsync<CreateArchivationDataAction>();
+
+    [HttpPost("import-legacy")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public Task<IActionResult> ImportLegacyLogItemAsync([FromBody] JsonObject jsonData)
+        => ProcessAsync<ImportLegacyLogItemAction>(jsonData);
 }
