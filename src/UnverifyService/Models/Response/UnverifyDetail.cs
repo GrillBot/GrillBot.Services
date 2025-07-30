@@ -1,12 +1,14 @@
-﻿namespace UnverifyService.Models.Response.Logs.Detail;
+﻿namespace UnverifyService.Models.Response;
 
-public record UnverityOperationDetailData(
+public record UnverifyDetail(
+    Guid Id,
+    long LogNumber,
     DateTime StartAtUtc,
     DateTime EndAtUtc,
-    long DurationMilliseconds,
-    string Reason,
+    string FromUserId,
+    string? Reason,
     string Language,
-    bool IsMutedRoleKeeped,
+    bool KeepMutedRole,
     List<string> RemovedRoles,
     List<string> KeepedRoles,
     List<ChannelOverride> RemovedChannels,

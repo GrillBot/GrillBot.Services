@@ -55,4 +55,13 @@ public class UnverifyController(IServiceProvider serviceProvider) : GrillBot.Cor
     [ProducesResponseType<List<ScheduleUnverifyRemoveItem>>(StatusCodes.Status200OK)]
     public Task<IActionResult> GetUnverifiesToRemoveAsync()
         => ProcessAsync<GetUnverifiesToRemoveAction>();
+
+    [HttpGet("{guildId}/{userId}")]
+    [ProducesResponseType<UnverifyDetail>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public Task<IActionResult> GetActiveUnverifyDetailAsync(
+        [FromRoute, DiscordId] ulong guildId,
+        [FromRoute, DiscordId] ulong userId
+    ) => ProcessAsync<GetActiveUnverifyDetailAction>(guildId, userId);
 }

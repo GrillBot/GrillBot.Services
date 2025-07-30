@@ -5,5 +5,5 @@ public record ManualRemoveOperationDetailData(
     string Language,
     bool IsForceRemove,
     List<string> ReturnedRoles,
-    List<ChannelDetailData> ReturnedChannels
+    List<ChannelOverride> ReturnedChannels
 );

@@ -8,6 +8,6 @@ public record SelfUnverifyOperationDetailData(
     bool IsMutedRoleKeeped,
     List<string> RemovedRoles,
     List<string> KeepedRoles,
-    List<ChannelDetailData> RemovedChannels,
-    List<ChannelDetailData> KeepedChannels
+    List<ChannelOverride> RemovedChannels,
+    List<ChannelOverride> KeepedChannels
 );

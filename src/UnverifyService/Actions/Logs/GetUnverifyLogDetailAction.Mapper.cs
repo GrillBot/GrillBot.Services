@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using UnverifyService.Core.Entity.Logs;
+using UnverifyService.Models.Response;
 using UnverifyService.Models.Response.Logs.Detail;
 
 namespace UnverifyService.Actions.Logs;
@@ -15,11 +16,11 @@ public partial class GetUnverifyLogDetailAction
         if (data is null)
             return null;
 
-        var removedChannels = new List<ChannelDetailData>();
-        var keepedChannels = new List<ChannelDetailData>();
+        var removedChannels = new List<ChannelOverride>();
+        var keepedChannels = new List<ChannelOverride>();
         foreach (var channel in data.Channels)
         {
-            var channelData = new ChannelDetailData(
+            var channelData = new ChannelOverride(
                 channel.ChannelId.ToString(),
                 [.. channel.Perms.ToAllowList().Select(o => o.ToString())],
                 [.. channel.Perms.ToDenyList().Select(o => o.ToString())]
@@ -77,7 +78,7 @@ public partial class GetUnverifyLogDetailAction
             data.Force,
             [.. data.Roles.Select(o => o.RoleId.ToString())],
             [..
-                data.Channels.Select(o => new ChannelDetailData(
+                data.Channels.Select(o => new ChannelOverride(
                     o.ChannelId.ToString(),
                     [.. o.Perms.ToAllowList().Select(o => o.ToString())],
                     [.. o.Perms.ToDenyList().Select(o => o.ToString())]
@@ -118,7 +119,7 @@ public partial class GetUnverifyLogDetailAction
         return new RecoveryOperationDetailData(
             [.. data.Roles.Select(o => o.RoleId.ToString())],
             [..
-                data.Channels.Select(o => new ChannelDetailData(
+                data.Channels.Select(o => new ChannelOverride(
                     o.ChannelId.ToString(),
                     [.. o.Perms.ToAllowList().Select(o => o.ToString())],
                     [.. o.Perms.ToDenyList().Select(o => o.ToString())]
