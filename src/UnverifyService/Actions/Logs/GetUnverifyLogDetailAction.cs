@@ -23,7 +23,7 @@ public partial class GetUnverifyLogDetailAction(IServiceProvider serviceProvider
                 Parent = o.ParentLogItem == null ? null : new
                 {
                     Id = o.ParentLogItemId!.Value,
-                    LogNumber = o.ParentLogItem.LogNumber,
+                    o.ParentLogItem.LogNumber,
                     FromUserId = o.ParentLogItem.FromUserId.ToString(),
                     ToUserId = o.ParentLogItem.ToUserId.ToString(),
                     o.ParentLogItem.CreatedAt,

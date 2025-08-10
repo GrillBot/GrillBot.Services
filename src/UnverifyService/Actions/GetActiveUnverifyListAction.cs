@@ -35,7 +35,7 @@ public class GetActiveUnverifyListAction(IServiceProvider serviceProvider) : Api
         baseQuery = WithSorting(baseQuery, request.Sort);
 
         var mappedQuery = baseQuery.Select(o => new ActiveUnverifyListItemResponse(
-            o.Id,
+            o.LogSetId,
             o.LogItem.GuildId.ToString(),
             o.LogItem.FromUserId.ToString(),
             o.LogItem.ToUserId.ToString(),
