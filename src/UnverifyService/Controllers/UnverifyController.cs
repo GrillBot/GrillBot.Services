@@ -17,6 +17,7 @@ public class UnverifyController(IServiceProvider serviceProvider) : GrillBot.Cor
     public Task<IActionResult> GetActiveUnverifyListAsync([FromBody] ActiveUnverifyListRequest request)
         => ProcessAsync<GetActiveUnverifyListAction>(request);
 
+    [SwaggerRequireAuthorization]
     [HttpPost("list/current-user")]
     [ProducesResponseType<PaginatedResponse<ActiveUnverifyListItemResponse>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
