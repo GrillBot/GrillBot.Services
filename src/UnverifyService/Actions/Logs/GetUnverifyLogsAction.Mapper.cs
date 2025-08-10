@@ -23,6 +23,7 @@ public partial class GetUnverifyLogsAction
         return new Response.UnverifyLogItem(
             item.Id,
             item.ParentLogItemId,
+            item.LogNumber,
             item.OperationType,
             item.GuildId.ToString(),
             item.FromUserId.ToString(),

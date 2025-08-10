@@ -19,9 +19,11 @@ public partial class GetUnverifyLogDetailAction(IServiceProvider serviceProvider
             .Select(o => new
             {
                 o.Id,
+                o.LogNumber,
                 Parent = o.ParentLogItem == null ? null : new
                 {
                     Id = o.ParentLogItemId!.Value,
+                    LogNumber = o.ParentLogItem.LogNumber,
                     FromUserId = o.ParentLogItem.FromUserId.ToString(),
                     ToUserId = o.ParentLogItem.ToUserId.ToString(),
                     o.ParentLogItem.CreatedAt,
@@ -50,7 +52,15 @@ public partial class GetUnverifyLogDetailAction(IServiceProvider serviceProvider
 
         return ApiResult.Ok(new UnverifyLogDetail(
             logItem.Id,
-            logItem.Parent is null ? null : new UnverifyLogSimpleDetail(logItem.Parent.Id, logItem.Parent.FromUserId, logItem.Parent.ToUserId, logItem.Parent.CreatedAt, logItem.Parent.OperationType),
+            logItem.LogNumber,
+            logItem.Parent is null ? null : new UnverifyLogSimpleDetail(
+                logItem.Parent.Id,
+                logItem.Parent.LogNumber,
+                logItem.Parent.FromUserId,
+                logItem.Parent.ToUserId,
+                logItem.Parent.CreatedAt,
+                logItem.Parent.OperationType
+            ),
             logItem.OperationType,
             logItem.GuildId,
             logItem.FromUserId,
