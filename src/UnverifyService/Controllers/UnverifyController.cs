@@ -64,4 +64,10 @@ public class UnverifyController(IServiceProvider serviceProvider) : GrillBot.Cor
         [FromRoute, DiscordId] ulong guildId,
         [FromRoute, DiscordId] ulong userId
     ) => ProcessAsync<GetActiveUnverifyDetailAction>(guildId, userId);
+
+    [HttpPost("recovery/validate")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public Task<IActionResult> CheckRecoveryRequirementsAsync([FromQuery] Guid? logId, [FromQuery] long? logNumber)
+        => ProcessAsync<CheckRecoveryRequirementsAction>(logId, logNumber);
 }

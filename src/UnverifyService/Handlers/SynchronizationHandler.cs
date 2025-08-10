@@ -20,6 +20,8 @@ public class SynchronizationHandler(IServiceProvider serviceProvider)
             await SynchronizeUserAsync(user, cancellationToken);
 
         await DbContext.SaveChangesAsync(cancellationToken);
+        await Publisher.PublishAsync(new RecalculateMetricsMessage(), cancellationToken: cancellationToken);
+
         return RabbitConsumptionResult.Success;
     }
 
