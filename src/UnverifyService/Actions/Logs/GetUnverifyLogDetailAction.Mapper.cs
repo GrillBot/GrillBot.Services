@@ -100,9 +100,12 @@ public partial class GetUnverifyLogDetailAction
                 o.NewStartAtUtc,
                 o.NewEndAtUtc,
                 (long)Math.Ceiling((o.NewEndAtUtc - o.NewStartAtUtc).TotalMilliseconds),
-                o.LogItem.ParentLogItem!.SetOperation!.StartAtUtc,
-                o.LogItem.ParentLogItem!.SetOperation!.EndAtUtc,
-                (long)Math.Ceiling((o.LogItem.ParentLogItem!.SetOperation!.EndAtUtc - o.LogItem.ParentLogItem!.SetOperation!.StartAtUtc).TotalMilliseconds),
+                o.LogItem.ParentLogItem == null ? o.NewStartAtUtc : o.LogItem.ParentLogItem!.SetOperation!.StartAtUtc,
+                o.LogItem.ParentLogItem == null ? o.NewEndAtUtc : o.LogItem.ParentLogItem!.SetOperation!.StartAtUtc,
+                (long)Math.Ceiling((
+                    (o.LogItem.ParentLogItem == null ? o.NewEndAtUtc : o.LogItem.ParentLogItem!.SetOperation!.StartAtUtc) - 
+                    (o.LogItem.ParentLogItem == null ? o.NewStartAtUtc : o.LogItem.ParentLogItem!.SetOperation!.StartAtUtc)
+                ).TotalMilliseconds),
                 o.Reason ?? ""
             ));
 
