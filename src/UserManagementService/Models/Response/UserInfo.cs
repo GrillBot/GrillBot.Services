@@ -2,5 +2,6 @@
 
 public record UserInfo(
     string UserId,
-    List<GuildUser> Guilds
+    List<GuildUser> Guilds,
+    TimeSpan? SelfUnverifyMinimalTime
 );
