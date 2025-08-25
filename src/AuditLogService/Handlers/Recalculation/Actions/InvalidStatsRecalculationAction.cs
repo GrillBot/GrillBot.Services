@@ -45,8 +45,6 @@ public class InvalidStatsRecalculationAction(IServiceProvider serviceProvider) :
             if (payload.Type is LogType.JobCompleted)
                 await ClearStatisticsAsync<JobInfo>(o => o.StartCount == 0);
         }
-
-        await ClearStatisticsAsync<DatabaseStatistic>(o => o.RecordsCount == 0);
     }
 
     private async Task<bool> VerifySuccessAsync(RecalculationPayload payload)
@@ -76,7 +74,6 @@ public class InvalidStatsRecalculationAction(IServiceProvider serviceProvider) :
                 isSuccess = isSuccess && await IsEmptyAsync<JobInfo>(o => o.StartCount == 0);
         }
 
-        isSuccess = isSuccess && await IsEmptyAsync<DatabaseStatistic>(o => o.RecordsCount == 0);
         return isSuccess;
     }
 }
