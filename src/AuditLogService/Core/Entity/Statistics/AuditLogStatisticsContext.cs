@@ -20,5 +20,4 @@ public class AuditLogStatisticsContext(DbContextOptions<AuditLogStatisticsContex
     public DbSet<InteractionUserActionStatistic> InteractionUserActionStatistics => Set<InteractionUserActionStatistic>();
     public DbSet<InteractionStatistic> InteractionStatistics => Set<InteractionStatistic>();
     public DbSet<JobInfo> JobInfos => Set<JobInfo>();
-    public DbSet<DatabaseStatistic> DatabaseStatistics => Set<DatabaseStatistic>();
 }

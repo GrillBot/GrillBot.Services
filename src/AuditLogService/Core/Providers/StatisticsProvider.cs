@@ -1,16 +1,22 @@
-﻿using AuditLogService.Core.Entity.Statistics;
-using GrillBot.Core.Database;
-using Microsoft.EntityFrameworkCore;
+﻿using GrillBot.Core.Database;
+using GrillBot.Services.Common.Telemetry.Database;
 
 namespace AuditLogService.Core.Providers;
 
-public class StatisticsProvider(AuditLogStatisticsContext _statisticsContext) : IStatisticsProvider
+public class StatisticsProvider(DatabaseTelemetryCollector _telemetry) : IStatisticsProvider
 {
-    public async Task<Dictionary<string, long>> GetTableStatisticsAsync(CancellationToken cancellationToken = default)
+    public Task<Dictionary<string, long>> GetTableStatisticsAsync(CancellationToken cancellationToken = default)
     {
-        return await _statisticsContext.DatabaseStatistics.AsNoTracking()
-            .OrderBy(o => o.TableName)
-            .Select(o => new { o.TableName, o.RecordsCount })
-            .ToDictionaryAsync(o => o.TableName, o => o.RecordsCount, cancellationToken);
+        var values = _telemetry.TableCounts.Get();
+
+        var result = values
+            .Select(o => new KeyValuePair<string, long>(
+                o.Tags.ToArray().First(x => x.Key == "table").Value!.ToString()!,
+                o.Value
+            ))
+            .OrderBy(o => o.Key)
+            .ToDictionary(o => o.Key, o => o.Value);
+
+        return Task.FromResult(result);
     }
 }

@@ -10,7 +10,7 @@ public class DefaultDatabaseInitializer<TDbContext>(
     protected override async Task ExecuteInternalAsync(IServiceProvider provider, CancellationToken cancellationToken = default)
     {
         var contextHelper = CreateContextHelper<TDbContext>(provider);
-        var tables = await contextHelper.DbContext.GetRecordsCountInTablesAsync();
+        var tables = await contextHelper.DbContext.GetRecordsCountInTablesAsync(cancellationToken);
 
         foreach (var (name, count) in tables)
             _collector.SetTableCount(name, count);

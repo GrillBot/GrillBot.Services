@@ -10,6 +10,7 @@ using GrillBot.Core;
 using GrillBot.Core.Metrics;
 using GrillBot.Services.Common;
 using GrillBot.Services.Common.EntityFramework.Extensions;
+using GrillBot.Services.Common.Telemetry.Database.Initializers;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -31,7 +32,8 @@ var application = await ServiceBuilder.CreateWebAppAsync<AppOptions>(
 
         services.AddTelemetryCollector<AuditLogTelemetryCollector>();
         services.AddTelemetryInitializer<FilesInitializer>();
-        services.AddTelemetryInitializer<DatabaseInitializer>();
+        services.AddTelemetryInitializer<DefaultDatabaseInitializer<AuditLogServiceContext>>();
+        services.AddTelemetryInitializer<DefaultDatabaseInitializer<AuditLogStatisticsContext>>();
         services.AddTelemetryInitializer<ApiStatisticsInitializer>();
         services.AddTelemetryInitializer<JobStatisticsInitializer>();
         services.AddTelemetryInitializer<ArchivationInitializer>();

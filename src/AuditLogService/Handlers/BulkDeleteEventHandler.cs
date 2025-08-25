@@ -17,26 +17,28 @@ public class BulkDeleteEventHandler(
 {
     protected override async Task<RabbitConsumptionResult> HandleInternalAsync(BulkDeletePayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers, CancellationToken cancellationToken = default)
     {
-        var logItems = await ReadLogItemsAsync(message.Ids, cancellationToken);
-        var filesForDeletion = new List<FileDeletePayload>();
-
-        foreach (var chunk in logItems.Chunk(100))
+        foreach (var chunk in message.Ids.Distinct().Chunk(100))
         {
-            DbContext.RemoveRange(chunk);
+            var logItems = await ReadLogItemsAsync(chunk, cancellationToken);
+            if (logItems.Count == 0)
+                continue;
 
-            await DeleteChildDataAsync(chunk, cancellationToken);
-            filesForDeletion.AddRange(chunk.Where(o => o.Files.Count > 0).SelectMany(o => o.Files).Select(o => new FileDeletePayload(o.Filename)));
+            DbContext.RemoveRange(logItems);
+            await DeleteChildDataAsync(logItems, cancellationToken);
+
+            var filesForDelete = logItems.SelectMany(o => o.Files).Select(o => new FileDeletePayload(o.Filename)).ToList();
+
+            await ContextHelper.SaveChangesAsync(cancellationToken);
+            await _dataRecalculation.EnqueueRecalculationAsync(logItems, cancellationToken);
+
+            if (filesForDelete.Count > 0)
+                await Publisher.PublishAsync(filesForDelete, cancellationToken: cancellationToken);
         }
 
-        await ContextHelper.SaveChangesAsync(cancellationToken);
-        await _dataRecalculation.EnqueueRecalculationAsync(logItems, cancellationToken);
-
-        if (filesForDeletion.Count > 0)
-            await Publisher.PublishAsync(filesForDeletion, cancellationToken: cancellationToken);
         return RabbitConsumptionResult.Success;
     }
 
-    private async Task<List<LogItem>> ReadLogItemsAsync(List<Guid> ids, CancellationToken cancellationToken = default)
+    private async Task<List<LogItem>> ReadLogItemsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
     {
         var result = new List<LogItem>();
         var baseQuery = DbContext.LogItems.Include(o => o.Files);
@@ -68,7 +70,7 @@ public class BulkDeleteEventHandler(
         return result;
     }
 
-    private async Task DeleteChildDataAsync(LogItem[] chunk, CancellationToken cancellationToken = default)
+    private async Task DeleteChildDataAsync(IEnumerable<LogItem> chunk, CancellationToken cancellationToken = default)
     {
         foreach (var type in chunk.GroupBy(o => o.Type))
         {
@@ -77,78 +79,78 @@ public class BulkDeleteEventHandler(
             switch (type.Key)
             {
                 case LogType.Info or LogType.Warning or LogType.Error:
-                    await ExecuteChildDataHardDeletion<LogMessage>(logItemIds, cancellationToken);
+                    ExecuteDeletion<LogMessage>(logItemIds);
                     break;
                 case LogType.ChannelCreated:
                     {
-                        var childItems = await ExecuteChildDataSoftDeletion<ChannelCreated>(logItemIds, q => q.Include(o => o.ChannelInfo), cancellationToken);
+                        var childItems = await ExecuteDeletionAsync<ChannelCreated>(logItemIds, q => q.Include(o => o.ChannelInfo), cancellationToken);
                         DbContext.RemoveRange(childItems.Where(o => o.ChannelInfo is not null).Select(o => o.ChannelInfo));
                     }
                     break;
                 case LogType.ChannelDeleted:
                     {
-                        var childItems = await ExecuteChildDataSoftDeletion<ChannelDeleted>(logItemIds, q => q.Include(o => o.ChannelInfo), cancellationToken);
+                        var childItems = await ExecuteDeletionAsync<ChannelDeleted>(logItemIds, q => q.Include(o => o.ChannelInfo), cancellationToken);
                         DbContext.RemoveRange(childItems.Where(o => o.ChannelInfo is not null).Select(o => o.ChannelInfo), cancellationToken);
                     }
                     break;
                 case LogType.ChannelUpdated:
                     {
-                        var childItems = await ExecuteChildDataSoftDeletion<ChannelUpdated>(logItemIds, q => q.Include(o => o.After).Include(o => o.Before), cancellationToken);
+                        var childItems = await ExecuteDeletionAsync<ChannelUpdated>(logItemIds, q => q.Include(o => o.After).Include(o => o.Before), cancellationToken);
                         DbContext.RemoveRange(childItems.Where(o => o.Before is not null).Select(o => o.Before));
                         DbContext.RemoveRange(childItems.Where(o => o.After is not null).Select(o => o.After));
                     }
                     break;
                 case LogType.EmoteDeleted:
-                    await ExecuteChildDataHardDeletion<DeletedEmote>(logItemIds, cancellationToken);
+                    ExecuteDeletion<DeletedEmote>(logItemIds);
                     break;
                 case LogType.OverwriteCreated:
                     {
-                        var childItems = await ExecuteChildDataSoftDeletion<OverwriteCreated>(logItemIds, q => q.Include(o => o.OverwriteInfo), cancellationToken);
+                        var childItems = await ExecuteDeletionAsync<OverwriteCreated>(logItemIds, q => q.Include(o => o.OverwriteInfo), cancellationToken);
                         DbContext.RemoveRange(childItems.Where(o => o.OverwriteInfo is not null).Select(o => o.OverwriteInfo));
                     }
                     break;
                 case LogType.OverwriteDeleted:
                     {
-                        var childItems = await ExecuteChildDataSoftDeletion<OverwriteDeleted>(logItemIds, q => q.Include(o => o.OverwriteInfo), cancellationToken);
+                        var childItems = await ExecuteDeletionAsync<OverwriteDeleted>(logItemIds, q => q.Include(o => o.OverwriteInfo), cancellationToken);
                         DbContext.RemoveRange(childItems.Where(o => o.OverwriteInfo is not null).Select(o => o.OverwriteInfo));
                     }
                     break;
                 case LogType.OverwriteUpdated:
                     {
-                        var childItems = await ExecuteChildDataSoftDeletion<OverwriteUpdated>(logItemIds, q => q.Include(o => o.After).Include(o => o.Before), cancellationToken);
+                        var childItems = await ExecuteDeletionAsync<OverwriteUpdated>(logItemIds, q => q.Include(o => o.After).Include(o => o.Before), cancellationToken);
                         DbContext.RemoveRange(childItems.Where(o => o.Before is not null).Select(o => o.Before));
                         DbContext.RemoveRange(childItems.Where(o => o.After is not null).Select(o => o.After));
                     }
                     break;
                 case LogType.Unban:
-                    await ExecuteChildDataHardDeletion<Unban>(logItemIds, cancellationToken);
+                    ExecuteDeletion<Unban>(logItemIds);
                     break;
                 case LogType.MemberUpdated:
                     {
-                        var childItems = await ExecuteChildDataSoftDeletion<MemberUpdated>(logItemIds, q => q.Include(o => o.After).Include(o => o.Before), cancellationToken);
+                        var childItems = await ExecuteDeletionAsync<MemberUpdated>(logItemIds, q => q.Include(o => o.After).Include(o => o.Before), cancellationToken);
                         DbContext.RemoveRange(childItems.Where(o => o.Before is not null).Select(o => o.Before));
                         DbContext.RemoveRange(childItems.Where(o => o.After is not null).Select(o => o.After));
                     }
                     break;
                 case LogType.GuildUpdated:
                     {
-                        var childItems = await ExecuteChildDataSoftDeletion<GuildUpdated>(logItemIds, q => q.Include(o => o.After).Include(o => o.Before), cancellationToken);
+                        var childItems = await ExecuteDeletionAsync<GuildUpdated>(logItemIds, q => q.Include(o => o.After).Include(o => o.Before), cancellationToken);
                         DbContext.RemoveRange(childItems.Where(o => o.Before is not null).Select(o => o.Before));
                         DbContext.RemoveRange(childItems.Where(o => o.After is not null).Select(o => o.After));
                     }
                     break;
                 case LogType.UserLeft:
-                    await ExecuteChildDataHardDeletion<UserLeft>(logItemIds, cancellationToken);
+                    ExecuteDeletion<UserLeft>(logItemIds);
                     break;
                 case LogType.UserJoined:
-                    await ExecuteChildDataHardDeletion<UserJoined>(logItemIds, cancellationToken);
+                    ExecuteDeletion<UserJoined>(logItemIds);
                     break;
                 case LogType.MessageEdited:
-                    await ExecuteChildDataHardDeletion<MessageEdited>(logItemIds, cancellationToken);
+                    ExecuteDeletion<MessageEdited>(logItemIds);
                     break;
                 case LogType.MessageDeleted:
                     {
-                        var childItems = await ExecuteChildDataSoftDeletion<MessageDeleted>(logItemIds, q => q.Include(o => o.Embeds).ThenInclude(o => o.Fields), cancellationToken);
+                        var childItems = await ExecuteDeletionAsync<MessageDeleted>(logItemIds, q => q.Include(o => o.Embeds).ThenInclude(o => o.Fields), cancellationToken);
                         foreach (var embed in childItems.SelectMany(o => o.Embeds))
                         {
                             DbContext.Remove(embed);
@@ -158,30 +160,30 @@ public class BulkDeleteEventHandler(
                     }
                     break;
                 case LogType.InteractionCommand:
-                    await ExecuteChildDataHardDeletion<InteractionCommand>(logItemIds, cancellationToken);
+                    ExecuteDeletion<InteractionCommand>(logItemIds);
                     break;
                 case LogType.ThreadDeleted:
                     {
-                        var childItems = await ExecuteChildDataSoftDeletion<ThreadDeleted>(logItemIds, q => q.Include(o => o.ThreadInfo), cancellationToken);
+                        var childItems = await ExecuteDeletionAsync<ThreadDeleted>(logItemIds, q => q.Include(o => o.ThreadInfo), cancellationToken);
                         DbContext.RemoveRange(childItems.Where(o => o.ThreadInfo is not null).Select(o => o.ThreadInfo));
                     }
                     break;
                 case LogType.JobCompleted:
-                    await ExecuteChildDataHardDeletion<JobExecution>(logItemIds, cancellationToken);
+                    ExecuteDeletion<JobExecution>(logItemIds);
                     break;
                 case LogType.Api:
-                    await ExecuteChildDataHardDeletion<ApiRequest>(logItemIds, cancellationToken);
+                    ExecuteDeletion<ApiRequest>(logItemIds);
                     break;
                 case LogType.ThreadUpdated:
                     {
-                        var childItems = await ExecuteChildDataSoftDeletion<ThreadUpdated>(logItemIds, q => q.Include(o => o.After).Include(o => o.Before), cancellationToken);
+                        var childItems = await ExecuteDeletionAsync<ThreadUpdated>(logItemIds, q => q.Include(o => o.After).Include(o => o.Before), cancellationToken);
                         DbContext.RemoveRange(childItems.Where(o => o.Before is not null).Select(o => o.Before));
                         DbContext.RemoveRange(childItems.Where(o => o.After is not null).Select(o => o.After));
                     }
                     break;
                 case LogType.RoleDeleted:
                     {
-                        var childItems = await ExecuteChildDataSoftDeletion<RoleDeleted>(logItemIds, q => q.Include(o => o.RoleInfo), cancellationToken);
+                        var childItems = await ExecuteDeletionAsync<RoleDeleted>(logItemIds, q => q.Include(o => o.RoleInfo), cancellationToken);
                         DbContext.RemoveRange(childItems.Where(o => o.RoleInfo is not null).Select(o => o.RoleInfo));
                     }
                     break;
@@ -189,7 +191,7 @@ public class BulkDeleteEventHandler(
         }
     }
 
-    private async Task<List<TChildEntity>> ExecuteChildDataSoftDeletion<TChildEntity>(
+    private async Task<List<TChildEntity>> ExecuteDeletionAsync<TChildEntity>(
         List<Guid> logItemIds,
         Func<IQueryable<TChildEntity>, IQueryable<TChildEntity>> includeData,
         CancellationToken cancellationToken = default
@@ -204,9 +206,9 @@ public class BulkDeleteEventHandler(
         return childItems;
     }
 
-    private async Task ExecuteChildDataHardDeletion<TChildEntity>(List<Guid> logItemIds, CancellationToken cancellationToken = default) where TChildEntity : ChildEntityBase
+    private void ExecuteDeletion<TChildEntity>(List<Guid> logItemIds) where TChildEntity : ChildEntityBase, new()
     {
-        var query = DbContext.Set<TChildEntity>().Where(o => logItemIds.Contains(o.LogItemId));
-        await ContextHelper.ExecuteBatchDeleteAsync(query, cancellationToken);
+        foreach (var id in logItemIds)
+            DbContext.Entry(new TChildEntity() { LogItemId = id }).State = EntityState.Deleted;
     }
 }
