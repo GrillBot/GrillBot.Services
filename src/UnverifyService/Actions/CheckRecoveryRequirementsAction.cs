@@ -13,7 +13,7 @@ public class CheckRecoveryRequirementsAction(IServiceProvider serviceProvider) :
     public override async Task<ApiResult> ProcessAsync()
     {
         var logId = GetOptionalParameter<Guid>(0);
-        var logNumber = GetOptionalParameter<long>(1);
+        var logNumber = GetOptionalParameter<long?>(1);
 
         var errorMessage = ValidateInput(logId, logNumber);
         if (errorMessage is not null)
