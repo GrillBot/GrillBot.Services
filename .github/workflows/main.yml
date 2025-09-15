@@ -119,7 +119,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Markdown check
-        uses: nosborn/github-action-markdown-cli@v3.3.0
+        uses: nosborn/github-action-markdown-cli@v3.5.0
         with:
           files: .
       - name: JSON file check
