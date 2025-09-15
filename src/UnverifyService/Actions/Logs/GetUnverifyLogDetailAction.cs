@@ -45,6 +45,7 @@ public partial class GetUnverifyLogDetailAction(IServiceProvider serviceProvider
             UnverifyOperationType.Unverify => await CreateUnverifyOperationDetailDataAsync(logItem.Id),
             UnverifyOperationType.SelfUnverify => await CreateSelfUnverifyOperationDetailDataAsync(logItem.Id),
             UnverifyOperationType.AutoRemove => await CreateAutoRemoveOperationDetailDataAsync(logItem.Id),
+            UnverifyOperationType.ManualRemove => await CreateManualRemoveOperationDetailDataAsync(logItem.Id),
             UnverifyOperationType.Update => await CreateUpdateOperationDetailDataAsync(logItem.Id),
             UnverifyOperationType.Recovery => await CreateRecoveryOperationDetailDataAsync(logItem.Id),
             _ => null
