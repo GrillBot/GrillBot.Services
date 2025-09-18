@@ -2,6 +2,7 @@
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 using UnverifyService.Core.Entity;
 using UnverifyService.Models.Request.Keepables;
 
@@ -36,7 +37,11 @@ public class CreateKeepablesAction(IServiceProvider serviceProvider) : ApiAction
 
         for (var i = 0; i < requests.Count; i++)
         {
-            var query = DbContext.SelfUnverifyKeepables.Where(o => o.Group == requests[i].Group && o.Name == requests[i].Name);
+            var query = DbContext.SelfUnverifyKeepables.Where(o =>
+                EF.Functions.ILike(o.Group, requests[i].Group) &&
+                EF.Functions.ILike(o.Name, requests[i].Name)
+            );
+
             if (!await ContextHelper.IsAnyAsync(query, CancellationToken))
                 continue;
 
