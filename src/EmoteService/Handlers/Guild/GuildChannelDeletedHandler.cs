@@ -15,11 +15,11 @@ public class GuildChannelDeletedHandler(IServiceProvider serviceProvider) : Base
         CancellationToken cancellationToken = default
     )
     {
-        ArgumentOutOfRangeException.ThrowIfZero(message.GuildId);
-        ArgumentOutOfRangeException.ThrowIfZero(message.ChannelId);
+        if (message.GuildId == 0 || message.ChannelId == 0)
+            return RabbitConsumptionResult.Reject;
 
         var guildQuery = DbContext.Guilds
-            .Where(o => o.GuildId == message.GuildId && (o.SuggestionChannelId == message.ChannelId || o.VoteChannelId == message.ChannelId));
+            .Where(o => o.GuildId == message.GuildId);
 
         var guild = await ContextHelper.ReadFirstOrDefaultEntityAsync(guildQuery, cancellationToken);
         if (guild is null)
