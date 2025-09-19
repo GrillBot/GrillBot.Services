@@ -90,7 +90,7 @@ public class BulkDeleteEventHandler(
                 case LogType.ChannelDeleted:
                     {
                         var childItems = await ExecuteDeletionAsync<ChannelDeleted>(logItemIds, q => q.Include(o => o.ChannelInfo), cancellationToken);
-                        DbContext.RemoveRange(childItems.Where(o => o.ChannelInfo is not null).Select(o => o.ChannelInfo), cancellationToken);
+                        DbContext.RemoveRange(childItems.Where(o => o.ChannelInfo is not null).Select(o => o.ChannelInfo));
                     }
                     break;
                 case LogType.ChannelUpdated:
