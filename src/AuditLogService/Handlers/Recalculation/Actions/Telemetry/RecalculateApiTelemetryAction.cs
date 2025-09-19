@@ -10,7 +10,7 @@ public class RecalculateApiTelemetryAction(IServiceProvider serviceProvider) : R
         = serviceProvider.GetRequiredService<AuditLogTelemetryCollector>();
 
     public override bool CheckPreconditions(RecalculationPayload payload)
-        => payload.Api is not null;
+        => payload.Api is not null && !string.IsNullOrEmpty(payload.Api.ApiGroupName);
 
     public override async Task ProcessAsync(RecalculationPayload payload)
     {
@@ -19,7 +19,7 @@ public class RecalculateApiTelemetryAction(IServiceProvider serviceProvider) : R
 
     private async Task RecalculateAvgDurationAsync(RecalculationPayload payload)
     {
-        var endpoint = $"{payload.Api!.Method} {payload.Api.TemplatePath}";
+        var endpoint = $"({payload.Api!.ApiGroupName}) {payload.Api!.Method} {payload.Api.TemplatePath}";
         var query = StatisticsContext.RequestStats.AsNoTracking()
             .Where(o => o.Endpoint == endpoint)
             .Select(o => (int?)Math.Round(o.TotalDuration / (double)(o.SuccessCount + o.FailedCount)));

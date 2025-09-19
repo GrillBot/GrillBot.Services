@@ -7,13 +7,13 @@ namespace AuditLogService.Handlers.Recalculation.Actions;
 public class ApiRequestStatsRecalculationAction(IServiceProvider serviceProvider) : RecalculationActionBase(serviceProvider)
 {
     public override bool CheckPreconditions(RecalculationPayload payload)
-        => payload.Api is not null;
+        => payload.Api is not null && !string.IsNullOrEmpty(payload.Api.ApiGroupName);
 
     public override async Task ProcessAsync(RecalculationPayload payload)
     {
         var method = payload.Api!.Method;
         var templatePath = payload.Api!.TemplatePath;
-        var endpoint = $"{method} {templatePath}";
+        var endpoint = $"({payload.Api!.ApiGroupName}) {method} {templatePath}";
         var stats = await GetOrCreateStatEntity<ApiRequestStat>(o => o.Endpoint == endpoint, endpoint);
 
         var dataQuery = DbContext.ApiRequests.AsNoTracking()

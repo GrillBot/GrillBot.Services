@@ -20,7 +20,7 @@ public class ApiStatisticsInitializer(
                 AvgDuration = (int)Math.Round(o.TotalDuration / (double)(o.SuccessCount + o.FailedCount))
             });
 
-        var data = await contextHelper.ReadEntitiesAsync(statisticsQuery);
+        var data = await contextHelper.ReadEntitiesAsync(statisticsQuery, cancellationToken);
         foreach (var item in data)
             _collector.SetApiAvgDuration(item.Endpoint, item.AvgDuration);
     }
