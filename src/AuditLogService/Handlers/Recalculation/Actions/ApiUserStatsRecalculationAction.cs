@@ -7,7 +7,10 @@ namespace AuditLogService.Handlers.Recalculation.Actions;
 public class ApiUserStatsRecalculationAction(IServiceProvider serviceProvider) : RecalculationActionBase(serviceProvider)
 {
     public override bool CheckPreconditions(RecalculationPayload payload)
-        => payload.Api is not null;
+    {
+        return payload.Api is not null && 
+            !string.IsNullOrEmpty(payload.Api.ApiGroupName);
+    }
 
     public override async Task ProcessAsync(RecalculationPayload payload)
     {

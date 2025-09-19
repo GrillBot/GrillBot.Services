@@ -7,7 +7,7 @@ namespace AuditLogService.Handlers.Recalculation.Actions;
 public class JobInfoRecalculationAction(IServiceProvider serviceProvider) : RecalculationActionBase(serviceProvider)
 {
     public override bool CheckPreconditions(RecalculationPayload payload)
-        => payload.Job is not null;
+        => !string.IsNullOrEmpty(payload.Job?.JobName);
 
     public override async Task ProcessAsync(RecalculationPayload payload)
     {

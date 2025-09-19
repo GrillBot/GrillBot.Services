@@ -62,7 +62,7 @@ public class DataRecalculationManager(IRabbitPublisher _publisher)
         if (payload.Job is not null)
         {
             var job = item.Job!;
-            if (job is null)
+            if (string.IsNullOrEmpty(job?.JobName))
                 return false;
 
             return job.JobName == payload.Job.JobName &&
