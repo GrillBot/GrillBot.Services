@@ -139,9 +139,9 @@ public partial class CreateArchivationDataAction
 
         var perms = new OverwritePermissions(info.AllowValue, info.DenyValue);
         if (perms.AllowValue > 0)
-            json["Allow"] = new JsonArray(perms.ToAllowList().Select(o => JsonValue.Create(o.ToString())).ToArray());
+            json["Allow"] = new JsonArray([.. perms.ToAllowList().Select(o => JsonValue.Create(o.ToString()))]);
         if (perms.DenyValue > 0)
-            json["Deny"] = new JsonArray(perms.ToDenyList().Select(o => JsonValue.Create(o.ToString())).ToArray());
+            json["Deny"] = new JsonArray([.. perms.ToDenyList().Select(o => JsonValue.Create(o.ToString()))]);
 
         return json;
     }
@@ -391,12 +391,12 @@ public partial class CreateArchivationDataAction
             if (embed.Fields.Count > 0)
             {
                 embedJson["Fields"] = new JsonArray(
-                    embed.Fields.Select(f => new JsonObject
+                    [.. embed.Fields.Select(f => new JsonObject
                     {
                         ["Name"] = f.Name,
                         ["Value"] = f.Value,
                         ["Inline"] = f.Inline
-                    }).ToArray()
+                    })]
                 );
             }
 
@@ -426,7 +426,7 @@ public partial class CreateArchivationDataAction
             ["InteractionDate"] = item.InteractionCommand.InteractionDate.ToString("yyyy-MM-dd")
         };
 
-        if (item.InteractionCommand.Parameters.Count > 0)
+        if (item.InteractionCommand.Parameters?.Count > 0)
         {
             var parameters = new JsonArray();
             foreach (var parameter in item.InteractionCommand.Parameters)
@@ -480,8 +480,8 @@ public partial class CreateArchivationDataAction
         if (info.SlowMode is not null)
             json["SlowMode"] = info.SlowMode.Value;
 
-        if (info.Tags.Count > 0)
-            json["Tags"] = new JsonArray(info.Tags.Select(t => JsonValue.Create(t)).ToArray());
+        if (info.Tags?.Count > 0)
+            json["Tags"] = new JsonArray([.. info.Tags.Select(t => JsonValue.Create(t))]);
         return json;
     }
 
@@ -534,14 +534,14 @@ public partial class CreateArchivationDataAction
             ["Duration"] = item.ApiRequest.Duration
         };
 
-        if (item.ApiRequest.Parameters.Count > 0)
+        if (item.ApiRequest.Parameters?.Count > 0)
         {
             json["Parameters"] = new JsonObject(
                 item.ApiRequest.Parameters.Select(o => KeyValuePair.Create<string, JsonNode?>(o.Key, JsonValue.Create(o.Value)))
             );
         }
 
-        if (item.ApiRequest.Headers.Count > 0)
+        if (item.ApiRequest.Headers?.Count > 0)
         {
             json["Headers"] = new JsonObject(
                 item.ApiRequest.Headers.Select(o => KeyValuePair.Create<string, JsonNode?>(o.Key, JsonValue.Create(o.Value)))
@@ -593,10 +593,10 @@ public partial class CreateArchivationDataAction
         if (!string.IsNullOrEmpty(info.Color))
             json["Color"] = info.Color;
 
-        if (info.Permissions.Count > 0)
+        if (info.Permissions?.Count > 0)
         {
             json["Permissions"] = new JsonArray(
-                info.Permissions.Select(p => JsonValue.Create(p)).ToArray()
+                [.. info.Permissions.Select(p => JsonValue.Create(p))]
             );
         }
 

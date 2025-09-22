@@ -11,8 +11,8 @@ namespace AuditLogService.Actions.Search;
 
 public partial class SearchItemsAction
 {
-    private async Task<PaginatedResponse<LogListItem>> MapAsync(PaginatedResponse<LogItem> headers)
-        => await PaginatedResponse<LogListItem>.CopyAndMapAsync(headers, MapAsync);
+    private Task<PaginatedResponse<LogListItem>> MapAsync(PaginatedResponse<LogItem> headers)
+        => PaginatedResponse<LogListItem>.CopyAndMapAsync(headers, MapAsync);
 
     private async Task<LogListItem> MapAsync(LogItem item)
     {
@@ -24,11 +24,11 @@ public partial class SearchItemsAction
             ChannelId = item.ChannelId,
             CreatedAt = item.CreatedAt,
             UserId = item.UserId,
-            Files = item.Files.Select(o => new Models.Response.Search.File
+            Files = [.. item.Files.Select(o => new Models.Response.Search.File
             {
                 Filename = o.Filename,
                 Size = o.Size
-            }).ToList()
+            })]
         };
 
         switch (item.Type)
@@ -326,7 +326,10 @@ public partial class SearchItemsAction
 
     private async Task SetThreadUpdatedPreviewAsync(LogListItem result)
     {
-        var info = await CreatePreviewAsync<ThreadUpdated, Tuple<List<string>, List<string>>>(result, entity => Tuple.Create(entity.Before.Tags, entity.After.Tags));
+        var info = await CreatePreviewAsync<ThreadUpdated, Tuple<List<string>, List<string>>>(
+            result,
+            entity => Tuple.Create(entity.Before.Tags ?? new(), entity.After.Tags ?? new())
+        );
 
         var tagsBefore = info?.Item1 ?? [];
         var tagsAfter = info?.Item2 ?? [];

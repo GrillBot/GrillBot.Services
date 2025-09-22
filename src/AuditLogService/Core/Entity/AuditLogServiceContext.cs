@@ -84,14 +84,14 @@ public class AuditLogServiceContext(DbContextOptions<AuditLogServiceContext> opt
         {
             b.HasIndex(x => x.Role).HasFilter("\"Role\" IS NOT NULL");
 
-            b.Property(o => o.Headers).HasConversion(new JsonValueConverter<Dictionary<string, string>>());
-            b.Property(o => o.Parameters).HasConversion(new JsonValueConverter<Dictionary<string, string>>());
+            b.Property(o => o.Headers).HasConversion(new JsonValueConverter<Dictionary<string, string>?>());
+            b.Property(o => o.Parameters).HasConversion(new JsonValueConverter<Dictionary<string, string>?>());
         });
 
         modelBuilder.Entity<RoleDeleted>(b => b.HasOne(o => o.RoleInfo).WithMany().HasForeignKey(o => o.RoleInfoId));
-        modelBuilder.Entity<InteractionCommand>(b => b.Property(o => o.Parameters).HasConversion(new JsonValueConverter<List<InteractionCommandParameter>>()));
-        modelBuilder.Entity<RoleInfo>(b => b.Property(o => o.Permissions).HasConversion(new JsonValueConverter<List<string>>()));
-        modelBuilder.Entity<ThreadInfo>(b => b.Property(o => o.Tags).HasConversion(new JsonValueConverter<List<string>>()));
+        modelBuilder.Entity<InteractionCommand>(b => b.Property(o => o.Parameters).HasConversion(new JsonValueConverter<List<InteractionCommandParameter>?>()));
+        modelBuilder.Entity<RoleInfo>(b => b.Property(o => o.Permissions).HasConversion(new JsonValueConverter<List<string>?>()));
+        modelBuilder.Entity<ThreadInfo>(b => b.Property(o => o.Tags).HasConversion(new JsonValueConverter<List<string>?>()));
     }
 
     public DbSet<ApiRequest> ApiRequests => Set<ApiRequest>();

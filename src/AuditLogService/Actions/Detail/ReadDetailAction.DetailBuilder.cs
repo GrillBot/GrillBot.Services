@@ -212,19 +212,21 @@ public partial class ReadDetailAction
             IsValidToken = entity.IsValidToken,
             Locale = entity.Locale
         });
+
         if (detail is null)
             return null;
 
-        List<Core.Entity.InteractionCommandParameter> parameters;
-        using (CreateCounter("Database"))
-            parameters = await DbContext.InteractionCommands.AsNoTracking().Where(o => o.LogItemId == header.Id).Select(o => o.Parameters).FirstAsync();
+        var parameters = await ContextHelper.ReadFirstOrDefaultEntityAsync(
+            DbContext.InteractionCommands.Where(o => o.LogItemId == header.Id).Select(o => o.Parameters),
+            CancellationToken
+        );
 
-        detail.Parameters = parameters.ConvertAll(o => new InteractionCommandParameter
+        detail.Parameters = parameters?.ConvertAll(o => new InteractionCommandParameter
         {
             Name = o.Name,
             Type = o.Type,
             Value = o.Value
-        });
+        }) ?? [];
 
         return detail;
     }
@@ -264,11 +266,11 @@ public partial class ReadDetailAction
             ControllerName = entity.ControllerName.Replace("Controller", ""),
             EndAt = entity.EndAt,
             ForwardedIp = entity.ForwardedIp,
-            Headers = entity.Headers,
+            Headers = entity.Headers ?? new(),
             Identification = entity.Identification,
             Ip = entity.Ip,
             Language = entity.Language,
-            Parameters = entity.Parameters,
+            Parameters = entity.Parameters ?? new(),
             Path = $"{entity.Method} {entity.Path}",
             Result = entity.Result,
             Role = entity.Role,
@@ -279,7 +281,9 @@ public partial class ReadDetailAction
 
     private async Task<ThreadUpdatedDetail?> CreateThreaduUpdatedDetailAsync(LogItem header)
     {
-        var threadInfos = await CreateDetailAsync<ThreadUpdated, Tuple<List<string>, List<string>>>(header, entity => Tuple.Create(entity.Before.Tags, entity.After.Tags));
+        var threadInfos = await CreateDetailAsync<ThreadUpdated, Tuple<List<string>, List<string>>>(
+            header, entity => Tuple.Create(entity.Before.Tags ?? new(), entity.After.Tags ?? new())
+        );
         if (threadInfos is null)
             return null;
 
@@ -300,7 +304,7 @@ public partial class ReadDetailAction
             IsHoisted = entity.RoleInfo.IsHoisted,
             IsMentionable = entity.RoleInfo.IsMentionable,
             Name = entity.RoleInfo.Name,
-            Permissions = entity.RoleInfo.Permissions,
+            Permissions = entity.RoleInfo.Permissions ?? new(),
             RoleId = entity.RoleInfo.RoleId
         });
     }

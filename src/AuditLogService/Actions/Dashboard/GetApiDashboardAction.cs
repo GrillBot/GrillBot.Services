@@ -19,7 +19,7 @@ public class GetApiDashboardAction(
     {
         return entity => new DashboardInfoRow
         {
-            Duration = (int)entity.Duration,
+            Duration = entity.Duration,
             Name = $"{entity.Method} {entity.TemplatePath}",
             Result = entity.Result
         };

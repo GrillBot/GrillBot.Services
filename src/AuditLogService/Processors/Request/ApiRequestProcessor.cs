@@ -17,7 +17,6 @@ public class ApiRequestProcessor(IServiceProvider serviceProvider) : RequestProc
         var apiRequest = request.ApiRequest!;
         entity.ApiRequest = new ApiRequest
         {
-            Headers = apiRequest.Headers,
             Identification = apiRequest.Identification,
             Ip = apiRequest.Ip,
             Language = apiRequest.Language,
@@ -34,12 +33,57 @@ public class ApiRequestProcessor(IServiceProvider serviceProvider) : RequestProc
             IsSuccess = successStatusCodes.Contains(apiRequest.Result),
             RequestDate = DateOnly.FromDateTime(apiRequest.EndAt),
             Role = apiRequest.Role,
-            Duration = (long)Math.Round((apiRequest.EndAt - apiRequest.StartAt).TotalMilliseconds)
+            Duration = (int)Math.Round((apiRequest.EndAt - apiRequest.StartAt).TotalMilliseconds)
         };
 
-        if (apiRequest.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor))
-            entity.ApiRequest.ForwardedIp = forwardedFor;
+        ProcessHeaders(apiRequest, entity.ApiRequest);
+        ProcessParameters(apiRequest, entity.ApiRequest);
 
         return Task.CompletedTask;
+    }
+
+    private static void ProcessHeaders(ApiRequestRequest request, ApiRequest data)
+    {
+        data.Headers = request.Headers;
+
+        // Find real caller IP.
+        if (data.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor))
+        {
+            data.ForwardedIp = forwardedFor;
+            data.Headers.Remove("X-Forwarded-For");
+        }
+
+        // If request contains cookie, remove sensitive data.
+        if (data.Headers.TryGetValue("Cookie", out var cookieHeader))
+        {
+            data.Headers["Cookie"] = string.Join(
+                "; ",
+                cookieHeader
+                    .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(c => c.StartsWith(".AspNetCore.Cookies=") ? $".AspNetCore.Cookies=<Removed>" : c)
+            );
+        }
+
+        if (data.Headers.ContainsKey("Authorization"))
+            data.Headers["Authorization"] = "<Removed>";
+
+        if (data.Headers.ContainsKey("ApiKey"))
+            data.Headers["ApiKey"] = "<Removed>";
+
+        // Remove useless headers
+        data.Headers.Remove("sec-ch-ua");
+        data.Headers.Remove("sec-ch-ua-mobile");
+        data.Headers.Remove("Sec-Fetch-Dest");
+        data.Headers.Remove("Sec-Fetch-Mode");
+        data.Headers.Remove("Sec-Fetch-Site");
+
+        if (data.Headers.Count == 0)
+            data.Headers = null;
+    }
+
+    private static void ProcessParameters(ApiRequestRequest request, ApiRequest data)
+    {
+        if (request.Parameters.Count > 0)
+            data.Parameters = request.Parameters;
     }
 }

@@ -32,6 +32,9 @@ public class RoleDeletedProcessor(IServiceProvider serviceProvider) : RequestPro
         if (logData.Properties.Permissions is not null)
             roleInfo.Permissions = logData.Properties.Permissions.Value.ToList().ConvertAll(o => o.ToString());
 
+        if (roleInfo.Permissions?.Count == 0)
+            roleInfo.Permissions = null;
+
         entity.UserId = auditLog.User.Id.ToString();
         entity.DiscordId = auditLog.Id.ToString();
         entity.CreatedAt = auditLog.CreatedAt.UtcDateTime;

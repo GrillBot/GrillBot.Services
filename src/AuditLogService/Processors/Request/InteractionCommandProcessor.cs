@@ -31,6 +31,9 @@ public class InteractionCommandProcessor(IServiceProvider serviceProvider) : Req
             InteractionDate = entity.LogDate
         };
 
+        if (entity.InteractionCommand.Parameters.Count == 0)
+            entity.InteractionCommand.Parameters = null;
+
         return Task.CompletedTask;
     }
 }

@@ -11,7 +11,7 @@ public class InteractionCommand : ChildEntityBase
     public string MethodName { get; set; } = null!;
 
     [Column(TypeName = "jsonb")]
-    public List<InteractionCommandParameter> Parameters { get; set; } = [];
+    public List<InteractionCommandParameter>? Parameters { get; set; }
 
     public bool HasResponded { get; set; }
     public bool IsValidToken { get; set; }

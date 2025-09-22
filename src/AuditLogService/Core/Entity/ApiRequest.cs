@@ -4,13 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuditLogService.Core.Entity;
 
-[Index(nameof(Method), nameof(TemplatePath))]
-[Index(nameof(ApiGroupName))]
-[Index(nameof(EndAt))]
-[Index(nameof(RequestDate))]
-[Index(nameof(LogItemId), nameof(Method), nameof(TemplatePath), nameof(ApiGroupName), nameof(Identification))]
-[Index(nameof(Duration))]
-[Index(nameof(Method), nameof(TemplatePath), nameof(IsSuccess))]
+[Index(nameof(Method), nameof(TemplatePath), nameof(ApiGroupName), nameof(Identification))]
+[Index(nameof(ApiGroupName), nameof(RequestDate))]
+[Index(nameof(ApiGroupName), nameof(EndAt))]
 public class ApiRequest : ChildEntityBase
 {
     [StringLength(128)]
@@ -31,7 +27,7 @@ public class ApiRequest : ChildEntityBase
     public string Path { get; set; } = null!;
 
     [Column(TypeName = "jsonb")]
-    public Dictionary<string, string> Parameters { get; set; } = [];
+    public Dictionary<string, string>? Parameters { get; set; }
 
     [StringLength(10)]
     public string Language { get; set; } = null!;
@@ -40,7 +36,7 @@ public class ApiRequest : ChildEntityBase
     public string ApiGroupName { get; set; } = null!;
 
     [Column(TypeName = "jsonb")]
-    public Dictionary<string, string> Headers { get; set; } = [];
+    public Dictionary<string, string>? Headers { get; set; }
 
     [StringLength(512)]
     public string Identification { get; set; } = null!;
@@ -61,5 +57,5 @@ public class ApiRequest : ChildEntityBase
     [StringLength(64)]
     public string? ForwardedIp { get; set; }
 
-    public long Duration { get; set; }
+    public int Duration { get; set; }
 }

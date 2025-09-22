@@ -23,7 +23,7 @@ public class ThreadDeletedProcessor(IServiceProvider serviceProvider) : RequestP
         var threadInfo = new ThreadInfo
         {
             Id = Guid.NewGuid(),
-            Tags = request.ThreadInfo!.Tags,
+            Tags = request.ThreadInfo?.Tags,
             Type = logData.ThreadType,
             ArchiveDuration = logData.AutoArchiveDuration,
             IsArchived = logData.IsArchived,
@@ -31,6 +31,9 @@ public class ThreadDeletedProcessor(IServiceProvider serviceProvider) : RequestP
             SlowMode = logData.SlowModeInterval,
             ThreadName = logData.ThreadName
         };
+
+        if (threadInfo.Tags?.Count == 0)
+            threadInfo.Tags = null;
 
         entity.CreatedAt = auditLog.CreatedAt.UtcDateTime;
         entity.DiscordId = auditLog.Id.ToString();
