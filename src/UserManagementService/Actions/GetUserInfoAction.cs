@@ -3,7 +3,7 @@ using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.Services.Common.Exceptions;
 using GrillBot.Core.Services.Common.Executor;
-using GrillBot.Core.Services.UserMeasures;
+using UserMeasures;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
 using UnverifyService;
@@ -26,17 +26,18 @@ public class GetUserInfoAction(
         var userId = GetParameter<ulong>(0);
         var userData = await GetUserDataAsync(userId);
         var unverifyInfo = await GetUnverifyUserInfoAsync(userId);
+        var measuresInfo = await GetMeasuresUserInfoAsync(userId);
 
-        if (userData.Count == 0 && unverifyInfo is null)
+        if (userData.Count == 0 && unverifyInfo is null && measuresInfo is null)
             return ApiResult.NotFound();
 
-        var guilds = await CreateGuildUserData(userId, userData, unverifyInfo);
-
-        return ApiResult.Ok(new UserInfo(
+        var result = new UserInfo(
             userId.ToString(),
-            guilds,
+            CreateGuildUserData(userData, unverifyInfo, measuresInfo),
             unverifyInfo?.SelfUnverifyMinimalTime
-        ));
+        );
+
+        return ApiResult.Ok(result);
     }
 
     private Task<List<Core.Entity.GuildUser>> GetUserDataAsync(ulong userId)
@@ -63,12 +64,12 @@ public class GetUserInfoAction(
         }
     }
 
-    private async Task<GrillBot.Core.Services.UserMeasures.Models.User.UserInfo?> GetMeasuresUserInfoAsync(ulong guildId, ulong userId)
+    private async Task<UserMeasures.Models.User.UserInfo?> GetMeasuresUserInfoAsync(ulong userId)
     {
         try
         {
             return await _userMeasures.ExecuteRequestAsync(
-                async (client, ctx) => await client.GetUserInfoAsync(guildId.ToString(), userId.ToString(), ctx.CancellationToken),
+                async (client, ctx) => await client.GetUserInfoAsync(userId.ToString(), null, ctx.CancellationToken),
                 CancellationToken
             );
         }
@@ -78,10 +79,10 @@ public class GetUserInfoAction(
         }
     }
 
-    private async Task<List<Models.Response.GuildUser>> CreateGuildUserData(
-        ulong userId,
+    private static List<Models.Response.GuildUser> CreateGuildUserData(
         List<Core.Entity.GuildUser> users,
-        UnverifyServiceModels.UserInfo? unverifyInfo
+        UnverifyServiceModels.UserInfo? unverifyInfo,
+        UserMeasures.Models.User.UserInfo? measuresInfo = null
     )
     {
         var result = new List<Models.Response.GuildUser>();
@@ -90,24 +91,29 @@ public class GetUserInfoAction(
             .Concat(unverifyInfo?.CurrentUnverifies.Keys?.ToArray() ?? [])
             .Concat(unverifyInfo?.SelfUnverifyCount.Keys?.ToArray() ?? [])
             .Concat(unverifyInfo?.UnverifyCount.Keys?.ToArray() ?? [])
+            .Concat(measuresInfo?.TimeoutCount.Keys?.ToArray() ?? [])
+            .Concat(measuresInfo?.WarningCount.Keys?.ToArray() ?? [])
+            .Concat(measuresInfo?.UnverifyCount.Keys?.ToArray() ?? [])
             .Distinct();
 
         foreach (var guildId in guildIds)
         {
             var guildUser = users.Find(o => o.GuildId == guildId.ToUlong());
             var currentUnverify = unverifyInfo?.CurrentUnverifies.TryGetValue(guildId, out var value) == true ? value : null;
-            var measuresInfo = await GetMeasuresUserInfoAsync(guildId.ToUlong(), userId);
             var selfUnverifyCount = unverifyInfo?.SelfUnverifyCount.TryGetValue(guildId, out var count) == true ? count : 0;
+            var unverifyCount = measuresInfo?.UnverifyCount.TryGetValue(guildId, out var uCount) == true ? uCount : 0;
+            var timeoutCount = measuresInfo?.TimeoutCount.TryGetValue(guildId, out var tCount) == true ? tCount : 0;
+            var warningCount = measuresInfo?.WarningCount.TryGetValue(guildId, out var wCount) == true ? wCount : 0;
 
             result.Add(new Models.Response.GuildUser(
                 guildId,
                 guildUser?.CurrentNickname,
                 guildUser is not null ? [.. guildUser.Nicknames.OrderBy(o => o.Value).Select(o => o.Value)] : [],
                 currentUnverify,
-                measuresInfo?.UnverifyCount ?? 0,
+                unverifyCount,
                 selfUnverifyCount,
-                measuresInfo?.TimeoutCount ?? 0,
-                measuresInfo?.WarningCount ?? 0
+                timeoutCount,
+                warningCount
             ));
         }
 

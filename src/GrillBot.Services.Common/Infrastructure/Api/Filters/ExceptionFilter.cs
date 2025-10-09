@@ -1,7 +1,6 @@
-﻿using Discord;
-using GrillBot.Core.RabbitMQ.V2.Publisher;
-using GrillBot.Core.Services.AuditLog.Enums;
-using GrillBot.Core.Services.AuditLog.Models.Events.Create;
+﻿using GrillBot.Core.RabbitMQ.V2.Publisher;
+using AuditLog.Enums;
+using AuditLog.Models.Events.Create;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Reflection;
