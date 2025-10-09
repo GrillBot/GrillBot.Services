@@ -29,9 +29,4 @@ public class LogsController(IServiceProvider serviceProvider) : GrillBot.Core.In
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public Task<IActionResult> CreateArchivationDataAsync()
         => ProcessAsync<CreateArchivationDataAction>();
-
-    [HttpPost("import-legacy")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public Task<IActionResult> ImportLegacyLogItemAsync([FromBody] JsonObject jsonData)
-        => ProcessAsync<ImportLegacyLogItemAction>(jsonData);
 }

@@ -1,14 +1,17 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
+using GrillBot.Core.RabbitMQ.V2.Publisher;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.Extensions.Options;
 using UnverifyService.Core.Entity;
+using UnverifyService.Models.Events;
 using UnverifyService.Options;
 
 namespace UnverifyService.Actions.Archivation;
 
 public partial class CreateArchivationDataAction(
     IServiceProvider serviceProvider,
-    IOptions<AppOptions> _options
+    IOptions<AppOptions> _options,
+    IRabbitPublisher _rabbitPublisher
 ) : ApiAction<UnverifyContext>(serviceProvider)
 {
     private DateTime ExpirationDate =>
@@ -16,12 +19,19 @@ public partial class CreateArchivationDataAction(
 
     public override async Task<ApiResult> ProcessAsync()
     {
-        if (!await ExistsItemtoArchiveAsync())
-            return new ApiResult(StatusCodes.Status204NoContent);
+        try
+        {
+            if (!await ExistsItemtoArchiveAsync())
+                return new ApiResult(StatusCodes.Status204NoContent);
 
-        var items = await ReadItemsToArchiveAsync();
-        var archive = CreateArchive(items);
+            var items = await ReadItemsToArchiveAsync();
+            var archive = CreateArchive(items);
 
-        return ApiResult.Ok(archive);
+            return ApiResult.Ok(archive);
+        }
+        finally
+        {
+            await _rabbitPublisher.PublishAsync(new RecalculateMetricsMessage(), cancellationToken: CancellationToken);
+        }
     }
 }
