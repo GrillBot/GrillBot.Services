@@ -23,7 +23,7 @@ jobs:
       FullDeploymentMatrix: ${{ steps.filter.outputs.all_changed_services }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Markdown check
         uses: nosborn/github-action-markdown-cli@v3.5.0
         with:
@@ -131,9 +131,9 @@ jobs:
     needs: [ChangeDetection]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         if: needs.ChangeDetection.outputs.DotnetServices == 'true'
         with:
           dotnet-version: 8.0.x
@@ -155,9 +155,9 @@ jobs:
         item: ${{ fromJson(needs.ChangeDetection.outputs.NodeDeploymentMatrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Node.JS
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 18.x
       - name: Build ${{ matrix.item }}
@@ -174,9 +174,9 @@ jobs:
         item: ${{ fromJson(needs.ChangeDetection.outputs.DotnetDeploymentMatrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 8.0.x
           source-url: https://nuget.pkg.github.com/GrillBot/index.json
@@ -198,7 +198,7 @@ jobs:
         item: ${{ fromJson(needs.ChangeDetection.outputs.FullDeploymentMatrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Login to the container registry
         uses: docker/login-action@v3
         with:
@@ -213,7 +213,7 @@ jobs:
       - name: Dump image tag
         run: echo ${{ steps.prepare_image_tag.outputs.value }}
       - name: Build container image ${{ matrix.item }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: src/
           file: src/${{matrix.item}}.Dockerfile
@@ -235,7 +235,7 @@ jobs:
         item: ${{ fromJson(needs.ChangeDetection.outputs.FullDeploymentMatrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Prepare image tag
         id: prepare_image_tag
         uses: ./.github/actions/prepare-image-tag
@@ -248,9 +248,10 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port: 22
-          script: echo '${{ secrets.SSH_Password }}' | sudo -S /scripts/update-grillbot-prod.sh ${{ steps.prepare_image_tag.outputs.value }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSHPRASE }}
+          script: /home/grillbot/deploy-grillbot.sh ${{ steps.prepare_image_tag.outputs.value }}
   VerifyProductionDeployment:
     runs-on: ubuntu-latest
     needs: [ChangeDetection, ProductionDeploy]
@@ -259,7 +260,7 @@ jobs:
         item: ${{ fromJson(needs.ChangeDetection.outputs.FullDeploymentMatrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Prepare image tag
         id: prepare_image_tag
         uses: ./.github/actions/prepare-image-tag
