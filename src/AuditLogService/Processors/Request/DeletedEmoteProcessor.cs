@@ -30,5 +30,5 @@ public class DeletedEmoteProcessor(IServiceProvider serviceProvider) : RequestPr
     }
 
     protected override bool IsValidAuditLogItem(IAuditLogEntry entry, LogRequest request)
-        => ((EmoteDeleteAuditLogData)entry.Data).EmoteId == Emote.Parse(request.DeletedEmote!.EmoteId).Id;
+        => ((EmoteDeleteAuditLogData)entry.Data).EmoteId == Discord.Emote.Parse(request.DeletedEmote!.EmoteId).Id;
 }
