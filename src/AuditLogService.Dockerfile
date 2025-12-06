@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 # Run external NuGet source
 ARG github_actions_token
@@ -22,7 +22,7 @@ RUN dotnet publish /src/AuditLogService -c Release -o /publish --no-restore -r l
 # Tools
 RUN dotnet tool install -g dotnet-dump && dotnet tool install -g dotnet-gcdump
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final_image
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final_image
 LABEL org.opencontainers.image.source=https://github.com/grillbot/grillbot.services
 
 WORKDIR /app
