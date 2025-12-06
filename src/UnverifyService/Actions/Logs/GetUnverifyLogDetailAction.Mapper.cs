@@ -1,6 +1,4 @@
-﻿using Discord;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
+﻿using Microsoft.EntityFrameworkCore;
 using UnverifyService.Core.Entity.Logs;
 using UnverifyService.Models.Response;
 using UnverifyService.Models.Response.Logs.Detail;

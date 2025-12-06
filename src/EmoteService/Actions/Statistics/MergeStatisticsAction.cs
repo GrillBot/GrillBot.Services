@@ -1,12 +1,11 @@
-﻿using Discord;
+﻿using AuditLog.Enums;
+using AuditLog.Models.Events.Create;
 using EmoteService.Core.Entity;
 using EmoteService.Extensions.QueryExtensions;
 using EmoteService.Models.Response;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
-using GrillBot.Core.Services.AuditLog.Enums;
-using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Services.Common.Infrastructure.Api;
 
 namespace EmoteService.Actions.Statistics;
@@ -20,8 +19,8 @@ public class MergeStatisticsAction(
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = GetParameter<string>(0);
-        var sourceEmote = Emote.Parse(GetParameter<string>(1));
-        var destinationEmote = Emote.Parse(GetParameter<string>(2));
+        var sourceEmote = Discord.Emote.Parse(GetParameter<string>(1));
+        var destinationEmote = Discord.Emote.Parse(GetParameter<string>(2));
 
         var (createdEmotesCount, deletedEmotesCount) = await ProcessMergeAsync(guildId, sourceEmote, destinationEmote);
         var modifiedRowsCount = await ContextHelper.SaveChangesAsync();
@@ -37,7 +36,7 @@ public class MergeStatisticsAction(
         return ApiResult.Ok(result);
     }
 
-    private async Task<(int createdEmotesCount, int deletedEmotesCount)> ProcessMergeAsync(string guildId, Emote sourceEmote, Emote destinationEmote)
+    private async Task<(int createdEmotesCount, int deletedEmotesCount)> ProcessMergeAsync(string guildId, Discord.Emote sourceEmote, Discord.Emote destinationEmote)
     {
         var baseQuery = DbContext.EmoteUserStatItems.Where(o => o.GuildId == guildId);
         var sourceStatistics = await ContextHelper.ReadEntitiesAsync(baseQuery.WithEmoteQuery(sourceEmote));
@@ -80,7 +79,7 @@ public class MergeStatisticsAction(
         return (createdEmotesCount, deletedEmotesCount);
     }
 
-    private Task NotifyAuditLogServiceAsync(MergeStatisticsResult result, Emote sourceEmote, Emote destinationEmote, string guildId)
+    private Task NotifyAuditLogServiceAsync(MergeStatisticsResult result, Discord.Emote sourceEmote, Discord.Emote destinationEmote, string guildId)
     {
         var logRequest = new LogRequest(LogType.Info, DateTime.UtcNow, guildId, CurrentUser.Id, null, null)
         {

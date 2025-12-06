@@ -1,5 +1,4 @@
-﻿using Discord;
-using EmoteService.Core.Entity;
+﻿using EmoteService.Core.Entity;
 using EmoteService.Extensions.QueryExtensions;
 using EmoteService.Models.Events;
 using GrillBot.Core.Infrastructure.Auth;
@@ -17,7 +16,7 @@ public class EmoteEventEventHandler(IServiceProvider serviceProvider) : BaseEven
         CancellationToken cancellationToken = default
     )
     {
-        var emoteValue = Emote.Parse(message.EmoteId);
+        var emoteValue = Discord.Emote.Parse(message.EmoteId);
         if (message.IsIncrement && !await IsSupportedEmoteAsync(emoteValue))
             return RabbitConsumptionResult.Success;
 
@@ -51,9 +50,12 @@ public class EmoteEventEventHandler(IServiceProvider serviceProvider) : BaseEven
     }
 
     private void ValidationFailed(string message)
-        => Logger.LogWarning(new EventId(2, "ValidationFailed_PublishAudit"), "{message}", message);
+    {
+        if (Logger.IsEnabled(LogLevel.Warning))
+            Logger.LogWarning(new EventId(2, "ValidationFailed_PublishAudit"), "{Message}", message);
+    }
 
-    private async Task<bool> IsSupportedEmoteAsync(Emote emote)
+    private async Task<bool> IsSupportedEmoteAsync(Discord.Emote emote)
     {
         var query = DbContext.EmoteDefinitions.WithEmoteQuery(emote);
         var isSupported = await ContextHelper.IsAnyAsync(query);
@@ -63,13 +65,13 @@ public class EmoteEventEventHandler(IServiceProvider serviceProvider) : BaseEven
         return isSupported;
     }
 
-    private async Task<EmoteUserStatItem?> GetEntityAsync(string guildId, string userId, Emote emote)
+    private async Task<EmoteUserStatItem?> GetEntityAsync(string guildId, string userId, Discord.Emote emote)
     {
         var query = DbContext.EmoteUserStatItems.Where(o => o.GuildId == guildId && o.UserId == userId).WithEmoteQuery(emote);
         return await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
     }
 
-    private async Task<EmoteUserStatItem> CreateEntityAsync(string guildId, string userId, Emote emote)
+    private async Task<EmoteUserStatItem> CreateEntityAsync(string guildId, string userId, Discord.Emote emote)
     {
         var entity = new EmoteUserStatItem
         {

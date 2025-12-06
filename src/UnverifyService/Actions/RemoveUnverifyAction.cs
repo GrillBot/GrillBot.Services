@@ -1,14 +1,12 @@
-﻿using Discord;
-using GrillBot.Core.Exceptions;
+﻿using AuditLog.Enums;
+using AuditLog.Models.Events.Create;
+using Discord;
 using GrillBot.Core.Extensions;
 using GrillBot.Core.Extensions.Discord;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
-using GrillBot.Core.Services.AuditLog.Enums;
-using GrillBot.Core.Services.AuditLog.Models.Events.Create;
-using GrillBot.Core.Services.GrillBot.Models;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
-using GrillBot.Core.Services.UserMeasures.Models.Events;
+using GrillBot.Models;
+using GrillBot.Models.Events.Messages;
 using GrillBot.Services.Common.Discord;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +16,7 @@ using UnverifyService.Core.Enums;
 using UnverifyService.Models;
 using UnverifyService.Models.Events;
 using UnverifyService.Models.Response;
+using UserMeasures.Models.Events;
 
 namespace UnverifyService.Actions;
 

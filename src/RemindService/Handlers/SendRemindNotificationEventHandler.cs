@@ -2,14 +2,14 @@
 using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Components;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Embeds;
+using GrillBot.Models.Events.Messages;
+using GrillBot.Models.Events.Messages.Components;
+using GrillBot.Models.Events.Messages.Embeds;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using RemindService.Core.Entity;
 using RemindService.Models.Events;
 using RemindService.Options;
-using Components = GrillBot.Core.Services.GrillBot.Models.Events.Messages.Components;
+using Components = GrillBot.Models.Events.Messages.Components;
 
 namespace RemindService.Handlers;
 

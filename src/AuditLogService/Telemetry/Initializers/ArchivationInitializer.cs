@@ -1,5 +1,4 @@
 ﻿using AuditLogService.Actions.Archivation;
-using GrillBot.Core.Metrics.Initializer;
 using GrillBot.Services.Common.Telemetry;
 
 namespace AuditLogService.Telemetry.Initializers;

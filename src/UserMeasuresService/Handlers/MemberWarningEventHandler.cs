@@ -2,8 +2,8 @@
 using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Embeds;
+using GrillBot.Models.Events.Messages;
+using GrillBot.Models.Events.Messages.Embeds;
 using GrillBot.Services.Common.Discord;
 using UserMeasuresService.Core.Entity;
 using UserMeasuresService.Handlers.Abstractions;

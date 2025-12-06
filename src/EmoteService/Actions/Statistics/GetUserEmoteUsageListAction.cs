@@ -1,5 +1,4 @@
-﻿using Discord;
-using EmoteService.Core.Entity;
+﻿using EmoteService.Core.Entity;
 using EmoteService.Extensions.QueryExtensions;
 using EmoteService.Models.Request;
 using EmoteService.Models.Response;
@@ -22,7 +21,7 @@ public class GetUserEmoteUsageListAction(
     public override async Task<ApiResult> ProcessAsync()
     {
         var request = (EmoteUserUsageListRequest)Parameters[0]!;
-        var emote = Emote.Parse(request.EmoteId);
+        var emote = Discord.Emote.Parse(request.EmoteId);
 
         var query = DbContext.EmoteUserStatItems.AsNoTracking()
             .Where(o => o.GuildId == request.GuildId)

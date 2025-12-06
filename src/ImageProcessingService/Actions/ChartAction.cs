@@ -1,10 +1,10 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using ImageMagick;
-using GrillBot.Core.Services.Graphics;
 using ImageProcessingService.Models;
 using Microsoft.AspNetCore.Mvc;
-using GrillBot.Core.Services.Graphics.Models.Chart;
 using ImageMagick.Drawing;
+using Graphics.Models.Chart;
+using Graphics;
 
 namespace ImageProcessingService.Actions;
 
@@ -29,7 +29,7 @@ public class ChartAction(IGraphicsClient _graphicsClient) : ApiActionBase
         }
     }
 
-    private static byte[] MergeChartsAndGetData(IReadOnlyList<MagickImage> charts, IReadOnlyList<ChartRequestData> requests)
+    private static byte[] MergeChartsAndGetData(List<MagickImage> charts, List<ChartRequestData> requests)
     {
         var finalHeight = (uint)requests.Sum(o => o.Options.Height);
         var width = (uint)requests.Max(o => o.Options.Width);

@@ -1,11 +1,10 @@
-﻿using Discord;
+﻿using AuditLog.Enums;
+using AuditLog.Models.Events.Create;
 using EmoteService.Core.Entity;
 using EmoteService.Extensions.QueryExtensions;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
-using GrillBot.Core.Services.AuditLog.Enums;
-using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Services.Common.Infrastructure.Api;
 
 namespace EmoteService.Actions.Statistics;
@@ -19,7 +18,7 @@ public class DeleteStatisticsAction(
     public override async Task<ApiResult> ProcessAsync()
     {
         var guildId = (string)Parameters[0]!;
-        var emote = Emote.Parse((string)Parameters[1]!);
+        var emote = Discord.Emote.Parse((string)Parameters[1]!);
         var userId = Parameters.ElementAtOrDefault(2) as string;
 
         var statisticsQuery = DbContext.EmoteUserStatItems

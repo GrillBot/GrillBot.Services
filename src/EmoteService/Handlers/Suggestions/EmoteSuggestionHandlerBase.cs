@@ -1,10 +1,10 @@
 ﻿using EmoteService.Core.Entity.Suggestions;
 using EmoteService.Core.Entity;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using GrillBot.Core.RabbitMQ.V2.Messages;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Embeds;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Components;
+using GrillBot.Models.Events.Messages.Components;
+using GrillBot.Models.Events.Messages;
+using GrillBot.Models.Events.Messages.Embeds;
 
 namespace EmoteService.Handlers.Suggestions;
 

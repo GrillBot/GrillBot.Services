@@ -1,4 +1,4 @@
-﻿using GrillBot.Core.Services.Graphics;
+﻿using Graphics;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace ImageProcessingService.Core;

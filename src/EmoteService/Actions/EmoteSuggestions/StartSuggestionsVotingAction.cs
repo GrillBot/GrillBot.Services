@@ -3,13 +3,12 @@ using EmoteService.Core.Entity.Suggestions;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Components;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages.Embeds;
+using GrillBot.Models.Events.Messages;
+using GrillBot.Models.Events.Messages.Components;
+using GrillBot.Models.Events.Messages.Embeds;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel;
 
 namespace EmoteService.Actions.EmoteSuggestions;
 

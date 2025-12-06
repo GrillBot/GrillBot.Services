@@ -1,5 +1,4 @@
-﻿using Discord;
-using EmoteService.Core.Entity;
+﻿using EmoteService.Core.Entity;
 using EmoteService.Extensions.QueryExtensions;
 using EmoteService.Models.Response;
 using GrillBot.Core.Infrastructure.Actions;
@@ -17,7 +16,7 @@ public class GetEmoteInfoAction(
     public override async Task<ApiResult> ProcessAsync()
     {
         var currentGuildId = (string)Parameters[0]!;
-        var emote = Emote.Parse((string)Parameters[1]!);
+        var emote = Discord.Emote.Parse((string)Parameters[1]!);
 
         var emoteInfo = new EmoteInfo
         {
@@ -31,7 +30,7 @@ public class GetEmoteInfoAction(
         return ApiResult.Ok(emoteInfo);
     }
 
-    private async Task<string?> GetOwnerGuildIdAsync(Emote emote)
+    private async Task<string?> GetOwnerGuildIdAsync(Discord.Emote emote)
     {
         var query = DbContext.EmoteDefinitions.WithEmoteQuery(emote).Select(o => o.GuildId);
         var guildId = await ContextHelper.ReadFirstOrDefaultEntityAsync(query);
@@ -45,7 +44,7 @@ public class GetEmoteInfoAction(
         return guildId;
     }
 
-    private async Task<EmoteInfoStatistics?> GetStatisticsAsync(Emote emote, string guildId)
+    private async Task<EmoteInfoStatistics?> GetStatisticsAsync(Discord.Emote emote, string guildId)
     {
         var baseQuery = DbContext.EmoteUserStatItems.Where(o => o.GuildId == guildId).WithEmoteQuery(emote);
         if (!await ContextHelper.IsAnyAsync(baseQuery))

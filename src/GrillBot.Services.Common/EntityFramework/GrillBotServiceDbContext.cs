@@ -1,7 +1,6 @@
 ﻿using GrillBot.Core.Database;
 using GrillBot.Services.Common.EntityFramework.Extensions;
 using GrillBot.Services.Common.Telemetry.Database;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 

@@ -1,5 +1,4 @@
-﻿using Discord;
-using EmoteService.Core.Entity;
+﻿using EmoteService.Core.Entity;
 using EmoteService.Extensions.QueryExtensions;
 using EmoteService.Models.Request;
 using EmoteService.Models.Response;
@@ -57,7 +56,7 @@ public class GetEmoteStatisticsListAction(
             query = query.Where(o => !o.EmoteIsAnimated);
 
         if (!string.IsNullOrEmpty(request.EmoteFullId))
-            query = query.WithEmoteQuery(Emote.Parse(request.EmoteFullId));
+            query = query.WithEmoteQuery(Discord.Emote.Parse(request.EmoteFullId));
         else if (!string.IsNullOrEmpty(request.EmoteName))
             query = query.Where(o => EF.Functions.ILike(o.EmoteName, $"{request.EmoteName}%"));
 
@@ -118,6 +117,6 @@ public class GetEmoteStatisticsListAction(
             EmoteName = name
         };
 
-        return Emote.Parse(definition.ToString()).Url;
+        return Discord.Emote.Parse(definition.ToString()).Url;
     }
 }

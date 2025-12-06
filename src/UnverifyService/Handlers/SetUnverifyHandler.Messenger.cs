@@ -2,8 +2,8 @@
 using GrillBot.Core.Extensions;
 using GrillBot.Core.Extensions.Discord;
 using GrillBot.Core.Infrastructure.Auth;
-using GrillBot.Core.Services.GrillBot.Models;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
+using GrillBot.Models;
+using GrillBot.Models.Events.Messages;
 using Microsoft.EntityFrameworkCore;
 using UnverifyService.Models;
 using UnverifyService.Models.Events;

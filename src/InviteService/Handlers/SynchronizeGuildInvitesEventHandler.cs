@@ -1,9 +1,9 @@
-﻿using GrillBot.Core.Extensions;
+﻿using AuditLog.Enums;
+using AuditLog.Models.Events.Create;
+using GrillBot.Core.Extensions;
 using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
 using GrillBot.Core.Redis.Extensions;
-using GrillBot.Core.Services.AuditLog.Enums;
-using GrillBot.Core.Services.AuditLog.Models.Events.Create;
 using GrillBot.Services.Common.Discord;
 using GrillBot.Services.Common.Infrastructure.RabbitMQ;
 using InviteService.Core.Entity;
@@ -32,7 +32,7 @@ public class SynchronizeGuildInvitesEventHandler(
     )
     {
         await ClearInvitesForGuildAsync(message.GuildId, cancellationToken);
-        await DownloadInvitesToCacheAsync(message.GuildId, currentUser, message.IgnoreLog);
+        await DownloadInvitesToCacheAsync(message.GuildId, currentUser, message.IgnoreLog, cancellationToken);
 
         return RabbitConsumptionResult.Success;
     }
@@ -43,7 +43,8 @@ public class SynchronizeGuildInvitesEventHandler(
 
         await foreach (var key in _redisServer.KeysAsync(pattern: prefix, pageSize: int.MaxValue))
         {
-            _logger.LogInformation("Removing invite metadata for key {Key}", key);
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("Removing invite metadata for key {Key}", key);
             cancellationToken.ThrowIfCancellationRequested();
             await _redisDatabase.KeyDeleteAsync(key);
         }
@@ -80,7 +81,8 @@ public class SynchronizeGuildInvitesEventHandler(
             var metadata = InviteMetadata.Create(invite);
             var key = $"InviteMetadata-{invite.GuildId}-{invite.Code}";
 
-            _logger.LogInformation("Storing invite metadata for key {Key}", key);
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("Storing invite metadata for key {Key}", key);
             await _cache.SetAsync(key, metadata, null, cancellationToken);
         }
     }

@@ -1,4 +1,4 @@
-﻿using GrillBot.Core.Services.GrillBot.Models;
+﻿using GrillBot.Models;
 
 namespace UnverifyService.Models.Response;
 

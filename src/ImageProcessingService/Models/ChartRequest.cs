@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using GrillBot.Core.Services.Graphics.Models.Chart;
+using Graphics.Models.Chart;
 using GrillBot.Core.Validation;
 
 namespace ImageProcessingService.Models;

@@ -1,5 +1,5 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
-using GrillBot.Core.Services.GrillBot.Models;
+using GrillBot.Models;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;
 using UnverifyService.Core.Entity;

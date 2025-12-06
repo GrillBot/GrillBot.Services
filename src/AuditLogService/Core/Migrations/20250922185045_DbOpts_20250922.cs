@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using AuditLogService.Core.Entity;
+﻿using AuditLogService.Core.Entity;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable

@@ -1,5 +1,4 @@
-﻿using Discord;
-using EmoteService.Core.Entity;
+﻿using EmoteService.Core.Entity;
 using EmoteService.Models.Events;
 using GrillBot.Core.Infrastructure.Auth;
 using GrillBot.Core.RabbitMQ.V2.Consumer;
@@ -41,7 +40,7 @@ public class SynchronizeEmotesEventHandler(
             return;
 
         var emoteEntities = emotes
-            .Select(Emote.Parse)
+            .Select(Discord.Emote.Parse)
             .Select(e => new EmoteDefinition
             {
                 EmoteId = e.Id.ToString(),

@@ -1,5 +1,5 @@
-﻿using GrillBot.Core.Services.AuditLog.Enums;
-using GrillBot.Core.Services.AuditLog.Models.Events.Create;
+﻿using AuditLog.Enums;
+using AuditLog.Models.Events.Create;
 using PointsService.Core.Entity;
 using PointsService.Models.Events;
 
@@ -11,7 +11,8 @@ public abstract class CreateTransactionBaseEventHandler<TPayload>(
 {
     protected async Task<bool> ValidationFailedAsync(TPayload payload, string? channelId, string message, bool suppressAudit = false)
     {
-        Logger.LogWarning("{message}", message);
+        if (Logger.IsEnabled(LogLevel.Warning))
+            Logger.LogWarning("{Message}", message);
 
         if (!suppressAudit)
             await WriteValidationErrorToLogAsync(payload, channelId, message);

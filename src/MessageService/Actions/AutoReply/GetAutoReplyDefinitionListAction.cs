@@ -1,6 +1,5 @@
 ﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
-using GrillBot.Core.Models.Pagination;
 using GrillBot.Services.Common.EntityFramework.Extensions;
 using GrillBot.Services.Common.Infrastructure.Api;
 using MessageService.Core.Entity;

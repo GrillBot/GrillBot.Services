@@ -2,9 +2,8 @@
 using GrillBot.Core.Extensions.Discord;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.RabbitMQ.V2.Publisher;
-using GrillBot.Core.Services.GrillBot.Models;
-using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
-using GrillBot.Core.Services.UserMeasures.Models.Events;
+using GrillBot.Models;
+using GrillBot.Models.Events.Messages;
 using GrillBot.Services.Common.Discord;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -14,6 +13,7 @@ using UnverifyService.Core.Entity.Logs;
 using UnverifyService.Core.Enums;
 using UnverifyService.Models.Events;
 using UnverifyService.Models.Request;
+using UserMeasures.Models.Events;
 
 namespace UnverifyService.Actions;
 

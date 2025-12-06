@@ -1,6 +1,4 @@
-﻿using Discord;
-
-namespace AuditLogService.Models.Events.Create;
+﻿namespace AuditLogService.Models.Events.Create;
 
 public class LogMessageRequest
 {

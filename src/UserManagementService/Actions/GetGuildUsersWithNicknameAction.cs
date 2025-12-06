@@ -1,5 +1,4 @@
-﻿using GrillBot.Core.Extensions;
-using GrillBot.Core.Infrastructure.Actions;
+﻿using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
 using GrillBot.Services.Common.Infrastructure.Api;
 using Microsoft.EntityFrameworkCore;

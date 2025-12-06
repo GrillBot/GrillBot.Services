@@ -1,5 +1,4 @@
-﻿using Discord;
-using EmoteService.Core.Entity;
+﻿using EmoteService.Core.Entity;
 using EmoteService.Extensions.QueryExtensions;
 using GrillBot.Core.Infrastructure.Actions;
 using GrillBot.Core.Managers.Performance;
@@ -16,7 +15,7 @@ public class DeleteSupportedEmoteAction(
     {
         var guildId = GetParameter<string>(0);
         var emoteId = GetParameter<string>(1);
-        var emote = Emote.Parse(emoteId);
+        var emote = Discord.Emote.Parse(emoteId);
 
         var query = DbContext.EmoteDefinitions
             .Where(o => o.GuildId == guildId)

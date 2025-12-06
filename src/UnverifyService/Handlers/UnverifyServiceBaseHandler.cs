@@ -26,5 +26,5 @@ public abstract class UnverifyServiceBaseHandler<TPayload>(
         return await ProcessHandlerAsync(message, currentUser, headers, cancellationToken);
     }
 
-    protected abstract Task<RabbitConsumptionResult> ProcessHandlerAsync(TPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> handler, CancellationToken cancellationToken = default);
+    protected abstract Task<RabbitConsumptionResult> ProcessHandlerAsync(TPayload message, ICurrentUserProvider currentUser, Dictionary<string, string> headers, CancellationToken cancellationToken = default);
 }

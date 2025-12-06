@@ -1,6 +1,5 @@
 ﻿using GrillBot.Core.Models.Pagination;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json.Nodes;
 using UnverifyService.Actions.Archivation;
 using UnverifyService.Actions.Logs;
 using UnverifyService.Models.Request.Logs;

@@ -1,4 +1,4 @@
-﻿using GrillBot.Core.Services.GrillBot.Models.Events.Messages;
+﻿using GrillBot.Models.Events.Messages;
 using MessageService.Models.Events;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
