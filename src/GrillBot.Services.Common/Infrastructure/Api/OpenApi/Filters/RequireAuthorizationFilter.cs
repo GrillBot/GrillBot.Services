@@ -1,5 +1,5 @@
 ﻿using GrillBot.Services.Common.Infrastructure.Api.OpenApi.Attributes;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace GrillBot.Services.Common.Infrastructure.Api.OpenApi.Filters;
@@ -15,6 +15,7 @@ internal class RequireAuthorizationFilter : IOperationFilter
         if (attributes is null)
             return;
 
+        operation.Parameters ??= [];
         operation.Parameters.Add(new OpenApiParameter
         {
             Description = "Authorization header",
@@ -23,7 +24,7 @@ internal class RequireAuthorizationFilter : IOperationFilter
             Required = true,
             Schema = new OpenApiSchema
             {
-                Type = "string",
+                Type = JsonSchemaType.String,
                 Pattern = @"^Bearer\s([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$"
             }
         });
