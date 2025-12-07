@@ -28,7 +28,6 @@ ENV TZ=Europe/Prague
 ENV ASPNETCORE_URLS='http://+:5213'
 ENV DOTNET_PRINT_TELEMETRY_MESSAGE='false'
 
-RUN sed -i 's/^Components: main$/& contrib/' /etc/apt/sources.list.d/debian.sources
 RUN apt update && apt install -y --no-install-recommends tzdata ttf-mscorefonts-installer fontconfig libc6-dev libgdiplus libx11-dev
 RUN ln -s /usr/lib/libgdiplus.so /usr/lib/gdiplus.dll
 RUN fc-cache -fv
