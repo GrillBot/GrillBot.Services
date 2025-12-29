@@ -17,7 +17,7 @@ namespace UserManagementService.Core.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.15")
+                .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -60,7 +60,25 @@ namespace UserManagementService.Core.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GuildId", "UserId");
+
                     b.ToTable("Nicknames");
+                });
+
+            modelBuilder.Entity("UserManagementService.Core.Entity.GuildUserNickname", b =>
+                {
+                    b.HasOne("UserManagementService.Core.Entity.GuildUser", "GuildUser")
+                        .WithMany("Nicknames")
+                        .HasForeignKey("GuildId", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GuildUser");
+                });
+
+            modelBuilder.Entity("UserManagementService.Core.Entity.GuildUser", b =>
+                {
+                    b.Navigation("Nicknames");
                 });
 #pragma warning restore 612, 618
         }

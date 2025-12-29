@@ -17,7 +17,7 @@ namespace UnverifyService.Core.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.18")
+                .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -50,9 +50,6 @@ namespace UnverifyService.Core.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<decimal?>("MuteRoleId")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("OwnerUserId")
                         .HasColumnType("numeric");
 
                     b.HasKey("GuildId");
@@ -278,7 +275,7 @@ namespace UnverifyService.Core.Migrations
             modelBuilder.Entity("UnverifyService.Core.Entity.ActiveUnverify", b =>
                 {
                     b.HasOne("UnverifyService.Core.Entity.Logs.UnverifyLogItem", "LogItem")
-                        .WithOne()
+                        .WithOne("ActiveUnverify")
                         .HasForeignKey("UnverifyService.Core.Entity.ActiveUnverify", "LogSetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -374,6 +371,8 @@ namespace UnverifyService.Core.Migrations
 
             modelBuilder.Entity("UnverifyService.Core.Entity.Logs.UnverifyLogItem", b =>
                 {
+                    b.Navigation("ActiveUnverify");
+
                     b.Navigation("ChildLogItems");
 
                     b.Navigation("RemoveOperation");
