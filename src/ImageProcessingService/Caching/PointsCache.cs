@@ -5,14 +5,27 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace ImageProcessingService.Caching;
 
-public class PointsCache(IDistributedCache _cache)
+public class PointsCache(
+    IDistributedCache _cache,
+    ILogger<PointsCache> _logger
+)
 {
     private static readonly TimeSpan _cacheExpiration = TimeSpan.FromDays(1);
 
     public async Task<ImageCacheData?> GetByPointsRequestAsync(PointsRequest request)
     {
         var cacheKey = CreateCacheKey(request);
-        return await _cache.GetAsync<ImageCacheData>(cacheKey);
+
+        try
+        {
+            return await _cache.GetAsync<ImageCacheData>(cacheKey);
+        }
+        catch (Exception ex)
+        {
+            if (_logger.IsEnabled(LogLevel.Warning))
+                _logger.LogWarning(ex, "Cannot get points image from cache.");
+            return null;
+        }
     }
 
     public async Task WriteByPointsRequestAsync(PointsRequest request, byte[] image)
@@ -25,7 +38,15 @@ public class PointsCache(IDistributedCache _cache)
             Image = image
         };
 
-        await _cache.SetAsync(cacheKey, cacheData, _cacheExpiration);
+        try
+        {
+            await _cache.SetAsync(cacheKey, cacheData, _cacheExpiration);
+        }
+        catch (Exception ex)
+        {
+            if (_logger.IsEnabled(LogLevel.Warning))
+                _logger.LogWarning(ex, "Cannot write points image to cache.");
+        }
     }
 
     private static string CreateCacheKey(PointsRequest request)

@@ -4,14 +4,16 @@ using AuditLog.Models.Events.Create;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 
 namespace GrillBot.Services.Common.Infrastructure.Api.Filters;
 
 public class ExceptionFilter(
-    IRabbitPublisher _rabbitPublisher
+    IRabbitPublisher _rabbitPublisher,
+    ILogger<ExceptionFilter> _logger
 ) : IAsyncExceptionFilter
 {
-    public Task OnExceptionAsync(ExceptionContext context)
+    public async Task OnExceptionAsync(ExceptionContext context)
     {
         var descriptor = (ControllerActionDescriptor)context.ActionDescriptor;
         var controllerName = descriptor.ControllerTypeInfo.Name;
@@ -27,7 +29,15 @@ public class ExceptionFilter(
             }
         };
 
-        return _rabbitPublisher.PublishAsync(new CreateItemsMessage(logRequest));
+        try
+        {
+            await _rabbitPublisher.PublishAsync(new CreateItemsMessage(logRequest));
+        }
+        catch (Exception ex)
+        {
+            if (_logger.IsEnabled(LogLevel.Error))
+                _logger.LogError(ex, "Cannot publish log message to RabbitMQ.");
+        }
     }
 
     private static string CreateErrorMessage(ExceptionContext context)

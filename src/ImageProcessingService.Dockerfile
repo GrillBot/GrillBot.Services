@@ -27,10 +27,24 @@ EXPOSE 5213
 ENV TZ=Europe/Prague
 ENV ASPNETCORE_URLS='http://+:5213'
 ENV DOTNET_PRINT_TELEMETRY_MESSAGE='false'
+ENV FONTCONFIG_PATH=/etc/fonts
+ENV FONTCONFIG_FILE=/etc/fonts/fonts.conf
 
-RUN apt update && apt install -y --no-install-recommends tzdata ttf-mscorefonts-installer fontconfig libc6-dev libgdiplus libx11-dev
+RUN apt update && apt install -y --no-install-recommends \
+    tzdata \
+    fontconfig \
+    fontconfig-config \
+    fonts-dejavu-core \
+    fonts-dejavu-extra \
+    fonts-liberation \
+    fonts-open-sans \
+    libgdiplus \
+    libx11-6 \
+    libc6-dev \
+ && rm -rf /var/lib/apt/lists/*
+
 RUN ln -s /usr/lib/libgdiplus.so /usr/lib/gdiplus.dll
-RUN fc-cache -fv
+RUN mkdir -p /etc/fonts/conf.d && fc-cache -fv
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 COPY --from=build /publish .
